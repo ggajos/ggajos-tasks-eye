@@ -1,0 +1,149 @@
+import { FuzzySuggestModal, Modal, Notice, Setting, TFolder } from "obsidian";
+import type { App } from "obsidian";
+import { NOTES_FOLDER_PATH } from "./constants";
+import { getContextFromFolderPath } from "./context";
+
+interface FolderOption {
+  text: string;
+  path: string;
+}
+
+function isFolder(value: unknown): value is TFolder {
+  return value instanceof TFolder;
+}
+
+function collectFolders(folder: TFolder, result: string[]): void {
+  for (const child of folder.children) {
+    if (isFolder(child)) {
+      result.push(child.path);
+      collectFolders(child, result);
+    }
+  }
+}
+
+function folderOptions(app: App): FolderOption[] {
+  const root = app.vault.getAbstractFileByPath(NOTES_FOLDER_PATH);
+  if (!isFolder(root)) return [{ text: "- (root)", path: NOTES_FOLDER_PATH }];
+
+  const folders: string[] = [];
+  collectFolders(root, folders);
+  const options = folders
+    .map((path) => ({ text: getContextFromFolderPath(path), path }))
+    .sort((a, b) => a.text.localeCompare(b.text));
+  return [{ text: "- (root)", path: NOTES_FOLDER_PATH }, ...options];
+}
+
+function noteBody(): string {
+  const lines = [
+    "---",
+    "status: open",
+  ];
+  lines.push("---", "");
+  return lines.join("\n");
+}
+
+function safeFileName(title: string): string {
+  return title
+    .replace(/[\\/:|#^[\]]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function uniquePath(app: App, folderPath: string, title: string): Promise<string> {
+  const base = safeFileName(title) || "Untitled";
+  let candidate = `${folderPath}/${base}.md`;
+  let suffix = 1;
+  while (await app.vault.adapter.exists(candidate)) {
+    candidate = `${folderPath}/${base} ${suffix}.md`;
+    suffix++;
+  }
+  return candidate;
+}
+
+class FolderSuggestModal extends FuzzySuggestModal<FolderOption> {
+  private options: FolderOption[];
+  private onChoose: (option: FolderOption) => void;
+
+  constructor(
+    app: App,
+    options: FolderOption[],
+    onChoose: (option: FolderOption) => void,
+  ) {
+    super(app);
+    this.options = options;
+    this.onChoose = onChoose;
+    this.setPlaceholder("Select Tasks Eye folder");
+  }
+
+  getItems(): FolderOption[] {
+    return this.options;
+  }
+
+  getItemText(item: FolderOption): string {
+    return item.text;
+  }
+
+  onChooseItem(item: FolderOption): void {
+    this.onChoose(item);
+  }
+}
+
+class TitleModal extends Modal {
+  private folderPath: string;
+
+  constructor(app: App, folderPath: string) {
+    super(app);
+    this.folderPath = folderPath;
+  }
+
+  onOpen(): void {
+    this.titleEl.setText("New Tasks Eye note");
+    const { contentEl } = this;
+    contentEl.empty();
+
+    let title = "";
+    new Setting(contentEl)
+      .setName("Title")
+      .addText((text) => {
+        text.setPlaceholder("Note title");
+        text.inputEl.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            void this.create(title);
+          }
+        });
+        text.onChange((value) => {
+          title = value;
+        });
+      });
+
+    new Setting(contentEl)
+      .addButton((button) => {
+        button
+          .setButtonText("Create")
+          .setCta()
+          .onClick(() => {
+            void this.create(title);
+          });
+      });
+  }
+
+  private async create(title: string): Promise<void> {
+    const trimmed = safeFileName(title);
+    if (!trimmed) {
+      new Notice("Tasks Eye: note title is required.");
+      return;
+    }
+
+    const path = await uniquePath(this.app, this.folderPath, trimmed);
+    const file = await this.app.vault.create(path, noteBody());
+    await this.app.workspace.getLeaf(false).openFile(file);
+    this.close();
+  }
+}
+
+export function openNewEyeNoteFlow(app: App): void {
+  new FolderSuggestModal(app, folderOptions(app), (folder) => {
+    new TitleModal(app, folder.path).open();
+  }).open();
+}

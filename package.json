@@ -1,0 +1,46 @@
+{
+  "name": "tasks-eye",
+  "version": "0.1.0",
+  "description": "Native Obsidian task views for Tasks-driven vaults.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "acceptance:test": "npm run build && wdio run ./wdio.conf.mts",
+    "acceptance:update-snapshots": "npm run acceptance:test",
+    "docs:screenshots": "node acceptance/scripts/publish-doc-screenshots.mjs",
+    "docs:serve": "python3 -m http.server 4173 --directory docs"
+  },
+  "keywords": [
+    "obsidian",
+    "tasks",
+    "gtd"
+  ],
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.13.2",
+    "@wdio/cli": "^9.28.0",
+    "@wdio/globals": "^9.17.0",
+    "@wdio/local-runner": "^9.28.0",
+    "@wdio/mocha-framework": "^9.28.0",
+    "@wdio/spec-reporter": "^9.28.0",
+    "esbuild": "0.25.12",
+    "mocha": "^10.8.2",
+    "obsidian": "1.13.1",
+    "obsidian-launcher": "^3.1.1",
+    "tsx": "^4.22.4",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7",
+    "wdio-obsidian-reporter": "^3.1.1",
+    "wdio-obsidian-service": "^3.1.1",
+    "webdriverio": "^9.28.0"
+  }
+}

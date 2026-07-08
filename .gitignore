@@ -1,0 +1,7 @@
+node_modules/
+data.json
+.obsidian-cache/
+main.js
+acceptance/.cache/
+acceptance/artifacts/
+.DS_Store

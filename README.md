@@ -4,6 +4,10 @@ Tasks Eye is a native Obsidian plugin for managing note-centered work queues on
 top of the Tasks plugin. It renders focused Open, Inbox, Hold, and Done views
 from regular markdown notes and Tasks emoji task metadata.
 
+The full documentation site lives in [`docs/`](docs/) and is ready for GitHub
+Pages configured as "deploy from branch" using the `/docs` folder. No GitHub
+Actions workflow is required.
+
 Tasks Eye expects notes to live under `Db/` and daily notes to live under
 `Timeline/`. A note's work status is stored in frontmatter:
 
@@ -29,7 +33,7 @@ status is treated as `open`.
 Open shows actionable notes grouped by due date. Future work stays `status: open`
 and is deferred by adding a Tasks due date (`📅 YYYY-MM-DD`).
 
-![Open board](docs/assets/screenshots/open-board.png)
+![Open board](docs/assets/screenshots/light/open.png)
 
 ### Inbox
 
@@ -45,7 +49,7 @@ Open.
 
 Done shows completed Tasks items for a selected date, grouped by note context.
 
-![Done tasks](docs/assets/screenshots/done-tasks.png)
+![Done tasks](docs/assets/screenshots/light/done.png)
 
 ## Daily Completed Summary
 
@@ -59,7 +63,7 @@ Tasks Eye registers the `tasks-eye-daily-completed` markdown code block:
 The legacy `eye-daily-completed` block name is also supported as a migration
 alias.
 
-![Daily completed summary](docs/assets/screenshots/daily-summary.png)
+![Daily completed summary](docs/assets/screenshots/light/daily-summary.png)
 
 ## Commands
 
