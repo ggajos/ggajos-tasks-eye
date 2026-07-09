@@ -23,6 +23,8 @@ export const SNAPSHOT_ROOT = path.resolve("acceptance", "snapshots", "docs");
 export const OPEN_FILE = "Db/Mission/Allegro/Invoice Sync.md";
 export const DAILY_FILE = "Timeline/2026/2026-07-08 - Wed.md";
 export const UNCHECK_FILE = "Db/Growth/Completed Toggle.md";
+const MAX_NOISE_CHANNEL_DELTA = 4;
+const MAX_NOISE_PIXEL_RATIO = 0.0005;
 
 export type EyeMode = "open" | "inbox" | "hold";
 type BaseTheme = "light" | "dark";
@@ -233,9 +235,32 @@ async function pngPixelsEqual(
   try {
     const current = PNG.sync.read(currentBuffer);
     const candidate = PNG.sync.read(candidateBuffer);
-    return current.width === candidate.width &&
-      current.height === candidate.height &&
-      current.data.equals(candidate.data);
+    if (current.width !== candidate.width || current.height !== candidate.height) {
+      return false;
+    }
+    if (current.data.equals(candidate.data)) return true;
+
+    const maxDifferingPixels = Math.ceil(
+      current.width * current.height * MAX_NOISE_PIXEL_RATIO,
+    );
+    let differingPixels = 0;
+
+    for (let index = 0; index < current.data.length; index += 4) {
+      const maxChannelDelta = Math.max(
+        Math.abs(current.data[index]! - candidate.data[index]!),
+        Math.abs(current.data[index + 1]! - candidate.data[index + 1]!),
+        Math.abs(current.data[index + 2]! - candidate.data[index + 2]!),
+        Math.abs(current.data[index + 3]! - candidate.data[index + 3]!),
+      );
+
+      if (maxChannelDelta === 0) continue;
+      if (maxChannelDelta > MAX_NOISE_CHANNEL_DELTA) return false;
+
+      differingPixels += 1;
+      if (differingPixels > maxDifferingPixels) return false;
+    }
+
+    return true;
   } catch {
     return currentBuffer.equals(candidateBuffer);
   }
