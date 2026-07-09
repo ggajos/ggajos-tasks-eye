@@ -53,15 +53,15 @@ Done shows completed Tasks items for a selected date, grouped by note context.
 
 ## Daily Completed Summary
 
-Tasks Eye registers the `obsidian-tasks-eye-daily-completed` markdown code block:
+Tasks Eye registers the `ggajos-tasks-eye-daily-completed` markdown code block:
 
 ````markdown
-```obsidian-tasks-eye-daily-completed
+```ggajos-tasks-eye-daily-completed
 ```
 ````
 
-The legacy `eye-daily-completed` block name is also supported as a migration
-alias.
+The legacy `obsidian-tasks-eye-daily-completed` and `eye-daily-completed` block
+names are also supported as migration aliases.
 
 ![Daily completed summary](docs/assets/screenshots/light/daily-summary.png)
 

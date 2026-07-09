@@ -21,7 +21,7 @@ import type { RowModel } from "./types";
 import { button, element } from "./ui";
 import type { VacationMarker } from "./vacation";
 
-export const VIEW_TYPE = "obsidian-tasks-eye-view";
+export const VIEW_TYPE = "ggajos-tasks-eye-view";
 
 function pill(text: string): HTMLElement {
   return element("span", "eye-pill", text);

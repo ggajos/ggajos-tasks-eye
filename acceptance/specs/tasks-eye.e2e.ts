@@ -53,7 +53,7 @@ async function resetFixtureVault(): Promise<void> {
           saveData: (data: unknown) => Promise<void>;
         }>;
       };
-    }).plugins.plugins["obsidian-tasks-eye"];
+    }).plugins.plugins["ggajos-tasks-eye"];
     if (!plugin) throw new Error("Tasks Eye plugin is not loaded");
 
     Object.assign(plugin, {
@@ -207,7 +207,7 @@ async function saveDocSnapshot(
 }
 
 async function openBoard(mode: EyeMode, expectedText: string): Promise<WdioElement> {
-  await browser.executeObsidianCommand(`obsidian-tasks-eye:open-${mode}`);
+  await browser.executeObsidianCommand(`ggajos-tasks-eye:open-${mode}`);
   return await waitForActivePluginText(expectedText);
 }
 
@@ -336,7 +336,7 @@ describe("Tasks Eye acceptance", () => {
 
       it("documents unchecking selected completed tasks", async () => {
         await openUncheckFixture();
-        await browser.executeObsidianCommand("obsidian-tasks-eye:uncheck-selected-tasks");
+        await browser.executeObsidianCommand("ggajos-tasks-eye:uncheck-selected-tasks");
         await browser.waitUntil(async () => {
           const note = await obsidianPage.read(UNCHECK_FILE);
           return note.includes("- [ ] Reopen follow-up checklist") &&
@@ -352,7 +352,7 @@ describe("Tasks Eye acceptance", () => {
       });
 
       it("documents the Done view", async () => {
-        await browser.executeObsidianCommand("obsidian-tasks-eye:open-completed-tasks");
+        await browser.executeObsidianCommand("ggajos-tasks-eye:open-completed-tasks");
         const root = await waitForActivePluginText("Review the completed task view");
         await expectElementText(root, "Completed Example");
         await saveDocSnapshot(variant, "done.png", root);

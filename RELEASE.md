@@ -53,7 +53,7 @@ GitHub release asset.
 After the GitHub release is created, BRAT can install or update the plugin from:
 
 ```text
-ggajos/obsidian-tasks-eye
+ggajos/ggajos-tasks-eye
 ```
 
 The release tag, release title, and `manifest.json` version all use the same
