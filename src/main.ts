@@ -213,7 +213,7 @@ export default class TheEyePlugin extends Plugin {
 
   async openEye(mode: EyeMode): Promise<void> {
     await this.setMode(mode);
-    const leaf = this.findLeaf() ?? this.app.workspace.getLeaf(true);
+    const leaf = this.findLeaf() ?? this.app.workspace.getLeaf(false);
     await leaf.setViewState({
       type: VIEW_TYPE,
       active: true,
@@ -229,7 +229,7 @@ export default class TheEyePlugin extends Plugin {
   async openCompletedTasks(date?: string): Promise<void> {
     const activeDaily = this.activeDailyDate();
     const viewDate = date ?? activeDaily ?? todayIso();
-    const leaf = this.findCompletedLeaf() ?? this.app.workspace.getLeaf(true);
+    const leaf = this.findCompletedLeaf() ?? this.app.workspace.getLeaf(false);
     await leaf.setViewState({
       type: COMPLETED_VIEW_TYPE,
       active: true,

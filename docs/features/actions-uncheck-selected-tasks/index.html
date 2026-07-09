@@ -37,7 +37,8 @@ keyboard shortcuts in a long note. Reopening the task should not require the
 user to remember which completion-date emoji needs to be removed.</p>
 <p>The command works directly in the editor because the user is already looking at
 the specific checklist lines they want to reopen. Its default shortcut,
-<code>Mod+Shift+U</code>, supports reopening a selected block without leaving the keyboard.</p>
+<code>Ctrl+Shift+D</code>, mirrors the user&#39;s <code>Ctrl+D</code> checking shortcut as the inverse
+operation.</p>
 
           </div>
         </div>
@@ -50,7 +51,7 @@ the specific checklist lines they want to reopen. Its default shortcut,
         </div>
         <ul class="feature-doc-list">
           <li>The command is available only when the current editor selection contains checked task lines.</li>
-<li>The command has a default <code>Mod+Shift+U</code> hotkey for mass unchecking selected tasks.</li>
+<li>The command has a default <code>Ctrl+Shift+D</code> hotkey for mass unchecking selected tasks.</li>
 <li>Standard checked task markers become unchecked markers.</li>
 <li>Tasks completion dates are removed from reopened task lines.</li>
 <li>The command uses the Tasks API when available and falls back to local line rewriting otherwise.</li>

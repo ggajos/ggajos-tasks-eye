@@ -6,4 +6,5 @@ user to remember which completion-date emoji needs to be removed.
 
 The command works directly in the editor because the user is already looking at
 the specific checklist lines they want to reopen. Its default shortcut,
-`Mod+Shift+U`, supports reopening a selected block without leaving the keyboard.
+`Ctrl+Shift+D`, mirrors the user's `Ctrl+D` checking shortcut as the inverse
+operation.

@@ -19,7 +19,7 @@ export const MODE_COMMAND_SHORTCUTS: Record<EyeMode, CommandShortcut> = {
     featureSlug: "views-open",
     featureTitle: "Open view",
     explanation: "Jump to the active-work board.",
-    hotkey: { modifiers: ["Mod", "Shift"], key: "1" },
+    hotkey: { modifiers: ["Ctrl"], key: "1" },
   },
   inbox: {
     commandId: "open-inbox",
@@ -27,7 +27,7 @@ export const MODE_COMMAND_SHORTCUTS: Record<EyeMode, CommandShortcut> = {
     featureSlug: "views-inbox",
     featureTitle: "Inbox view",
     explanation: "Jump to the repair queue for validation violations.",
-    hotkey: { modifiers: ["Mod", "Shift"], key: "2" },
+    hotkey: { modifiers: ["Ctrl"], key: "2" },
   },
   hold: {
     commandId: "open-hold",
@@ -35,7 +35,7 @@ export const MODE_COMMAND_SHORTCUTS: Record<EyeMode, CommandShortcut> = {
     featureSlug: "views-hold",
     featureTitle: "Hold view",
     explanation: "Jump to backlog notes that should stay out of active work.",
-    hotkey: { modifiers: ["Mod", "Shift"], key: "3" },
+    hotkey: { modifiers: ["Ctrl"], key: "3" },
   },
 };
 
@@ -49,15 +49,16 @@ export const COMMAND_SHORTCUTS: readonly CommandShortcut[] = [
     featureSlug: "views-done",
     featureTitle: "Done view",
     explanation: "Open the completed-task review for the current day.",
-    hotkey: { modifiers: ["Mod", "Shift"], key: "4" },
+    hotkey: { modifiers: ["Ctrl"], key: "4" },
   },
   {
     commandId: "uncheck-selected-tasks",
     commandName: "Uncheck selected tasks",
     featureSlug: "actions-uncheck-selected-tasks",
     featureTitle: "Uncheck selected tasks",
-    explanation: "Reopen selected checked task lines and remove completion dates.",
-    hotkey: { modifiers: ["Mod", "Shift"], key: "U" },
+    explanation:
+      "Reopen selected checked task lines as the inverse of the user's task-checking shortcut.",
+    hotkey: { modifiers: ["Ctrl", "Shift"], key: "D" },
   },
 ];
 
