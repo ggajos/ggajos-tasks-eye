@@ -39,6 +39,7 @@ import { getTasksApi } from "./tasksApi";
 import type { TasksApiV1 } from "./tasksApi";
 import type { EyeFile, EyeSettings, RowModel } from "./types";
 import { EyeView, VIEW_TYPE } from "./view";
+import { MODE_COMMAND_SHORTCUTS, COMMAND_SHORTCUTS } from "../features/commands";
 
 const DEFAULT_SETTINGS: EyeSettings = {
   mode: "open",
@@ -83,6 +84,7 @@ export default class TheEyePlugin extends Plugin {
       this.addCommand({
         id: `open-${mode}`,
         name: `Open Tasks Eye: ${mode}`,
+        hotkeys: [MODE_COMMAND_SHORTCUTS[mode].hotkey],
         callback: () => {
           void this.openEye(mode);
         },
@@ -99,6 +101,9 @@ export default class TheEyePlugin extends Plugin {
     this.addCommand({
       id: "open-completed-tasks",
       name: "Open Tasks Eye Done",
+      hotkeys: [COMMAND_SHORTCUTS.find((command) =>
+        command.commandId === "open-completed-tasks"
+      )!.hotkey],
       callback: () => {
         void this.openCompletedTasks();
       },
@@ -106,6 +111,9 @@ export default class TheEyePlugin extends Plugin {
     this.addCommand({
       id: "uncheck-selected-tasks",
       name: "Uncheck selected tasks",
+      hotkeys: [COMMAND_SHORTCUTS.find((command) =>
+        command.commandId === "uncheck-selected-tasks"
+      )!.hotkey],
       editorCheckCallback: (checking, editor, ctx) => {
         if (!canUncheckSelectedTasks(editor)) return false;
         if (!checking) this.uncheckSelectedTasksInEditor(editor, ctx);
@@ -157,20 +165,6 @@ export default class TheEyePlugin extends Plugin {
     this.registerEvent(this.app.workspace.on("active-leaf-change", () => {
       void this.syncCompletedViewsToActiveDaily();
     }));
-    this.registerEvent(
-      this.app.workspace.on("editor-menu", (menu, editor, ctx) => {
-        if (!canUncheckSelectedTasks(editor)) return;
-        menu.addItem((item) => {
-          item
-            .setTitle("Uncheck selected tasks")
-            .setIcon("list-checks")
-            .onClick(() => {
-              this.uncheckSelectedTasksInEditor(editor, ctx);
-            });
-        });
-      }),
-    );
-
     if (!this.tasksApiAvailable()) {
       new Notice("Tasks Eye requires the Obsidian Tasks plugin API.");
     }

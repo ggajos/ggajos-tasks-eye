@@ -11,13 +11,18 @@ build.
   and the WDIO service.
 - `acceptance/fixtures/base/` contains markdown notes copied into each fresh
   vault.
-- `acceptance/specs/` contains WebdriverIO acceptance tests.
-- `acceptance/snapshots/docs/` stores review screenshots from the last run,
-  grouped by visual variant.
+- `acceptance/specs/` contains the WebdriverIO runner that discovers feature
+  acceptance and screenshot scenarios.
+- `acceptance/snapshots/docs/features/` stores review screenshots from the last
+  run, grouped by feature and visual variant.
+- `features/<slug>/` contains feature-owned metadata, rationale, unit tests,
+  and optional WDIO screenshot scenarios.
+- `docs-src/` contains Markdown-backed source templates for generated
+  documentation pages.
 - `.obsidian-cache/` stores downloaded Obsidian, driver, and community plugin
   assets.
-- `docs/assets/screenshots/` stores the published screenshots used by
-  `docs/index.html` and the README.
+- `docs/assets/features/` stores feature-centric screenshots generated from
+  feature WDIO scenarios and used by generated documentation plus the README.
 
 The default target is:
 
@@ -55,6 +60,12 @@ Copy the accepted documentation screenshot tree into GitHub Pages assets:
 npm run docs:screenshots
 ```
 
+Regenerate documentation HTML from `docs-src/` and `features/`:
+
+```bash
+npm run docs:build
+```
+
 Preview the documentation locally by opening `docs/index.html` or by serving the
 repository with any static file server rooted at `docs/`.
 
@@ -65,11 +76,13 @@ the `/docs` folder. This repository intentionally has no GitHub Actions workflow
 
 1. Run `npm test` and `npm run build`.
 2. Run `npm run acceptance:test`.
-3. Review `acceptance/snapshots/docs/` for UI changes across Light, Dark, and
-   Dark Minimal variants.
+3. Review `acceptance/snapshots/docs/features/` for UI changes across Light,
+   Dark, and Dark Minimal variants.
 4. If a visual change is intended, run `npm run acceptance:update-snapshots`.
 5. Run `npm run docs:screenshots` when documentation screenshots should change.
-6. Review `acceptance/snapshots/` and `docs/assets/screenshots/` before commit.
+6. Run `npm run docs:build` after changing `docs-src/` or feature metadata.
+7. Review `acceptance/snapshots/`, `docs/assets/features/`, and generated
+   `docs/features/` pages before commit.
 
 ## Notes
 

@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "acceptance:test": "npm run build && wdio run ./wdio.conf.mts",
     "acceptance:update-snapshots": "npm run acceptance:test",
-    "docs:screenshots": "node acceptance/scripts/publish-doc-screenshots.mjs",
+    "docs:build": "tsx scripts/build-docs.ts",
+    "docs:screenshots": "node acceptance/scripts/publish-doc-screenshots.mjs && npm run docs:build",
     "docs:serve": "python3 -m http.server 4173 --directory docs",
     "release": "release-it major --ci"
   },
@@ -34,6 +35,7 @@
     "@wdio/mocha-framework": "^9.28.0",
     "@wdio/spec-reporter": "^9.28.0",
     "esbuild": "0.25.12",
+    "marked": "^18.0.5",
     "mocha": "^10.8.2",
     "obsidian": "1.13.1",
     "obsidian-launcher": "^3.1.1",

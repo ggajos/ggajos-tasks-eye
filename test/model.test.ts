@@ -214,45 +214,6 @@ status: open
     )).toBe(true);
   });
 
-  it("filters hold rows by row context", () => {
-    const files = [
-      file(
-        "Db/Growth/A.md",
-        `---
-status: hold
----
-
-- [ ] growth
-`,
-      ),
-      file(
-        "Db/Mission/Allegro/B.md",
-        `---
-status: hold
----
-
-- [ ] allegro
-`,
-      ),
-      file(
-        "Db/Mission/7N/C.md",
-        `---
-status: hold
----
-
-- [ ] 7n
-`,
-      ),
-    ];
-
-    expect(selectRows(files, "hold", "growth").map((row) => row.file.path))
-      .toEqual(["Db/Growth/A.md"]);
-    expect(selectRows(files, "hold", "m/allegro").map((row) => row.file.path))
-      .toEqual(["Db/Mission/Allegro/B.md"]);
-    expect(selectRows(files, "hold", "mission").map((row) => row.file.path))
-      .toEqual([]);
-  });
-
   it("inbox shows invalid notes independently of status", () => {
     const files = [
       fixture("active.md", "Db/Mission/Valid.md"),

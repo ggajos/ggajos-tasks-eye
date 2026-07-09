@@ -33,7 +33,7 @@ status is treated as `open`.
 Open shows actionable notes grouped by due date. Future work stays `status: open`
 and is deferred by adding a Tasks due date (`📅 YYYY-MM-DD`).
 
-![Open board](docs/assets/screenshots/light/open.png)
+![Open board](docs/assets/features/views-open/light/board.png)
 
 ### Inbox
 
@@ -49,7 +49,7 @@ Open.
 
 Done shows completed Tasks items for a selected date, grouped by note context.
 
-![Done tasks](docs/assets/screenshots/light/done.png)
+![Done tasks](docs/assets/features/views-done/light/done-view.png)
 
 ## Daily Completed Summary
 
@@ -63,7 +63,7 @@ Tasks Eye registers the `ggajos-tasks-eye-daily-completed` markdown code block:
 The legacy `obsidian-tasks-eye-daily-completed` and `eye-daily-completed` block
 names are also supported as migration aliases.
 
-![Daily completed summary](docs/assets/screenshots/light/daily-summary.png)
+![Daily completed summary](docs/assets/features/blocks-daily-completed-summary/light/summary.png)
 
 ## Commands
 
@@ -87,6 +87,10 @@ Acceptance testing runs a sandboxed Obsidian app against a copied fixture vault:
 ```bash
 npm run acceptance:test
 ```
+
+Feature-owned executable documentation lives under `features/<slug>/`. A
+feature folder can provide typed metadata, `why.md`, Vitest specs, and WDIO
+screenshots that feed generated documentation.
 
 See [docs/testing.md](docs/testing.md) for the WDIO architecture, artifact
 locations, and screenshot update workflow.

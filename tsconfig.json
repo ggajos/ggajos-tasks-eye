@@ -25,6 +25,12 @@
   "include": [
     "src/**/*.ts",
     "test/**/*.ts",
+    "features/**/*.ts",
+    "scripts/**/*.ts",
     "vitest.config.ts"
+  ],
+  "exclude": [
+    "acceptance/**/*.ts",
+    "features/**/wdio.ts"
   ]
 }
