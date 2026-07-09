@@ -99,6 +99,6 @@ export function uncheckSelectedTasks(
   const changes = getUncheckSelectedTaskChanges(editor, uncheckLine);
   if (changes.length === 0) return false;
 
-  editor.transaction({ changes }, "tasks-eye-uncheck-selected-tasks");
+  editor.transaction({ changes }, "obsidian-tasks-eye-uncheck-selected-tasks");
   return true;
 }

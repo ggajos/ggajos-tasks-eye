@@ -114,7 +114,7 @@ export default class TheEyePlugin extends Plugin {
     });
 
     for (const blockName of [
-      "tasks-eye-daily-completed",
+      "obsidian-tasks-eye-daily-completed",
       "eye-daily-completed",
     ] as const) {
       this.registerMarkdownCodeBlockProcessor(

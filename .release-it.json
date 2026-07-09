@@ -1,0 +1,25 @@
+{
+  "$schema": "https://unpkg.com/release-it@20/schema/release-it.json",
+  "git": {
+    "requireBranch": "master",
+    "commitMessage": "chore: release ${version}",
+    "tagName": "${version}",
+    "tagAnnotation": "${version}"
+  },
+  "npm": {
+    "publish": false,
+    "skipChecks": true
+  },
+  "github": {
+    "release": false
+  },
+  "hooks": {
+    "before:bump": [
+      "node scripts/obsidian-release.mjs check",
+      "npm test",
+      "npm run build"
+    ],
+    "after:bump": "node scripts/obsidian-release.mjs sync ${version}",
+    "after:git:release": "gh release create ${version} manifest.json main.js styles.css --title ${version} --notes \"Beta release ${version} for BRAT.\""
+  }
+}

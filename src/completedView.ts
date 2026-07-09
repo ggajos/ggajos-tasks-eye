@@ -15,7 +15,7 @@ import { formatHumanDate, shiftIsoDate, todayIso } from "./date";
 import type TheEyePlugin from "./main";
 import { button, element, unwrapSingleParagraph } from "./ui";
 
-export const COMPLETED_VIEW_TYPE = "tasks-eye-completed-view";
+export const COMPLETED_VIEW_TYPE = "obsidian-tasks-eye-completed-view";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 

@@ -1,5 +1,5 @@
 {
-  "name": "tasks-eye",
+  "name": "obsidian-tasks-eye",
   "version": "0.1.0",
   "description": "Native Obsidian task views for Tasks-driven vaults.",
   "main": "main.js",
@@ -13,7 +13,8 @@
     "acceptance:test": "npm run build && wdio run ./wdio.conf.mts",
     "acceptance:update-snapshots": "npm run acceptance:test",
     "docs:screenshots": "node acceptance/scripts/publish-doc-screenshots.mjs",
-    "docs:serve": "python3 -m http.server 4173 --directory docs"
+    "docs:serve": "python3 -m http.server 4173 --directory docs",
+    "release": "release-it major --ci"
   },
   "keywords": [
     "obsidian",
@@ -22,7 +23,7 @@
   ],
   "license": "UNLICENSED",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.13.0"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -36,6 +37,7 @@
     "mocha": "^10.8.2",
     "obsidian": "1.13.1",
     "obsidian-launcher": "^3.1.1",
+    "release-it": "^20.2.1",
     "tsx": "^4.22.4",
     "typescript": "5.9.3",
     "vitest": "3.2.7",
