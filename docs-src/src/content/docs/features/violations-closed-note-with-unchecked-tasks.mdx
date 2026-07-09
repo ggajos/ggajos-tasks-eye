@@ -1,0 +1,66 @@
+---
+title: "Violation: closed note has unchecked tasks"
+description: "A note with `status: closed` is invalid when it still contains unchecked task lines."
+sidebar:
+  label: "Violation: closed note has unchecked tasks"
+  order: 11
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A note with `status: closed` is invalid when it still contains unchecked task lines.
+
+## Rationale
+
+### Why This Violation Exists
+
+Closed means the note should no longer carry active work. If unchecked tasks
+remain, the note is ambiguous: either the status is wrong, or the work needs to
+be completed or moved.
+
+Inbox makes that mismatch visible so the user can repair the note before the
+task disappears from active planning.
+
+## User Value
+
+The user is warned when a supposedly finished note still contains unresolved work.
+
+## Executable Documentation
+
+- `status: closed` notes with unchecked tasks are reported in Inbox.
+- Closed notes with only completed tasks do not trigger this violation.
+- The violation text is `closed note has unchecked tasks`.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Closed note violation
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-closed-note-with-unchecked-tasks/dark-minimal/violation.png" alt="Inbox row showing a closed note with unchecked tasks violation in Dark Minimal" loading="lazy" />
+    <figcaption>Closed note violation - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-closed-note-with-unchecked-tasks/dark/violation.png" alt="Inbox row showing a closed note with unchecked tasks violation in Dark" loading="lazy" />
+    <figcaption>Closed note violation - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-closed-note-with-unchecked-tasks/light/violation.png" alt="Inbox row showing a closed note with unchecked tasks violation in Light" loading="lazy" />
+    <figcaption>Closed note violation - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Growth/Closed With Open Task.md`
+

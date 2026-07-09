@@ -12,10 +12,11 @@
     "test:watch": "vitest",
     "acceptance:test": "npm run build && wdio run ./wdio.conf.mts",
     "acceptance:update-snapshots": "npm run acceptance:test",
-    "docs:build": "tsx scripts/build-docs.ts",
+    "docs:build": "tsx scripts/build-docs.ts && astro build --config docs-src/astro.config.mjs",
     "docs:screenshots": "node acceptance/scripts/publish-doc-screenshots.mjs && npm run docs:build",
-    "docs:serve": "python3 -m http.server 4173 --directory docs",
-    "release": "release-it major --ci"
+    "docs:serve": "astro preview --host 127.0.0.1 --port 4173 --config docs-src/astro.config.mjs",
+    "release": "node scripts/obsidian-release.mjs release beta",
+    "release:public": "node scripts/obsidian-release.mjs release public"
   },
   "keywords": [
     "obsidian",
@@ -27,6 +28,7 @@
     "node": ">=22.13.0"
   },
   "devDependencies": {
+    "@astrojs/starlight": "^0.41.3",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.13.2",
     "@wdio/cli": "^9.28.0",
@@ -34,8 +36,8 @@
     "@wdio/local-runner": "^9.28.0",
     "@wdio/mocha-framework": "^9.28.0",
     "@wdio/spec-reporter": "^9.28.0",
+    "astro": "^7.0.7",
     "esbuild": "0.25.12",
-    "marked": "^18.0.5",
     "mocha": "^10.8.2",
     "obsidian": "1.13.1",
     "obsidian-launcher": "^3.1.1",

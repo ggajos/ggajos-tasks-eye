@@ -1,0 +1,93 @@
+---
+title: "Uncheck selected tasks"
+description: "The editor command turns selected completed task lines back into unchecked tasks and removes Tasks completion dates."
+sidebar:
+  label: "Uncheck selected tasks"
+  order: 2
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The editor command turns selected completed task lines back into unchecked tasks and removes Tasks completion dates.
+
+## Rationale
+
+### Why Uncheck Selected Tasks Exists
+
+Completed task markers are easy to create accidentally, especially when using
+keyboard shortcuts in a long note. Reopening the task should not require the
+user to remember which completion-date emoji needs to be removed.
+
+The command works directly in the editor because the user is already looking at
+the specific checklist lines they want to reopen. Its default shortcut,
+`Ctrl+Shift+D`, mirrors the user's `Ctrl+D` checking shortcut as the inverse
+operation.
+
+## User Value
+
+The user can reopen accidentally completed checklist items without manually cleaning Tasks emoji metadata.
+
+## Executable Documentation
+
+- The command is available only when the current editor selection contains checked task lines.
+- The command has a default `Ctrl+Shift+D` hotkey for mass unchecking selected tasks.
+- Standard checked task markers become unchecked markers.
+- Tasks completion dates are removed from reopened task lines.
+- The command uses the Tasks API when available and falls back to local line rewriting otherwise.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Before
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-uncheck-selected-tasks/dark-minimal/before.png" alt="Markdown editor showing selected completed tasks before reopening in Dark Minimal" loading="lazy" />
+    <figcaption>Before - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-uncheck-selected-tasks/dark/before.png" alt="Markdown editor showing selected completed tasks before reopening in Dark" loading="lazy" />
+    <figcaption>Before - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-uncheck-selected-tasks/light/before.png" alt="Markdown editor showing selected completed tasks before reopening in Light" loading="lazy" />
+    <figcaption>Before - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+### After
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-uncheck-selected-tasks/dark-minimal/after.png" alt="Markdown editor showing selected tasks reopened as unchecked in Dark Minimal" loading="lazy" />
+    <figcaption>After - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-uncheck-selected-tasks/dark/after.png" alt="Markdown editor showing selected tasks reopened as unchecked in Dark" loading="lazy" />
+    <figcaption>After - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-uncheck-selected-tasks/light/after.png" alt="Markdown editor showing selected tasks reopened as unchecked in Light" loading="lazy" />
+    <figcaption>After - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Growth/Completed Toggle.md`
+

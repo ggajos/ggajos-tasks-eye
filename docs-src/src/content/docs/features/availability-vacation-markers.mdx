@@ -1,0 +1,68 @@
+---
+title: "Vacation availability markers"
+description: "Open boards show configured weekends, holidays, and custom OOO dates as availability markers through the work timeline."
+sidebar:
+  label: "Vacation availability markers"
+  order: 3
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Open boards show configured weekends, holidays, and custom OOO dates as availability markers through the work timeline.
+
+## Rationale
+
+### Why Vacation Markers Exist
+
+Due dates are only useful if they reflect real availability. Tasks Eye shows OOO
+days directly in the board so scheduled work can be judged against weekends,
+holidays, and custom unavailable dates.
+
+The markers are visible in Open because that is where scheduling decisions are
+made. The dedicated `OOO` filter isolates availability when the user wants a
+calendar-like review.
+
+## User Value
+
+The user can see unavailable dates next to scheduled work and isolate those dates with the synthetic `OOO` filter.
+
+## Executable Documentation
+
+- Configured weekends, annual holidays, movable holidays, and custom dates are recognized as unavailable.
+- Open boards interleave vacation markers with dated work.
+- The `OOO` filter shows only availability markers.
+- Normal context filters suppress availability markers.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### OOO filter
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/availability-vacation-markers/dark-minimal/ooo-filter.png" alt="Open board filtered to vacation availability markers in Dark Minimal" loading="lazy" />
+    <figcaption>OOO filter - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/availability-vacation-markers/dark/ooo-filter.png" alt="Open board filtered to vacation availability markers in Dark" loading="lazy" />
+    <figcaption>OOO filter - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/availability-vacation-markers/light/ooo-filter.png" alt="Open board filtered to vacation availability markers in Light" loading="lazy" />
+    <figcaption>OOO filter - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Life/Vacation Collision.md`
+

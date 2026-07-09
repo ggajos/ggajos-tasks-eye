@@ -6,7 +6,9 @@ from regular markdown notes and Tasks emoji task metadata.
 
 The full documentation site lives in [`docs/`](docs/) and is ready for GitHub
 Pages configured as "deploy from branch" using the `/docs` folder. No GitHub
-Actions workflow is required.
+Actions workflow is required. The docs build defaults to the project Pages base
+path `/ggajos-tasks-eye/`; set `DOCS_SITE` and `DOCS_BASE` when building for a
+custom domain or another mount point.
 
 Tasks Eye expects notes to live under `Db/` and daily notes to live under
 `Timeline/`. A note's work status is stored in frontmatter:
@@ -92,5 +94,5 @@ Feature-owned executable documentation lives under `features/<slug>/`. A
 feature folder can provide typed metadata, `why.md`, Vitest specs, and WDIO
 screenshots that feed generated documentation.
 
-See [docs/testing.md](docs/testing.md) for the WDIO architecture, artifact
+See [docs/testing/](docs/testing/) for the WDIO architecture, artifact
 locations, and screenshot update workflow.

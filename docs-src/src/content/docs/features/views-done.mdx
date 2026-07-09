@@ -1,0 +1,67 @@
+---
+title: "Done view"
+description: "The Done view collects completed Tasks items for a selected date and groups them by context and note."
+sidebar:
+  label: "Done view"
+  order: 7
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+The Done view collects completed Tasks items for a selected date and groups them by context and note.
+
+## Rationale
+
+### Why Done Exists
+
+Completed work is useful after the checkbox changes. The Done view gives that
+history a focused surface where the user can review a day, switch dates, and see
+the work grouped by the same contexts used on the boards.
+
+The view reads completion dates from Tasks metadata so it does not need a
+separate archive or log.
+
+## User Value
+
+The user can review what was completed on a specific day without searching individual notes.
+
+## Executable Documentation
+
+- Completed tasks are selected by Tasks completion date.
+- Tasks are grouped by folder-derived context and note name.
+- The date picker and previous/next/today controls change the reviewed date.
+- The context filter narrows completed tasks the same way it narrows board rows.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Done view
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-done/dark-minimal/done-view.png" alt="Done view grouped by context and note in Dark Minimal" loading="lazy" />
+    <figcaption>Done view - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-done/dark/done-view.png" alt="Done view grouped by context and note in Dark" loading="lazy" />
+    <figcaption>Done view - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-done/light/done-view.png" alt="Done view grouped by context and note in Light" loading="lazy" />
+    <figcaption>Done view - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Growth/Completed Example.md`
+

@@ -1,0 +1,68 @@
+---
+title: "Daily completed summary block"
+description: "Daily notes can embed a completed-task summary with the `ggajos-tasks-eye-daily-completed` Markdown code block."
+sidebar:
+  label: "Daily completed summary block"
+  order: 4
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Daily notes can embed a completed-task summary with the `ggajos-tasks-eye-daily-completed` Markdown code block.
+
+## Rationale
+
+### Why The Daily Summary Block Exists
+
+The Done view is useful for browsing, but daily notes are the long-term journal
+of what actually happened. The block lets completed work become part of that
+daily record without copying task text by hand.
+
+The aliases exist so older notes keep rendering while the project settles on the
+canonical block name.
+
+## User Value
+
+The user can review completed work inside the daily note where planning and reflection already happen.
+
+## Executable Documentation
+
+- The canonical daily-completed code block renders completed tasks for the note date.
+- Legacy block names remain supported as migration aliases.
+- The block derives the date from source content or the daily note filename.
+- The rendered block includes previous and next daily-note navigation links when available.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Daily summary
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/blocks-daily-completed-summary/dark-minimal/summary.png" alt="Daily note preview showing a completed task summary block in Dark Minimal" loading="lazy" />
+    <figcaption>Daily summary - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/blocks-daily-completed-summary/dark/summary.png" alt="Daily note preview showing a completed task summary block in Dark" loading="lazy" />
+    <figcaption>Daily summary - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/blocks-daily-completed-summary/light/summary.png" alt="Daily note preview showing a completed task summary block in Light" loading="lazy" />
+    <figcaption>Daily summary - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Timeline/2026/2026-07-08 - Wed.md`
+- `acceptance/fixtures/base/Db/Growth/Completed Example.md`
+

@@ -1,0 +1,68 @@
+---
+title: "Hold"
+description: "A backlog board for notes with `status: hold`, kept visible without mixing deferred work into the active Open board."
+sidebar:
+  label: "Hold"
+  order: 8
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+A backlog board for notes with `status: hold`, kept visible without mixing deferred work into the active Open board.
+
+## Rationale
+
+### Why Hold Exists
+
+Some work should stay visible without competing with active commitments. Hold is
+the backlog state for that work: paused ideas, deferred reading, and notes that
+should remain reviewable but should not appear in the Open board.
+
+Hold uses the same compact row model and context badges as Open so backlog notes
+do not need a separate mental model. The difference is selection: a note belongs
+to Hold only when its frontmatter says `status: hold`.
+
+## User Value
+
+The user can keep future or paused work findable, reviewable, and filterable while preserving a clean active-work queue.
+
+## Executable Documentation
+
+- Notes with `status: hold` appear in the Hold view.
+- Notes with `status: open` do not appear in the Hold view.
+- Hold rows can be narrowed by the same folder-derived context filter as other board rows.
+- The Hold documentation screenshot is captured for every configured documentation theme.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Backlog board
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-hold/dark-minimal/board.png" alt="Hold backlog board showing a Reading Queue note in Dark Minimal" loading="lazy" />
+    <figcaption>Backlog board - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-hold/dark/board.png" alt="Hold backlog board showing a Reading Queue note in Dark" loading="lazy" />
+    <figcaption>Backlog board - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-hold/light/board.png" alt="Hold backlog board showing a Reading Queue note in Light" loading="lazy" />
+    <figcaption>Backlog board - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Growth/Reading Queue.md`
+

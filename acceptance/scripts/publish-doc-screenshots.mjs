@@ -3,8 +3,9 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 const snapshotRoot = join("acceptance", "snapshots", "docs");
-const docsScreenshotsRoot = join("docs", "assets", "screenshots");
-const docsFeaturesRoot = join("docs", "assets", "features");
+const docsAssetsRoot = join("docs-src", "public", "assets");
+const docsScreenshotsRoot = join(docsAssetsRoot, "screenshots");
+const docsFeaturesRoot = join(docsAssetsRoot, "features");
 
 if (!existsSync(snapshotRoot)) {
   console.warn(`No documentation screenshot directory found: ${snapshotRoot}`);
@@ -28,4 +29,4 @@ for (const entry of await readdir(snapshotRoot, { withFileTypes: true })) {
   await cp(source, join(docsScreenshotsRoot, entry.name), { recursive: true });
 }
 
-console.log(`Copied documentation screenshots: ${snapshotRoot} -> docs/assets`);
+console.log(`Copied documentation screenshots: ${snapshotRoot} -> ${docsAssetsRoot}`);

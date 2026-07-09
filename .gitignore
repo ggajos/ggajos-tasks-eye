@@ -4,4 +4,6 @@ data.json
 main.js
 acceptance/.cache/
 acceptance/artifacts/
+.astro/
+docs-src/.astro/
 .DS_Store

@@ -1,0 +1,71 @@
+---
+title: "Inbox view"
+description: "Inbox is the repair queue that collects notes with validation violations, regardless of their current status."
+sidebar:
+  label: "Inbox view"
+  order: 9
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Inbox is the repair queue that collects notes with validation violations, regardless of their current status.
+
+## Rationale
+
+### Why Inbox Exists
+
+The board is only useful when notes follow the project rules. Inbox collects the
+notes that need cleanup so the user can repair data quality separately from
+choosing what to work on.
+
+The view is status-independent on purpose: a closed note with unchecked work is
+still invalid, and an invalid status should be visible even if the user intended
+the note to be active.
+
+## User Value
+
+The user gets one place to fix broken or inconsistent work notes before they pollute daily planning.
+
+## Executable Documentation
+
+- Inbox shows notes with validation errors.
+- Inbox includes invalid notes regardless of whether their status is open, hold, or closed.
+- Inbox rows show the same note links, context badges, and row actions as other task rows.
+- Inbox displays an all-clear empty state when no files violate the rules.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Repair queue
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-inbox/dark-minimal/repair-queue.png" alt="Inbox repair queue showing validation errors in Dark Minimal" loading="lazy" />
+    <figcaption>Repair queue - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-inbox/dark/repair-queue.png" alt="Inbox repair queue showing validation errors in Dark" loading="lazy" />
+    <figcaption>Repair queue - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/views-inbox/light/repair-queue.png" alt="Inbox repair queue showing validation errors in Light" loading="lazy" />
+    <figcaption>Repair queue - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Growth/Missing Task.md`
+- `acceptance/fixtures/base/Db/Growth/Invalid Status.md`
+- `acceptance/fixtures/base/Db/Growth/Closed With Open Task.md`
+- `acceptance/fixtures/base/Db/Life/Vacation Collision.md`
+

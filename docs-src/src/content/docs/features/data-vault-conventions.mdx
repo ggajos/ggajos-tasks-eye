@@ -1,0 +1,68 @@
+---
+title: "Vault conventions"
+description: "Tasks Eye reads managed Markdown notes from `Db/`, timeline notes from `Timeline/`, status frontmatter, and Obsidian Tasks emoji metadata."
+sidebar:
+  label: "Vault conventions"
+  order: 5
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Tasks Eye reads managed Markdown notes from `Db/`, timeline notes from `Timeline/`, status frontmatter, and Obsidian Tasks emoji metadata.
+
+## Rationale
+
+### Why Vault Conventions Exist
+
+Tasks Eye is deliberately not a separate database. Notes remain normal Markdown,
+status remains frontmatter, and task state remains in the Obsidian Tasks format.
+
+That convention keeps the vault useful without the plugin and gives every view a
+small, predictable set of source data to read.
+
+## User Value
+
+The user keeps a readable vault where the plugin adds views without owning the underlying data format.
+
+## Executable Documentation
+
+- Managed work notes live under `Db/`.
+- Daily notes live under `Timeline/` and expose dates through their filenames.
+- Supported note statuses are `open`, `hold`, `closed`, and `archived`.
+- Missing or blank status is treated as `open`.
+- Tasks due dates and completion dates are read from Obsidian Tasks emoji metadata.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Managed note row
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/data-vault-conventions/dark-minimal/managed-note-row.png" alt="Open board row rendered from a managed Markdown note in Dark Minimal" loading="lazy" />
+    <figcaption>Managed note row - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/data-vault-conventions/dark/managed-note-row.png" alt="Open board row rendered from a managed Markdown note in Dark" loading="lazy" />
+    <figcaption>Managed note row - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/data-vault-conventions/light/managed-note-row.png" alt="Open board row rendered from a managed Markdown note in Light" loading="lazy" />
+    <figcaption>Managed note row - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Mission/Allegro/Invoice Sync.md`
+- `acceptance/fixtures/base/Timeline/2026/2026-07-08 - Wed.md`
+

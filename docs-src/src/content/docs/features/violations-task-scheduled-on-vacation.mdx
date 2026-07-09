@@ -1,0 +1,67 @@
+---
+title: "Violation: task scheduled on vacation"
+description: "An unfinished task with a due date on a configured unavailable day is reported as an Inbox violation."
+sidebar:
+  label: "Violation: task scheduled on vacation"
+  order: 14
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+An unfinished task with a due date on a configured unavailable day is reported as an Inbox violation.
+
+## Rationale
+
+### Why This Violation Exists
+
+Vacation markers show unavailable days, but a scheduled task on one of those
+days needs stronger treatment. It is not just calendar context; it is a task
+that should be moved.
+
+Inbox reports the conflict so the user can repair the due date before relying on
+the Open board.
+
+## User Value
+
+The user can reschedule work before it lands on weekends, holidays, or custom OOO days.
+
+## Executable Documentation
+
+- Unfinished tasks due on configured vacation dates are reported in Inbox.
+- The violation includes the due date and vacation reason.
+- Rows show only the earliest vacation collision for the note.
+- Tasks on normal working days do not trigger this violation.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Vacation collision
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-task-scheduled-on-vacation/dark-minimal/violation.png" alt="Inbox row showing a task scheduled on vacation violation in Dark Minimal" loading="lazy" />
+    <figcaption>Vacation collision - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-task-scheduled-on-vacation/dark/violation.png" alt="Inbox row showing a task scheduled on vacation violation in Dark" loading="lazy" />
+    <figcaption>Vacation collision - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-task-scheduled-on-vacation/light/violation.png" alt="Inbox row showing a task scheduled on vacation violation in Light" loading="lazy" />
+    <figcaption>Vacation collision - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Life/Vacation Collision.md`
+

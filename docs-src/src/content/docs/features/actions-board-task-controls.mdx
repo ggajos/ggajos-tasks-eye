@@ -1,0 +1,67 @@
+---
+title: "Board task controls"
+description: "Board rows expose task actions for completing the next task and shifting due dates without opening the note."
+sidebar:
+  label: "Board task controls"
+  order: 1
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Board rows expose task actions for completing the next task and shifting due dates without opening the note.
+
+## Rationale
+
+### Why Board Task Controls Exist
+
+The board is meant to be a working surface, not just a report. If the next
+action is clear, the user should be able to complete it or move its due date
+without opening the note and editing Tasks syntax by hand.
+
+Tasks Eye keeps the note as the durable record. The controls are only shortcuts
+for changing the exact task line represented by the visible row.
+
+## User Value
+
+The user can triage work directly from the board while Tasks Eye keeps the underlying Markdown task line as the source of truth.
+
+## Executable Documentation
+
+- Rows with an unfinished task show a complete button.
+- Rows with a due date show `+1`, `-1`, `+7`, and `-7` due-date controls.
+- Shifting a due date updates the matching Tasks due marker in the note.
+- Completing a task delegates to the Obsidian Tasks API and refreshes the board.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Row controls
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-board-task-controls/dark-minimal/controls.png" alt="Open board row showing complete and due-date shift controls in Dark Minimal" loading="lazy" />
+    <figcaption>Row controls - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-board-task-controls/dark/controls.png" alt="Open board row showing complete and due-date shift controls in Dark" loading="lazy" />
+    <figcaption>Row controls - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/actions-board-task-controls/light/controls.png" alt="Open board row showing complete and due-date shift controls in Light" loading="lazy" />
+    <figcaption>Row controls - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Mission/Allegro/Invoice Sync.md`
+

@@ -1,0 +1,292 @@
+---
+title: "Tasks Eye"
+description: "Native Obsidian task views for Tasks-driven vaults."
+sidebar:
+  label: "Overview"
+  order: 0
+---
+
+Tasks Eye is an Obsidian plugin for note-centered task boards, repair queues,
+review views, editor commands, and daily summaries. The documentation is
+generated from feature folders, so each page is backed by rationale, executable
+tests, and WDIO screenshots.
+
+## Workflow
+
+<ol class="workflow-list">
+  <li><strong>Open</strong><span>Review actionable notes grouped by due date.</span></li>
+  <li><strong>Inbox</strong><span>Fix one validation rule at a time.</span></li>
+  <li><strong>Hold</strong><span>Keep backlog notes visible outside today's work.</span></li>
+  <li><strong>Done</strong><span>Review completed tasks by selected date.</span></li>
+</ol>
+
+## Feature Index
+
+Each entry below comes from a folder under <code>features/</code>. Prefixes group
+related behavior, including <code>actions-*</code>, <code>views-*</code>, and
+<code>violations-*</code>.
+
+<section class="feature-group" aria-labelledby="feature-group-actions">
+  <div class="feature-group__heading">
+    <h3 id="feature-group-actions">Actions</h3>
+    <p>Editor and board commands that change task state.</p>
+  </div>
+  <div class="feature-grid">
+<article class="feature-card">
+  <a href="features/actions-board-task-controls/" class="feature-card__media" aria-label="Board task controls documentation">
+    <img src="assets/features/actions-board-task-controls/dark-minimal/controls.png" alt="Open board row showing complete and due-date shift controls" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/actions-board-task-controls/">Board task controls</a></h3>
+    <p>Board rows expose task actions for completing the next task and shifting due dates without opening the note.</p>
+    <p class="feature-card__value">The user can triage work directly from the board while Tasks Eye keeps the underlying Markdown task line as the source of truth.</p>
+  </div>
+</article>
+<article class="feature-card">
+  <a href="features/actions-uncheck-selected-tasks/" class="feature-card__media" aria-label="Uncheck selected tasks documentation">
+    <img src="assets/features/actions-uncheck-selected-tasks/dark-minimal/before.png" alt="Markdown editor showing selected completed tasks before reopening" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/actions-uncheck-selected-tasks/">Uncheck selected tasks</a></h3>
+    <p>The editor command turns selected completed task lines back into unchecked tasks and removes Tasks completion dates.</p>
+    <p class="feature-card__value">The user can reopen accidentally completed checklist items without manually cleaning Tasks emoji metadata.</p>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="feature-group" aria-labelledby="feature-group-availability">
+  <div class="feature-group__heading">
+    <h3 id="feature-group-availability">Availability</h3>
+    <p>Calendar context that changes how work is interpreted.</p>
+  </div>
+  <div class="feature-grid">
+<article class="feature-card">
+  <a href="features/availability-vacation-markers/" class="feature-card__media" aria-label="Vacation availability markers documentation">
+    <img src="assets/features/availability-vacation-markers/dark-minimal/ooo-filter.png" alt="Open board filtered to vacation availability markers" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/availability-vacation-markers/">Vacation availability markers</a></h3>
+    <p>Open boards show configured weekends, holidays, and custom OOO dates as availability markers through the work timeline.</p>
+    <p class="feature-card__value">The user can see unavailable dates next to scheduled work and isolate those dates with the synthetic `OOO` filter.</p>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="feature-group" aria-labelledby="feature-group-blocks">
+  <div class="feature-group__heading">
+    <h3 id="feature-group-blocks">Blocks</h3>
+    <p>Markdown code blocks rendered inside notes.</p>
+  </div>
+  <div class="feature-grid">
+<article class="feature-card">
+  <a href="features/blocks-daily-completed-summary/" class="feature-card__media" aria-label="Daily completed summary block documentation">
+    <img src="assets/features/blocks-daily-completed-summary/dark-minimal/summary.png" alt="Daily note preview showing a completed task summary block" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/blocks-daily-completed-summary/">Daily completed summary block</a></h3>
+    <p>Daily notes can embed a completed-task summary with the `ggajos-tasks-eye-daily-completed` Markdown code block.</p>
+    <p class="feature-card__value">The user can review completed work inside the daily note where planning and reflection already happen.</p>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="feature-group" aria-labelledby="feature-group-data">
+  <div class="feature-group__heading">
+    <h3 id="feature-group-data">Data</h3>
+    <p>Vault conventions and metadata contracts.</p>
+  </div>
+  <div class="feature-grid">
+<article class="feature-card">
+  <a href="features/data-vault-conventions/" class="feature-card__media" aria-label="Vault conventions documentation">
+    <img src="assets/features/data-vault-conventions/dark-minimal/managed-note-row.png" alt="Open board row rendered from a managed Markdown note" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/data-vault-conventions/">Vault conventions</a></h3>
+    <p>Tasks Eye reads managed Markdown notes from `Db/`, timeline notes from `Timeline/`, status frontmatter, and Obsidian Tasks emoji metadata.</p>
+    <p class="feature-card__value">The user keeps a readable vault where the plugin adds views without owning the underlying data format.</p>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="feature-group" aria-labelledby="feature-group-filters">
+  <div class="feature-group__heading">
+    <h3 id="feature-group-filters">Filters</h3>
+    <p>Controls that narrow visible work without changing notes.</p>
+  </div>
+  <div class="feature-grid">
+<article class="feature-card">
+  <a href="features/filters-context-filtering/" class="feature-card__media" aria-label="Context filtering documentation">
+    <img src="assets/features/filters-context-filtering/dark-minimal/filtered-board.png" alt="Open board filtered to the M/Allegro context" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/filters-context-filtering/">Context filtering</a></h3>
+    <p>Tasks Eye derives context labels from `Db/` folders and uses the toolbar filter to narrow board and Done views.</p>
+    <p class="feature-card__value">The user can focus on one area of life or work without changing note metadata or moving tasks between queues.</p>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="feature-group" aria-labelledby="feature-group-views">
+  <div class="feature-group__heading">
+    <h3 id="feature-group-views">Views</h3>
+    <p>Primary task boards and review surfaces.</p>
+  </div>
+  <div class="feature-grid">
+<article class="feature-card">
+  <a href="features/views-done/" class="feature-card__media" aria-label="Done view documentation">
+    <img src="assets/features/views-done/dark-minimal/done-view.png" alt="Done view grouped by context and note" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/views-done/">Done view</a></h3>
+    <p>The Done view collects completed Tasks items for a selected date and groups them by context and note.</p>
+    <p class="feature-card__value">The user can review what was completed on a specific day without searching individual notes.</p>
+  </div>
+</article>
+<article class="feature-card">
+  <a href="features/views-hold/" class="feature-card__media" aria-label="Hold documentation">
+    <img src="assets/features/views-hold/dark-minimal/board.png" alt="Hold backlog board showing a Reading Queue note" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/views-hold/">Hold</a></h3>
+    <p>A backlog board for notes with `status: hold`, kept visible without mixing deferred work into the active Open board.</p>
+    <p class="feature-card__value">The user can keep future or paused work findable, reviewable, and filterable while preserving a clean active-work queue.</p>
+  </div>
+</article>
+<article class="feature-card">
+  <a href="features/views-inbox/" class="feature-card__media" aria-label="Inbox view documentation">
+    <img src="assets/features/views-inbox/dark-minimal/repair-queue.png" alt="Inbox repair queue showing validation errors" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/views-inbox/">Inbox view</a></h3>
+    <p>Inbox is the repair queue that collects notes with validation violations, regardless of their current status.</p>
+    <p class="feature-card__value">The user gets one place to fix broken or inconsistent work notes before they pollute daily planning.</p>
+  </div>
+</article>
+<article class="feature-card">
+  <a href="features/views-open/" class="feature-card__media" aria-label="Open view documentation">
+    <img src="assets/features/views-open/dark-minimal/board.png" alt="Open board grouped by due-date buckets" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/views-open/">Open view</a></h3>
+    <p>Open is the active-work board for `status: open` notes, grouped by due-date buckets and ordered by next action.</p>
+    <p class="feature-card__value">The user can see actionable work by urgency while keeping future scheduling in normal Tasks due dates.</p>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="feature-group" aria-labelledby="feature-group-violations">
+  <div class="feature-group__heading">
+    <h3 id="feature-group-violations">Violations</h3>
+    <p>One feature per validation rule shown in Inbox.</p>
+  </div>
+  <div class="feature-grid">
+<article class="feature-card">
+  <a href="features/violations-closed-note-with-unchecked-tasks/" class="feature-card__media" aria-label="Violation: closed note has unchecked tasks documentation">
+    <img src="assets/features/violations-closed-note-with-unchecked-tasks/dark-minimal/violation.png" alt="Inbox row showing a closed note with unchecked tasks violation" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/violations-closed-note-with-unchecked-tasks/">Violation: closed note has unchecked tasks</a></h3>
+    <p>A note with `status: closed` is invalid when it still contains unchecked task lines.</p>
+    <p class="feature-card__value">The user is warned when a supposedly finished note still contains unresolved work.</p>
+  </div>
+</article>
+<article class="feature-card">
+  <a href="features/violations-invalid-status/" class="feature-card__media" aria-label="Violation: invalid status documentation">
+    <img src="assets/features/violations-invalid-status/dark-minimal/violation.png" alt="Inbox row showing an invalid status violation" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/violations-invalid-status/">Violation: invalid status</a></h3>
+    <p>A note with explicit status outside `open`, `hold`, `closed`, or `archived` is invalid.</p>
+    <p class="feature-card__value">The user gets an immediate repair cue when a typo or obsolete status would otherwise hide a note from the intended workflow.</p>
+  </div>
+</article>
+<article class="feature-card">
+  <a href="features/violations-open-note-without-uncompleted-tasks/" class="feature-card__media" aria-label="Violation: open note has no uncompleted tasks documentation">
+    <img src="assets/features/violations-open-note-without-uncompleted-tasks/dark-minimal/violation.png" alt="Inbox row showing an open note with no uncompleted tasks violation" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/violations-open-note-without-uncompleted-tasks/">Violation: open note has no uncompleted tasks</a></h3>
+    <p>An open note is invalid when it has no unchecked task left to act on.</p>
+    <p class="feature-card__value">The user can close, archive, or add a next action instead of letting empty active notes clutter planning.</p>
+  </div>
+</article>
+<article class="feature-card">
+  <a href="features/violations-task-scheduled-on-vacation/" class="feature-card__media" aria-label="Violation: task scheduled on vacation documentation">
+    <img src="assets/features/violations-task-scheduled-on-vacation/dark-minimal/violation.png" alt="Inbox row showing a task scheduled on vacation violation" loading="lazy" />
+  </a>
+  <div class="feature-card__body">
+    <h3><a href="features/violations-task-scheduled-on-vacation/">Violation: task scheduled on vacation</a></h3>
+    <p>An unfinished task with a due date on a configured unavailable day is reported as an Inbox violation.</p>
+    <p class="feature-card__value">The user can reschedule work before it lands on weekends, holidays, or custom OOO days.</p>
+  </div>
+</article>
+  </div>
+</section>
+
+## Keyboard Shortcuts
+
+These defaults are registered by the plugin and can still be changed in
+Obsidian's hotkey settings. Each shortcut links to the feature that owns the
+behavior.
+
+<div class="table-scroll">
+<table class="shortcut-table">
+  <thead>
+    <tr>
+      <th>Default shortcut</th>
+      <th>Command</th>
+      <th>Feature</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+<tr>
+  <td><kbd>Ctrl+1</kbd></td>
+  <td><code>Open Tasks Eye: open</code></td>
+  <td><a href="features/views-open/">Open view</a></td>
+  <td>Jump to the active-work board.</td>
+</tr>
+<tr>
+  <td><kbd>Ctrl+2</kbd></td>
+  <td><code>Open Tasks Eye: inbox</code></td>
+  <td><a href="features/views-inbox/">Inbox view</a></td>
+  <td>Jump to the repair queue for validation violations.</td>
+</tr>
+<tr>
+  <td><kbd>Ctrl+3</kbd></td>
+  <td><code>Open Tasks Eye: hold</code></td>
+  <td><a href="features/views-hold/">Hold view</a></td>
+  <td>Jump to backlog notes that should stay out of active work.</td>
+</tr>
+<tr>
+  <td><kbd>Ctrl+4</kbd></td>
+  <td><code>Open Tasks Eye Done</code></td>
+  <td><a href="features/views-done/">Done view</a></td>
+  <td>Open the completed-task review for the current day.</td>
+</tr>
+<tr>
+  <td><kbd>Ctrl+Shift+D</kbd></td>
+  <td><code>Uncheck selected tasks</code></td>
+  <td><a href="features/actions-uncheck-selected-tasks/">Uncheck selected tasks</a></td>
+  <td>Reopen selected checked task lines as the inverse of the user's task-checking shortcut.</td>
+</tr>
+  </tbody>
+</table>
+</div>
+
+## Documentation Pipeline
+
+Feature folders feed the unit suite, the WDIO acceptance runner, and this
+Starlight site.
+
+```bash
+npm test
+npm run acceptance:test
+npm run docs:screenshots
+```

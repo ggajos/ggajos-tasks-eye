@@ -1,0 +1,67 @@
+---
+title: "Context filtering"
+description: "Tasks Eye derives context labels from `Db/` folders and uses the toolbar filter to narrow board and Done views."
+sidebar:
+  label: "Context filtering"
+  order: 6
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+Tasks Eye derives context labels from `Db/` folders and uses the toolbar filter to narrow board and Done views.
+
+## Rationale
+
+### Why Context Filtering Exists
+
+The folder tree already describes the broad context of a note. Tasks Eye uses
+that structure instead of adding another tag or frontmatter field.
+
+Filtering is intentionally non-destructive: it changes the current view, not the
+notes themselves.
+
+## User Value
+
+The user can focus on one area of life or work without changing note metadata or moving tasks between queues.
+
+## Executable Documentation
+
+- Folder paths below `Db/` produce stable context keys and display labels.
+- Nested Mission folders are abbreviated as labels such as `M/Allegro`.
+- Unknown persisted filters fall back to `All`.
+- Changing the toolbar filter narrows visible rows without mutating notes.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Filtered board
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/filters-context-filtering/dark-minimal/filtered-board.png" alt="Open board filtered to the M/Allegro context in Dark Minimal" loading="lazy" />
+    <figcaption>Filtered board - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/filters-context-filtering/dark/filtered-board.png" alt="Open board filtered to the M/Allegro context in Dark" loading="lazy" />
+    <figcaption>Filtered board - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/filters-context-filtering/light/filtered-board.png" alt="Open board filtered to the M/Allegro context in Light" loading="lazy" />
+    <figcaption>Filtered board - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Mission/Allegro/Invoice Sync.md`
+- `acceptance/fixtures/base/Db/Life/Passport Renewal.md`
+

@@ -1,0 +1,65 @@
+---
+title: "Violation: open note has no uncompleted tasks"
+description: "An open note is invalid when it has no unchecked task left to act on."
+sidebar:
+  label: "Violation: open note has no uncompleted tasks"
+  order: 13
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+An open note is invalid when it has no unchecked task left to act on.
+
+## Rationale
+
+### Why This Violation Exists
+
+Open notes are supposed to represent actionable work. If an open note has no
+unchecked task, it is not clear what the next action is.
+
+Inbox flags that situation so the user can add a task, close the note, or move
+it out of active planning.
+
+## User Value
+
+The user can close, archive, or add a next action instead of letting empty active notes clutter planning.
+
+## Executable Documentation
+
+- `status: open` notes with no unchecked tasks are reported in Inbox.
+- Missing or blank status is treated as Open for this rule.
+- Open notes with at least one unchecked task do not trigger this violation.
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Missing task violation
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-uncompleted-tasks/dark-minimal/violation.png" alt="Inbox row showing an open note with no uncompleted tasks violation in Dark Minimal" loading="lazy" />
+    <figcaption>Missing task violation - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-uncompleted-tasks/dark/violation.png" alt="Inbox row showing an open note with no uncompleted tasks violation in Dark" loading="lazy" />
+    <figcaption>Missing task violation - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-uncompleted-tasks/light/violation.png" alt="Inbox row showing an open note with no uncompleted tasks violation in Light" loading="lazy" />
+    <figcaption>Missing task violation - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+## Fixtures
+
+- `acceptance/fixtures/base/Db/Growth/Missing Task.md`
+

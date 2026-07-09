@@ -20,6 +20,6 @@
       "npm run build"
     ],
     "after:bump": "node scripts/obsidian-release.mjs sync ${version}",
-    "after:git:release": "gh release create ${version} manifest.json main.js styles.css --title ${version} --notes \"Beta release ${version} for BRAT.\""
+    "after:git:release": "node scripts/obsidian-release.mjs github-release ${version}"
   }
 }
