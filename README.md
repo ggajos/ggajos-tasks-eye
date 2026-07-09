@@ -81,13 +81,12 @@ names are also supported as migration aliases.
 ```bash
 npm install
 npm test
-npm run build
 ```
 
 Acceptance testing runs a sandboxed Obsidian app against a copied fixture vault:
 
 ```bash
-npm run acceptance:test
+npm run test:acceptance
 ```
 
 Feature-owned executable documentation lives under `features/<slug>/`. A

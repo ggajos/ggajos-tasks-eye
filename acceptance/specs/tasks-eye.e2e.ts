@@ -18,7 +18,7 @@ const FEATURE_SCREENSHOT_SCENARIOS = await discoverFeatureScreenshotScenarios(
 
 describe("Tasks Eye acceptance", () => {
   before(async () => {
-    await resetDocSnapshotRoot();
+    await resetDocSnapshotRoot(FEATURE_SCREENSHOT_SCENARIOS);
   });
 
   for (const { feature, scenario } of FEATURE_ACCEPTANCE_SCENARIOS) {

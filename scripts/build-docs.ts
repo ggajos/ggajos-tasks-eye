@@ -246,8 +246,9 @@ Starlight site.
 
 \`\`\`bash
 npm test
-npm run acceptance:test
-npm run docs:screenshots
+npm run test:unit
+npm run test:acceptance
+npm run docs
 \`\`\`
 `;
 }
@@ -368,7 +369,7 @@ The default target is:
 Override them with environment variables when needed:
 
 \`\`\`bash
-OBSIDIAN_VERSIONS="1.12.7/latest" TASKS_PLUGIN_VERSION=8.2.2 npm run acceptance:test
+OBSIDIAN_VERSIONS="1.12.7/latest" TASKS_PLUGIN_VERSION=8.2.2 npm run test:acceptance
 \`\`\`
 
 ## Commands
@@ -377,10 +378,10 @@ Use Node \`22.12.0\` or newer for acceptance testing. The WDIO/Obsidian launcher
 stack uses modern Node APIs that fail on older Node 20 builds.
 
 \`\`\`bash
-npm run acceptance:test
-npm run acceptance:update-snapshots
-npm run docs:screenshots
-npm run docs:build
+npm test
+npm run test:unit
+npm run test:acceptance
+npm run docs
 npm run docs:serve
 \`\`\`
 
@@ -390,13 +391,10 @@ workflow.
 
 ## Review Workflow
 
-1. Run \`npm test\` and \`npm run build\`.
-2. Run \`npm run acceptance:test\`.
-3. Review \`acceptance/snapshots/docs/features/\` for UI changes across Light, Dark, and Dark Minimal variants.
-4. If a visual change is intended, run \`npm run acceptance:update-snapshots\`.
-5. Run \`npm run docs:screenshots\` when documentation screenshots should change.
-6. Run \`npm run docs:build\` after changing \`docs-src/\` or feature metadata.
-7. Review \`acceptance/snapshots/\`, \`docs-src/public/assets/features/\`, and generated \`docs/features/\` pages before commit.
+1. Run \`npm test\` for the full gate: unit tests, production build, WDIO acceptance, screenshot publishing, and Starlight docs build.
+2. Review \`acceptance/snapshots/docs/features/\` for UI changes across Light, Dark, and Dark Minimal variants.
+3. Review \`docs-src/public/assets/features/\` and generated \`docs/features/\` pages before commit.
+4. For focused loops, run \`npm run test:unit\`, \`npm run test:acceptance\`, or \`npm run docs\`.
 
 ## Notes
 

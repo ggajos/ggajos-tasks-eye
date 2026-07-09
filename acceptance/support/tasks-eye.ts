@@ -1,7 +1,16 @@
-import { access, mkdir, rm } from "node:fs/promises";
+import {
+  access,
+  mkdir,
+  readFile,
+  readdir,
+  rename,
+  rm,
+  unlink,
+} from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { browser } from "@wdio/globals";
+import { PNG } from "pngjs";
 import { obsidianPage } from "wdio-obsidian-service";
 import {
   DOCUMENTATION_VARIANTS,
@@ -39,6 +48,11 @@ export interface FeatureAcceptanceScenario {
 interface FeatureWdioModule {
   acceptanceScenarios?: unknown;
   screenshotScenarios?: unknown;
+}
+
+export interface DiscoveredFeatureScreenshotScenario {
+  feature: LoadedFeature;
+  scenario: FeatureScreenshotScenario;
 }
 
 const VISUAL_VARIANT_CONFIG: Record<
@@ -122,14 +136,8 @@ export async function discoverFeatureAcceptanceScenarios(
 
 export async function discoverFeatureScreenshotScenarios(
   features: readonly LoadedFeature[],
-): Promise<Array<{
-  feature: LoadedFeature;
-  scenario: FeatureScreenshotScenario;
-}>> {
-  const scenarios: Array<{
-    feature: LoadedFeature;
-    scenario: FeatureScreenshotScenario;
-  }> = [];
+): Promise<DiscoveredFeatureScreenshotScenario[]> {
+  const scenarios: DiscoveredFeatureScreenshotScenario[] = [];
 
   for (const feature of features) {
     const wdioPath = path.join(feature.rootDir, "wdio.ts");
@@ -159,9 +167,99 @@ export async function discoverFeatureScreenshotScenarios(
   return scenarios;
 }
 
-export async function resetDocSnapshotRoot(): Promise<void> {
-  await rm(SNAPSHOT_ROOT, { recursive: true, force: true });
+async function listFiles(root: string): Promise<string[]> {
+  const entries = await readdir(root, { withFileTypes: true }).catch(() => []);
+  const files = await Promise.all(entries.map(async (entry) => {
+    const entryPath = path.join(root, entry.name);
+    if (entry.isDirectory()) return await listFiles(entryPath);
+    if (entry.isFile()) return [entryPath];
+    return [];
+  }));
+  return files.flat();
+}
+
+function expectedFeatureSnapshotPaths(
+  scenarios: readonly DiscoveredFeatureScreenshotScenario[],
+): Set<string> {
+  const expected = new Set<string>();
+  for (const { feature, scenario } of scenarios) {
+    const filename = scenario.screenshotSlug.endsWith(".png")
+      ? scenario.screenshotSlug
+      : `${scenario.screenshotSlug}.png`;
+    for (const variant of VISUAL_VARIANTS) {
+      expected.add(path.join(
+        "features",
+        feature.feature.slug,
+        variant.key,
+        filename,
+      ));
+    }
+  }
+  return expected;
+}
+
+export async function resetDocSnapshotRoot(
+  scenarios: readonly DiscoveredFeatureScreenshotScenario[] = [],
+): Promise<void> {
   await mkdir(SNAPSHOT_ROOT, { recursive: true });
+  const expected = expectedFeatureSnapshotPaths(scenarios);
+  const shouldCleanFeatureSnapshots = scenarios.length > 0;
+  const files = await listFiles(SNAPSHOT_ROOT);
+
+  await Promise.all(files.map(async (file) => {
+    const relativePath = path.relative(SNAPSHOT_ROOT, file);
+    const isTempFile = path.basename(file).includes(".tmp");
+    const isStaleFeatureSnapshot = shouldCleanFeatureSnapshots &&
+      relativePath.startsWith(`features${path.sep}`) &&
+      !expected.has(relativePath);
+
+    if (isTempFile || isStaleFeatureSnapshot) {
+      await rm(file, { force: true });
+    }
+  }));
+}
+
+async function pngPixelsEqual(
+  currentPath: string,
+  candidatePath: string,
+): Promise<boolean> {
+  if (!await exists(currentPath)) return false;
+
+  const [currentBuffer, candidateBuffer] = await Promise.all([
+    readFile(currentPath),
+    readFile(candidatePath),
+  ]);
+
+  try {
+    const current = PNG.sync.read(currentBuffer);
+    const candidate = PNG.sync.read(candidateBuffer);
+    return current.width === candidate.width &&
+      current.height === candidate.height &&
+      current.data.equals(candidate.data);
+  } catch {
+    return currentBuffer.equals(candidateBuffer);
+  }
+}
+
+async function saveScreenshotIfPixelsChanged(
+  targetPath: string,
+  el: WdioElement,
+): Promise<void> {
+  const targetDir = path.dirname(targetPath);
+  const tempPath = path.join(
+    targetDir,
+    `.${path.basename(targetPath)}.${process.pid}.${Date.now()}.tmp.png`,
+  );
+
+  await mkdir(targetDir, { recursive: true });
+  await el.saveScreenshot(tempPath);
+
+  if (await pngPixelsEqual(targetPath, tempPath)) {
+    await unlink(tempPath);
+    return;
+  }
+
+  await rename(tempPath, targetPath);
 }
 
 export async function resetFixtureVault(): Promise<void> {
@@ -370,8 +468,7 @@ export async function saveDocSnapshot(
   el: WdioElement,
 ): Promise<void> {
   const variantDir = path.join(SNAPSHOT_ROOT, variant.key);
-  await mkdir(variantDir, { recursive: true });
-  await el.saveScreenshot(path.join(variantDir, name));
+  await saveScreenshotIfPixelsChanged(path.join(variantDir, name), el);
 }
 
 export async function saveFeatureDocSnapshot(
@@ -389,8 +486,7 @@ export async function saveFeatureDocSnapshot(
     featureSlug,
     variant.key,
   );
-  await mkdir(variantDir, { recursive: true });
-  await el.saveScreenshot(path.join(variantDir, filename));
+  await saveScreenshotIfPixelsChanged(path.join(variantDir, filename), el);
 }
 
 export async function openBoard(
