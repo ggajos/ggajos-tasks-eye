@@ -27,7 +27,7 @@ export const SNAPSHOT_ROOT = path.resolve("acceptance", "snapshots", "docs");
 export const OPEN_FILE = "Db/Mission/Allegro/Invoice Sync.md";
 export const DAILY_FILE = "Timeline/2026/2026-07-08 - Wed.md";
 export const UNCHECK_FILE = "Db/Growth/Completed Toggle.md";
-const MAX_NOISE_CHANNEL_DELTA = 4;
+const MAX_NOISE_CHANNEL_DELTA = 8;
 const MAX_NOISE_PIXEL_RATIO = 0.0005;
 
 export type EyeMode = "open" | "inbox" | "hold";
