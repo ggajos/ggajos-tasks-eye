@@ -268,6 +268,21 @@ ${feature.fixturePaths.map((fixture) => `- \`${fixture}\``).join("\n")}
 `;
 }
 
+function renderViolationSample(feature: FeatureDefinition): string {
+  const sample = feature.violation?.sampleNote;
+  if (!sample) return "";
+
+  return `
+## Violating Note
+
+\`${sample.path}\`
+
+\`\`\`md
+${sample.markdown.trimEnd()}
+\`\`\`
+`;
+}
+
 function demoteHeadings(markdown: string): string {
   return markdown.replaceAll(/^(#{1,5})(\s+)/gm, "#$1$2");
 }
@@ -321,7 +336,7 @@ ${feature.feature.userValue}
 ## Executable Documentation
 
 ${renderAcceptanceCriteria(feature.feature)}
-
+${renderViolationSample(feature.feature)}
 ## Screenshots
 
 Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with

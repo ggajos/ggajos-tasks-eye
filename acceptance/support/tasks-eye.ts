@@ -16,7 +16,11 @@ import {
   DOCUMENTATION_VARIANTS,
   type DocumentationVariantKey,
 } from "../../features/visualVariants";
-import type { LoadedFeature } from "../../features/types";
+import { getContextFromPath } from "../../src/context";
+import type {
+  FeatureDefinition,
+  LoadedFeature,
+} from "../../features/types";
 
 export const ACCEPTANCE_TODAY = process.env.TASKS_EYE_TODAY ?? "2026-07-08";
 export const SNAPSHOT_ROOT = path.resolve("acceptance", "snapshots", "docs");
@@ -338,6 +342,71 @@ export async function expectElementNotText(
   if (actual.includes(text)) {
     throw new Error(`Expected element text not to contain "${text}"`);
   }
+}
+
+export async function expectSingleViolation(message: string): Promise<void> {
+  let state = { rowCount: 0, errors: [] as string[] };
+  await browser.waitUntil(async () => {
+    state = await browser.execute(() => {
+      const root = document.querySelector(
+        ".workspace-leaf.mod-active .eye-plugin",
+      );
+      if (!root) return { rowCount: 0, errors: [] as string[] };
+
+      const errors = Array.from(root.querySelectorAll(".eye-errors > div"))
+        .map((element) => element.textContent?.trim() ?? "");
+      return {
+        rowCount: root.querySelectorAll(".eye-row").length,
+        errors,
+      };
+    });
+    return state.rowCount === 1 &&
+      state.errors.length === 1 &&
+      state.errors[0] === message;
+  }, {
+    timeout: 10_000,
+    timeoutMsg:
+      `Expected one row with only violation "${message}"`,
+  });
+}
+
+export function createViolationScreenshotScenarios(
+  feature: FeatureDefinition,
+): readonly FeatureScreenshotScenario[] {
+  const violation = feature.violation;
+  if (!violation) {
+    throw new Error(`${feature.slug} is missing violation metadata`);
+  }
+
+  const configurations: Array<{
+    screenshotSlug: string;
+    mode: EyeMode;
+  }> = [
+    { screenshotSlug: "violation", mode: "inbox" },
+  ];
+  if (violation.appearsInOpen) {
+    configurations.push({ screenshotSlug: "open", mode: "open" });
+  }
+
+  return configurations.map(({ screenshotSlug, mode }) => ({
+    screenshotSlug,
+    async run(variant) {
+      const { path: samplePath, markdown } = violation.sampleNote;
+      await obsidianPage.write(samplePath, markdown);
+
+      const expectedTitle = path.basename(samplePath, path.extname(samplePath));
+      await openBoard(mode, expectedTitle);
+      await setContextFilter(getContextFromPath(samplePath));
+      const root = await waitForActivePluginText(expectedTitle);
+      await expectSingleViolation(violation.message);
+      await saveFeatureDocSnapshot(
+        feature.slug,
+        variant,
+        screenshotSlug,
+        root,
+      );
+    },
+  }));
 }
 
 export async function waitForActivePluginText(

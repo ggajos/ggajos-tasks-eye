@@ -3,7 +3,7 @@ title: "Violation: open note has no uncompleted tasks"
 description: "An open note is invalid when it has no unchecked task left to act on."
 sidebar:
   label: "Violation: open note has no uncompleted tasks"
-  order: 13
+  order: 14
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
@@ -29,6 +29,19 @@ The user can close, archive, or add a next action instead of letting empty activ
 - `status: open` notes with no unchecked tasks are reported in Inbox.
 - Missing or blank status is treated as Open for this rule.
 - Open notes with at least one unchecked task do not trigger this violation.
+- The violation is visible in both Inbox and Open.
+
+## Violating Note
+
+`Db/Violation Samples/No Unchecked Tasks.md`
+
+```md
+---
+status: open
+---
+
+This note intentionally has no unchecked tasks.
+```
 
 ## Screenshots
 
@@ -55,6 +68,29 @@ variants in the browser.
   <figure class="feature-shot">
     <img src="../../assets/features/violations-open-note-without-uncompleted-tasks/light/violation.png" alt="Inbox row showing an open note with no uncompleted tasks violation in Light" loading="lazy" />
     <figcaption>Missing task violation - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+### Missing task in Open
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-uncompleted-tasks/dark-minimal/open.png" alt="Open row showing an open note with no uncompleted tasks violation in Dark Minimal" loading="lazy" />
+    <figcaption>Missing task in Open - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-uncompleted-tasks/dark/open.png" alt="Open row showing an open note with no uncompleted tasks violation in Dark" loading="lazy" />
+    <figcaption>Missing task in Open - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-uncompleted-tasks/light/open.png" alt="Open row showing an open note with no uncompleted tasks violation in Light" loading="lazy" />
+    <figcaption>Missing task in Open - Light</figcaption>
   </figure>
 </TabItem>
 </Tabs>

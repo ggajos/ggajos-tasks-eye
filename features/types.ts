@@ -4,6 +4,17 @@ export interface FeatureScreenshot {
   alt: string;
 }
 
+export interface FeatureNoteSample {
+  path: string;
+  markdown: string;
+}
+
+export interface FeatureViolation {
+  message: string;
+  appearsInOpen: boolean;
+  sampleNote: FeatureNoteSample;
+}
+
 export interface FeatureDefinition {
   slug: string;
   title: string;
@@ -12,6 +23,7 @@ export interface FeatureDefinition {
   acceptanceCriteria: readonly string[];
   fixturePaths: readonly string[];
   screenshots: readonly FeatureScreenshot[];
+  violation?: FeatureViolation;
 }
 
 export interface LoadedFeature {

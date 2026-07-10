@@ -1,22 +1,6 @@
 import {
-  expectElementText,
-  openBoard,
-  saveFeatureDocSnapshot,
-  type FeatureScreenshotScenario,
+  createViolationScreenshotScenarios,
 } from "../../acceptance/support/tasks-eye";
+import { feature } from "./feature";
 
-export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
-  {
-    screenshotSlug: "violation",
-    async run(variant) {
-      const root = await openBoard("inbox", "Invalid Status");
-      await expectElementText(root, 'invalid status: "waiting"');
-      await saveFeatureDocSnapshot(
-        "violations-invalid-status",
-        variant,
-        "violation",
-        root,
-      );
-    },
-  },
-];
+export const screenshotScenarios = createViolationScreenshotScenarios(feature);

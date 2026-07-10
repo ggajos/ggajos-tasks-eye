@@ -40,7 +40,8 @@ and is deferred by adding a Tasks due date (`📅 YYYY-MM-DD`).
 ### Inbox
 
 Inbox shows notes that need attention, such as open notes with no remaining
-unchecked task or notes with invalid status frontmatter.
+unchecked task, open notes whose unchecked tasks have no due date, or notes
+with invalid status frontmatter.
 
 ### Hold
 

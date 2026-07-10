@@ -137,7 +137,7 @@ status: hold
         "Db/Growth/Missing.md",
         `# Missing
 
-- [ ] missing status
+- [ ] missing status 📅 2026-07-28
 `,
       ),
       file(
@@ -146,7 +146,7 @@ status: hold
 status:
 ---
 
-- [ ] blank status
+- [ ] blank status 📅 2026-07-28
 `,
       ),
       file(
@@ -197,7 +197,7 @@ status: open
 status: open
 ---
 
-- [ ] still open
+- [ ] still open 📅 2026-07-28
 `,
       ),
     ];

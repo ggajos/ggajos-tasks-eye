@@ -96,6 +96,10 @@ export const sidebar = [
             "link": "/features/violations-invalid-status/"
           },
           {
+            "label": "Violation: open note has no task with due date",
+            "link": "/features/violations-open-note-without-due-date/"
+          },
+          {
             "label": "Violation: open note has no uncompleted tasks",
             "link": "/features/violations-open-note-without-uncompleted-tasks/"
           },

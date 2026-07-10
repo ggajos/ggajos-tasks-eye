@@ -1,22 +1,6 @@
 import {
-  expectElementText,
-  openBoard,
-  saveFeatureDocSnapshot,
-  type FeatureScreenshotScenario,
+  createViolationScreenshotScenarios,
 } from "../../acceptance/support/tasks-eye";
+import { feature } from "./feature";
 
-export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
-  {
-    screenshotSlug: "violation",
-    async run(variant) {
-      const root = await openBoard("inbox", "Vacation Collision");
-      await expectElementText(root, "task scheduled on vacation");
-      await saveFeatureDocSnapshot(
-        "violations-task-scheduled-on-vacation",
-        variant,
-        "violation",
-        root,
-      );
-    },
-  },
-];
+export const screenshotScenarios = createViolationScreenshotScenarios(feature);

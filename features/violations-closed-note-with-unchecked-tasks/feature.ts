@@ -15,6 +15,19 @@ export const feature = {
   fixturePaths: [
     "acceptance/fixtures/base/Db/Growth/Closed With Open Task.md",
   ],
+  violation: {
+    message: "closed note has unchecked tasks",
+    appearsInOpen: false,
+    sampleNote: {
+      path: "Db/Violation Samples/Closed Note.md",
+      markdown: `---
+status: closed
+---
+
+- [ ] Reconcile the leftover task before closing the note
+`,
+    },
+  },
   screenshots: [
     {
       slug: "violation",

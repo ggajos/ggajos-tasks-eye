@@ -1,22 +1,6 @@
 import {
-  expectElementText,
-  openBoard,
-  saveFeatureDocSnapshot,
-  type FeatureScreenshotScenario,
+  createViolationScreenshotScenarios,
 } from "../../acceptance/support/tasks-eye";
+import { feature } from "./feature";
 
-export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
-  {
-    screenshotSlug: "violation",
-    async run(variant) {
-      const root = await openBoard("inbox", "Missing Task");
-      await expectElementText(root, "open note has no uncompleted tasks");
-      await saveFeatureDocSnapshot(
-        "violations-open-note-without-uncompleted-tasks",
-        variant,
-        "violation",
-        root,
-      );
-    },
-  },
-];
+export const screenshotScenarios = createViolationScreenshotScenarios(feature);

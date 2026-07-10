@@ -1,7 +1,11 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { FeatureDefinition, LoadedFeature } from "./types";
+import type {
+  FeatureDefinition,
+  FeatureViolation,
+  LoadedFeature,
+} from "./types";
 
 export const FEATURES_ROOT = path.resolve("features");
 
@@ -47,6 +51,35 @@ function optionalTextArray(value: unknown, field: string): readonly string[] {
   return value;
 }
 
+function optionalViolation(value: unknown): FeatureViolation | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "object" || value === null) {
+    throw new Error("Feature has invalid violation metadata");
+  }
+
+  const violation = value as Record<string, unknown>;
+  const sampleNote = violation.sampleNote;
+  if (typeof sampleNote !== "object" || sampleNote === null) {
+    throw new Error("Feature violation is missing sampleNote");
+  }
+  const sample = sampleNote as Record<string, unknown>;
+  if (typeof violation.appearsInOpen !== "boolean") {
+    throw new Error("Feature violation is missing boolean appearsInOpen");
+  }
+
+  return {
+    message: requireText(violation.message, "violation.message"),
+    appearsInOpen: violation.appearsInOpen,
+    sampleNote: {
+      path: requireText(sample.path, "violation.sampleNote.path"),
+      markdown: requireText(
+        sample.markdown,
+        "violation.sampleNote.markdown",
+      ),
+    },
+  };
+}
+
 function validateFeature(dirName: string, candidate: unknown): FeatureDefinition {
   if (typeof candidate !== "object" || candidate === null) {
     throw new Error(`Feature folder "${dirName}" must export a feature object`);
@@ -84,12 +117,41 @@ function validateFeature(dirName: string, candidate: unknown): FeatureDefinition
     ),
     fixturePaths: optionalTextArray(value.fixturePaths, "fixturePaths"),
     screenshots,
+    violation: optionalViolation(value.violation),
   } satisfies FeatureDefinition;
 
   if (feature.slug !== dirName) {
     throw new Error(
       `Feature folder "${dirName}" exports slug "${feature.slug}". The slug must match the folder name.`,
     );
+  }
+
+  const isViolationFeature = dirName.startsWith("violations-");
+  if (isViolationFeature && feature.violation === undefined) {
+    throw new Error(
+      `Violation feature "${dirName}" must define violation metadata`,
+    );
+  }
+  if (!isViolationFeature && feature.violation !== undefined) {
+    throw new Error(
+      `Non-violation feature "${dirName}" cannot define violation metadata`,
+    );
+  }
+
+  if (feature.violation) {
+    const screenshotSlugs = new Set(
+      feature.screenshots.map((screenshot) => screenshot.slug),
+    );
+    if (!screenshotSlugs.has("violation")) {
+      throw new Error(
+        `Violation feature "${dirName}" must define a violation screenshot`,
+      );
+    }
+    if (feature.violation.appearsInOpen && !screenshotSlugs.has("open")) {
+      throw new Error(
+        `Violation feature "${dirName}" must define an Open screenshot`,
+      );
+    }
   }
 
   return feature;

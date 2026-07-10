@@ -86,6 +86,7 @@ export function validateFile(file: EyeFile): string[] {
     file.status !== null &&
     file.status !== "";
   const status = statusValue(file);
+  const uncompletedTasks = file.tasks.filter((task) => !task.completed);
 
   if (
     hasExplicitStatus &&
@@ -99,16 +100,17 @@ export function validateFile(file: EyeFile): string[] {
 
   if (
     status === "closed" &&
-    file.tasks.some((task) => !task.completed)
+    uncompletedTasks.length > 0
   ) {
     violations.push("closed note has unchecked tasks");
   }
 
-  if (
-    status === "open" &&
-    !file.tasks.some((task) => !task.completed)
-  ) {
-    violations.push("open note has no uncompleted tasks");
+  if (status === "open") {
+    if (uncompletedTasks.length === 0) {
+      violations.push("open note has no uncompleted tasks");
+    } else if (!uncompletedTasks.some((task) => task.dueTs !== null)) {
+      violations.push("open note has no uncompleted task with due date");
+    }
   }
 
   for (const task of getUncompletedTasksWithDue(file.tasks)) {

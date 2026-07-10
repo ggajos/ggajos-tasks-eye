@@ -15,6 +15,19 @@ export const feature = {
   fixturePaths: [
     "acceptance/fixtures/base/Db/Growth/Invalid Status.md",
   ],
+  violation: {
+    message: 'invalid status: "waiting"',
+    appearsInOpen: false,
+    sampleNote: {
+      path: "Db/Violation Samples/Invalid Status.md",
+      markdown: `---
+status: waiting
+---
+
+- [ ] Decide which queue this note belongs in
+`,
+    },
+  },
   screenshots: [
     {
       slug: "violation",

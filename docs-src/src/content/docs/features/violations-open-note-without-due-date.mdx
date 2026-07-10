@@ -1,0 +1,101 @@
+---
+title: "Violation: open note has no task with due date"
+description: "An open note is invalid when it has unchecked tasks but none of them has a Tasks due date."
+sidebar:
+  label: "Violation: open note has no task with due date"
+  order: 13
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+An open note is invalid when it has unchecked tasks but none of them has a Tasks due date.
+
+## Rationale
+
+### Why This Violation Exists
+
+Open notes represent active work. When none of their unchecked tasks has a due
+date, the work has no place in the dated plan and is easy to overlook.
+
+Inbox flags the note so the user can schedule at least one next action. Other
+unchecked tasks may remain undated; a single dated unchecked task is enough to
+anchor the note in planning.
+
+## User Value
+
+The user can schedule at least one next action instead of leaving active work without a planning date.
+
+## Executable Documentation
+
+- `status: open` notes with unchecked tasks but no due dates are reported in Inbox.
+- Missing or blank status is treated as Open for this rule.
+- One unchecked task with a due date is enough to satisfy the rule, even when other unchecked tasks are undated.
+- Completed tasks with due dates do not satisfy the rule.
+- Hold, closed, and archived notes do not trigger this specific violation.
+- The violation is visible in both Inbox and Open.
+
+## Violating Note
+
+`Db/Violation Samples/Missing Due Date.md`
+
+```md
+---
+status: open
+---
+
+- [ ] Choose the next dated action
+```
+
+## Screenshots
+
+Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
+the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
+variants in the browser.
+
+### Missing due date violation
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-due-date/dark-minimal/violation.png" alt="Inbox row showing an open note without an unchecked task due date in Dark Minimal" loading="lazy" />
+    <figcaption>Missing due date violation - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-due-date/dark/violation.png" alt="Inbox row showing an open note without an unchecked task due date in Dark" loading="lazy" />
+    <figcaption>Missing due date violation - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-due-date/light/violation.png" alt="Inbox row showing an open note without an unchecked task due date in Light" loading="lazy" />
+    <figcaption>Missing due date violation - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+### Missing due date in Open
+
+<Tabs syncKey="feature-screenshot-theme">
+<TabItem label="Dark Minimal">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-due-date/dark-minimal/open.png" alt="Open row showing an open note without an unchecked task due date in Dark Minimal" loading="lazy" />
+    <figcaption>Missing due date in Open - Dark Minimal</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Dark">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-due-date/dark/open.png" alt="Open row showing an open note without an unchecked task due date in Dark" loading="lazy" />
+    <figcaption>Missing due date in Open - Dark</figcaption>
+  </figure>
+</TabItem>
+<TabItem label="Light">
+  <figure class="feature-shot">
+    <img src="../../assets/features/violations-open-note-without-due-date/light/open.png" alt="Open row showing an open note without an unchecked task due date in Light" loading="lazy" />
+    <figcaption>Missing due date in Open - Light</figcaption>
+  </figure>
+</TabItem>
+</Tabs>
+
+
