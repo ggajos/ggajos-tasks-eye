@@ -1,4 +1,4 @@
-import { ItemView, setIcon } from "obsidian";
+import { ItemView, MarkdownRenderer, setIcon } from "obsidian";
 import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { isEyeMode, MODE_LABELS, MODES } from "./constants";
 import type { EyeMode } from "./constants";
@@ -17,7 +17,12 @@ import type { BoardBucket, BoardDayGroup, RenderItem } from "./model";
 import { formatYmd, nowDate, nowTs } from "./date";
 import type TheEyePlugin from "./main";
 import type { RowModel } from "./types";
-import { button, contextFilterControl, element } from "./ui";
+import {
+  button,
+  contextFilterControl,
+  element,
+  unwrapSingleParagraph,
+} from "./ui";
 import type { VacationMarker } from "./vacation";
 
 export const VIEW_TYPE = "ggajos-tasks-eye-view";
@@ -134,7 +139,7 @@ export class EyeView extends ItemView {
       const vacationSourceRows = this.mode === "open"
         ? selectRows(files, this.mode, "*")
         : rows;
-      const rendered = this.renderBoard(
+      const rendered = await this.renderBoard(
         list,
         rows,
         vacationSourceRows,
@@ -152,7 +157,7 @@ export class EyeView extends ItemView {
     }
 
     list.classList.add("eye-flat-list");
-    for (const row of rows) this.renderRow(list, row, false);
+    for (const row of rows) await this.renderRow(list, row, false);
   }
 
   private emptyMessage(): string {
@@ -201,12 +206,12 @@ export class EyeView extends ItemView {
     root.appendChild(toolbar);
   }
 
-  private renderBoard(
+  private async renderBoard(
     list: HTMLElement,
     rows: RowModel[],
     vacationSourceRows: RowModel[],
     contextFilter: string,
-  ): boolean {
+  ): Promise<boolean> {
     list.classList.add("eye-tree");
 
     const items = this.mode === "open"
@@ -214,14 +219,14 @@ export class EyeView extends ItemView {
       : rows.map((model): RenderItem => ({ kind: "task", model }));
     const buckets = buildBoardBuckets(items, nowDate());
 
-    for (const bucket of buckets) this.renderBucket(list, bucket);
+    for (const bucket of buckets) await this.renderBucket(list, bucket);
     return buckets.length > 0;
   }
 
-  private renderBucket(
+  private async renderBucket(
     list: HTMLElement,
     bucket: BoardBucket,
-  ): void {
+  ): Promise<void> {
     const stateKey = this.bucketStateKey(bucket.key);
     const collapsed = this.collapsedBuckets.has(stateKey);
     const group = element("section", "eye-bucket tree-item");
@@ -273,7 +278,9 @@ export class EyeView extends ItemView {
     const showDays = this.shouldShowDayDividers(bucket);
     for (const day of bucket.days) {
       if (showDays) this.renderDayDivider(children, day);
-      for (const item of day.items) this.renderItem(children, item, true);
+      for (const item of day.items) {
+        await this.renderItem(children, item, true);
+      }
     }
 
     group.appendChild(children);
@@ -317,13 +324,16 @@ export class EyeView extends ItemView {
     list.appendChild(divider);
   }
 
-  private renderItem(
+  private async renderItem(
     list: HTMLElement,
     item: RenderItem,
     taskFirst: boolean,
-  ): void {
-    if (item.kind === "task") this.renderRow(list, item.model, taskFirst);
-    else this.renderMarker(list, item.marker);
+  ): Promise<void> {
+    if (item.kind === "task") {
+      await this.renderRow(list, item.model, taskFirst);
+    } else {
+      this.renderMarker(list, item.marker);
+    }
   }
 
   private renderMarker(list: HTMLElement, marker: VacationMarker): void {
@@ -365,11 +375,11 @@ export class EyeView extends ItemView {
     return link;
   }
 
-  private renderRow(
+  private async renderRow(
     list: HTMLElement,
     model: RowModel,
     taskFirst: boolean,
-  ): void {
+  ): Promise<void> {
     const row = element(
       "div",
       ["eye-row", ...rowStateClasses(model)].join(" "),
@@ -383,7 +393,7 @@ export class EyeView extends ItemView {
       note.appendChild(this.renderNoteLink(model));
       if (model.errors.length > 0) note.appendChild(pill("!"));
       appendMeta(meta, model, false);
-      action.textContent = model.actionLabel;
+      await this.renderActionMarkdown(action, model);
 
       main.appendChild(action);
       main.appendChild(note);
@@ -397,7 +407,7 @@ export class EyeView extends ItemView {
       if (model.earliestTask) {
         const action = element("div", "eye-action");
         appendMeta(meta, model, true);
-        action.textContent = model.actionLabel;
+        await this.renderActionMarkdown(action, model);
         main.appendChild(action);
       }
     }
@@ -418,6 +428,20 @@ export class EyeView extends ItemView {
     row.appendChild(this.renderContextBadge(model));
     row.appendChild(this.renderActions(model));
     list.appendChild(row);
+  }
+
+  private async renderActionMarkdown(
+    action: HTMLElement,
+    model: RowModel,
+  ): Promise<void> {
+    await MarkdownRenderer.render(
+      this.app,
+      model.actionLabel,
+      action,
+      model.file.path,
+      this,
+    );
+    unwrapSingleParagraph(action);
   }
 
   private renderActions(model: RowModel): HTMLElement {

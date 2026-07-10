@@ -12,7 +12,7 @@ export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
       const root = await openBoard("hold", "Technology Radar");
       await expectElementText(
         root,
-        "Evaluate Temporal for durable workflow orchestration",
+        "Review ADR-042 with Security Architecture",
       );
       await expectElementNotText(root, "Billing Platform Modernization");
       await save(root);
