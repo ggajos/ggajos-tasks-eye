@@ -8,6 +8,7 @@ const obsidianVersions = await parseObsidianVersions(
   { cacheDir },
 );
 const tasksPluginVersion = process.env.TASKS_PLUGIN_VERSION ?? "latest";
+const obsidianLanguage = "en-US";
 
 const plugins: PluginEntry[] = [
   { id: "obsidian-tasks-plugin", version: tasksPluginVersion },
@@ -25,6 +26,9 @@ export const config: WebdriverIO.Config = {
   capabilities: obsidianVersions.map(([appVersion, installerVersion]) => ({
     browserName: "obsidian",
     browserVersion: appVersion,
+    "goog:chromeOptions": {
+      args: [`--lang=${obsidianLanguage}`],
+    },
     "wdio:obsidianOptions": {
       installerVersion,
       plugins,

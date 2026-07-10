@@ -11,66 +11,67 @@ describe("Hold feature", () => {
   it("shows hold notes without mixing in active work", () => {
     const files = [
       file(
-        "Db/Growth/Reading Queue.md",
+        "Db/Architecture/Technology Radar.md",
         `---
 status: hold
 ---
 
-- [ ] Pick the next TypeScript testing article
+- [ ] Evaluate Temporal for durable workflow orchestration
 `,
       ),
       file(
-        "Db/Growth/Active Study.md",
+        "Db/Architecture/Active Evaluation.md",
         `---
 status: open
 ---
 
-- [ ] Read current article
+- [ ] Review the current platform decision
 `,
       ),
     ];
 
     const rows = selectRows(files, "hold", "*");
 
-    expect(rows.map((row) => row.file.basename)).toEqual(["Reading Queue"]);
-    expect(rows[0]?.actionLabel).toBe("Pick the next TypeScript testing article");
+    expect(rows.map((row) => row.file.basename)).toEqual(["Technology Radar"]);
+    expect(rows[0]?.actionLabel)
+      .toBe("Evaluate Temporal for durable workflow orchestration");
   });
 
   it("filters hold rows by folder-derived context", () => {
     const files = [
       file(
-        "Db/Growth/A.md",
+        "Db/Architecture/Technology Radar.md",
         `---
 status: hold
 ---
 
-- [ ] growth
+- [ ] evaluate architecture technology
 `,
       ),
       file(
-        "Db/Mission/Allegro/B.md",
+        "Db/Mission/Platform/Modernization.md",
         `---
 status: hold
 ---
 
-- [ ] allegro
+- [ ] plan platform modernization
 `,
       ),
       file(
-        "Db/Mission/7N/C.md",
+        "Db/Mission/Identity/Access Model.md",
         `---
 status: hold
 ---
 
-- [ ] 7n
+- [ ] review identity boundary
 `,
       ),
     ];
 
-    expect(selectRows(files, "hold", "growth").map((row) => row.file.path))
-      .toEqual(["Db/Growth/A.md"]);
-    expect(selectRows(files, "hold", "m/allegro").map((row) => row.file.path))
-      .toEqual(["Db/Mission/Allegro/B.md"]);
+    expect(selectRows(files, "hold", "architecture").map((row) => row.file.path))
+      .toEqual(["Db/Architecture/Technology Radar.md"]);
+    expect(selectRows(files, "hold", "m/platform").map((row) => row.file.path))
+      .toEqual(["Db/Mission/Platform/Modernization.md"]);
     expect(selectRows(files, "hold", "mission").map((row) => row.file.path))
       .toEqual([]);
   });

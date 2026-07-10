@@ -3,7 +3,6 @@ import { obsidianPage } from "wdio-obsidian-service";
 import {
   UNCHECK_FILE,
   openUncheckFixture,
-  saveFeatureDocSnapshot,
   waitForActiveEditorText,
   type FeatureAcceptanceScenario,
   type FeatureScreenshotScenario,
@@ -23,8 +22,8 @@ export const acceptanceScenarios: readonly FeatureAcceptanceScenario[] = [
       await uncheckSelectedTasks();
       await browser.waitUntil(async () => {
         const note = await obsidianPage.read(UNCHECK_FILE);
-        return note.includes("- [ ] Reopen follow-up checklist") &&
-          note.includes("- [ ] Return recurring reading task") &&
+        return note.includes("- [ ] Approved the production readiness checklist") &&
+          note.includes("- [ ] Validated rollback ownership with service leads") &&
           !note.includes("✅");
       }, {
         timeout: 10_000,
@@ -37,28 +36,20 @@ export const acceptanceScenarios: readonly FeatureAcceptanceScenario[] = [
 export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
   {
     screenshotSlug: "before",
-    async run(variant) {
+    async run({ save }) {
       const editor = await openUncheckFixture();
-      await saveFeatureDocSnapshot(
-        "actions-uncheck-selected-tasks",
-        variant,
-        "before",
-        editor,
-      );
+      await save(editor);
     },
   },
   {
     screenshotSlug: "after",
-    async run(variant) {
+    async run({ save }) {
       await openUncheckFixture();
       await uncheckSelectedTasks();
-      const editor = await waitForActiveEditorText("Reopen follow-up checklist");
-      await saveFeatureDocSnapshot(
-        "actions-uncheck-selected-tasks",
-        variant,
-        "after",
-        editor,
+      const editor = await waitForActiveEditorText(
+        "Approved the production readiness checklist",
       );
+      await save(editor);
     },
   },
 ];

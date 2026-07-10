@@ -21,12 +21,13 @@ import type {
   FeatureDefinition,
   LoadedFeature,
 } from "../../features/types";
+import type { ViolationCode } from "../../src/validation";
 
 export const ACCEPTANCE_TODAY = process.env.TASKS_EYE_TODAY ?? "2026-07-08";
 export const SNAPSHOT_ROOT = path.resolve("acceptance", "snapshots", "docs");
-export const OPEN_FILE = "Db/Mission/Allegro/Invoice Sync.md";
+export const OPEN_FILE = "Db/Mission/Platform/Billing Platform Modernization.md";
 export const DAILY_FILE = "Timeline/2026/2026-07-08 - Wed.md";
-export const UNCHECK_FILE = "Db/Growth/Completed Toggle.md";
+export const UNCHECK_FILE = "Db/Architecture/Release Readiness.md";
 const MAX_NOISE_CHANNEL_DELTA = 8;
 const MAX_NOISE_PIXEL_RATIO = 0.0005;
 
@@ -43,7 +44,11 @@ export interface VisualVariant {
 
 export interface FeatureScreenshotScenario {
   screenshotSlug: string;
-  run: (variant: VisualVariant) => Promise<void>;
+  run: (context: FeatureScreenshotContext) => Promise<void>;
+}
+
+export interface FeatureScreenshotContext {
+  save: (el: WdioElement) => Promise<void>;
 }
 
 export interface FeatureAcceptanceScenario {
@@ -59,6 +64,21 @@ interface FeatureWdioModule {
 export interface DiscoveredFeatureScreenshotScenario {
   feature: LoadedFeature;
   scenario: FeatureScreenshotScenario;
+}
+
+export async function assertEnglishObsidianLocale(): Promise<void> {
+  const locale = await browser.execute(() => ({
+    configuredLanguage: localStorage.getItem("language"),
+    navigatorLanguage: navigator.language,
+  }));
+  const effectiveLanguage =
+    locale.configuredLanguage ?? locale.navigatorLanguage;
+
+  if (!/^en(?:-|$)/i.test(effectiveLanguage)) {
+    throw new Error(
+      `Acceptance screenshots require English Obsidian; effective locale was "${effectiveLanguage}"`,
+    );
+  }
 }
 
 const VISUAL_VARIANT_CONFIG: Record<
@@ -157,6 +177,7 @@ export async function discoverFeatureScreenshotScenarios(
     const knownScreenshots = new Set(
       feature.feature.screenshots.map((screenshot) => screenshot.slug),
     );
+    const scenarioSlugs = new Set<string>();
     for (const scenario of module.screenshotScenarios) {
       if (!isScenario(scenario)) {
         throw new Error(`${wdioPath} exports an invalid screenshot scenario`);
@@ -166,7 +187,21 @@ export async function discoverFeatureScreenshotScenarios(
           `${wdioPath} references unknown screenshot "${scenario.screenshotSlug}"`,
         );
       }
+      if (scenarioSlugs.has(scenario.screenshotSlug)) {
+        throw new Error(
+          `${wdioPath} repeats screenshot "${scenario.screenshotSlug}"`,
+        );
+      }
+      scenarioSlugs.add(scenario.screenshotSlug);
       scenarios.push({ feature, scenario });
+    }
+
+    for (const screenshotSlug of knownScreenshots) {
+      if (!scenarioSlugs.has(screenshotSlug)) {
+        throw new Error(
+          `${wdioPath} is missing screenshot scenario "${screenshotSlug}"`,
+        );
+      }
     }
   }
 
@@ -344,29 +379,30 @@ export async function expectElementNotText(
   }
 }
 
-export async function expectSingleViolation(message: string): Promise<void> {
-  let state = { rowCount: 0, errors: [] as string[] };
+export async function expectSingleViolation(code: ViolationCode): Promise<void> {
+  let state = { rowCount: 0, violationCodes: [] as string[] };
   await browser.waitUntil(async () => {
     state = await browser.execute(() => {
       const root = document.querySelector(
         ".workspace-leaf.mod-active .eye-plugin",
       );
-      if (!root) return { rowCount: 0, errors: [] as string[] };
+      if (!root) return { rowCount: 0, violationCodes: [] as string[] };
 
-      const errors = Array.from(root.querySelectorAll(".eye-errors > div"))
-        .map((element) => element.textContent?.trim() ?? "");
+      const violationCodes = Array.from(
+        root.querySelectorAll<HTMLElement>(".eye-errors > div"),
+      ).map((element) => element.dataset.eyeViolation ?? "");
       return {
         rowCount: root.querySelectorAll(".eye-row").length,
-        errors,
+        violationCodes,
       };
     });
     return state.rowCount === 1 &&
-      state.errors.length === 1 &&
-      state.errors[0] === message;
+      state.violationCodes.length === 1 &&
+      state.violationCodes[0] === code;
   }, {
     timeout: 10_000,
     timeoutMsg:
-      `Expected one row with only violation "${message}"`,
+      `Expected one row with only violation code "${code}"`,
   });
 }
 
@@ -375,7 +411,7 @@ export function createViolationScreenshotScenarios(
 ): readonly FeatureScreenshotScenario[] {
   const violation = feature.violation;
   if (!violation) {
-    throw new Error(`${feature.slug} is missing violation metadata`);
+    throw new Error("Violation feature is missing violation metadata");
   }
 
   const configurations: Array<{
@@ -390,7 +426,7 @@ export function createViolationScreenshotScenarios(
 
   return configurations.map(({ screenshotSlug, mode }) => ({
     screenshotSlug,
-    async run(variant) {
+    async run({ save }) {
       const { path: samplePath, markdown } = violation.sampleNote;
       await obsidianPage.write(samplePath, markdown);
 
@@ -398,13 +434,8 @@ export function createViolationScreenshotScenarios(
       await openBoard(mode, expectedTitle);
       await setContextFilter(getContextFromPath(samplePath));
       const root = await waitForActivePluginText(expectedTitle);
-      await expectSingleViolation(violation.message);
-      await saveFeatureDocSnapshot(
-        feature.slug,
-        variant,
-        screenshotSlug,
-        root,
-      );
+      await expectSingleViolation(violation.code);
+      await save(root);
     },
   }));
 }
@@ -456,37 +487,6 @@ export async function waitForActiveEditorText(
   }, {
     timeout: 20_000,
     timeoutMsg: `Expected active markdown editor to contain "${text}"`,
-  });
-
-  const root = await $(selector);
-  await root.waitForDisplayed({ timeout: 5_000 });
-  return root as unknown as WdioElement;
-}
-
-export async function waitForActiveModalText(text: string): Promise<WdioElement> {
-  const selector = ".modal";
-  await browser.waitUntil(async () => {
-    const root = await $(selector);
-    if (!await root.isExisting()) return false;
-    return (await root.getText()).includes(text);
-  }, {
-    timeout: 10_000,
-    timeoutMsg: `Expected active modal to contain "${text}"`,
-  });
-
-  const root = await $(selector);
-  await root.waitForDisplayed({ timeout: 5_000 });
-  return root as unknown as WdioElement;
-}
-
-export async function waitForActiveModal(): Promise<WdioElement> {
-  const selector = ".modal, .prompt, .suggestion-container";
-  await browser.waitUntil(async () => {
-    const root = await $(selector);
-    return await root.isExisting();
-  }, {
-    timeout: 10_000,
-    timeoutMsg: "Expected an active modal",
   });
 
   const root = await $(selector);
@@ -556,15 +556,6 @@ export async function expectRowAction(
   });
 }
 
-export async function saveDocSnapshot(
-  variant: VisualVariant,
-  name: string,
-  el: WdioElement,
-): Promise<void> {
-  const variantDir = path.join(SNAPSHOT_ROOT, variant.key);
-  await saveScreenshotIfPixelsChanged(path.join(variantDir, name), el);
-}
-
 export async function saveFeatureDocSnapshot(
   featureSlug: string,
   variant: VisualVariant,
@@ -593,23 +584,7 @@ export async function openBoard(
 
 export async function openCompletedTasksView(): Promise<WdioElement> {
   await browser.executeObsidianCommand("ggajos-tasks-eye:open-completed-tasks");
-  return await waitForActivePluginText("Review the completed task view");
-}
-
-export async function openSourceFile(
-  filePath: string,
-  expectedText: string,
-): Promise<WdioElement> {
-  await browser.executeObsidian(async ({ app }, pathToOpen) => {
-    const leaf = app.workspace.getLeaf(true);
-    await leaf.setViewState({
-      type: "markdown",
-      state: { file: pathToOpen, mode: "source" },
-      active: true,
-    });
-    await app.workspace.revealLeaf(leaf);
-  }, filePath);
-  return await waitForActiveEditorText(expectedText);
+  return await waitForActivePluginText("Approved ADR-042 for tenant isolation");
 }
 
 export async function openDailyPreview(): Promise<WdioElement> {
@@ -622,7 +597,9 @@ export async function openDailyPreview(): Promise<WdioElement> {
     });
     await app.workspace.revealLeaf(leaf);
   }, DAILY_FILE);
-  return await waitForActiveMarkdownPreviewText("Review the completed task view");
+  return await waitForActiveMarkdownPreviewText(
+    "Approved ADR-042 for tenant isolation",
+  );
 }
 
 export async function openUncheckFixture(): Promise<WdioElement> {
@@ -637,11 +614,21 @@ export async function openUncheckFixture(): Promise<WdioElement> {
 
     const view = app.workspace.getActiveViewOfType(obsidian.MarkdownView);
     if (!view) throw new Error("Markdown editor did not open");
-    const endLine = 5;
+    const checkedTaskLines = Array.from(
+      { length: view.editor.lastLine() + 1 },
+      (_, line) => line,
+    ).filter((line) => /^\s*[-*+]\s+\[[xX]\]/.test(view.editor.getLine(line)));
+    const startLine = checkedTaskLines[0];
+    const endLine = checkedTaskLines[checkedTaskLines.length - 1];
+    if (startLine === undefined || endLine === undefined) {
+      throw new Error("Release readiness fixture has no completed tasks");
+    }
     view.editor.setSelection(
-      { line: 4, ch: 0 },
+      { line: startLine, ch: 0 },
       { line: endLine, ch: view.editor.getLine(endLine).length },
     );
   }, UNCHECK_FILE);
-  return await waitForActiveEditorText("Reopen follow-up checklist");
+  return await waitForActiveEditorText(
+    "Approved the production readiness checklist",
+  );
 }

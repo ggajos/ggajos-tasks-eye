@@ -1,4 +1,4 @@
-import { DUE_BUCKETS, NOTES_FOLDER_PATH, STATUSES, VACATION } from "./constants";
+import { DUE_BUCKETS, VACATION } from "./constants";
 import type { DueBucket, EyeMode } from "./constants";
 import {
   getContextFromPath,
@@ -20,7 +20,9 @@ import {
 } from "./date";
 import { stripDueDate } from "./taskParsing";
 import type { EyeFile, EyeTask, RowModel } from "./types";
-import { vacationMarkers, vacationReasonForTs } from "./vacation";
+import { statusValue, validateFile } from "./validation";
+import type { ValidationViolation } from "./validation";
+import { vacationMarkers } from "./vacation";
 import type { VacationMarker } from "./vacation";
 
 export type RenderItem =
@@ -45,7 +47,7 @@ interface MutableBoardBucket extends BoardBucket {
   dayMap: Map<string, BoardDayGroup>;
 }
 
-export function getUncompletedTasksWithDue(tasks: EyeTask[]): EyeTask[] {
+function getUncompletedTasksWithDue(tasks: EyeTask[]): EyeTask[] {
   return tasks.filter((task) => !task.completed && task.dueTs !== null);
 }
 
@@ -55,7 +57,7 @@ export function getEarliestDueDate(tasks: EyeTask[]): number | null {
   return Math.min(...dated.map((task) => task.dueTs as number));
 }
 
-export function findEarliestDueTask(tasks: EyeTask[]): EyeTask | undefined {
+function findEarliestDueTask(tasks: EyeTask[]): EyeTask | undefined {
   const uncompleted = tasks.filter((task) => !task.completed);
   if (uncompleted.length === 0) return undefined;
 
@@ -67,69 +69,10 @@ export function findEarliestDueTask(tasks: EyeTask[]): EyeTask | undefined {
   )[0];
 }
 
-function isInManagedFolder(file: EyeFile): boolean {
-  return file.path.startsWith(`${NOTES_FOLDER_PATH}/`);
-}
-
-function statusValue(file: EyeFile): string {
-  if (file.status === undefined || file.status === null || file.status === "") {
-    return "open";
-  }
-  return typeof file.status === "string" ? file.status : "";
-}
-
-export function validateFile(file: EyeFile): string[] {
-  if (!isInManagedFolder(file)) return [];
-
-  const violations: string[] = [];
-  const hasExplicitStatus = file.status !== undefined &&
-    file.status !== null &&
-    file.status !== "";
-  const status = statusValue(file);
-  const uncompletedTasks = file.tasks.filter((task) => !task.completed);
-
-  if (
-    hasExplicitStatus &&
-    (
-      typeof file.status !== "string" ||
-      !STATUSES.includes(status as (typeof STATUSES)[number])
-    )
-  ) {
-    violations.push(`invalid status: "${String(file.status)}"`);
-  }
-
-  if (
-    status === "closed" &&
-    uncompletedTasks.length > 0
-  ) {
-    violations.push("closed note has unchecked tasks");
-  }
-
-  if (status === "open") {
-    if (uncompletedTasks.length === 0) {
-      violations.push("open note has no uncompleted tasks");
-    } else if (!uncompletedTasks.some((task) => task.dueTs !== null)) {
-      violations.push("open note has no uncompleted task with due date");
-    }
-  }
-
-  for (const task of getUncompletedTasksWithDue(file.tasks)) {
-    const reason = vacationReasonForTs(task.dueTs as number, VACATION);
-    if (reason) {
-      violations.push(
-        `task scheduled on vacation: ${formatYmd(task.dueTs as number)} (${reason})`,
-      );
-    }
-  }
-
-  return violations;
-}
-
-export function rowErrors(file: EyeFile): string[] {
+export function rowErrors(file: EyeFile): ValidationViolation[] {
   const earliestDue = getEarliestDueDate(file.tasks);
-  const earliestYmd = earliestDue === null ? "" : formatYmd(earliestDue);
-  return validateFile(file).filter((err) =>
-    !err.startsWith("task scheduled on vacation:") || err.includes(earliestYmd)
+  return validateFile(file).filter((violation) =>
+    violation.code !== "task-on-vacation" || violation.dueTs === earliestDue
   );
 }
 
@@ -198,7 +141,7 @@ export function selectRows(
     .sort(compareRowModels);
 }
 
-export function vacationMarkersForRows(rows: RowModel[]): VacationMarker[] {
+function vacationMarkersForRows(rows: RowModel[]): VacationMarker[] {
   let lastDue: number | null = null;
   for (const model of rows) {
     if (

@@ -2,31 +2,31 @@ import { cp, mkdir, readdir, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-const snapshotRoot = join("acceptance", "snapshots", "docs");
-const docsAssetsRoot = join("docs-src", "public", "assets");
-const docsScreenshotsRoot = join(docsAssetsRoot, "screenshots");
-const docsFeaturesRoot = join(docsAssetsRoot, "features");
-
-if (!existsSync(snapshotRoot)) {
-  console.warn(`No documentation screenshot directory found: ${snapshotRoot}`);
+const snapshotFeaturesRoot = join(
+  "acceptance",
+  "snapshots",
+  "docs",
+  "features",
+);
+const docsFeaturesRoot = join("docs-src", "public", "assets", "features");
+if (!existsSync(snapshotFeaturesRoot)) {
+  console.warn(`No documentation screenshots found: ${snapshotFeaturesRoot}`);
   process.exit(0);
 }
 
-await rm(docsScreenshotsRoot, { recursive: true, force: true });
 await rm(docsFeaturesRoot, { recursive: true, force: true });
 
-for (const entry of await readdir(snapshotRoot, { withFileTypes: true })) {
-  if (!entry.isDirectory()) continue;
+for (const feature of await readdir(snapshotFeaturesRoot, {
+  withFileTypes: true,
+})) {
+  if (!feature.isDirectory()) continue;
 
-  const source = join(snapshotRoot, entry.name);
-  if (entry.name === "features") {
-    await mkdir(docsFeaturesRoot, { recursive: true });
-    await cp(source, docsFeaturesRoot, { recursive: true });
-    continue;
-  }
-
-  await mkdir(docsScreenshotsRoot, { recursive: true });
-  await cp(source, join(docsScreenshotsRoot, entry.name), { recursive: true });
+  const source = join(snapshotFeaturesRoot, feature.name);
+  const target = join(docsFeaturesRoot, feature.name);
+  await mkdir(target, { recursive: true });
+  await cp(source, target, { recursive: true });
 }
 
-console.log(`Copied documentation screenshots: ${snapshotRoot} -> ${docsAssetsRoot}`);
+console.log(
+  `Published all documentation screenshot themes from ${snapshotFeaturesRoot}`,
+);

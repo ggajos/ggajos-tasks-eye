@@ -6,32 +6,33 @@ describe("Done view feature", () => {
   it("collects completed tasks for the selected date", () => {
     const tasks = collectCompletedTasks([
       file(
-        "Db/Growth/Completed Example.md",
+        "Db/Architecture/Architecture Governance.md",
         `---
 status: closed
 ---
 
-- [x] Review the completed task view ✅ 2026-07-08
-- [x] Older task ✅ 2026-07-07
+- [x] Approved ADR-042 for tenant isolation ✅ 2026-07-08
+- [x] Reviewed last quarter's platform roadmap ✅ 2026-07-07
 `,
       ),
     ], "2026-07-08");
 
     expect(tasks.map((task) => task.text)).toEqual([
-      "Review the completed task view",
+      "Approved ADR-042 for tenant isolation",
     ]);
   });
 
   it("groups completed tasks by context and note", () => {
     const grouped = groupCompletedTasks([
       {
-        context: "Growth",
-        fileName: "Completed Example",
-        filePath: "Db/Growth/Completed Example.md",
-        text: "Review",
+        context: "Architecture",
+        fileName: "Architecture Governance",
+        filePath: "Db/Architecture/Architecture Governance.md",
+        text: "Approved ADR-042",
       },
     ]);
 
-    expect(grouped.Growth?.["Completed Example"]?.[0]?.text).toBe("Review");
+    expect(grouped.Architecture?.["Architecture Governance"]?.[0]?.text)
+      .toBe("Approved ADR-042");
   });
 });

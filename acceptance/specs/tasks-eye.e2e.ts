@@ -2,10 +2,12 @@ import { discoverFeatures } from "../../features/discovery";
 import {
   VISUAL_VARIANTS,
   applyVisualVariant,
+  assertEnglishObsidianLocale,
   discoverFeatureAcceptanceScenarios,
   discoverFeatureScreenshotScenarios,
   resetDocSnapshotRoot,
   resetFixtureVault,
+  saveFeatureDocSnapshot,
 } from "../support/tasks-eye";
 
 const FEATURES = await discoverFeatures();
@@ -18,6 +20,7 @@ const FEATURE_SCREENSHOT_SCENARIOS = await discoverFeatureScreenshotScenarios(
 
 describe("Tasks Eye acceptance", () => {
   before(async () => {
+    await assertEnglishObsidianLocale();
     await resetDocSnapshotRoot(FEATURE_SCREENSHOT_SCENARIOS);
   });
 
@@ -36,7 +39,14 @@ describe("Tasks Eye acceptance", () => {
         async () => {
           await resetFixtureVault();
           await applyVisualVariant(variant);
-          await scenario.run(variant);
+          await scenario.run({
+            save: (element) => saveFeatureDocSnapshot(
+              feature.feature.slug,
+              variant,
+              scenario.screenshotSlug,
+              element,
+            ),
+          });
         },
       );
     }

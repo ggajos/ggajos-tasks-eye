@@ -1,17 +1,16 @@
 import {
   expectElementText,
   openCompletedTasksView,
-  saveFeatureDocSnapshot,
   type FeatureScreenshotScenario,
 } from "../../acceptance/support/tasks-eye";
 
 export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
   {
     screenshotSlug: "done-view",
-    async run(variant) {
+    async run({ save }) {
       const root = await openCompletedTasksView();
-      await expectElementText(root, "Completed Example");
-      await saveFeatureDocSnapshot("views-done", variant, "done-view", root);
+      await expectElementText(root, "Architecture Governance");
+      await save(root);
     },
   },
 ];

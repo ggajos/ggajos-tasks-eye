@@ -6,4 +6,7 @@ acceptance/.cache/
 acceptance/artifacts/
 .astro/
 docs-src/.astro/
+docs-src/public/assets/
+docs-src/src/content/docs/
+docs-src/src/generated/
 .DS_Store

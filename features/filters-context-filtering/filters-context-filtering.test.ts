@@ -10,24 +10,24 @@ import { file } from "../testSupport";
 describe("Context filtering feature", () => {
   it("discovers and formats folder-derived contexts", () => {
     const contexts = discoverContexts([
-      file("Db/Growth/A.md", ""),
-      file("Db/Mission/7N/B.md", ""),
-      file("Db/Mission/Allegro/C.md", ""),
+      file("Db/Architecture/Technology Radar.md", ""),
+      file("Db/Leadership/Engineering Strategy.md", ""),
+      file("Db/Mission/Platform/Modernization.md", ""),
     ]);
 
-    expect(contexts).toEqual(["growth", "m/7n", "m/allegro"]);
+    expect(contexts).toEqual(["architecture", "leadership", "m/platform"]);
     expect(contexts.map(formatContextLabel)).toEqual([
-      "Growth",
-      "M/7N",
-      "M/Allegro",
+      "Architecture",
+      "Leadership",
+      "M/Platform",
     ]);
   });
 
   it("matches rows by the same context value shown in the filter", () => {
-    expect(matchesContextFilter("Db/Mission/Allegro/Invoice.md", "m/allegro"))
+    expect(matchesContextFilter("Db/Mission/Platform/Billing.md", "m/platform"))
       .toBe(true);
-    expect(matchesContextFilter("Db/Life/Passport.md", "m/allegro"))
+    expect(matchesContextFilter("Db/Leadership/Mentorship.md", "m/platform"))
       .toBe(false);
-    expect(normalizeContextFilter("missing", ["growth"])).toBe("*");
+    expect(normalizeContextFilter("missing", ["architecture"])).toBe("*");
   });
 });

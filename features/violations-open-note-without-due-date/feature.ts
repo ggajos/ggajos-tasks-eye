@@ -1,12 +1,9 @@
-import type { FeatureDefinition } from "../types";
+import { defineFeature } from "../types";
 
-export const feature = {
-  slug: "violations-open-note-without-due-date",
-  title: "Violation: open note has no task with due date",
+export default defineFeature({
+  title: "Open note without a due date",
   summary:
     "An open note is invalid when it has unchecked tasks but none of them has a Tasks due date.",
-  userValue:
-    "The user can schedule at least one next action instead of leaving active work without a planning date.",
   acceptanceCriteria: [
     "`status: open` notes with unchecked tasks but no due dates are reported in Inbox.",
     "Missing or blank status is treated as Open for this rule.",
@@ -15,30 +12,31 @@ export const feature = {
     "Hold, closed, and archived notes do not trigger this specific violation.",
     "The violation is visible in both Inbox and Open.",
   ],
-  fixturePaths: [],
   violation: {
-    message: "open note has no uncompleted task with due date",
+    code: "open-without-due-date",
     appearsInOpen: true,
     sampleNote: {
-      path: "Db/Violation Samples/Missing Due Date.md",
+      path: "Db/Case Studies/Platform Capability Map.md",
       markdown: `---
 status: open
 ---
 
-- [ ] Choose the next dated action
+# Platform Capability Map
+
+- [ ] Define the next review milestone for the capability map
 `,
     },
   },
   screenshots: [
     {
       slug: "violation",
-      title: "Missing due date violation",
-      alt: "Inbox row showing an open note without an unchecked task due date",
+      title: "Undated capability-map action",
+      alt: "Inbox row showing an architecture capability-map action without a due date",
     },
     {
       slug: "open",
-      title: "Missing due date in Open",
-      alt: "Open row showing an open note without an unchecked task due date",
+      title: "Undated action in Open",
+      alt: "Open row showing an undated platform capability-map action",
     },
   ],
-} satisfies FeatureDefinition;
+});

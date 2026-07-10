@@ -1,3 +1,6 @@
+import { setIcon } from "obsidian";
+import { formatContextLabel } from "./context";
+
 export function element<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   className?: string,
@@ -32,4 +35,27 @@ export function unwrapSingleParagraph(el: HTMLElement): void {
 
   while (child.firstChild) el.insertBefore(child.firstChild, child);
   child.remove();
+}
+
+export function contextFilterControl(
+  contexts: readonly string[],
+  activeContext: string,
+  onChange: (context: string) => void,
+): HTMLElement {
+  const control = element("div", "eye-context-filter");
+  const icon = element("span", "eye-context-filter-icon");
+  icon.setAttribute("aria-hidden", "true");
+  setIcon(icon, "list-filter");
+  control.appendChild(icon);
+
+  const select = element("select", "eye-context-select");
+  select.appendChild(new Option("All", "*"));
+  for (const context of contexts) {
+    select.appendChild(new Option(formatContextLabel(context), context));
+  }
+  select.value = activeContext;
+  select.addEventListener("change", () => onChange(select.value));
+  control.appendChild(select);
+
+  return control;
 }

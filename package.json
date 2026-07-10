@@ -6,12 +6,14 @@
   "type": "module",
   "scripts": {
     "dev": "node esbuild.config.mjs",
-    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "typecheck": "tsc -noEmit -skipLibCheck",
+    "typecheck:acceptance": "tsc -p tsconfig.acceptance.json -noEmit -skipLibCheck",
+    "build": "npm run typecheck && node esbuild.config.mjs production",
     "test": "npm run test:unit && npm run test:acceptance && npm run docs",
     "test:unit": "vitest run",
-    "test:acceptance": "npm run build && wdio run ./wdio.conf.mts",
-    "docs": "node acceptance/scripts/publish-doc-screenshots.mjs && tsx scripts/build-docs.ts && astro build --config docs-src/astro.config.mjs",
-    "docs:serve": "astro preview --host 127.0.0.1 --port 4173 --config docs-src/astro.config.mjs",
+    "test:acceptance": "npm run build && npm run typecheck:acceptance && wdio run ./wdio.conf.mts",
+    "docs": "npm run typecheck && node acceptance/scripts/publish-doc-screenshots.mjs && tsx scripts/build-docs.ts && astro build --config docs-src/astro.config.mjs",
+    "docs:serve": "npm run docs && astro preview --host 127.0.0.1 --port 4173 --config docs-src/astro.config.mjs",
     "release": "node scripts/obsidian-release.mjs release beta",
     "release:public": "node scripts/obsidian-release.mjs release public"
   },

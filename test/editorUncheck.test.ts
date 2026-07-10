@@ -36,14 +36,8 @@ function editorFor(
 }
 
 describe("editor uncheck selected tasks", () => {
-  it("unchecks only standard completed task markers", () => {
-    expect(uncheckTaskLine("- [x] done")).toBe("- [ ] done");
-    expect(uncheckTaskLine("  * [X] nested")).toBe("  * [ ] nested");
+  it("supports plus bullets and leaves non-completed lines unchanged", () => {
     expect(uncheckTaskLine("+ [x] plus")).toBe("+ [ ] plus");
-    expect(uncheckTaskLine("- [x] done ✅ 2026-07-08")).toBe("- [ ] done");
-    expect(
-      uncheckTaskLine("- [x] done ✅ 2026-07-08 📅 2026-07-09"),
-    ).toBe("- [ ] done 📅 2026-07-09");
     expect(uncheckTaskLine("- [ ] already open")).toBe("- [ ] already open");
     expect(uncheckTaskLine("- [-] custom")).toBe("- [-] custom");
     expect(uncheckTaskLine("- [/] custom")).toBe("- [/] custom");

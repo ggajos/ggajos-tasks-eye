@@ -35,7 +35,7 @@ status is treated as `open`.
 Open shows actionable notes grouped by due date. Future work stays `status: open`
 and is deferred by adding a Tasks due date (`📅 YYYY-MM-DD`).
 
-![Open board](docs/assets/features/views-open/light/board.png)
+![Open board](docs/assets/features/views-open/dark-minimal/board.png)
 
 ### Inbox
 
@@ -52,7 +52,7 @@ Open.
 
 Done shows completed Tasks items for a selected date, grouped by note context.
 
-![Done tasks](docs/assets/features/views-done/light/done-view.png)
+![Done tasks](docs/assets/features/views-done/dark-minimal/done-view.png)
 
 ## Daily Completed Summary
 
@@ -66,7 +66,7 @@ Tasks Eye registers the `ggajos-tasks-eye-daily-completed` markdown code block:
 The legacy `obsidian-tasks-eye-daily-completed` and `eye-daily-completed` block
 names are also supported as migration aliases.
 
-![Daily completed summary](docs/assets/features/blocks-daily-completed-summary/light/summary.png)
+![Daily completed summary](docs/assets/features/blocks-daily-completed-summary/dark-minimal/summary.png)
 
 ## Commands
 

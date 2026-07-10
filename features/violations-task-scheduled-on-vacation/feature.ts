@@ -1,12 +1,9 @@
-import type { FeatureDefinition } from "../types";
+import { defineFeature } from "../types";
 
-export const feature = {
-  slug: "violations-task-scheduled-on-vacation",
-  title: "Violation: task scheduled on vacation",
+export default defineFeature({
+  title: "Task scheduled on vacation",
   summary:
     "An unfinished task with a due date on a configured unavailable day is reported as an Inbox violation.",
-  userValue:
-    "The user can reschedule work before it lands on weekends, holidays, or custom OOO days.",
   acceptanceCriteria: [
     "Unfinished tasks due on configured vacation dates are reported in Inbox.",
     "The violation includes the due date and vacation reason.",
@@ -14,32 +11,31 @@ export const feature = {
     "Tasks on normal working days do not trigger this violation.",
     "The violation is visible in both Inbox and Open.",
   ],
-  fixturePaths: [
-    "acceptance/fixtures/base/Db/Life/Vacation Collision.md",
-  ],
   violation: {
-    message: "task scheduled on vacation: 2026-07-13 (custom)",
+    code: "task-on-vacation",
     appearsInOpen: true,
     sampleNote: {
-      path: "Db/Violation Samples/Vacation Task.md",
+      path: "Db/Case Studies/Architecture Offsite.md",
       markdown: `---
 status: open
 ---
 
-- [ ] Move cabin travel prep away from custom OOO day 📅 2026-07-13
+# Architecture Offsite
+
+- [ ] Reschedule the platform strategy review away from OOO 📅 2026-07-13
 `,
     },
   },
   screenshots: [
     {
       slug: "violation",
-      title: "Vacation collision",
-      alt: "Inbox row showing a task scheduled on vacation violation",
+      title: "Offsite review scheduled during OOO",
+      alt: "Inbox row showing a platform strategy review scheduled during OOO",
     },
     {
       slug: "open",
-      title: "Vacation collision in Open",
-      alt: "Open row showing a task scheduled on vacation violation",
+      title: "OOO conflict in Open",
+      alt: "Open row showing an architecture offsite review scheduled during OOO",
     },
   ],
-} satisfies FeatureDefinition;
+});

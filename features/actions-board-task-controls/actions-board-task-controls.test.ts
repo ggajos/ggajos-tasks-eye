@@ -6,29 +6,29 @@ import { file } from "../testSupport";
 describe("Board task controls feature", () => {
   it("targets the earliest unfinished due task in a board row", () => {
     const row = buildRowModel(file(
-      "Db/Mission/Allegro/Invoice Sync.md",
+      "Db/Mission/Platform/Billing Platform Modernization.md",
       `---
 status: open
 ---
 
-- [ ] later 📅 2026-07-15
-- [ ] earlier 📅 2026-07-08
+- [ ] Review the migration runbook 📅 2026-07-15
+- [ ] Approve the billing event contract 📅 2026-07-08
 `,
     ));
 
-    expect(row.actionLabel).toBe("earlier");
+    expect(row.actionLabel).toBe("Approve the billing event contract");
     expect(row.earliestTask?.dueIso).toBe("2026-07-08");
   });
 
   it("shifts the represented task line without changing unrelated tasks", () => {
     const note = file(
-      "Db/Mission/Allegro/Invoice Sync.md",
+      "Db/Mission/Platform/Billing Platform Modernization.md",
       `---
 status: open
 ---
 
-- [ ] first 📅 2026-07-08
-- [ ] second 📅 2026-07-15
+- [ ] Approve the billing event contract 📅 2026-07-08
+- [ ] Review the migration runbook 📅 2026-07-15
 `,
     );
     const row = buildRowModel(note);
@@ -39,7 +39,7 @@ status: open
       1,
     );
 
-    expect(updated).toContain("first 📅 2026-07-09");
-    expect(updated).toContain("second 📅 2026-07-15");
+    expect(updated).toContain("Approve the billing event contract 📅 2026-07-09");
+    expect(updated).toContain("Review the migration runbook 📅 2026-07-15");
   });
 });

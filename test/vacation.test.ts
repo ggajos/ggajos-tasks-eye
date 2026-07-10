@@ -23,17 +23,11 @@ describe("vacation helpers", () => {
     expect(inCustomDates("2026-07-28", config.customDates)).toBe(false);
   });
 
-  it("detects weekend, annual, and movable holidays", () => {
-    expect(vacationReasonForTs(isoToTs("2026-07-11"), config))
-      .toBe("weekend");
-    expect(vacationReasonForTs(isoToTs("2026-05-01"), config))
-      .toBe("holiday");
+  it("detects movable holidays", () => {
     expect(vacationReasonForTs(isoToTs("2026-04-06"), config))
       .toBe("holiday");
     expect(vacationReasonForTs(isoToTs("2026-06-04"), config))
       .toBe("holiday");
-    expect(vacationReasonForTs(isoToTs("2026-07-13"), config))
-      .toBe("custom");
     expect(vacationReasonForTs(isoToTs("2026-07-14"), config))
       .toBeNull();
   });

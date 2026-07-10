@@ -4,7 +4,6 @@ import { isEyeMode, MODE_LABELS, MODES } from "./constants";
 import type { EyeMode } from "./constants";
 import {
   discoverContexts,
-  formatContextLabel,
   normalizeContextFilter,
   withVacationContext,
 } from "./context";
@@ -18,7 +17,7 @@ import type { BoardBucket, BoardDayGroup, RenderItem } from "./model";
 import { formatYmd, nowDate, nowTs } from "./date";
 import type TheEyePlugin from "./main";
 import type { RowModel } from "./types";
-import { button, element } from "./ui";
+import { button, contextFilterControl, element } from "./ui";
 import type { VacationMarker } from "./vacation";
 
 export const VIEW_TYPE = "ggajos-tasks-eye-view";
@@ -83,7 +82,6 @@ export class EyeView extends ItemView {
       isEyeMode((state as { mode: unknown }).mode)
     ) {
       this.mode = (state as { mode: EyeMode }).mode;
-      await this.plugin.setMode(this.mode);
     }
   }
 
@@ -97,7 +95,6 @@ export class EyeView extends ItemView {
 
   async setMode(mode: EyeMode): Promise<void> {
     this.mode = mode;
-    await this.plugin.setMode(mode);
     await this.requestRender();
   }
 
@@ -137,7 +134,7 @@ export class EyeView extends ItemView {
       const vacationSourceRows = this.mode === "open"
         ? selectRows(files, this.mode, "*")
         : rows;
-      const rendered = await this.renderBoard(
+      const rendered = this.renderBoard(
         list,
         rows,
         vacationSourceRows,
@@ -155,7 +152,7 @@ export class EyeView extends ItemView {
     }
 
     list.classList.add("eye-flat-list");
-    for (const row of rows) await this.renderRow(list, row, false);
+    for (const row of rows) this.renderRow(list, row, false);
   }
 
   private emptyMessage(): string {
@@ -182,7 +179,7 @@ export class EyeView extends ItemView {
       const btn = button(
         `eye-mode-button${mode === this.mode ? " is-active" : ""}`,
         `Show ${MODE_LABELS[mode]}`,
-        () => void this.setMode(mode),
+        () => void this.plugin.openEye(mode),
         MODE_LABELS[mode],
       );
       nav.appendChild(btn);
@@ -191,40 +188,25 @@ export class EyeView extends ItemView {
     toolbar.appendChild(nav);
     toolbar.appendChild(element("div", "eye-toolbar-spacer"));
 
-    const contextFilter = element("div", "eye-context-filter");
-    const filterIcon = element("span", "eye-context-filter-icon");
-    filterIcon.setAttribute("aria-hidden", "true");
-    setIcon(filterIcon, "list-filter");
-    contextFilter.appendChild(filterIcon);
-
-    const select = element("select", "eye-context-select");
-    const allOption = new Option("All", "*");
-    allOption.label = "All";
-    select.appendChild(allOption);
-    for (const context of contexts) {
-      const label = formatContextLabel(context);
-      const option = new Option(label, context);
-      option.label = label;
-      select.appendChild(option);
-    }
-    select.value = activeContextFilter;
-    select.addEventListener("change", () => {
-      void this.plugin.setContextFilter(select.value).then(() =>
-        this.requestRender()
-      );
-    });
-    contextFilter.appendChild(select);
-    toolbar.appendChild(contextFilter);
+    toolbar.appendChild(contextFilterControl(
+      contexts,
+      activeContextFilter,
+      (context) => {
+        void this.plugin.setContextFilter(context).then(() =>
+          this.requestRender()
+        );
+      },
+    ));
 
     root.appendChild(toolbar);
   }
 
-  private async renderBoard(
+  private renderBoard(
     list: HTMLElement,
     rows: RowModel[],
     vacationSourceRows: RowModel[],
     contextFilter: string,
-  ): Promise<boolean> {
+  ): boolean {
     list.classList.add("eye-tree");
 
     const items = this.mode === "open"
@@ -232,14 +214,14 @@ export class EyeView extends ItemView {
       : rows.map((model): RenderItem => ({ kind: "task", model }));
     const buckets = buildBoardBuckets(items, nowDate());
 
-    for (const bucket of buckets) await this.renderBucket(list, bucket);
+    for (const bucket of buckets) this.renderBucket(list, bucket);
     return buckets.length > 0;
   }
 
-  private async renderBucket(
+  private renderBucket(
     list: HTMLElement,
     bucket: BoardBucket,
-  ): Promise<void> {
+  ): void {
     const stateKey = this.bucketStateKey(bucket.key);
     const collapsed = this.collapsedBuckets.has(stateKey);
     const group = element("section", "eye-bucket tree-item");
@@ -291,7 +273,7 @@ export class EyeView extends ItemView {
     const showDays = this.shouldShowDayDividers(bucket);
     for (const day of bucket.days) {
       if (showDays) this.renderDayDivider(children, day);
-      for (const item of day.items) await this.renderItem(children, item, true);
+      for (const item of day.items) this.renderItem(children, item, true);
     }
 
     group.appendChild(children);
@@ -339,10 +321,9 @@ export class EyeView extends ItemView {
     list: HTMLElement,
     item: RenderItem,
     taskFirst: boolean,
-  ): Promise<void> {
-    if (item.kind === "task") return this.renderRow(list, item.model, taskFirst);
+  ): void {
+    if (item.kind === "task") this.renderRow(list, item.model, taskFirst);
     else this.renderMarker(list, item.marker);
-    return Promise.resolve();
   }
 
   private renderMarker(list: HTMLElement, marker: VacationMarker): void {
@@ -384,18 +365,11 @@ export class EyeView extends ItemView {
     return link;
   }
 
-  private renderActionLabel(
-    el: HTMLElement,
-    model: RowModel,
-  ): void {
-    el.textContent = model.actionLabel;
-  }
-
-  private async renderRow(
+  private renderRow(
     list: HTMLElement,
     model: RowModel,
     taskFirst: boolean,
-  ): Promise<void> {
+  ): void {
     const row = element(
       "div",
       ["eye-row", ...rowStateClasses(model)].join(" "),
@@ -409,7 +383,7 @@ export class EyeView extends ItemView {
       note.appendChild(this.renderNoteLink(model));
       if (model.errors.length > 0) note.appendChild(pill("!"));
       appendMeta(meta, model, false);
-      this.renderActionLabel(action, model);
+      action.textContent = model.actionLabel;
 
       main.appendChild(action);
       main.appendChild(note);
@@ -423,7 +397,7 @@ export class EyeView extends ItemView {
       if (model.earliestTask) {
         const action = element("div", "eye-action");
         appendMeta(meta, model, true);
-        this.renderActionLabel(action, model);
+        action.textContent = model.actionLabel;
         main.appendChild(action);
       }
     }
@@ -432,8 +406,10 @@ export class EyeView extends ItemView {
 
     if (model.errors.length > 0) {
       const errors = element("div", "eye-errors");
-      for (const err of model.errors) {
-        errors.appendChild(element("div", undefined, err));
+      for (const violation of model.errors) {
+        const error = element("div", undefined, violation.message);
+        error.dataset.eyeViolation = violation.code;
+        errors.appendChild(error);
       }
       main.appendChild(errors);
     }

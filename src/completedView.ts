@@ -7,13 +7,18 @@ import {
 } from "./dailyCore";
 import type { CompletedTask } from "./dailyCore";
 import {
-  formatContextLabel,
+  discoverContexts,
   matchesContextFilter,
   normalizeContextFilter,
 } from "./context";
 import { formatHumanDate, shiftIsoDate, todayIso } from "./date";
 import type TheEyePlugin from "./main";
-import { button, element, unwrapSingleParagraph } from "./ui";
+import {
+  button,
+  contextFilterControl,
+  element,
+  unwrapSingleParagraph,
+} from "./ui";
 
 export const COMPLETED_VIEW_TYPE = "ggajos-tasks-eye-completed-view";
 
@@ -105,7 +110,7 @@ export class CompletedTasksView extends ItemView {
     const files = await this.plugin.readFiles();
     if (token !== this.renderToken) return;
 
-    const contexts = this.plugin.discoverContexts(files);
+    const contexts = discoverContexts(files);
     const contextFilter = normalizeContextFilter(
       this.plugin.settings.contextFilter,
       contexts,
@@ -176,30 +181,15 @@ export class CompletedTasksView extends ItemView {
     toolbar.appendChild(nav);
     toolbar.appendChild(element("div", "eye-toolbar-spacer"));
 
-    const contextFilter = element("div", "eye-context-filter");
-    const filterIcon = element("span", "eye-context-filter-icon");
-    filterIcon.setAttribute("aria-hidden", "true");
-    setIcon(filterIcon, "list-filter");
-    contextFilter.appendChild(filterIcon);
-
-    const select = element("select", "eye-context-select");
-    const allOption = new Option("All", "*");
-    allOption.label = "All";
-    select.appendChild(allOption);
-    for (const context of contexts) {
-      const label = formatContextLabel(context);
-      const option = new Option(label, context);
-      option.label = label;
-      select.appendChild(option);
-    }
-    select.value = activeContextFilter;
-    select.addEventListener("change", () => {
-      void this.plugin.setContextFilter(select.value).then(() =>
-        this.requestRender()
-      );
-    });
-    contextFilter.appendChild(select);
-    toolbar.appendChild(contextFilter);
+    toolbar.appendChild(contextFilterControl(
+      contexts,
+      activeContextFilter,
+      (context) => {
+        void this.plugin.setContextFilter(context).then(() =>
+          this.requestRender()
+        );
+      },
+    ));
 
     root.appendChild(toolbar);
   }

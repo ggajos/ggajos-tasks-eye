@@ -35,4 +35,43 @@ status: open
       item.kind === "marker"
     )).toBe(true);
   });
+
+  it("interleaves markers with the unfiltered work timeline", () => {
+    const rows = selectRows([
+      file(
+        "Db/Mission/Trip.md",
+        `---
+status: open
+---
+
+- [ ] after vacation 📅 2026-07-20
+`,
+      ),
+    ], "open", "*");
+
+    const items = boardItemsForContext(rows, rows, "*");
+    expect(items.some((item) => item.kind === "marker")).toBe(true);
+    expect(items.some((item) => item.kind === "task")).toBe(true);
+  });
+
+  it("suppresses markers for a normal context filter", () => {
+    const files = [
+      file(
+        "Db/Hardware/Car.md",
+        "---\nstatus: open\n---\n\n- [ ] service car 📅 2026-07-20",
+      ),
+      file(
+        "Db/Growth/Study.md",
+        "---\nstatus: open\n---\n\n- [ ] study 📅 2026-07-20",
+      ),
+    ];
+    const filteredRows = selectRows(files, "open", "hardware");
+    const allRows = selectRows(files, "open", "*");
+    const items = boardItemsForContext(filteredRows, allRows, "hardware");
+
+    expect(items.every((item) => item.kind === "task")).toBe(true);
+    expect(items.map((item) =>
+      item.kind === "task" ? item.model.file.basename : item.marker.label
+    )).toEqual(["Car"]);
+  });
 });

@@ -1,19 +1,18 @@
 import {
   expectElementText,
   openBoard,
-  saveFeatureDocSnapshot,
   type FeatureScreenshotScenario,
 } from "../../acceptance/support/tasks-eye";
 
 export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
   {
     screenshotSlug: "repair-queue",
-    async run(variant) {
-      const root = await openBoard("inbox", "Missing Task");
-      await expectElementText(root, "Invalid Status");
-      await expectElementText(root, "Closed With Open Task");
-      await expectElementText(root, "Vacation Collision");
-      await saveFeatureDocSnapshot("views-inbox", variant, "repair-queue", root);
+    async run({ save }) {
+      const root = await openBoard("inbox", "Engineering Strategy Q3");
+      await expectElementText(root, "Service Ownership Model");
+      await expectElementText(root, "ADR-042 Tenant Isolation");
+      await expectElementText(root, "Architecture Offsite");
+      await save(root);
     },
   },
 ];

@@ -1,44 +1,41 @@
-import type { FeatureDefinition } from "../types";
+import { defineFeature } from "../types";
 
-export const feature = {
-  slug: "violations-open-note-without-uncompleted-tasks",
-  title: "Violation: open note has no uncompleted tasks",
+export default defineFeature({
+  title: "Open note without an unchecked task",
   summary:
     "An open note is invalid when it has no unchecked task left to act on.",
-  userValue:
-    "The user can close, archive, or add a next action instead of letting empty active notes clutter planning.",
   acceptanceCriteria: [
     "`status: open` notes with no unchecked tasks are reported in Inbox.",
     "Missing or blank status is treated as Open for this rule.",
     "Open notes with at least one unchecked task do not trigger this violation.",
     "The violation is visible in both Inbox and Open.",
   ],
-  fixturePaths: [
-    "acceptance/fixtures/base/Db/Growth/Missing Task.md",
-  ],
   violation: {
-    message: "open note has no uncompleted tasks",
+    code: "open-without-uncompleted-tasks",
     appearsInOpen: true,
     sampleNote: {
-      path: "Db/Violation Samples/No Unchecked Tasks.md",
+      path: "Db/Case Studies/Engineering Strategy Q3.md",
       markdown: `---
 status: open
 ---
 
-This note intentionally has no unchecked tasks.
+# Engineering Strategy Q3
+
+The strategy covers platform leverage and reliability investment, but still
+needs a concrete next action.
 `,
     },
   },
   screenshots: [
     {
       slug: "violation",
-      title: "Missing task violation",
-      alt: "Inbox row showing an open note with no uncompleted tasks violation",
+      title: "Strategy without a next action",
+      alt: "Inbox row showing an engineering strategy note without an unchecked next action",
     },
     {
       slug: "open",
-      title: "Missing task in Open",
-      alt: "Open row showing an open note with no uncompleted tasks violation",
+      title: "Strategy gap in Open",
+      alt: "Open row showing an engineering strategy note that needs a next action",
     },
   ],
-} satisfies FeatureDefinition;
+});

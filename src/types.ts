@@ -1,4 +1,5 @@
 import type { EyeMode } from "./constants";
+import type { ValidationViolation } from "./validation";
 
 export interface EyeTask {
   completed: boolean;
@@ -21,7 +22,7 @@ export interface RowModel {
   file: EyeFile;
   earliestDue: number | null;
   earliestTask: EyeTask | undefined;
-  errors: string[];
+  errors: ValidationViolation[];
   isToday: boolean;
   isFuture: boolean;
   dateLabel: string;

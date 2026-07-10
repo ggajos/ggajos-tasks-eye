@@ -6,13 +6,12 @@ import {
   clickRowAction,
   expectRowAction,
   openBoard,
-  saveFeatureDocSnapshot,
   type FeatureAcceptanceScenario,
   type FeatureScreenshotScenario,
 } from "../../acceptance/support/tasks-eye";
 
 const ORIGINAL_OPEN_FILE = readFileSync(
-  "acceptance/fixtures/base/Db/Mission/Allegro/Invoice Sync.md",
+  "acceptance/fixtures/base/Db/Mission/Platform/Billing Platform Modernization.md",
   "utf8",
 );
 
@@ -25,15 +24,17 @@ export const acceptanceScenarios: readonly FeatureAcceptanceScenario[] = [
     title: "shifts task due dates through board controls",
     async run() {
       try {
-        await openBoard("open", "Confirm invoice import mapping");
+        await openBoard("open", "Approve the billing domain event contract");
         await clickRowAction(
-          "Confirm invoice import mapping",
+          "Approve the billing domain event contract",
           "Shift due date +1 day(s)",
         );
 
         await browser.waitUntil(async () => {
           const note = await obsidianPage.read(OPEN_FILE);
-          return note.includes("Confirm invoice import mapping 📅 2026-07-09");
+          return note.includes(
+            "Approve the billing domain event contract 📅 2026-07-09",
+          );
         }, {
           timeout: 10_000,
           timeoutMsg: "Expected due date to shift to 2026-07-09",
@@ -47,12 +48,17 @@ export const acceptanceScenarios: readonly FeatureAcceptanceScenario[] = [
     title: "completes tasks through board controls and the Tasks API",
     async run() {
       try {
-        await openBoard("open", "Confirm invoice import mapping");
-        await clickRowAction("Confirm invoice import mapping", "Complete task");
+        await openBoard("open", "Approve the billing domain event contract");
+        await clickRowAction(
+          "Approve the billing domain event contract",
+          "Complete task",
+        );
 
         await browser.waitUntil(async () => {
           const note = await obsidianPage.read(OPEN_FILE);
-          return note.includes("- [x] Confirm invoice import mapping");
+          return note.includes(
+            "- [x] Approve the billing domain event contract",
+          );
         }, {
           timeout: 10_000,
           timeoutMsg: "Expected first task to be completed",
@@ -67,18 +73,16 @@ export const acceptanceScenarios: readonly FeatureAcceptanceScenario[] = [
 export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
   {
     screenshotSlug: "controls",
-    async run(variant) {
-      const root = await openBoard("open", "Confirm invoice import mapping");
+    async run({ save }) {
+      const root = await openBoard(
+        "open",
+        "Approve the billing domain event contract",
+      );
       await expectRowAction(
-        "Confirm invoice import mapping",
+        "Approve the billing domain event contract",
         "Complete task",
       );
-      await saveFeatureDocSnapshot(
-        "actions-board-task-controls",
-        variant,
-        "controls",
-        root,
-      );
+      await save(root);
     },
   },
 ];

@@ -7,6 +7,7 @@ import type {
   FeatureDefinition,
   FeatureScreenshot,
   LoadedFeature,
+  LoadedFeatureDefinition,
 } from "../features/types";
 
 const DOCS_SRC_ROOT = path.resolve("docs-src");
@@ -15,6 +16,11 @@ const FEATURE_CONTENT_ROOT = path.join(CONTENT_ROOT, "features");
 const GENERATED_ROOT = path.join(DOCS_SRC_ROOT, "src", "generated");
 const DEFAULT_SCREENSHOT_VARIANT = "dark-minimal";
 const SCREENSHOT_VARIANT_ORDER = ["dark-minimal", "dark", "light"];
+
+const screenshotVariants = [...DOCUMENTATION_VARIANTS].sort((a, b) =>
+  SCREENSHOT_VARIANT_ORDER.indexOf(a.key) -
+  SCREENSHOT_VARIANT_ORDER.indexOf(b.key)
+);
 
 interface FeatureGroup {
   label: string;
@@ -66,10 +72,6 @@ const FALLBACK_GROUP: FeatureGroup = {
   order: 999,
 };
 
-const screenshotVariants = [...DOCUMENTATION_VARIANTS].sort((a, b) =>
-  SCREENSHOT_VARIANT_ORDER.indexOf(a.key) - SCREENSHOT_VARIANT_ORDER.indexOf(b.key)
-);
-
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -90,7 +92,7 @@ function slugPrefix(slug: string): string {
   return slug.split("-")[0] ?? slug;
 }
 
-function groupForFeature(feature: FeatureDefinition): FeatureGroup {
+function groupForFeature(feature: LoadedFeatureDefinition): FeatureGroup {
   return FEATURE_GROUPS[slugPrefix(feature.slug)] ?? FALLBACK_GROUP;
 }
 
@@ -119,16 +121,16 @@ function groupFeatures(features: readonly LoadedFeature[]): Map<string, LoadedFe
   );
 }
 
-function featurePath(feature: FeatureDefinition): string {
+function featurePath(feature: LoadedFeatureDefinition): string {
   return `/features/${feature.slug}/`;
 }
 
-function relativeFeaturePath(feature: FeatureDefinition): string {
+function relativeFeaturePath(feature: LoadedFeatureDefinition): string {
   return `features/${feature.slug}/`;
 }
 
 function screenshotAssetPath(
-  feature: FeatureDefinition,
+  feature: LoadedFeatureDefinition,
   screenshot: FeatureScreenshot,
   variantKey: string,
   prefix: string,
@@ -152,7 +154,6 @@ function renderIndexFeatureCards(features: readonly LoadedFeature[]): string {
   <div class="feature-card__body">
     <h3><a href="${relativeFeaturePath(feature)}">${escapeHtml(feature.title)}</a></h3>
     <p>${escapeHtml(singleLine(feature.summary))}</p>
-    <p class="feature-card__value">${escapeHtml(singleLine(feature.userValue))}</p>
   </div>
 </article>`;
         })
@@ -177,7 +178,7 @@ function renderShortcutTable(features: readonly LoadedFeature[]): string {
     .filter((command) => featureSlugs.has(command.featureSlug))
     .map((command) => `<tr>
   <td><kbd>${escapeHtml(formatHotkey(command.hotkey))}</kbd></td>
-  <td><code>${escapeHtml(command.commandName)}</code></td>
+  <td><code>${escapeHtml(command.name)}</code></td>
   <td><a href="features/${escapeHtml(command.featureSlug)}/">${escapeHtml(command.featureTitle)}</a></td>
   <td>${escapeHtml(command.explanation)}</td>
 </tr>`)
@@ -210,9 +211,14 @@ sidebar:
 ---
 
 Tasks Eye is an Obsidian plugin for note-centered task boards, repair queues,
-review views, editor commands, and daily summaries. The documentation is
-generated from feature folders, so each page is backed by rationale, executable
-tests, and WDIO screenshots.
+review views, editor commands, and daily summaries.
+
+## Getting Started
+
+1. Install and enable the Obsidian Tasks community plugin.
+2. Keep work notes under <code>Db/</code> and add Tasks-formatted checklist items.
+3. Use <code>status: open</code>, <code>hold</code>, <code>closed</code>, or <code>archived</code> in note frontmatter.
+4. Open Tasks Eye from its ribbon icon or a keyboard shortcut.
 
 ## Workflow
 
@@ -225,9 +231,8 @@ tests, and WDIO screenshots.
 
 ## Feature Index
 
-Each entry below comes from a folder under <code>features/</code>. Prefixes group
-related behavior, including <code>actions-*</code>, <code>views-*</code>, and
-<code>violations-*</code>.
+Browse by the result you want: change a task, filter work, open a view, or repair
+an invalid note.
 
 ${renderIndexFeatureCards(features)}
 
@@ -238,18 +243,6 @@ Obsidian's hotkey settings. Each shortcut links to the feature that owns the
 behavior.
 
 ${renderShortcutTable(features)}
-
-## Documentation Pipeline
-
-Feature folders feed the unit suite, the WDIO acceptance runner, and this
-Starlight site.
-
-\`\`\`bash
-npm test
-npm run test:unit
-npm run test:acceptance
-npm run docs
-\`\`\`
 `;
 }
 
@@ -259,23 +252,12 @@ function renderAcceptanceCriteria(feature: FeatureDefinition): string {
     .join("\n");
 }
 
-function renderFixtures(feature: FeatureDefinition): string {
-  if (feature.fixturePaths.length === 0) return "";
-
-  return `## Fixtures
-
-${feature.fixturePaths.map((fixture) => `- \`${fixture}\``).join("\n")}
-`;
-}
-
 function renderViolationSample(feature: FeatureDefinition): string {
   const sample = feature.violation?.sampleNote;
   if (!sample) return "";
 
   return `
-## Violating Note
-
-\`${sample.path}\`
+## Example Invalid Note
 
 \`\`\`md
 ${sample.markdown.trimEnd()}
@@ -283,21 +265,26 @@ ${sample.markdown.trimEnd()}
 `;
 }
 
-function demoteHeadings(markdown: string): string {
-  return markdown.replaceAll(/^(#{1,5})(\s+)/gm, "#$1$2");
+function withoutLeadingHeading(markdown: string): string {
+  return markdown.replace(/^#{1,6}\s+[^\n]+\n+/, "").trim();
 }
 
-function renderScreenshotTabs(feature: FeatureDefinition): string {
+function renderScreenshots(feature: LoadedFeatureDefinition): string {
   return feature.screenshots
     .map((screenshot) => {
       const tabs = screenshotVariants
         .map((variant) => {
-          const src = screenshotAssetPath(feature, screenshot, variant.key, "../../");
+          const src = screenshotAssetPath(
+            feature,
+            screenshot,
+            variant.key,
+            "../../",
+          );
           const alt = `${screenshot.alt} in ${variant.label}`;
           return `<TabItem label="${escapeHtml(variant.label)}">
   <figure class="feature-shot">
     <img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="lazy" />
-    <figcaption>${escapeHtml(screenshot.title)} - ${escapeHtml(variant.label)}</figcaption>
+    <figcaption>${escapeHtml(screenshot.title)} · ${escapeHtml(variant.label)}</figcaption>
   </figure>
 </TabItem>`;
         })
@@ -325,27 +312,17 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ${feature.feature.summary}
 
-## Rationale
+## Why It Matters
 
-${demoteHeadings(feature.whyMarkdown.trim())}
+${withoutLeadingHeading(feature.whyMarkdown.trim())}
 
-## User Value
-
-${feature.feature.userValue}
-
-## Executable Documentation
+## Rules
 
 ${renderAcceptanceCriteria(feature.feature)}
 ${renderViolationSample(feature.feature)}
-## Screenshots
+## Preview
 
-Screenshots are captured by WDIO in Obsidian Light, Obsidian Dark, and Dark with
-the Minimal theme. Dark Minimal is shown first by default; use the tabs to switch
-variants in the browser.
-
-${renderScreenshotTabs(feature.feature)}
-
-${renderFixtures(feature.feature)}
+${renderScreenshots(feature.feature)}
 `;
 }
 
@@ -370,15 +347,16 @@ build.
 - \`acceptance/specs/\` contains the WebdriverIO runner that discovers feature acceptance and screenshot scenarios.
 - \`acceptance/snapshots/docs/features/\` stores review screenshots from the last run, grouped by feature and visual variant.
 - \`features/<slug>/\` contains feature-owned metadata, rationale, unit tests, and optional WDIO screenshot scenarios.
-- \`docs-src/\` contains the Starlight source project and generated content pages.
+- \`docs-src/\` contains the Starlight configuration plus ignored, disposable build staging.
 - \`.obsidian-cache/\` stores downloaded Obsidian, driver, and community plugin assets.
-- \`docs-src/public/assets/features/\` stores screenshots consumed by the generated documentation site.
+- \`docs/\` is the generated GitHub Pages output; feature pages expose Light, Dark, and Dark Minimal screenshots in synchronized tabs.
 
 The default target is:
 
 - Obsidian \`latest/latest\` (\`appVersion/installerVersion\`)
 - Tasks plugin \`latest\`
 - Minimal theme \`latest\`
+- Obsidian UI language \`en-US\`
 - acceptance date \`2026-07-08\`
 
 Override them with environment variables when needed:
@@ -389,7 +367,7 @@ OBSIDIAN_VERSIONS="1.12.7/latest" TASKS_PLUGIN_VERSION=8.2.2 npm run test:accept
 
 ## Commands
 
-Use Node \`22.12.0\` or newer for acceptance testing. The WDIO/Obsidian launcher
+Use Node \`22.13.0\` or newer for acceptance testing. The WDIO/Obsidian launcher
 stack uses modern Node APIs that fail on older Node 20 builds.
 
 \`\`\`bash
@@ -408,12 +386,13 @@ workflow.
 
 1. Run \`npm test\` for the full gate: unit tests, production build, WDIO acceptance, screenshot publishing, and Starlight docs build.
 2. Review \`acceptance/snapshots/docs/features/\` for UI changes across Light, Dark, and Dark Minimal variants.
-3. Review \`docs-src/public/assets/features/\` and generated \`docs/features/\` pages before commit.
+3. Review the generated \`docs/features/\` pages before commit; intermediate \`docs-src\` content is ignored.
 4. For focused loops, run \`npm run test:unit\`, \`npm run test:acceptance\`, or \`npm run docs\`.
 
 ## Notes
 
 - The plugin reads \`TASKS_EYE_TODAY\` only to make screenshots deterministic in acceptance runs. Normal Obsidian usage falls back to the real local date.
+- Electron starts with \`--lang=en-US\`, and the acceptance suite fails before capturing screenshots if Obsidian resolves a non-English locale.
 - The fixture vault is copied by the service, so tests do not mutate the source markdown under \`acceptance/fixtures/base/\`.
 - Pin \`OBSIDIAN_VERSIONS\` in CI or release branches when screenshot diffs must stay reproducible across time.
 `;

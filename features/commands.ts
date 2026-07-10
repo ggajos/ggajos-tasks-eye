@@ -1,64 +1,47 @@
-import type { EyeMode } from "../src/constants";
+import {
+  MODE_COMMANDS,
+  OPEN_COMPLETED_COMMAND,
+  UNCHECK_SELECTED_COMMAND,
+} from "../src/commands";
+import type { CommandDefinition } from "../src/commands";
 
-export interface CommandShortcut {
-  commandId: string;
-  commandName: string;
+export interface CommandShortcut extends CommandDefinition {
   featureSlug: string;
   featureTitle: string;
   explanation: string;
-  hotkey: {
-    modifiers: Array<"Mod" | "Ctrl" | "Meta" | "Shift" | "Alt">;
-    key: string;
-  };
 }
 
-export const MODE_COMMAND_SHORTCUTS: Record<EyeMode, CommandShortcut> = {
-  open: {
-    commandId: "open-open",
-    commandName: "Open Tasks Eye: open",
+export const COMMAND_SHORTCUTS: readonly CommandShortcut[] = [
+  {
+    ...MODE_COMMANDS.open,
     featureSlug: "views-open",
     featureTitle: "Open view",
     explanation: "Jump to the active-work board.",
-    hotkey: { modifiers: ["Ctrl"], key: "1" },
   },
-  inbox: {
-    commandId: "open-inbox",
-    commandName: "Open Tasks Eye: inbox",
+  {
+    ...MODE_COMMANDS.inbox,
     featureSlug: "views-inbox",
     featureTitle: "Inbox view",
     explanation: "Jump to the repair queue for validation violations.",
-    hotkey: { modifiers: ["Ctrl"], key: "2" },
   },
-  hold: {
-    commandId: "open-hold",
-    commandName: "Open Tasks Eye: hold",
+  {
+    ...MODE_COMMANDS.hold,
     featureSlug: "views-hold",
     featureTitle: "Hold view",
     explanation: "Jump to backlog notes that should stay out of active work.",
-    hotkey: { modifiers: ["Ctrl"], key: "3" },
   },
-};
-
-export const COMMAND_SHORTCUTS: readonly CommandShortcut[] = [
-  MODE_COMMAND_SHORTCUTS.open,
-  MODE_COMMAND_SHORTCUTS.inbox,
-  MODE_COMMAND_SHORTCUTS.hold,
   {
-    commandId: "open-completed-tasks",
-    commandName: "Open Tasks Eye Done",
+    ...OPEN_COMPLETED_COMMAND,
     featureSlug: "views-done",
     featureTitle: "Done view",
     explanation: "Open the completed-task review for the current day.",
-    hotkey: { modifiers: ["Ctrl"], key: "4" },
   },
   {
-    commandId: "uncheck-selected-tasks",
-    commandName: "Uncheck selected tasks",
+    ...UNCHECK_SELECTED_COMMAND,
     featureSlug: "actions-uncheck-selected-tasks",
     featureTitle: "Uncheck selected tasks",
     explanation:
       "Reopen selected checked task lines as the inverse of the user's task-checking shortcut.",
-    hotkey: { modifiers: ["Ctrl", "Shift"], key: "D" },
   },
 ];
 

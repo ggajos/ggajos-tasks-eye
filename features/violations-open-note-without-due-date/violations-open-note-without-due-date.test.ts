@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { selectRows, validateFile } from "../../src/model";
-import { file, rowNames } from "../testSupport";
+import { selectRows } from "../../src/model";
+import { file, rowNames, violationCodes } from "../testSupport";
 
-const VIOLATION = "open note has no uncompleted task with due date";
+const VIOLATION = "open-without-due-date";
 
 describe("Open note without due date violation", () => {
   it("reports open notes whose unchecked tasks are all undated", () => {
-    expect(validateFile(file(
+    expect(violationCodes(file(
       "Db/Growth/Unscheduled Active.md",
       "---\nstatus: open\n---\n\n- [ ] choose next action\n- [ ] collect notes",
     ))).toContain(VIOLATION);
@@ -16,14 +16,14 @@ describe("Open note without due date violation", () => {
     ["missing", "- [ ] choose next action"],
     ["blank", "---\nstatus:\n---\n\n- [ ] choose next action"],
   ])("treats %s status as open", (_label, markdown) => {
-    expect(validateFile(file(
+    expect(violationCodes(file(
       "Db/Growth/Default Open.md",
       markdown,
     ))).toContain(VIOLATION);
   });
 
   it("allows one dated unchecked task alongside undated tasks", () => {
-    expect(validateFile(file(
+    expect(violationCodes(file(
       "Db/Growth/Scheduled Active.md",
       [
         "---",
@@ -37,7 +37,7 @@ describe("Open note without due date violation", () => {
   });
 
   it("does not count a completed dated task", () => {
-    expect(validateFile(file(
+    expect(violationCodes(file(
       "Db/Growth/Unscheduled Active.md",
       [
         "---",
@@ -53,7 +53,7 @@ describe("Open note without due date violation", () => {
   it.each(["hold", "closed", "archived"])(
     "does not apply to %s notes",
     (status) => {
-      expect(validateFile(file(
+      expect(violationCodes(file(
         `Db/Growth/${status}.md`,
         `---\nstatus: ${status}\n---\n\n- [ ] choose next action`,
       ))).not.toContain(VIOLATION);
@@ -61,12 +61,12 @@ describe("Open note without due date violation", () => {
   );
 
   it("keeps the existing empty-open-note violation separate", () => {
-    const violations = validateFile(file(
+    const violations = violationCodes(file(
       "Db/Growth/Empty.md",
       "---\nstatus: open\n---\n",
     ));
 
-    expect(violations).toContain("open note has no uncompleted tasks");
+    expect(violations).toContain("open-without-uncompleted-tasks");
     expect(violations).not.toContain(VIOLATION);
   });
 

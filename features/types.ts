@@ -1,3 +1,5 @@
+import type { ViolationCode } from "../src/validation";
+
 export interface FeatureScreenshot {
   slug: string;
   title: string;
@@ -10,25 +12,30 @@ export interface FeatureNoteSample {
 }
 
 export interface FeatureViolation {
-  message: string;
+  code: ViolationCode;
   appearsInOpen: boolean;
   sampleNote: FeatureNoteSample;
 }
 
 export interface FeatureDefinition {
-  slug: string;
   title: string;
   summary: string;
-  userValue: string;
   acceptanceCriteria: readonly string[];
-  fixturePaths: readonly string[];
   screenshots: readonly FeatureScreenshot[];
   violation?: FeatureViolation;
+}
+
+export interface LoadedFeatureDefinition extends FeatureDefinition {
+  slug: string;
 }
 
 export interface LoadedFeature {
   dirName: string;
   rootDir: string;
   whyMarkdown: string;
-  feature: FeatureDefinition;
+  feature: LoadedFeatureDefinition;
+}
+
+export function defineFeature<T extends FeatureDefinition>(feature: T): T {
+  return feature;
 }

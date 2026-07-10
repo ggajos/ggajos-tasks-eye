@@ -15,6 +15,11 @@ import {
   shiftTaskDueInFile,
 } from "./actions";
 import {
+  MODE_COMMANDS,
+  OPEN_COMPLETED_COMMAND,
+  UNCHECK_SELECTED_COMMAND,
+} from "./commands";
+import {
   isEyeMode,
   MODES,
   NOTES_FOLDER_PATH,
@@ -26,7 +31,6 @@ import {
   COMPLETED_VIEW_TYPE,
   dateFromDailyPath,
 } from "./completedView";
-import { discoverContexts, matchesContextFilter } from "./context";
 import { renderDailyCompletedBlock } from "./daily";
 import { todayIso } from "./date";
 import {
@@ -39,7 +43,6 @@ import { getTasksApi } from "./tasksApi";
 import type { TasksApiV1 } from "./tasksApi";
 import type { EyeFile, EyeSettings, RowModel } from "./types";
 import { EyeView, VIEW_TYPE } from "./view";
-import { MODE_COMMAND_SHORTCUTS, COMMAND_SHORTCUTS } from "../features/commands";
 
 const DEFAULT_SETTINGS: EyeSettings = {
   mode: "open",
@@ -81,10 +84,11 @@ export default class TheEyePlugin extends Plugin {
     });
 
     for (const mode of MODES) {
+      const command = MODE_COMMANDS[mode];
       this.addCommand({
-        id: `open-${mode}`,
-        name: `Open Tasks Eye: ${mode}`,
-        hotkeys: [MODE_COMMAND_SHORTCUTS[mode].hotkey],
+        id: command.id,
+        name: command.name,
+        hotkeys: [command.hotkey],
         callback: () => {
           void this.openEye(mode);
         },
@@ -99,21 +103,17 @@ export default class TheEyePlugin extends Plugin {
       },
     });
     this.addCommand({
-      id: "open-completed-tasks",
-      name: "Open Tasks Eye Done",
-      hotkeys: [COMMAND_SHORTCUTS.find((command) =>
-        command.commandId === "open-completed-tasks"
-      )!.hotkey],
+      id: OPEN_COMPLETED_COMMAND.id,
+      name: OPEN_COMPLETED_COMMAND.name,
+      hotkeys: [OPEN_COMPLETED_COMMAND.hotkey],
       callback: () => {
         void this.openCompletedTasks();
       },
     });
     this.addCommand({
-      id: "uncheck-selected-tasks",
-      name: "Uncheck selected tasks",
-      hotkeys: [COMMAND_SHORTCUTS.find((command) =>
-        command.commandId === "uncheck-selected-tasks"
-      )!.hotkey],
+      id: UNCHECK_SELECTED_COMMAND.id,
+      name: UNCHECK_SELECTED_COMMAND.name,
+      hotkeys: [UNCHECK_SELECTED_COMMAND.hotkey],
       editorCheckCallback: (checking, editor, ctx) => {
         if (!canUncheckSelectedTasks(editor)) return false;
         if (!checking) this.uncheckSelectedTasksInEditor(editor, ctx);
@@ -190,30 +190,26 @@ export default class TheEyePlugin extends Plugin {
   }
 
   async readFiles(): Promise<EyeFile[]> {
-    return await readEyeFiles(this.app);
-  }
-
-  discoverContexts(files: EyeFile[]): string[] {
-    return discoverContexts(files);
-  }
-
-  matchesContextFilter(path: string): boolean {
-    return matchesContextFilter(path, this.settings.contextFilter);
+    return readEyeFiles(this.app);
   }
 
   async setMode(mode: EyeMode): Promise<void> {
+    if (this.settings.mode === mode) return;
     this.settings.mode = mode;
     await this.saveData(this.settings);
   }
 
   async setContextFilter(contextFilter: string): Promise<void> {
-    this.settings.contextFilter = contextFilter || "*";
+    const normalized = contextFilter || "*";
+    if (this.settings.contextFilter === normalized) return;
+    this.settings.contextFilter = normalized;
     await this.saveData(this.settings);
   }
 
   async openEye(mode: EyeMode): Promise<void> {
     await this.setMode(mode);
-    const leaf = this.findLeaf() ?? this.app.workspace.getLeaf(false);
+    const existingLeaf = this.findLeaf();
+    const leaf = existingLeaf ?? this.app.workspace.getLeaf(false);
     await leaf.setViewState({
       type: VIEW_TYPE,
       active: true,
@@ -221,7 +217,7 @@ export default class TheEyePlugin extends Plugin {
     });
     await this.app.workspace.revealLeaf(leaf);
 
-    if (leaf.view instanceof EyeView) {
+    if (existingLeaf && leaf.view instanceof EyeView) {
       await leaf.view.setMode(mode);
     }
   }

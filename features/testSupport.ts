@@ -1,5 +1,7 @@
 import { buildEyeFileFromMarkdown } from "../src/indexer";
 import type { EyeFile, RowModel } from "../src/types";
+import { validateFile } from "../src/validation";
+import type { ViolationCode } from "../src/validation";
 
 export function file(path: string, markdown: string): EyeFile {
   return buildEyeFileFromMarkdown(path, markdown);
@@ -7,4 +9,8 @@ export function file(path: string, markdown: string): EyeFile {
 
 export function rowNames(rows: RowModel[]): string[] {
   return rows.map((row) => row.file.basename);
+}
+
+export function violationCodes(file: EyeFile): ViolationCode[] {
+  return validateFile(file).map((violation) => violation.code);
 }
