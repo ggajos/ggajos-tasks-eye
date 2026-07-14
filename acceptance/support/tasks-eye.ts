@@ -582,7 +582,7 @@ export async function openBoard(
   return await waitForActivePluginText(expectedText);
 }
 
-export async function openCompletedTasksView(): Promise<WdioElement> {
+export async function openDoneMode(): Promise<WdioElement> {
   await browser.executeObsidianCommand("ggajos-tasks-eye:open-completed-tasks");
   return await waitForActivePluginText("Approved ADR-042 for tenant isolation");
 }

@@ -21,17 +21,12 @@ import {
 } from "./commands";
 import {
   isEyeMode,
-  MODES,
   NOTES_FOLDER_PATH,
   TIMELINE_FOLDER_PATH,
 } from "./constants";
 import type { EyeMode } from "./constants";
-import {
-  CompletedTasksView,
-  COMPLETED_VIEW_TYPE,
-  dateFromDailyPath,
-} from "./completedView";
 import { renderDailyCompletedBlock } from "./daily";
+import { datePrefix } from "./dailyCore";
 import { todayIso } from "./date";
 import {
   canUncheckSelectedTasks,
@@ -71,19 +66,14 @@ export default class TheEyePlugin extends Plugin {
     if (!this.settings.contextFilter) this.settings.contextFilter = "*";
 
     this.registerView(VIEW_TYPE, (leaf) => new EyeView(leaf, this));
-    this.registerView(
-      COMPLETED_VIEW_TYPE,
-      (leaf) => new CompletedTasksView(leaf, this),
-    );
 
     this.addRibbonIcon("eye", "Open Tasks Eye", () => {
       void this.openEye(this.settings.mode);
     });
-    this.addRibbonIcon("check-check", "Open Tasks Eye Done", () => {
-      void this.openCompletedTasks();
-    });
 
-    for (const mode of MODES) {
+    for (const mode of Object.keys(MODE_COMMANDS) as Array<
+      keyof typeof MODE_COMMANDS
+    >) {
       const command = MODE_COMMANDS[mode];
       this.addCommand({
         id: command.id,
@@ -163,7 +153,7 @@ export default class TheEyePlugin extends Plugin {
       }
     }));
     this.registerEvent(this.app.workspace.on("active-leaf-change", () => {
-      void this.syncCompletedViewsToActiveDaily();
+      void this.syncDoneDateToActiveDaily();
     }));
     if (!this.tasksApiAvailable()) {
       new Notice("Tasks Eye requires the Obsidian Tasks plugin API.");
@@ -210,10 +200,14 @@ export default class TheEyePlugin extends Plugin {
     await this.setMode(mode);
     const existingLeaf = this.findLeaf();
     const leaf = existingLeaf ?? this.app.workspace.getLeaf(false);
+    const state: Record<string, unknown> = { mode };
+    if (!existingLeaf && mode === "done") {
+      state.date = this.activeDailyDate() ?? todayIso();
+    }
     await leaf.setViewState({
       type: VIEW_TYPE,
       active: true,
-      state: { mode },
+      state,
     });
     await this.app.workspace.revealLeaf(leaf);
 
@@ -223,18 +217,20 @@ export default class TheEyePlugin extends Plugin {
   }
 
   async openCompletedTasks(date?: string): Promise<void> {
+    await this.setMode("done");
     const activeDaily = this.activeDailyDate();
     const viewDate = date ?? activeDaily ?? todayIso();
-    const leaf = this.findCompletedLeaf() ?? this.app.workspace.getLeaf(false);
+    const existingLeaf = this.findLeaf();
+    const leaf = existingLeaf ?? this.app.workspace.getLeaf(false);
     await leaf.setViewState({
-      type: COMPLETED_VIEW_TYPE,
+      type: VIEW_TYPE,
       active: true,
-      state: { date: viewDate },
+      state: { mode: "done", date: viewDate },
     });
     await this.app.workspace.revealLeaf(leaf);
 
-    if (leaf.view instanceof CompletedTasksView) {
-      await leaf.view.setDate(viewDate);
+    if (existingLeaf && leaf.view instanceof EyeView) {
+      await leaf.view.setMode("done", viewDate);
     }
   }
 
@@ -283,31 +279,18 @@ export default class TheEyePlugin extends Plugin {
     return this.app.workspace.getLeavesOfType(VIEW_TYPE)[0] ?? null;
   }
 
-  private findCompletedLeaf(): WorkspaceLeaf | null {
-    return this.app.workspace.getLeavesOfType(COMPLETED_VIEW_TYPE)[0] ?? null;
-  }
-
   private queueRefresh(): void {
     if (this.refreshTimer !== null) window.clearTimeout(this.refreshTimer);
     this.refreshTimer = window.setTimeout(() => {
       this.refreshTimer = null;
-      void this.refreshOpenViews();
+      void this.refreshViews();
     }, 150);
   }
 
-  private async refreshOpenViews(): Promise<void> {
+  private async refreshViews(): Promise<void> {
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
     for (const leaf of leaves) {
       if (leaf.view instanceof EyeView) await leaf.view.requestRender();
-    }
-
-    const completedLeaves = this.app.workspace.getLeavesOfType(
-      COMPLETED_VIEW_TYPE,
-    );
-    for (const leaf of completedLeaves) {
-      if (leaf.view instanceof CompletedTasksView) {
-        await leaf.view.requestRender();
-      }
     }
   }
 
@@ -316,18 +299,16 @@ export default class TheEyePlugin extends Plugin {
     if (!file || !file.path.startsWith(`${TIMELINE_FOLDER_PATH}/`)) {
       return null;
     }
-    return dateFromDailyPath(file.path);
+    return datePrefix(file.name);
   }
 
-  private async syncCompletedViewsToActiveDaily(): Promise<void> {
+  private async syncDoneDateToActiveDaily(): Promise<void> {
     const date = this.activeDailyDate();
     if (!date) return;
 
-    const completedLeaves = this.app.workspace.getLeavesOfType(
-      COMPLETED_VIEW_TYPE,
-    );
-    for (const leaf of completedLeaves) {
-      if (leaf.view instanceof CompletedTasksView) {
+    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
+    for (const leaf of leaves) {
+      if (leaf.view instanceof EyeView) {
         await leaf.view.setDate(date);
       }
     }

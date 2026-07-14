@@ -3,7 +3,7 @@
   "name": "Tasks Eye",
   "version": "5.0.0",
   "minAppVersion": "1.10.0",
-  "description": "Native task and completed-task views for Tasks-driven vaults.",
+  "description": "A unified native task view for Tasks-driven vaults.",
   "author": "Grzegorz Gajos",
   "isDesktopOnly": false
 }

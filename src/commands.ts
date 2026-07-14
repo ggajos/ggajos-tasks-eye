@@ -9,7 +9,10 @@ export interface CommandDefinition {
   };
 }
 
-export const MODE_COMMANDS: Record<EyeMode, CommandDefinition> = {
+export const MODE_COMMANDS: Record<
+  Exclude<EyeMode, "done">,
+  CommandDefinition
+> = {
   open: {
     id: "open-open",
     name: "Open Tasks Eye: open",

@@ -12,12 +12,14 @@ export const MODES = [
   "open",
   "inbox",
   "hold",
+  "done",
 ] as const;
 
 export const MODE_LABELS: Record<EyeMode, string> = {
   open: "Open",
   inbox: "Inbox",
   hold: "Hold",
+  done: "Done",
 };
 
 export type EyeStatus = (typeof STATUSES)[number];

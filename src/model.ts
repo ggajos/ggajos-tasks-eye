@@ -126,7 +126,8 @@ export function rowMatchesMode(model: RowModel, mode: EyeMode): boolean {
   const status = statusValue(model.file);
   if (mode === "open") return status === "open";
   if (mode === "inbox") return model.errors.length > 0;
-  return status === "hold";
+  if (mode === "hold") return status === "hold";
+  return false;
 }
 
 export function selectRows(

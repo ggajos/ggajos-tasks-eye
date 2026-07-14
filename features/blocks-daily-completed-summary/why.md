@@ -1,6 +1,6 @@
 ## Why The Daily Summary Block Exists
 
-The Done view is useful for browsing, but daily notes are the long-term journal
+The Done mode is useful for browsing, but daily notes are the long-term journal
 of what actually happened. The block lets completed work become part of that
 daily record without copying task text by hand.
 

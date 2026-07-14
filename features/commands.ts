@@ -33,8 +33,8 @@ export const COMMAND_SHORTCUTS: readonly CommandShortcut[] = [
   {
     ...OPEN_COMPLETED_COMMAND,
     featureSlug: "views-done",
-    featureTitle: "Done view",
-    explanation: "Open the completed-task review for the current day.",
+    featureTitle: "Done mode",
+    explanation: "Switch the unified view to completed-task review for the current day.",
   },
   {
     ...UNCHECK_SELECTED_COMMAND,
