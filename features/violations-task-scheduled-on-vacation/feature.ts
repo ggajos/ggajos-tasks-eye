@@ -1,3 +1,4 @@
+import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
@@ -14,9 +15,9 @@ export default defineFeature({
   violation: {
     code: "task-on-vacation",
     appearsInOpen: true,
-    sampleNote: {
-      path: "Db/Case Studies/Architecture Offsite.md",
-      markdown: `---
+    fixture: violationFixture(note(
+      "Db/Case Studies/Architecture Offsite.md",
+      `---
 status: open
 ---
 
@@ -24,7 +25,7 @@ status: open
 
 - [ ] Reschedule the platform strategy review away from OOO 📅 2026-07-13
 `,
-    },
+    )),
   },
   screenshots: [
     {

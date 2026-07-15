@@ -1,3 +1,4 @@
+import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
@@ -12,9 +13,9 @@ export default defineFeature({
   violation: {
     code: "closed-with-unchecked-tasks",
     appearsInOpen: false,
-    sampleNote: {
-      path: "Db/Case Studies/ADR-042 Tenant Isolation.md",
-      markdown: `---
+    fixture: violationFixture(note(
+      "Db/Case Studies/ADR-042 Tenant Isolation.md",
+      `---
 status: closed
 ---
 
@@ -22,7 +23,7 @@ status: closed
 
 - [ ] Publish tenant migration guardrails for service owners
 `,
-    },
+    )),
   },
   screenshots: [
     {

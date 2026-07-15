@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { COMMAND_SHORTCUTS, formatHotkey } from "../features/commands";
 import { discoverFeatures } from "../features/discovery";
@@ -14,6 +14,7 @@ const DOCS_SRC_ROOT = path.resolve("docs-src");
 const CONTENT_ROOT = path.join(DOCS_SRC_ROOT, "src", "content", "docs");
 const FEATURE_CONTENT_ROOT = path.join(CONTENT_ROOT, "features");
 const GENERATED_ROOT = path.join(DOCS_SRC_ROOT, "src", "generated");
+const TEMPLATE_ROOT = path.join(DOCS_SRC_ROOT, "templates");
 const DEFAULT_SCREENSHOT_VARIANT = "dark-minimal";
 const SCREENSHOT_VARIANT_ORDER = ["dark-minimal", "dark", "light"];
 
@@ -201,49 +202,20 @@ ${rows}
 </div>`;
 }
 
-function renderIndexPage(features: readonly LoadedFeature[]): string {
-  return `---
-title: "Tasks Eye"
-description: "Native Obsidian task views for Tasks-driven vaults."
-sidebar:
-  label: "Overview"
-  order: 0
----
-
-Tasks Eye is an Obsidian plugin for note-centered task boards, repair queues,
-review views, editor commands, and daily summaries.
-
-## Getting Started
-
-1. Install and enable the Obsidian Tasks community plugin.
-2. Keep work notes under <code>Db/</code> and add Tasks-formatted checklist items.
-3. Use <code>status: open</code>, <code>hold</code>, <code>closed</code>, or <code>archived</code> in note frontmatter.
-4. Open Tasks Eye from its ribbon icon or a keyboard shortcut.
-
-## Workflow
-
-<ol class="workflow-list">
-  <li><strong>Open</strong><span>Review actionable notes grouped by due date.</span></li>
-  <li><strong>Inbox</strong><span>Fix one validation rule at a time.</span></li>
-  <li><strong>Hold</strong><span>Keep backlog notes visible outside today's work.</span></li>
-  <li><strong>Done</strong><span>Review completed tasks by selected date.</span></li>
-</ol>
-
-## Feature Index
-
-Browse by the result you want: change a task, filter work, open a view, or repair
-an invalid note.
-
-${renderIndexFeatureCards(features)}
-
-## Keyboard Shortcuts
-
-These defaults are registered by the plugin and can still be changed in
-Obsidian's hotkey settings. Each shortcut links to the feature that owns the
-behavior.
-
-${renderShortcutTable(features)}
-`;
+async function renderIndexPage(features: readonly LoadedFeature[]): Promise<string> {
+  let template = await readFile(path.join(TEMPLATE_ROOT, "index.mdx"), "utf8");
+  const replacements = {
+    FEATURE_CARDS: renderIndexFeatureCards(features),
+    SHORTCUT_TABLE: renderShortcutTable(features),
+  };
+  for (const [token, value] of Object.entries(replacements)) {
+    const marker = `{{${token}}}`;
+    if (template.split(marker).length !== 2) {
+      throw new Error(`Documentation template must contain one ${marker}`);
+    }
+    template = template.replace(marker, value);
+  }
+  return template;
 }
 
 function renderAcceptanceCriteria(feature: FeatureDefinition): string {
@@ -253,8 +225,9 @@ function renderAcceptanceCriteria(feature: FeatureDefinition): string {
 }
 
 function renderViolationSample(feature: FeatureDefinition): string {
-  const sample = feature.violation?.sampleNote;
-  if (!sample) return "";
+  const violation = feature.violation;
+  if (!violation) return "";
+  const sample = violation.fixture.subject;
 
   return `
 ## Example Invalid Note
@@ -326,78 +299,6 @@ ${renderScreenshots(feature.feature)}
 `;
 }
 
-function renderTestingPage(): string {
-  return `---
-title: "Acceptance Testing"
-description: "How Tasks Eye runs feature-owned acceptance tests and documentation screenshots."
-sidebar:
-  label: "Acceptance testing"
-  order: 100
----
-
-Tasks Eye acceptance tests run the real Obsidian desktop app against a generated
-fixture vault. The harness uses \`wdio-obsidian-service\` to download and sandbox
-Obsidian, install the Tasks community plugin, and install the local Tasks Eye
-build.
-
-## Architecture
-
-- \`wdio.conf.mts\` defines Obsidian versions, plugin installation, vault copying, and the WDIO service.
-- \`acceptance/fixtures/base/\` contains markdown notes copied into each fresh vault.
-- \`acceptance/specs/\` contains the WebdriverIO runner that discovers feature acceptance and screenshot scenarios.
-- \`acceptance/snapshots/docs/features/\` stores review screenshots from the last run, grouped by feature and visual variant.
-- \`features/<slug>/\` contains feature-owned metadata, rationale, unit tests, and optional WDIO screenshot scenarios.
-- \`docs-src/\` contains the Starlight configuration plus ignored, disposable build staging.
-- \`.obsidian-cache/\` stores downloaded Obsidian, driver, and community plugin assets.
-- \`docs/\` is the generated GitHub Pages output; feature pages expose Light, Dark, and Dark Minimal screenshots in synchronized tabs.
-
-The default target is:
-
-- Obsidian \`latest/latest\` (\`appVersion/installerVersion\`)
-- Tasks plugin \`latest\`
-- Minimal theme \`latest\`
-- Obsidian UI language \`en-US\`
-- acceptance date \`2026-07-08\`
-
-Override them with environment variables when needed:
-
-\`\`\`bash
-OBSIDIAN_VERSIONS="1.12.7/latest" TASKS_PLUGIN_VERSION=8.2.2 npm run test:acceptance
-\`\`\`
-
-## Commands
-
-Use Node \`22.13.0\` or newer for acceptance testing. The WDIO/Obsidian launcher
-stack uses modern Node APIs that fail on older Node 20 builds.
-
-\`\`\`bash
-npm test
-npm run test:unit
-npm run test:acceptance
-npm run docs
-npm run docs:serve
-\`\`\`
-
-For GitHub Pages, use repository settings and select "Deploy from branch" with
-the \`/docs\` folder. This repository intentionally has no GitHub Actions
-workflow.
-
-## Review Workflow
-
-1. Run \`npm test\` for the full gate: unit tests, production build, WDIO acceptance, screenshot publishing, and Starlight docs build.
-2. Review \`acceptance/snapshots/docs/features/\` for UI changes across Light, Dark, and Dark Minimal variants.
-3. Review the generated \`docs/features/\` pages before commit; intermediate \`docs-src\` content is ignored.
-4. For focused loops, run \`npm run test:unit\`, \`npm run test:acceptance\`, or \`npm run docs\`.
-
-## Notes
-
-- The plugin reads \`TASKS_EYE_TODAY\` only to make screenshots deterministic in acceptance runs. Normal Obsidian usage falls back to the real local date.
-- Electron starts with \`--lang=en-US\`, and the acceptance suite fails before capturing screenshots if Obsidian resolves a non-English locale.
-- The fixture vault is copied by the service, so tests do not mutate the source markdown under \`acceptance/fixtures/base/\`.
-- Pin \`OBSIDIAN_VERSIONS\` in CI or release branches when screenshot diffs must stay reproducible across time.
-`;
-}
-
 function renderSidebar(features: readonly LoadedFeature[]): string {
   const featureGroups = [...groupFeatures(features)]
     .map(([label, groupFeaturesForLabel]) => {
@@ -440,8 +341,14 @@ async function build(): Promise<void> {
   await rm(FEATURE_CONTENT_ROOT, { recursive: true, force: true });
   await mkdir(FEATURE_CONTENT_ROOT, { recursive: true });
 
-  await writeFile(path.join(CONTENT_ROOT, "index.mdx"), renderIndexPage(features));
-  await writeFile(path.join(CONTENT_ROOT, "testing.mdx"), renderTestingPage());
+  await writeFile(
+    path.join(CONTENT_ROOT, "index.mdx"),
+    await renderIndexPage(features),
+  );
+  await writeFile(
+    path.join(CONTENT_ROOT, "testing.mdx"),
+    await readFile(path.join(TEMPLATE_ROOT, "testing.mdx"), "utf8"),
+  );
   await writeFile(path.join(GENERATED_ROOT, "sidebar.mjs"), renderSidebar(features));
 
   for (const [index, feature] of features.entries()) {

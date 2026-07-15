@@ -1,4 +1,5 @@
 import type { ViolationCode } from "../src/validation";
+import type { ViolationFixture } from "./fixtures";
 
 export interface FeatureScreenshot {
   slug: string;
@@ -6,15 +7,10 @@ export interface FeatureScreenshot {
   alt: string;
 }
 
-export interface FeatureNoteSample {
-  path: string;
-  markdown: string;
-}
-
 export interface FeatureViolation {
   code: ViolationCode;
   appearsInOpen: boolean;
-  sampleNote: FeatureNoteSample;
+  fixture: ViolationFixture;
 }
 
 export interface FeatureDefinition {

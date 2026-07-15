@@ -1,0 +1,146 @@
+import { $, browser } from "@wdio/globals";
+
+export type EyeMode = "open" | "inbox" | "hold";
+export type WdioElement = WebdriverIO.Element;
+
+const PLUGIN = ".workspace-leaf.mod-active .eye-plugin";
+const PREVIEW = ".workspace-leaf.mod-active .markdown-preview-view";
+const EDITOR = ".workspace-leaf.mod-active .markdown-source-view";
+
+async function activeView(selector: string, text: string): Promise<WdioElement> {
+  let actual = "";
+  try {
+    await browser.waitUntil(async () => {
+      const element = await $(selector);
+      if (!await element.isExisting()) return false;
+      actual = await element.getText();
+      return actual.includes(text);
+    }, { timeout: 20_000 });
+  } catch {
+    throw new Error(
+      `Expected active view to contain "${text}"; last text was ${JSON.stringify(actual)}`,
+    );
+  }
+  const element = await $(selector);
+  await element.waitForDisplayed({ timeout: 5_000 });
+  return element as unknown as WdioElement;
+}
+
+async function openMarkdown(
+  filePath: string,
+  mode: "preview" | "source",
+  text: string,
+): Promise<WdioElement> {
+  await browser.executeObsidian(async ({ app }, path, viewMode) => {
+    const leaf = app.workspace.getLeaf(true);
+    await leaf.setViewState({
+      type: "markdown",
+      state: { file: path, mode: viewMode },
+      active: true,
+    });
+    await app.workspace.revealLeaf(leaf);
+  }, filePath, mode);
+  return await activeView(mode === "preview" ? PREVIEW : EDITOR, text);
+}
+
+async function rowAction(
+  rowText: string,
+  ariaLabel: string,
+  click = false,
+): Promise<boolean> {
+  return await browser.execute((text, label, shouldClick) => {
+    const rows = document.querySelectorAll<HTMLElement>(
+      ".workspace-leaf.mod-active .eye-plugin .eye-row",
+    );
+    const row = [...rows].find((candidate) =>
+      candidate.textContent?.includes(text)
+    );
+    const buttons = row?.querySelectorAll<HTMLButtonElement>("button") ?? [];
+    const button = [...buttons].find((candidate) =>
+      candidate.getAttribute("aria-label") === label
+    );
+    if (shouldClick) button?.click();
+    return button !== undefined;
+  }, rowText, ariaLabel, click);
+}
+
+export const tasksEyePage = {
+  plugin: (text: string) => activeView(PLUGIN, text),
+  editor: (text: string) => activeView(EDITOR, text),
+
+  async openBoard(mode: EyeMode, text: string): Promise<WdioElement> {
+    await browser.executeObsidianCommand(`ggajos-tasks-eye:open-${mode}`);
+    return await activeView(PLUGIN, text);
+  },
+
+  async openDone(text: string): Promise<WdioElement> {
+    await browser.executeObsidianCommand("ggajos-tasks-eye:open-completed-tasks");
+    return await activeView(PLUGIN, text);
+  },
+
+  openPreview: (filePath: string, text: string) =>
+    openMarkdown(filePath, "preview", text),
+
+  async setContextFilter(value: string): Promise<void> {
+    await browser.execute((nextValue) => {
+      const select = document.querySelector<HTMLSelectElement>(
+        ".workspace-leaf.mod-active .eye-context-select",
+      );
+      if (!select) throw new Error("Tasks Eye context filter is not visible");
+      select.value = nextValue;
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    }, value);
+  },
+
+  async expectRowAction(rowText: string, ariaLabel: string): Promise<void> {
+    await browser.waitUntil(() => rowAction(rowText, ariaLabel), {
+      timeout: 10_000,
+      timeoutMsg: `Expected row "${rowText}" to expose action "${ariaLabel}"`,
+    });
+  },
+
+  async clickRowAction(rowText: string, ariaLabel: string): Promise<void> {
+    await this.expectRowAction(rowText, ariaLabel);
+    if (!await rowAction(rowText, ariaLabel, true)) {
+      throw new Error(`Missing action "${ariaLabel}" for row "${rowText}"`);
+    }
+  },
+
+  async expectSingleViolation(code: string): Promise<void> {
+    await browser.waitUntil(async () => await browser.execute((expected) => {
+      const root = document.querySelector(
+        ".workspace-leaf.mod-active .eye-plugin",
+      );
+      const codes = [...root?.querySelectorAll<HTMLElement>(
+        ".eye-errors > div",
+      ) ?? []].map((element) => element.dataset.eyeViolation ?? "");
+      return root?.querySelectorAll(".eye-row").length === 1 &&
+        codes.length === 1 && codes[0] === expected;
+    }, code), {
+      timeout: 10_000,
+      timeoutMsg: `Expected one row with only violation code "${code}"`,
+    });
+  },
+
+  async selectCheckedTasks(filePath: string, text: string): Promise<WdioElement> {
+    const editor = await openMarkdown(filePath, "source", text);
+    await browser.executeObsidian(({ app, obsidian }, path) => {
+      const view = app.workspace.getActiveViewOfType(obsidian.MarkdownView);
+      if (!view) throw new Error(`Markdown editor did not open for "${path}"`);
+      const checked = Array.from(
+        { length: view.editor.lastLine() + 1 },
+        (_, line) => line,
+      ).filter((line) => /^\s*[-*+]\s+\[[xX]\]/.test(view.editor.getLine(line)));
+      const start = checked[0];
+      const end = checked.at(-1);
+      if (start === undefined || end === undefined) {
+        throw new Error(`Fixture "${path}" has no completed tasks`);
+      }
+      view.editor.setSelection(
+        { line: start, ch: 0 },
+        { line: end, ch: view.editor.getLine(end).length },
+      );
+    }, filePath);
+    return editor;
+  },
+};

@@ -1,16 +1,24 @@
-import {
-  expectElementText,
-  openBoard,
-  type FeatureScreenshotScenario,
-} from "../../acceptance/support/tasks-eye";
+import { expect } from "@wdio/globals";
+import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
+import { featureScenarios } from "../../acceptance/support/tasks-eye";
+import { fixture, note } from "../fixtures";
 
-export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
-  {
+const ACTION = "Approve the billing domain event contract";
+
+export const { screenshotScenarios } = featureScenarios(
+  fixture([note(
+    "Db/Mission/Platform/Billing Platform Modernization.md",
+    {
+      status: "open",
+      tasks: [{ text: ACTION, due: "2026-07-08" }],
+    },
+  )]),
+  { screenshots: [{
     screenshotSlug: "managed-note-row",
     async run({ save }) {
-      const root = await openBoard("open", "Billing Platform Modernization");
-      await expectElementText(root, "Approve the billing domain event contract");
+      const root = await tasksEyePage.openBoard("open", ACTION);
+      await expect(root).toHaveText(expect.stringContaining(ACTION));
       await save(root);
     },
-  },
-];
+  }] },
+);

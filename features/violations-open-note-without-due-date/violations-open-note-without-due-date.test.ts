@@ -1,17 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { selectRows } from "../../src/model";
-import { file, rowNames, violationCodes } from "../testSupport";
+import { file, violationCodes } from "../testSupport";
 
 const VIOLATION = "open-without-due-date";
 
 describe("Open note without due date violation", () => {
-  it("reports open notes whose unchecked tasks are all undated", () => {
-    expect(violationCodes(file(
-      "Db/Growth/Unscheduled Active.md",
-      "---\nstatus: open\n---\n\n- [ ] choose next action\n- [ ] collect notes",
-    ))).toContain(VIOLATION);
-  });
-
   it.each([
     ["missing", "- [ ] choose next action"],
     ["blank", "---\nstatus:\n---\n\n- [ ] choose next action"],
@@ -68,19 +60,5 @@ describe("Open note without due date violation", () => {
 
     expect(violations).toContain("open-without-uncompleted-tasks");
     expect(violations).not.toContain(VIOLATION);
-  });
-
-  it("shows the violation in Inbox without removing the note from Open", () => {
-    const files = [file(
-      "Db/Growth/Unscheduled Active.md",
-      "---\nstatus: open\n---\n\n- [ ] choose next action",
-    )];
-
-    expect(rowNames(selectRows(files, "open", "*"))).toEqual([
-      "Unscheduled Active",
-    ]);
-    expect(rowNames(selectRows(files, "inbox", "*"))).toEqual([
-      "Unscheduled Active",
-    ]);
   });
 });

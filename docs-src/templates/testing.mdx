@@ -1,0 +1,76 @@
+---
+title: "Acceptance Testing"
+description: "How Tasks Eye runs feature-owned acceptance tests and documentation screenshots."
+sidebar:
+  label: "Acceptance testing"
+  order: 100
+---
+
+Tasks Eye acceptance tests run the real Obsidian desktop app against generated,
+feature-owned fixture vaults. The harness uses `wdio-obsidian-service` to
+download and sandbox Obsidian, install the Tasks community plugin, and install
+the local Tasks Eye build.
+
+## Architecture
+
+- `wdio.conf.mts` defines Obsidian versions, plugin installation, vault copying, and the WDIO service.
+- `acceptance/fixtures/base/` is intentionally minimal; each scenario creates its complete vault from typed fixture builders.
+- `acceptance/specs/` discovers feature acceptance and screenshot scenarios.
+- `acceptance/snapshots/docs/features/` stores review screenshots grouped by feature and visual variant.
+- `features/<slug>/` contains typed metadata, rationale, focused tests, and optional custom WDIO scenarios.
+- Standard violation examples automatically drive model contracts and Inbox/Open screenshot scenarios.
+- `docs-src/` contains authored templates plus ignored build staging.
+- `docs/` is the generated GitHub Pages output with Light, Dark, and Dark Minimal screenshot tabs.
+
+The default target is:
+
+- Obsidian `latest/latest` (`appVersion/installerVersion`)
+- Tasks plugin `latest`
+- Minimal theme `latest`
+- Obsidian UI language `en-US`
+- acceptance date `2026-07-08`
+
+Override versions when needed:
+
+```bash
+OBSIDIAN_VERSIONS="1.12.7/latest" TASKS_PLUGIN_VERSION=8.2.2 npm run test:acceptance
+```
+
+## Feature Fixtures
+
+Every acceptance or screenshot scenario declares a complete `FeatureFixture`.
+Use `fixture()`, `note()`, and `task()` for normal notes; pass literal Markdown
+to `note()` when exact or malformed syntax is the behavior under test. A
+scenario never inherits notes from another feature.
+
+Violation features use `violationFixture()` to identify the documented subject
+note. The unit suite proves that note's violation and row visibility, while the
+acceptance runner generates the standard Inbox and optional Open screenshots.
+A custom scenario with the same screenshot slug replaces that generated flow.
+
+## Commands
+
+Use Node `22.13.0` or newer.
+
+```bash
+npm test
+npm run test:unit
+npm run test:acceptance
+npm run docs
+npm run docs:serve
+```
+
+## Review Workflow
+
+1. Run `npm test` for the full unit, build, acceptance, screenshot, and docs gate.
+2. Review `acceptance/snapshots/docs/features/` for intentional UI changes across all variants.
+3. Review generated `docs/features/` pages before commit; intermediate content under `docs-src/src/content/docs/` is disposable.
+4. Use the focused commands above during development.
+
+## Notes
+
+- `TASKS_EYE_TODAY` makes acceptance output deterministic; normal use falls back to the real local date.
+- Acceptance fails before capture if Obsidian does not resolve an English locale.
+- Fixtures are materialized only in the service's copied vault, never in their TypeScript source.
+- Screenshots are review artifacts: meaningful changes update them, while tiny pixel noise is suppressed.
+- Pin `OBSIDIAN_VERSIONS` when screenshot reproducibility matters across environments.

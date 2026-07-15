@@ -38,9 +38,16 @@ Public features live under `features/<slug>/` with:
 - Optional `*.test.ts` Vitest coverage near the feature.
 - Optional `wdio.ts` screenshot or acceptance scenarios.
 
-When a feature has `wdio.ts`, it must export valid scenario arrays as expected
-by `acceptance/support/tasks-eye.ts`. Feature screenshots referenced in
-`feature.ts` must match screenshot scenario slugs.
+Every WDIO scenario owns a complete typed fixture created with the helpers in
+`features/fixtures.ts`; scenarios must not depend on notes from another feature
+or on the minimal acceptance seed vault. Use structured note/task helpers for
+normal cases and literal Markdown when exact syntax is the behavior under test.
+
+Violation feature fixtures automatically drive their model contract plus the
+standard Inbox/Open screenshots. A `wdio.ts` scenario with the same screenshot
+slug overrides the generated flow; other explicit scenarios are additive.
+Feature screenshots referenced in `feature.ts` must match the final scenario
+slugs.
 
 Generated docs under `docs/` and `docs-src/src/content/docs/features/` are
 rebuilt by `npm run docs`; avoid hand-editing generated output unless the task
@@ -48,6 +55,7 @@ explicitly asks for it.
 
 ## Fixtures
 
-Acceptance fixtures live under `acceptance/fixtures/base/`. Unit tests can build
-`EyeFile` values directly with `buildEyeFileFromMarkdown()` or feature
-`testSupport` helpers.
+`acceptance/fixtures/base/` is only a minimal seed vault. Acceptance fixture
+content belongs to its feature as TypeScript. Unit tests can build `EyeFile`
+values directly with `buildEyeFileFromMarkdown()` or feature `testSupport`
+helpers.

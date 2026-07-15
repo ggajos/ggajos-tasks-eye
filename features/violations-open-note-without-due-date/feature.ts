@@ -1,3 +1,4 @@
+import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
@@ -15,9 +16,9 @@ export default defineFeature({
   violation: {
     code: "open-without-due-date",
     appearsInOpen: true,
-    sampleNote: {
-      path: "Db/Case Studies/Platform Capability Map.md",
-      markdown: `---
+    fixture: violationFixture(note(
+      "Db/Case Studies/Platform Capability Map.md",
+      `---
 status: open
 ---
 
@@ -25,7 +26,7 @@ status: open
 
 - [ ] Define the next review milestone for the capability map
 `,
-    },
+    )),
   },
   screenshots: [
     {

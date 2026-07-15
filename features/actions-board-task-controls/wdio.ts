@@ -1,88 +1,49 @@
 import { browser } from "@wdio/globals";
-import { readFileSync } from "node:fs";
 import { obsidianPage } from "wdio-obsidian-service";
-import {
-  OPEN_FILE,
-  clickRowAction,
-  expectRowAction,
-  openBoard,
-  type FeatureAcceptanceScenario,
-  type FeatureScreenshotScenario,
-} from "../../acceptance/support/tasks-eye";
+import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
+import { featureScenarios } from "../../acceptance/support/tasks-eye";
+import { fixture, note } from "../fixtures";
 
-const ORIGINAL_OPEN_FILE = readFileSync(
-  "acceptance/fixtures/base/Db/Mission/Platform/Billing Platform Modernization.md",
-  "utf8",
-);
+const FILE = "Db/Mission/Platform/Billing Platform Modernization.md";
+const ACTION = "Approve the billing domain event contract";
 
-async function restoreOpenFixture(): Promise<void> {
-  await obsidianPage.write(OPEN_FILE, ORIGINAL_OPEN_FILE);
+const boardFixture = fixture([note(FILE, {
+    status: "open",
+    tasks: [
+      { text: ACTION, due: "2026-07-08" },
+      { text: "Review the migration runbook", due: "2026-07-15" },
+    ],
+})]);
+
+async function waitForFileText(text: string): Promise<void> {
+  await browser.waitUntil(async () => (await obsidianPage.read(FILE)).includes(text), {
+    timeout: 10_000,
+    timeoutMsg: `Expected fixture to contain "${text}"`,
+  });
 }
 
-export const acceptanceScenarios: readonly FeatureAcceptanceScenario[] = [
-  {
+export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
+  boardFixture,
+  { acceptance: [{
     title: "shifts task due dates through board controls",
     async run() {
-      try {
-        await openBoard("open", "Approve the billing domain event contract");
-        await clickRowAction(
-          "Approve the billing domain event contract",
-          "Shift due date +1 day(s)",
-        );
-
-        await browser.waitUntil(async () => {
-          const note = await obsidianPage.read(OPEN_FILE);
-          return note.includes(
-            "Approve the billing domain event contract 📅 2026-07-09",
-          );
-        }, {
-          timeout: 10_000,
-          timeoutMsg: "Expected due date to shift to 2026-07-09",
-        });
-      } finally {
-        await restoreOpenFixture();
-      }
+      await tasksEyePage.openBoard("open", ACTION);
+      await tasksEyePage.clickRowAction(ACTION, "Shift due date +1 day(s)");
+      await waitForFileText(`${ACTION} 📅 2026-07-09`);
     },
-  },
-  {
+  }, {
     title: "completes tasks through board controls and the Tasks API",
     async run() {
-      try {
-        await openBoard("open", "Approve the billing domain event contract");
-        await clickRowAction(
-          "Approve the billing domain event contract",
-          "Complete task",
-        );
-
-        await browser.waitUntil(async () => {
-          const note = await obsidianPage.read(OPEN_FILE);
-          return note.includes(
-            "- [x] Approve the billing domain event contract",
-          );
-        }, {
-          timeout: 10_000,
-          timeoutMsg: "Expected first task to be completed",
-        });
-      } finally {
-        await restoreOpenFixture();
-      }
+      await tasksEyePage.openBoard("open", ACTION);
+      await tasksEyePage.clickRowAction(ACTION, "Complete task");
+      await waitForFileText(`- [x] ${ACTION}`);
     },
-  },
-];
-
-export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
-  {
+  }], screenshots: [{
     screenshotSlug: "controls",
     async run({ save }) {
-      const root = await openBoard(
-        "open",
-        "Approve the billing domain event contract",
-      );
-      await expectRowAction(
-        "Approve the billing domain event contract",
-        "Complete task",
-      );
+      const root = await tasksEyePage.openBoard("open", ACTION);
+      await tasksEyePage.expectRowAction(ACTION, "Complete task");
       await save(root);
     },
-  },
-];
+  }] },
+);

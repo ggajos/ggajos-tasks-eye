@@ -1,3 +1,4 @@
+import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
@@ -13,9 +14,9 @@ export default defineFeature({
   violation: {
     code: "open-without-uncompleted-tasks",
     appearsInOpen: true,
-    sampleNote: {
-      path: "Db/Case Studies/Engineering Strategy Q3.md",
-      markdown: `---
+    fixture: violationFixture(note(
+      "Db/Case Studies/Engineering Strategy Q3.md",
+      `---
 status: open
 ---
 
@@ -24,7 +25,7 @@ status: open
 The strategy covers platform leverage and reliability investment, but still
 needs a concrete next action.
 `,
-    },
+    )),
   },
   screenshots: [
     {

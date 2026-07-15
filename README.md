@@ -95,8 +95,9 @@ npm run test:acceptance
 ```
 
 Feature-owned executable documentation lives under `features/<slug>/`. A
-feature folder can provide typed metadata, `why.md`, Vitest specs, and WDIO
-screenshots that feed generated documentation.
+feature folder can provide typed metadata, `why.md`, focused Vitest specs, and
+isolated WDIO fixtures/screenshots that feed generated documentation. Standard
+violation fixtures also generate their model contracts and screenshots.
 
 See [docs/testing/](docs/testing/) for the WDIO architecture, artifact
 locations, and screenshot update workflow.

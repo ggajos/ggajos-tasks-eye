@@ -26,7 +26,7 @@ describe("Tasks Eye acceptance", () => {
 
   for (const { feature, scenario } of FEATURE_ACCEPTANCE_SCENARIOS) {
     it(`${feature.feature.title}: ${scenario.title}`, async () => {
-      await resetFixtureVault();
+      await resetFixtureVault(scenario.fixture);
       await applyVisualVariant(VISUAL_VARIANTS[0]!);
       await scenario.run();
     });
@@ -37,7 +37,7 @@ describe("Tasks Eye acceptance", () => {
       it(
         `documents ${feature.feature.title} ${scenario.screenshotSlug} in ${variant.label}`,
         async () => {
-          await resetFixtureVault();
+          await resetFixtureVault(scenario.fixture);
           await applyVisualVariant(variant);
           await scenario.run({
             save: (element) => saveFeatureDocSnapshot(

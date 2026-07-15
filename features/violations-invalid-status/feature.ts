@@ -1,3 +1,4 @@
+import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
@@ -12,9 +13,9 @@ export default defineFeature({
   violation: {
     code: "invalid-status",
     appearsInOpen: false,
-    sampleNote: {
-      path: "Db/Case Studies/Service Ownership Model.md",
-      markdown: `---
+    fixture: violationFixture(note(
+      "Db/Case Studies/Service Ownership Model.md",
+      `---
 status: reviewing
 ---
 
@@ -22,7 +23,7 @@ status: reviewing
 
 - [ ] Align escalation boundaries with platform and product leadership
 `,
-    },
+    )),
   },
   screenshots: [
     {

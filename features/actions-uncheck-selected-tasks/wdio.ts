@@ -1,55 +1,56 @@
 import { browser } from "@wdio/globals";
 import { obsidianPage } from "wdio-obsidian-service";
-import {
-  UNCHECK_FILE,
-  openUncheckFixture,
-  waitForActiveEditorText,
-  type FeatureAcceptanceScenario,
-  type FeatureScreenshotScenario,
-} from "../../acceptance/support/tasks-eye";
+import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
+import { featureScenarios } from "../../acceptance/support/tasks-eye";
+import { fixture, note } from "../fixtures";
 
-async function uncheckSelectedTasks(): Promise<void> {
-  await browser.executeObsidianCommand(
-    "ggajos-tasks-eye:uncheck-selected-tasks",
-  );
+const FILE = "Db/Architecture/Release Readiness.md";
+const FIRST_TASK = "Approved the production readiness checklist";
+
+const uncheckFixture = fixture([note(FILE, {
+    status: "closed",
+    tasks: [
+      { text: FIRST_TASK, completed: "2026-07-08" },
+      { text: "Validated rollback ownership with service leads", completed: "2026-07-08" },
+    ],
+})]);
+
+async function openSelection() {
+  return await tasksEyePage.selectCheckedTasks(FILE, FIRST_TASK);
 }
 
-export const acceptanceScenarios: readonly FeatureAcceptanceScenario[] = [
-  {
+async function uncheckSelectedTasks(): Promise<void> {
+  await browser.executeObsidianCommand("ggajos-tasks-eye:uncheck-selected-tasks");
+}
+
+export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
+  uncheckFixture,
+  { acceptance: [{
     title: "reopens selected completed tasks",
     async run() {
-      await openUncheckFixture();
+      await openSelection();
       await uncheckSelectedTasks();
       await browser.waitUntil(async () => {
-        const note = await obsidianPage.read(UNCHECK_FILE);
-        return note.includes("- [ ] Approved the production readiness checklist") &&
-          note.includes("- [ ] Validated rollback ownership with service leads") &&
-          !note.includes("✅");
+        const markdown = await obsidianPage.read(FILE);
+        return markdown.includes(`- [ ] ${FIRST_TASK}`) &&
+          markdown.includes("- [ ] Validated rollback ownership with service leads") &&
+          !markdown.includes("✅");
       }, {
         timeout: 10_000,
         timeoutMsg: "Expected selected completed tasks to be unchecked",
       });
     },
-  },
-];
-
-export const screenshotScenarios: readonly FeatureScreenshotScenario[] = [
-  {
+  }], screenshots: [{
     screenshotSlug: "before",
     async run({ save }) {
-      const editor = await openUncheckFixture();
-      await save(editor);
+      await save(await openSelection());
     },
-  },
-  {
+  }, {
     screenshotSlug: "after",
     async run({ save }) {
-      await openUncheckFixture();
+      await openSelection();
       await uncheckSelectedTasks();
-      const editor = await waitForActiveEditorText(
-        "Approved the production readiness checklist",
-      );
-      await save(editor);
+      await save(await tasksEyePage.editor(FIRST_TASK));
     },
-  },
-];
+  }] },
+);

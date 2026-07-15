@@ -2,13 +2,6 @@ import { describe, expect, it } from "vitest";
 import { file, violationCodes } from "../testSupport";
 
 describe("Closed note with unchecked tasks violation", () => {
-  it("reports closed notes that still contain unchecked tasks", () => {
-    expect(violationCodes(file(
-      "Db/Growth/Closed.md",
-      "---\nstatus: closed\n---\n\n- [ ] unresolved",
-    ))).toContain("closed-with-unchecked-tasks");
-  });
-
   it("allows closed notes with only completed tasks", () => {
     expect(violationCodes(file(
       "Db/Growth/Closed.md",
