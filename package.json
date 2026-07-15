@@ -1,6 +1,6 @@
 {
   "name": "ggajos-tasks-eye",
-  "version": "6.0.0-beta.8",
+  "version": "6.0.0-beta.9",
   "description": "A unified native Obsidian task view for Tasks-driven vaults.",
   "main": "main.js",
   "type": "module",
