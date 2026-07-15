@@ -1,5 +1,3 @@
-export const NOTES_FOLDER_PATH = "Db";
-
 export const STATUSES = [
   "hold",
   "open",

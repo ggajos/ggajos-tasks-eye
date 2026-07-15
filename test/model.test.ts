@@ -13,7 +13,7 @@ import {
 import type { RenderItem } from "../src/model";
 import type { EyeFile, RowModel } from "../src/types";
 
-function fixture(name: string, path = `Db/Mission/${name}`): EyeFile {
+function fixture(name: string, path = `Mission/${name}`): EyeFile {
   const markdown = readFileSync(join(__dirname, "fixtures", name), "utf8");
   return buildEyeFileFromMarkdown(path, markdown);
 }
@@ -45,7 +45,7 @@ describe("row model", () => {
 
   it("ignores completed tasks when selecting the next action", () => {
     const row = buildRowModel(file(
-      "Db/Mission/Done ignored.md",
+      "Mission/Done ignored.md",
       `---
 status: open
 ---
@@ -76,7 +76,7 @@ describe("board grouping", () => {
   it("puts no-due work in a separate first bucket", () => {
     const rows = selectRows([
       file(
-        "Db/Mission/No due.md",
+        "Mission/No due.md",
         `---
 status: open
 ---
@@ -85,7 +85,7 @@ status: open
 `,
       ),
       file(
-        "Db/Mission/Today.md",
+        "Mission/Today.md",
         `---
 status: open
 ---
@@ -107,7 +107,7 @@ status: open
   it("groups month buckets by exact day", () => {
     const rows = selectRows([
       file(
-        "Db/Mission/Later.md",
+        "Mission/Later.md",
         `---
 status: open
 ---
@@ -116,7 +116,7 @@ status: open
 `,
       ),
       file(
-        "Db/Mission/Sooner.md",
+        "Mission/Sooner.md",
         `---
 status: open
 ---
@@ -142,7 +142,7 @@ status: open
   it("preserves context and title ordering within a day", () => {
     const rows = selectRows([
       file(
-        "Db/Mission/Mission B.md",
+        "Mission/Mission B.md",
         `---
 status: open
 ---
@@ -151,7 +151,7 @@ status: open
 `,
       ),
       file(
-        "Db/Mission/Mission A.md",
+        "Mission/Mission A.md",
         `---
 status: open
 ---
@@ -160,7 +160,7 @@ status: open
 `,
       ),
       file(
-        "Db/Growth/Growth.md",
+        "Growth/Growth.md",
         `---
 status: open
 ---
@@ -185,7 +185,7 @@ status: open
   it("places vacation markers in their matching bucket days", () => {
     const rows = selectRows([
       file(
-        "Db/Mission/Trip.md",
+        "Mission/Trip.md",
         `---
 status: open
 ---

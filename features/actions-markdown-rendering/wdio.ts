@@ -7,14 +7,14 @@ const RENDERED_ACTION =
   "Review ADR-042 with Security Architecture and record the decision in architecture/tenant-isolation";
 
 const markdownFixture = fixture([
-    note("Db/Architecture/Technology Radar.md", {
+    note("Architecture/Technology Radar.md", {
       status: "hold",
       tasks: [{
         text: "Review [[ADR-042 Tenant Isolation|ADR-042]] with **Security Architecture** and record the decision in `architecture/tenant-isolation`",
         due: "2026-07-08",
       }],
     }),
-    note("Db/Architecture/ADR-042 Tenant Isolation.md", {
+    note("Architecture/ADR-042 Tenant Isolation.md", {
       status: "closed",
       tasks: [{ text: "Approve isolation", completed: "2026-07-08" }],
     }),
@@ -22,7 +22,7 @@ const markdownFixture = fixture([
 
 async function openMarkdownActionBoard() {
   await tasksEyePage.openBoard("hold", "Technology Radar");
-  await tasksEyePage.setContextFilter("architecture");
+  await tasksEyePage.setContextFilter("Architecture");
   return await tasksEyePage.plugin(RENDERED_ACTION);
 }
 

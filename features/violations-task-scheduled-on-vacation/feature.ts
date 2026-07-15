@@ -16,7 +16,7 @@ export default defineFeature({
     code: "task-on-vacation",
     appearsInOpen: true,
     fixture: violationFixture(note(
-      "Db/Case Studies/Architecture Offsite.md",
+      "Case Studies/Architecture Offsite.md",
       `---
 status: open
 ---

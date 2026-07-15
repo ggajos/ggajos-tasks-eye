@@ -21,7 +21,7 @@ describe("Vacation availability feature", () => {
   it("shows only markers for the OOO context filter", () => {
     const rows = selectRows([
       file(
-        "Db/Mission/Trip.md",
+        "Mission/Trip.md",
         `---
 status: open
 ---
@@ -39,7 +39,7 @@ status: open
   it("interleaves markers with the unfiltered work timeline", () => {
     const rows = selectRows([
       file(
-        "Db/Mission/Trip.md",
+        "Mission/Trip.md",
         `---
 status: open
 ---
@@ -57,17 +57,17 @@ status: open
   it("suppresses markers for a normal context filter", () => {
     const files = [
       file(
-        "Db/Hardware/Car.md",
+        "Hardware/Car.md",
         "---\nstatus: open\n---\n\n- [ ] service car 📅 2026-07-20",
       ),
       file(
-        "Db/Growth/Study.md",
+        "Growth/Study.md",
         "---\nstatus: open\n---\n\n- [ ] study 📅 2026-07-20",
       ),
     ];
-    const filteredRows = selectRows(files, "open", "hardware");
+    const filteredRows = selectRows(files, "open", "Hardware");
     const allRows = selectRows(files, "open", "*");
-    const items = boardItemsForContext(filteredRows, allRows, "hardware");
+    const items = boardItemsForContext(filteredRows, allRows, "Hardware");
 
     expect(items.every((item) => item.kind === "task")).toBe(true);
     expect(items.map((item) =>

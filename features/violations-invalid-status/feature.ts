@@ -14,7 +14,7 @@ export default defineFeature({
     code: "invalid-status",
     appearsInOpen: false,
     fixture: violationFixture(note(
-      "Db/Case Studies/Service Ownership Model.md",
+      "Case Studies/Service Ownership Model.md",
       `---
 status: reviewing
 ---

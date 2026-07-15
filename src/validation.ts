@@ -1,5 +1,6 @@
-import { NOTES_FOLDER_PATH, STATUSES, VACATION } from "./constants";
+import { STATUSES, VACATION } from "./constants";
 import { formatYmd } from "./date";
+import { isPathInManagedFolder } from "./managedPath";
 import type { EyeFile, EyeTask } from "./types";
 import { vacationReasonForTs } from "./vacation";
 import type { VacationReason } from "./vacation";
@@ -120,7 +121,7 @@ const VALIDATION_RULES: readonly ValidationRule[] = [
 ];
 
 export function validateFile(file: EyeFile): ValidationViolation[] {
-  if (!file.path.startsWith(`${NOTES_FOLDER_PATH}/`)) return [];
+  if (!isPathInManagedFolder(file.path, file.managedFolderPath)) return [];
 
   const context: ValidationContext = {
     file,

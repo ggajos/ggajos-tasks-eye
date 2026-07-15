@@ -27,7 +27,7 @@ export function collectCompletedTasks(
       if (task.completed && task.text.includes(`✅ ${date}`)) {
         result.push({
           text: cleanCompletedTaskText(task.text),
-          context: getContextFromPath(file.path),
+          context: getContextFromPath(file.path, file.managedFolderPath),
           fileName: file.basename,
           filePath: file.path,
         });

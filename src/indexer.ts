@@ -1,5 +1,9 @@
 import type { App, TFile } from "obsidian";
-import { NOTES_FOLDER_PATH } from "./constants";
+import {
+  DEFAULT_MANAGED_FOLDER_PATH,
+  isPathInManagedFolder,
+  normalizeManagedFolderPath,
+} from "./managedPath";
 import { parseTasksFromMarkdown } from "./taskParsing";
 import type { EyeFile } from "./types";
 
@@ -38,30 +42,43 @@ export function buildEyeFileFromMarkdown(
   path: string,
   markdown: string,
   frontmatter: Frontmatter = parseFrontmatter(markdown),
+  managedFolderPath = DEFAULT_MANAGED_FOLDER_PATH,
 ): EyeFile {
   const name = path.split("/").pop() ?? path;
   return {
     path,
     name,
     basename: basenameFromPath(path),
+    managedFolderPath: normalizeManagedFolderPath(managedFolderPath),
     status: frontmatter.status,
     tasks: parseTasksFromMarkdown(markdown),
   };
 }
 
-function isManagedMarkdown(file: TFile): boolean {
-  return file.extension === "md" && file.path.startsWith(`${NOTES_FOLDER_PATH}/`);
+function isManagedMarkdown(file: TFile, managedFolderPath: string): boolean {
+  return file.extension === "md" &&
+    isPathInManagedFolder(file.path, managedFolderPath);
 }
 
-export async function readEyeFiles(app: App): Promise<EyeFile[]> {
-  const files = app.vault.getMarkdownFiles().filter(isManagedMarkdown);
+export async function readEyeFiles(
+  app: App,
+  managedFolderPath: string,
+): Promise<EyeFile[]> {
+  const files = app.vault.getMarkdownFiles().filter((file) =>
+    isManagedMarkdown(file, managedFolderPath)
+  );
   const result: EyeFile[] = [];
 
   for (const file of files) {
     const markdown = await app.vault.cachedRead(file);
     const frontmatter = app.metadataCache.getFileCache(file)?.frontmatter ??
       parseFrontmatter(markdown);
-    result.push(buildEyeFileFromMarkdown(file.path, markdown, frontmatter));
+    result.push(buildEyeFileFromMarkdown(
+      file.path,
+      markdown,
+      frontmatter,
+      managedFolderPath,
+    ));
   }
 
   return result.sort((a, b) => a.path.localeCompare(b.path));

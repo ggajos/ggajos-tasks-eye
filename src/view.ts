@@ -5,7 +5,6 @@ import { isEyeMode, MODE_LABELS, MODES } from "./constants";
 import type { EyeMode } from "./constants";
 import {
   discoverContexts,
-  matchesContextFilter,
   normalizeContextFilter,
   withVacationContext,
 } from "./context";
@@ -166,6 +165,14 @@ export class EyeView extends ItemView {
     this.renderToolbar(root, []);
     root.appendChild(element("div", "eye-empty", "Loading..."));
 
+    const folderError = this.plugin.managedFolderError();
+    if (folderError) {
+      root.replaceChildren();
+      this.renderToolbar(root, []);
+      root.appendChild(element("div", "eye-error", folderError));
+      return;
+    }
+
     const files = await this.plugin.readFiles();
     if (token !== this.renderToken) return;
 
@@ -312,7 +319,9 @@ export class EyeView extends ItemView {
     contextFilter: string,
   ): Promise<void> {
     const tasks = collectCompletedTasks(files, this.date)
-      .filter((task) => matchesContextFilter(task.filePath, contextFilter));
+      .filter((task) =>
+        !contextFilter || contextFilter === "*" || task.context === contextFilter
+      );
     const list = element("div", "eye-list eye-completed-list");
     root.appendChild(list);
 

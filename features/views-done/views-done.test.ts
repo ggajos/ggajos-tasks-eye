@@ -15,7 +15,7 @@ describe("Done mode feature", () => {
   it("collects completed tasks for the selected date", () => {
     const tasks = collectCompletedTasks([
       file(
-        "Db/Architecture/Architecture Governance.md",
+        "Architecture/Architecture Governance.md",
         `---
 status: closed
 ---
@@ -36,7 +36,7 @@ status: closed
       {
         context: "Architecture",
         fileName: "Architecture Governance",
-        filePath: "Db/Architecture/Architecture Governance.md",
+        filePath: "Architecture/Architecture Governance.md",
         text: "Approved ADR-042",
       },
     ]);

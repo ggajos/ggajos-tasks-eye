@@ -2,6 +2,7 @@ import {
   Notice,
   Plugin,
   TFile,
+  TFolder,
 } from "obsidian";
 import type {
   Editor,
@@ -19,10 +20,7 @@ import {
   OPEN_COMPLETED_COMMAND,
   UNCHECK_SELECTED_COMMAND,
 } from "./commands";
-import {
-  isEyeMode,
-  NOTES_FOLDER_PATH,
-} from "./constants";
+import { isEyeMode } from "./constants";
 import type { EyeMode } from "./constants";
 import { todayIso } from "./date";
 import {
@@ -30,7 +28,16 @@ import {
   uncheckSelectedTasks,
 } from "./editorUncheck";
 import { readEyeFiles } from "./indexer";
+import { findManagedFolder } from "./managedFolder";
+import {
+  DEFAULT_MANAGED_FOLDER_PATH,
+  isPathInManagedFolder,
+  isPathRelatedToManagedFolder,
+  missingManagedFolderMessage,
+  normalizeManagedFolderPath,
+} from "./managedPath";
 import { openNewEyeNoteFlow } from "./newNote";
+import { TasksEyeSettingTab } from "./settings";
 import { getTasksApi } from "./tasksApi";
 import type { TasksApiV1 } from "./tasksApi";
 import type { EyeFile, EyeSettings, RowModel } from "./types";
@@ -39,11 +46,8 @@ import { EyeView, VIEW_TYPE } from "./view";
 const DEFAULT_SETTINGS: EyeSettings = {
   mode: "open",
   contextFilter: "*",
+  notesFolderPath: DEFAULT_MANAGED_FOLDER_PATH,
 };
-
-function isRelevantFile(file: TAbstractFile): boolean {
-  return file.path.startsWith(`${NOTES_FOLDER_PATH}/`);
-}
 
 export default class TheEyePlugin extends Plugin {
   settings: EyeSettings = DEFAULT_SETTINGS;
@@ -57,8 +61,12 @@ export default class TheEyePlugin extends Plugin {
     };
     if (!isEyeMode(this.settings.mode)) this.settings.mode = "open";
     if (!this.settings.contextFilter) this.settings.contextFilter = "*";
+    this.settings.notesFolderPath = normalizeManagedFolderPath(
+      this.settings.notesFolderPath,
+    );
 
     this.registerView(VIEW_TYPE, (leaf) => new EyeView(leaf, this));
+    this.addSettingTab(new TasksEyeSettingTab(this.app, this));
 
     this.addRibbonIcon("eye", "Open Tasks Eye", () => {
       void this.openEye(this.settings.mode);
@@ -82,7 +90,7 @@ export default class TheEyePlugin extends Plugin {
       id: "create-new-note",
       name: "Create new Tasks Eye note",
       callback: () => {
-        openNewEyeNoteFlow(this.app);
+        openNewEyeNoteFlow(this.app, this.settings.notesFolderPath);
       },
     });
     this.addCommand({
@@ -105,21 +113,28 @@ export default class TheEyePlugin extends Plugin {
     });
 
     this.registerEvent(this.app.metadataCache.on("changed", (file) => {
-      if (isRelevantFile(file)) this.queueRefresh();
+      if (this.isRelevantFile(file)) this.queueRefresh();
     }));
     this.registerEvent(this.app.vault.on("create", (file) => {
-      if (isRelevantFile(file)) this.queueRefresh();
+      if (this.isRelevantFile(file)) this.queueRefresh();
     }));
     this.registerEvent(this.app.vault.on("modify", (file) => {
-      if (isRelevantFile(file)) this.queueRefresh();
+      if (this.isRelevantFile(file)) this.queueRefresh();
     }));
     this.registerEvent(this.app.vault.on("delete", (file) => {
-      if (isRelevantFile(file)) this.queueRefresh();
+      if (
+        isPathRelatedToManagedFolder(
+          file.path,
+          this.settings.notesFolderPath,
+        )
+      ) {
+        this.queueRefresh();
+      }
     }));
     this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
       if (
-        isRelevantFile(file) ||
-        oldPath.startsWith(`${NOTES_FOLDER_PATH}/`)
+        this.isRelevantFile(file) ||
+        isPathRelatedToManagedFolder(oldPath, this.settings.notesFolderPath)
       ) {
         this.queueRefresh();
       }
@@ -149,7 +164,22 @@ export default class TheEyePlugin extends Plugin {
   }
 
   async readFiles(): Promise<EyeFile[]> {
-    return readEyeFiles(this.app);
+    return readEyeFiles(this.app, this.settings.notesFolderPath);
+  }
+
+  managedFolderError(): string | null {
+    return this.managedFolder() === null
+      ? missingManagedFolderMessage(this.settings.notesFolderPath)
+      : null;
+  }
+
+  async setNotesFolderPath(notesFolderPath: string): Promise<void> {
+    const normalized = normalizeManagedFolderPath(notesFolderPath);
+    if (this.settings.notesFolderPath === normalized) return;
+    this.settings.notesFolderPath = normalized;
+    this.settings.contextFilter = "*";
+    await this.saveData(this.settings);
+    await this.refreshViews();
   }
 
   async setMode(mode: EyeMode): Promise<void> {
@@ -245,6 +275,14 @@ export default class TheEyePlugin extends Plugin {
 
   private findLeaf(): WorkspaceLeaf | null {
     return this.app.workspace.getLeavesOfType(VIEW_TYPE)[0] ?? null;
+  }
+
+  private managedFolder(): TFolder | null {
+    return findManagedFolder(this.app, this.settings.notesFolderPath);
+  }
+
+  private isRelevantFile(file: TAbstractFile): boolean {
+    return isPathInManagedFolder(file.path, this.settings.notesFolderPath);
   }
 
   private queueRefresh(): void {

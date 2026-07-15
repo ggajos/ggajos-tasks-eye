@@ -15,7 +15,7 @@ export default defineFeature({
     code: "open-without-uncompleted-tasks",
     appearsInOpen: true,
     fixture: violationFixture(note(
-      "Db/Case Studies/Engineering Strategy Q3.md",
+      "Case Studies/Engineering Strategy Q3.md",
       `---
 status: open
 ---

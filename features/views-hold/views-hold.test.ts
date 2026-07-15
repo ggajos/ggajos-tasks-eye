@@ -11,7 +11,7 @@ describe("Hold feature", () => {
   it("shows hold notes without mixing in active work", () => {
     const files = [
       file(
-        "Db/Architecture/Technology Radar.md",
+        "Architecture/Technology Radar.md",
         `---
 status: hold
 ---
@@ -20,7 +20,7 @@ status: hold
 `,
       ),
       file(
-        "Db/Architecture/Active Evaluation.md",
+        "Architecture/Active Evaluation.md",
         `---
 status: open
 ---
@@ -40,7 +40,7 @@ status: open
   it("filters hold rows by folder-derived context", () => {
     const files = [
       file(
-        "Db/Architecture/Technology Radar.md",
+        "Architecture/Technology Radar.md",
         `---
 status: hold
 ---
@@ -49,7 +49,7 @@ status: hold
 `,
       ),
       file(
-        "Db/Mission/Platform/Modernization.md",
+        "Mission/Platform/Modernization.md",
         `---
 status: hold
 ---
@@ -58,7 +58,7 @@ status: hold
 `,
       ),
       file(
-        "Db/Mission/Identity/Access Model.md",
+        "Mission/Identity/Access Model.md",
         `---
 status: hold
 ---
@@ -68,10 +68,10 @@ status: hold
       ),
     ];
 
-    expect(selectRows(files, "hold", "architecture").map((row) => row.file.path))
-      .toEqual(["Db/Architecture/Technology Radar.md"]);
-    expect(selectRows(files, "hold", "m/platform").map((row) => row.file.path))
-      .toEqual(["Db/Mission/Platform/Modernization.md"]);
+    expect(selectRows(files, "hold", "Architecture").map((row) => row.file.path))
+      .toEqual(["Architecture/Technology Radar.md"]);
+    expect(selectRows(files, "hold", "Mission/Platform").map((row) => row.file.path))
+      .toEqual(["Mission/Platform/Modernization.md"]);
     expect(selectRows(files, "hold", "mission").map((row) => row.file.path))
       .toEqual([]);
   });

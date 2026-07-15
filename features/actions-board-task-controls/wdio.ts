@@ -4,7 +4,7 @@ import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
 import { fixture, note } from "../fixtures";
 
-const FILE = "Db/Mission/Platform/Billing Platform Modernization.md";
+const FILE = "Mission/Platform/Billing Platform Modernization.md";
 const ACTION = "Approve the billing domain event contract";
 
 const boardFixture = fixture([note(FILE, {

@@ -1,36 +1,37 @@
-import { FuzzySuggestModal, Modal, Notice, Setting, TFolder } from "obsidian";
+import { FuzzySuggestModal, Modal, Notice, Setting } from "obsidian";
 import type { App } from "obsidian";
-import { NOTES_FOLDER_PATH } from "./constants";
 import { getContextFromFolderPath } from "./context";
+import {
+  collectDescendantFolders,
+  findManagedFolder,
+} from "./managedFolder";
+import {
+  missingManagedFolderMessage,
+  vaultFolderPath,
+} from "./managedPath";
 
 interface FolderOption {
   text: string;
   path: string;
 }
 
-function isFolder(value: unknown): value is TFolder {
-  return value instanceof TFolder;
-}
+function folderOptions(
+  app: App,
+  managedFolderPath: string,
+): FolderOption[] {
+  const root = findManagedFolder(app, managedFolderPath);
+  if (!root) return [];
 
-function collectFolders(folder: TFolder, result: string[]): void {
-  for (const child of folder.children) {
-    if (isFolder(child)) {
-      result.push(child.path);
-      collectFolders(child, result);
-    }
-  }
-}
-
-function folderOptions(app: App): FolderOption[] {
-  const root = app.vault.getAbstractFileByPath(NOTES_FOLDER_PATH);
-  if (!isFolder(root)) return [{ text: "- (root)", path: NOTES_FOLDER_PATH }];
-
-  const folders: string[] = [];
-  collectFolders(root, folders);
-  const options = folders
-    .map((path) => ({ text: getContextFromFolderPath(path), path }))
+  const options = collectDescendantFolders(root)
+    .map((folder) => ({
+      text: getContextFromFolderPath(folder.path, managedFolderPath),
+      path: folder.path,
+    }))
     .sort((a, b) => a.text.localeCompare(b.text));
-  return [{ text: "- (root)", path: NOTES_FOLDER_PATH }, ...options];
+  return [
+    { text: "- (root)", path: vaultFolderPath(managedFolderPath) },
+    ...options,
+  ];
 }
 
 function noteBody(): string {
@@ -49,12 +50,17 @@ function safeFileName(title: string): string {
     .trim();
 }
 
-async function uniquePath(app: App, folderPath: string, title: string): Promise<string> {
+async function uniquePath(
+  app: App,
+  folderPath: string,
+  title: string,
+): Promise<string> {
   const base = safeFileName(title) || "Untitled";
-  let candidate = `${folderPath}/${base}.md`;
+  const inFolder = (name: string) => folderPath ? `${folderPath}/${name}` : name;
+  let candidate = inFolder(`${base}.md`);
   let suffix = 1;
   while (await app.vault.adapter.exists(candidate)) {
-    candidate = `${folderPath}/${base} ${suffix}.md`;
+    candidate = inFolder(`${base} ${suffix}.md`);
     suffix++;
   }
   return candidate;
@@ -142,8 +148,14 @@ class TitleModal extends Modal {
   }
 }
 
-export function openNewEyeNoteFlow(app: App): void {
-  new FolderSuggestModal(app, folderOptions(app), (folder) => {
+export function openNewEyeNoteFlow(app: App, managedFolderPath: string): void {
+  const options = folderOptions(app, managedFolderPath);
+  if (options.length === 0) {
+    new Notice(missingManagedFolderMessage(managedFolderPath));
+    return;
+  }
+
+  new FolderSuggestModal(app, options, (folder) => {
     new TitleModal(app, folder.path).open();
   }).open();
 }

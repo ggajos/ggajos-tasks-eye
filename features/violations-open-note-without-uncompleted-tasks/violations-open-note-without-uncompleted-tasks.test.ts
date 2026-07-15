@@ -4,7 +4,7 @@ import { file, violationCodes } from "../testSupport";
 describe("Open note without uncompleted tasks violation", () => {
   it("allows open notes with an unchecked task", () => {
     expect(violationCodes(file(
-      "Db/Growth/Active.md",
+      "Growth/Active.md",
       "---\nstatus: open\n---\n\n- [ ] next action",
     ))).not.toContain("open-without-uncompleted-tasks");
   });

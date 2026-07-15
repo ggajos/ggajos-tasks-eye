@@ -6,7 +6,7 @@ import { fixture, note } from "../fixtures";
 const WORK = "Prepare the availability review";
 
 export const { screenshotScenarios } = featureScenarios(
-  fixture([note("Db/Planning/Availability Review.md", {
+  fixture([note("Planning/Availability Review.md", {
     status: "open",
     tasks: [{ text: WORK, due: "2026-07-20" }],
   })]),

@@ -10,8 +10,10 @@ Actions workflow is required. The docs build defaults to the project Pages base
 path `/ggajos-tasks-eye/`; set `DOCS_SITE` and `DOCS_BASE` when building for a
 custom domain or another mount point.
 
-Tasks Eye expects managed notes to live under `Db/`. A note's work status is
-stored in frontmatter:
+Tasks Eye manages Markdown notes under the configured notes folder and all of
+its subfolders. The setting defaults to the vault root (`/`). Change the folder
+from **Settings → Tasks Eye → Notes folder**. A note's work status is stored
+in frontmatter:
 
 ```yaml
 ---

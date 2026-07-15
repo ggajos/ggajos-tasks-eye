@@ -91,8 +91,8 @@ export function buildRowModel(file: EyeFile): RowModel {
     yearLabel: year === currentYear() ? "" : year,
     dayLabel: earliestDue === null ? "" : formatWeekday(earliestDue),
     actionLabel: earliestTask ? stripDueDate(earliestTask.text) : "No uncompleted tasks",
-    contextKey: getTopLevelContext(file.path),
-    contextLabel: getContextFromPath(file.path),
+    contextKey: getTopLevelContext(file.path, file.managedFolderPath),
+    contextLabel: getContextFromPath(file.path, file.managedFolderPath),
   };
 }
 
@@ -105,8 +105,8 @@ export function rowStateClasses(model: RowModel): string[] {
 }
 
 function compareByContextTitle(a: EyeFile, b: EyeFile): number {
-  const context = getContextFromPath(a.path).localeCompare(
-    getContextFromPath(b.path),
+  const context = getContextFromPath(a.path, a.managedFolderPath).localeCompare(
+    getContextFromPath(b.path, b.managedFolderPath),
   );
   if (context !== 0) return context;
 
@@ -138,7 +138,13 @@ export function selectRows(
   return files
     .map(buildRowModel)
     .filter((model) => rowMatchesMode(model, mode))
-    .filter((model) => matchesContextFilter(model.file.path, contextFilter))
+    .filter((model) =>
+      matchesContextFilter(
+        model.file.path,
+        contextFilter,
+        model.file.managedFolderPath,
+      )
+    )
     .sort(compareRowModels);
 }
 

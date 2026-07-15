@@ -9,27 +9,29 @@ import {
 } from "../src/context";
 
 describe("context helpers", () => {
-  it("abbreviates nested managed folders to row contexts", () => {
-    expect(getContextFromFolderPath("Db/Mission/Platform/Billing"))
-      .toBe("m/p/billing");
-    expect(getContextFromPath("Db/Mission/Platform/Modernization.md"))
-      .toBe("m/platform");
+  it("preserves literal folders relative to the managed root", () => {
+    expect(getContextFromFolderPath("10 work/Client A"))
+      .toBe("10 work/Client A");
+    expect(getContextFromPath(
+      "Workspace/10 work/Client A/Modernization.md",
+      "Workspace",
+    )).toBe("10 work/Client A");
   });
 
   it("returns top-level contexts for colors and fallbacks", () => {
-    expect(getTopLevelContext("Db/Mission/Platform/Modernization.md"))
-      .toBe("mission");
-    expect(getTopLevelContext("Db/Note.md")).toBe("-");
-    expect(getTopLevelContext("Archive/Note.md")).toBe("-");
+    expect(getTopLevelContext("Mission/Platform/Modernization.md"))
+      .toBe("Mission");
+    expect(getTopLevelContext("Note.md")).toBe("-");
+    expect(getTopLevelContext("Archive/Note.md", "Workspace")).toBe("-");
   });
 
   it("adds and formats the synthetic vacation context", () => {
-    const contexts = withVacationContext(["architecture", "m/platform"]);
+    const contexts = withVacationContext(["Architecture", "Mission/Platform"]);
 
-    expect(contexts).toEqual(["architecture", "m/platform", "ooo"]);
+    expect(contexts).toEqual(["Architecture", "Mission/Platform", "ooo"]);
     expect(contexts.map(formatContextLabel)).toEqual([
       "Architecture",
-      "M/Platform",
+      "Mission/Platform",
       "OOO",
     ]);
     expect(normalizeContextFilter("ooo", contexts)).toBe("ooo");

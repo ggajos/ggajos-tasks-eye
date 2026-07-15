@@ -14,6 +14,7 @@ export interface EyeFile {
   path: string;
   name: string;
   basename: string;
+  managedFolderPath: string;
   status?: unknown;
   tasks: EyeTask[];
 }
@@ -36,4 +37,5 @@ export interface RowModel {
 export interface EyeSettings {
   mode: EyeMode;
   contextFilter: string;
+  notesFolderPath: string;
 }

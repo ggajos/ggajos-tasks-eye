@@ -5,15 +5,15 @@ import { fixture, note } from "../fixtures";
 
 export const { screenshotScenarios } = featureScenarios(
   fixture([
-    note("Db/Strategy/Engineering Strategy.md", {
+    note("Strategy/Engineering Strategy.md", {
       status: "open",
       body: "The strategy needs a concrete next action.",
     }),
-    note("Db/Architecture/Service Ownership.md", {
+    note("Architecture/Service Ownership.md", {
       status: "reviewing",
       tasks: ["Align escalation boundaries"],
     }),
-    note("Db/Architecture/Tenant Isolation.md", {
+    note("Architecture/Tenant Isolation.md", {
       status: "closed",
       tasks: ["Publish migration guardrails"],
     }),

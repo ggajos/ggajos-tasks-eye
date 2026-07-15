@@ -1,90 +1,86 @@
-import { NOTES_FOLDER_PATH } from "./constants";
+import {
+  DEFAULT_MANAGED_FOLDER_PATH,
+  isPathInManagedFolder,
+  vaultFolderPath,
+} from "./managedPath";
 
 export const VACATION_CONTEXT = "ooo";
 
-export function getTopLevelContext(filePath: string): string {
-  const folderPath = filePath.replace(/\/[^/]+$/, "");
-  if (!folderPath.startsWith(NOTES_FOLDER_PATH)) return "-";
-
-  const normalized = folderPath.slice(NOTES_FOLDER_PATH.length).replace(
-    /^\//,
-    "",
-  );
-  if (!normalized) return "-";
-
-  const firstSegment = normalized.split("/")[0] ?? "";
-  return firstSegment.replace(/^\d+\s+/, "").toLowerCase().trim() || "-";
+function folderPathFromFilePath(filePath: string): string {
+  const separator = filePath.lastIndexOf("/");
+  return separator < 0 ? "" : filePath.slice(0, separator);
 }
 
-export function matchesContextFilter(filePath: string, filter: string): boolean {
+function relativeFolderPath(
+  folderPath: string,
+  managedFolderPath: string,
+): string | null {
+  if (!isPathInManagedFolder(folderPath, managedFolderPath)) return null;
+  const root = vaultFolderPath(managedFolderPath);
+  if (!root) return folderPath.replace(/^\/+|\/+$/g, "");
+  if (folderPath === root) return "";
+  return folderPath.slice(root.length).replace(/^\/+/, "");
+}
+
+export function getTopLevelContext(
+  filePath: string,
+  managedFolderPath = DEFAULT_MANAGED_FOLDER_PATH,
+): string {
+  const context = getContextFromPath(filePath, managedFolderPath);
+  if (context === "-") return context;
+  return context.split("/")[0] ?? "-";
+}
+
+export function matchesContextFilter(
+  filePath: string,
+  filter: string,
+  managedFolderPath = DEFAULT_MANAGED_FOLDER_PATH,
+): boolean {
   if (!filter || filter === "*") return true;
-  return getContextFromPath(filePath) === filter;
+  return getContextFromPath(filePath, managedFolderPath) === filter;
 }
 
-export function getContextFromFolderPath(folderPath: string): string {
-  if (
-    folderPath !== NOTES_FOLDER_PATH &&
-    !folderPath.startsWith(`${NOTES_FOLDER_PATH}/`)
-  ) {
-    return "-";
-  }
+export function getContextFromFolderPath(
+  folderPath: string,
+  managedFolderPath = DEFAULT_MANAGED_FOLDER_PATH,
+): string {
+  const relative = relativeFolderPath(folderPath, managedFolderPath);
+  return relative || "-";
+}
 
-  const normalized = folderPath.replace(
-    new RegExp(`^${NOTES_FOLDER_PATH}/?`, "i"),
-    "",
+export function getContextFromPath(
+  filePath: string,
+  managedFolderPath = DEFAULT_MANAGED_FOLDER_PATH,
+): string {
+  return getContextFromFolderPath(
+    folderPathFromFilePath(filePath),
+    managedFolderPath,
   );
-
-  if (!normalized) return "-";
-
-  const parts = normalized
-    .split("/")
-    .map((segment) =>
-      segment
-        .replace(/^\d+\s+/, "")
-        .toLowerCase()
-        .trim()
-    )
-    .filter(Boolean);
-
-  if (parts.length === 0) return "-";
-  if (parts.length === 1) return parts[0] ?? "-";
-
-  const abbreviated = parts.slice(0, -1).map((p) => p.charAt(0));
-  const leaf = parts[parts.length - 1] ?? "-";
-  return [...abbreviated, leaf].join("/");
-}
-
-export function getContextFromPath(filePath: string): string {
-  return getContextFromFolderPath(filePath.replace(/\/[^/]+$/, ""));
 }
 
 export function discoverContexts(
-  files: { path: string }[],
+  files: Array<{ path: string; managedFolderPath?: string }>,
 ): string[] {
   const contexts = new Set<string>();
   for (const file of files) {
-    const ctx = getContextFromPath(file.path);
+    const ctx = getContextFromPath(
+      file.path,
+      file.managedFolderPath ?? DEFAULT_MANAGED_FOLDER_PATH,
+    );
     if (ctx !== "-") contexts.add(ctx);
   }
-  return Array.from(contexts).sort();
+  return Array.from(contexts).sort((a, b) => a.localeCompare(b));
 }
 
 export function withVacationContext(contexts: readonly string[]): string[] {
-  return Array.from(new Set([...contexts, VACATION_CONTEXT])).sort();
+  return Array.from(new Set([...contexts, VACATION_CONTEXT])).sort((a, b) =>
+    a.localeCompare(b)
+  );
 }
 
 export function formatContextLabel(context: string): string {
   if (context === VACATION_CONTEXT) return "OOO";
-  if (context === "-") return context;
-  return context
-    .split("/")
-    .map((part) => {
-      if (part.length <= 2 || /^\d+[a-z]+$/i.test(part)) {
-        return part.toUpperCase();
-      }
-      return part.charAt(0).toUpperCase() + part.slice(1);
-    })
-    .join("/");
+  return context;
 }
 
 export function normalizeContextFilter(

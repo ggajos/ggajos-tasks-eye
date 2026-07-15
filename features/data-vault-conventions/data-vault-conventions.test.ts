@@ -11,9 +11,9 @@ describe("Vault conventions feature", () => {
 
   it("treats missing or blank status as open", () => {
     const rows = selectRows([
-      file("Db/Growth/Missing.md", "- [ ] missing status"),
-      file("Db/Growth/Blank.md", "---\nstatus:\n---\n\n- [ ] blank status"),
-      file("Db/Growth/Hold.md", "---\nstatus: hold\n---\n\n- [ ] hold"),
+      file("Growth/Missing.md", "- [ ] missing status"),
+      file("Growth/Blank.md", "---\nstatus:\n---\n\n- [ ] blank status"),
+      file("Growth/Hold.md", "---\nstatus: hold\n---\n\n- [ ] hold"),
     ], "open", "*");
 
     expect(rowNames(rows)).toEqual(["Blank", "Missing"]);

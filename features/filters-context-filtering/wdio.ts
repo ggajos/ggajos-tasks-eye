@@ -8,11 +8,11 @@ const MENTORING = "Prepare the system design coaching plan";
 
 export const { screenshotScenarios } = featureScenarios(
   fixture([
-    note("Db/Mission/Platform/Billing Platform Modernization.md", {
+    note("Mission/Platform/Billing Platform Modernization.md", {
       status: "open",
       tasks: [{ text: BILLING, due: "2026-07-08" }],
     }),
-    note("Db/Leadership/Staff Engineering Mentorship.md", {
+    note("Leadership/Staff Engineering Mentorship.md", {
       status: "open",
       tasks: [{ text: MENTORING, due: "2026-07-09" }],
     }),
@@ -21,9 +21,9 @@ export const { screenshotScenarios } = featureScenarios(
     screenshotSlug: "filtered-board",
     async run({ save }) {
       await tasksEyePage.openBoard("open", BILLING);
-      await tasksEyePage.setContextFilter("m/platform");
+      await tasksEyePage.setContextFilter("Mission/Platform");
       const root = await tasksEyePage.plugin("Billing Platform Modernization");
-      await expect(root).toHaveText(expect.stringContaining("M/Platform"));
+      await expect(root).toHaveText(expect.stringContaining("Mission/Platform"));
       await expect(root).toHaveText(expect.not.stringContaining(MENTORING));
       await save(root);
     },

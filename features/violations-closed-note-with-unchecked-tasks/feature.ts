@@ -14,7 +14,7 @@ export default defineFeature({
     code: "closed-with-unchecked-tasks",
     appearsInOpen: false,
     fixture: violationFixture(note(
-      "Db/Case Studies/ADR-042 Tenant Isolation.md",
+      "Case Studies/ADR-042 Tenant Isolation.md",
       `---
 status: closed
 ---

@@ -6,7 +6,7 @@ import { file } from "../testSupport";
 describe("Board task controls feature", () => {
   it("targets the earliest unfinished due task in a board row", () => {
     const row = buildRowModel(file(
-      "Db/Mission/Platform/Billing Platform Modernization.md",
+      "Mission/Platform/Billing Platform Modernization.md",
       `---
 status: open
 ---
@@ -22,7 +22,7 @@ status: open
 
   it("shifts the represented task line without changing unrelated tasks", () => {
     const note = file(
-      "Db/Mission/Platform/Billing Platform Modernization.md",
+      "Mission/Platform/Billing Platform Modernization.md",
       `---
 status: open
 ---

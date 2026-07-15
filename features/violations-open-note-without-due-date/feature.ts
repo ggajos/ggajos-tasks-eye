@@ -17,7 +17,7 @@ export default defineFeature({
     code: "open-without-due-date",
     appearsInOpen: true,
     fixture: violationFixture(note(
-      "Db/Case Studies/Platform Capability Map.md",
+      "Case Studies/Platform Capability Map.md",
       `---
 status: open
 ---

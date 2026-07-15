@@ -8,11 +8,11 @@ const OPEN_ACTION = "Approve the billing event contract";
 
 export const { screenshotScenarios } = featureScenarios(
   fixture([
-    note("Db/Architecture/Technology Radar.md", {
+    note("Architecture/Technology Radar.md", {
       status: "hold",
       tasks: [{ text: HOLD_ACTION, due: "2026-07-08" }],
     }),
-    note("Db/Architecture/Billing Platform.md", {
+    note("Architecture/Billing Platform.md", {
       status: "open",
       tasks: [{ text: OPEN_ACTION, due: "2026-07-08" }],
     }),

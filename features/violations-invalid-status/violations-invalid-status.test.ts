@@ -3,7 +3,7 @@ import { file, violationCodes } from "../testSupport";
 
 describe("Invalid status violation", () => {
   it("does not report missing status as invalid", () => {
-    expect(violationCodes(file("Db/Growth/Missing.md", "- [ ] task")))
+    expect(violationCodes(file("Growth/Missing.md", "- [ ] task")))
       .not.toContain("invalid-status");
   });
 });

@@ -5,7 +5,7 @@ import { file } from "../testSupport";
 describe("Markdown-formatted board actions feature", () => {
   it("preserves action Markdown while removing the Tasks due marker", () => {
     const row = buildRowModel(file(
-      "Db/Architecture/Technology Radar.md",
+      "Architecture/Technology Radar.md",
       `---
 status: open
 ---

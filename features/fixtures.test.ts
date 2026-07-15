@@ -3,7 +3,7 @@ import { fixture, note, task, violationFixture } from "./fixtures";
 
 describe("feature fixture builders", () => {
   it("builds structured notes with deterministic Tasks markers", () => {
-    const file = note("Db/Platform/Plan.md", {
+    const file = note("Platform/Plan.md", {
       status: "open",
       body: "Ship the safe path.",
       tasks: [
@@ -24,28 +24,29 @@ Ship the safe path.
   });
 
   it("preserves literal Markdown and supports blank status", () => {
-    expect(note("Db/Raw.md", "# exact\n").markdown).toBe("# exact\n");
-    expect(note("Db/Blank.md", { status: null }).markdown).toBe(
+    expect(note("Raw.md", "# exact\n").markdown).toBe("# exact\n");
+    expect(note("Blank.md", { status: null }).markdown).toBe(
       "---\nstatus:\n---\n",
     );
     expect(task("plain task")).toBe("- [ ] plain task");
   });
 
   it("rejects duplicate and unsafe paths", () => {
-    const file = note("Db/Plan.md", "# Plan\n");
+    const file = note("Plan.md", "# Plan\n");
     expect(() => fixture([file, file])).toThrow("Duplicate fixture path");
     expect(() => note("../Plan.md", "# Plan\n"))
       .toThrow("Invalid fixture Markdown path");
-    expect(() => note("Db/Plan.txt", "Plan\n"))
+    expect(() => note("Plan.txt", "Plan\n"))
       .toThrow("Invalid fixture Markdown path");
   });
 
   it("identifies a violation subject inside its complete fixture", () => {
-    const subject = note("Db/Invalid.md", "- [ ] repair\n");
-    const context = note("Db/Context.md", "- [ ] context\n");
+    const subject = note("Invalid.md", "- [ ] repair\n");
+    const context = note("Context.md", "- [ ] context\n");
     const value = violationFixture(subject, [context]);
 
     expect(value.subject).toBe(subject);
     expect(value.files).toHaveLength(2);
+    expect(value.settings.notesFolderPath).toBe("/");
   });
 });

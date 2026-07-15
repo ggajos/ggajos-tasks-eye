@@ -13,6 +13,7 @@ export interface FeatureFixture {
   settings: {
     mode: FixtureMode;
     contextFilter: string;
+    notesFolderPath: string;
   };
 }
 
@@ -96,6 +97,7 @@ export function fixture(
     settings: {
       mode: options.settings?.mode ?? "open",
       contextFilter: options.settings?.contextFilter ?? "*",
+      notesFolderPath: options.settings?.notesFolderPath ?? "/",
     },
   };
 }
@@ -123,5 +125,6 @@ export function isFeatureFixture(value: unknown): value is FeatureFixture {
     ) &&
     typeof candidate.today === "string" &&
     typeof candidate.settings?.mode === "string" &&
-    typeof candidate.settings?.contextFilter === "string";
+    typeof candidate.settings?.contextFilter === "string" &&
+    typeof candidate.settings?.notesFolderPath === "string";
 }

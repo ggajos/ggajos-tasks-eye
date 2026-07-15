@@ -4,7 +4,7 @@ import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
 import { fixture, note } from "../fixtures";
 
-const FILE = "Db/Architecture/Release Readiness.md";
+const FILE = "Architecture/Release Readiness.md";
 const FIRST_TASK = "Approved the production readiness checklist";
 
 const uncheckFixture = fixture([note(FILE, {

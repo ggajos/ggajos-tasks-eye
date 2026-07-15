@@ -28,31 +28,31 @@ async function expectDefaultOpenBuckets(): Promise<void> {
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   fixture([
-    note("Db/Mission/Platform/Platform Discovery.md", {
+    note("Mission/Platform/Platform Discovery.md", {
       status: "open",
       tasks: [{ text: NO_DUE }],
     }),
-    note("Db/Mission/Platform/Billing Platform Modernization.md", {
+    note("Mission/Platform/Billing Platform Modernization.md", {
       status: "open",
       tasks: [{ text: BILLING, due: "2026-07-08" }],
     }),
-    note("Db/Leadership/Staff Engineering Mentorship.md", {
+    note("Leadership/Staff Engineering Mentorship.md", {
       status: "open",
       tasks: [{ text: MENTORING, due: "2026-07-09" }],
     }),
-    note("Db/Architecture/Service Ownership.md", {
+    note("Architecture/Service Ownership.md", {
       status: "open",
       tasks: [{ text: THIS_MONTH, due: "2026-07-15" }],
     }),
-    note("Db/Architecture/Capability Review.md", {
+    note("Architecture/Capability Review.md", {
       status: "open",
       tasks: [{ text: NEXT_MONTH, due: "2026-08-05" }],
     }),
-    note("Db/Planning/Reliability Investment.md", {
+    note("Planning/Reliability Investment.md", {
       status: "open",
       tasks: [{ text: FUTURE, due: "2026-09-01" }],
     }),
-    note("Db/Planning/Deferred Migration.md", {
+    note("Planning/Deferred Migration.md", {
       status: "hold",
       tasks: [{ text: HOLD_FUTURE, due: "2026-09-01" }],
     }),

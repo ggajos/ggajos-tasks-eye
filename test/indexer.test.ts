@@ -9,7 +9,7 @@ describe("frontmatter parsing", () => {
     const markdown = "\uFEFF---\r\nstatus: open\r\n---\r\n\r\n- [ ] task";
 
     expect(parseFrontmatter(markdown)).toEqual({ status: "open" });
-    expect(buildEyeFileFromMarkdown("Db/Growth/A.md", markdown).status)
+    expect(buildEyeFileFromMarkdown("Growth/A.md", markdown).status)
       .toBe("open");
   });
 

@@ -8,18 +8,18 @@ const LEGACY_COMPLETED_VIEW_TYPE = "ggajos-tasks-eye-completed-view";
 const COMPLETED = "Approved ADR-042 for tenant isolation";
 
 const doneFixture = fixture([
-    note("Db/Architecture/Architecture Governance.md", {
+    note("Architecture/Architecture Governance.md", {
       status: "closed",
       tasks: [{ text: COMPLETED, completed: "2026-07-08" }],
     }),
-    note("Db/Architecture/Billing Platform.md", {
+    note("Architecture/Billing Platform.md", {
       status: "open",
       tasks: [{
         text: "Approve the billing domain event contract",
         due: "2026-07-08",
       }],
     }),
-    note("Db/Architecture/Technology Radar.md", {
+    note("Architecture/Technology Radar.md", {
       status: "hold",
       tasks: [{ text: "Review platform isolation", due: "2026-07-08" }],
     }),

@@ -5,7 +5,7 @@ import { file } from "../testSupport";
 describe("Task scheduled on vacation violation", () => {
   it("shows only the earliest vacation collision in row errors", () => {
     expect(rowErrors(file(
-      "Db/Architecture/Architecture Offsite.md",
+      "Architecture/Architecture Offsite.md",
       `---
 status: open
 ---

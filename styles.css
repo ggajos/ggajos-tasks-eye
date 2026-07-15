@@ -315,31 +315,35 @@
   overflow: hidden;
   padding: 0 2px 0 8px;
   text-align: right;
-  text-transform: uppercase;
   text-overflow: ellipsis;
   transition: opacity 120ms ease;
   white-space: nowrap;
   width: auto;
 }
 
-.eye-context-badge[data-eye-context="growth"] {
+.eye-context-badge[data-eye-context="growth" i] {
   --eye-context-rgb: var(--eye-green-rgb);
 }
 
-.eye-context-badge[data-eye-context="fitness"] {
+.eye-context-badge[data-eye-context="fitness" i] {
   --eye-context-rgb: var(--eye-orange-rgb);
 }
 
-.eye-context-badge[data-eye-context="life"] {
+.eye-context-badge[data-eye-context="life" i] {
   --eye-context-rgb: var(--eye-purple-rgb);
 }
 
-.eye-context-badge[data-eye-context="mission"] {
+.eye-context-badge[data-eye-context="mission" i] {
   --eye-context-rgb: var(--eye-cyan-rgb);
 }
 
-.eye-context-badge[data-eye-context="hardware"] {
+.eye-context-badge[data-eye-context="hardware" i] {
   --eye-context-rgb: var(--eye-blue-rgb);
+}
+
+.eye-setting-warning {
+  color: var(--text-error);
+  margin: 0 0 var(--size-4-4);
 }
 
 .eye-row-main {
