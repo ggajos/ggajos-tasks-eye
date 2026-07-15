@@ -10,8 +10,8 @@ Actions workflow is required. The docs build defaults to the project Pages base
 path `/ggajos-tasks-eye/`; set `DOCS_SITE` and `DOCS_BASE` when building for a
 custom domain or another mount point.
 
-Tasks Eye expects notes to live under `Db/` and daily notes to live under
-`Timeline/`. A note's work status is stored in frontmatter:
+Tasks Eye expects managed notes to live under `Db/`. A note's work status is
+stored in frontmatter:
 
 ```yaml
 ---
@@ -57,20 +57,6 @@ Done shows completed Tasks items for a selected date, grouped by note context,
 inside the same Tasks Eye view as the work queues.
 
 ![Done tasks](docs/assets/features/views-done/dark-minimal/done-view.png)
-
-## Daily Completed Summary
-
-Tasks Eye registers the `ggajos-tasks-eye-daily-completed` markdown code block:
-
-````markdown
-```ggajos-tasks-eye-daily-completed
-```
-````
-
-The legacy `obsidian-tasks-eye-daily-completed` and `eye-daily-completed` block
-names are also supported as migration aliases.
-
-![Daily completed summary](docs/assets/features/blocks-daily-completed-summary/dark-minimal/summary.png)
 
 ## Commands
 

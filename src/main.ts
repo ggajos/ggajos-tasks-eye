@@ -22,11 +22,8 @@ import {
 import {
   isEyeMode,
   NOTES_FOLDER_PATH,
-  TIMELINE_FOLDER_PATH,
 } from "./constants";
 import type { EyeMode } from "./constants";
-import { renderDailyCompletedBlock } from "./daily";
-import { datePrefix } from "./dailyCore";
 import { todayIso } from "./date";
 import {
   canUncheckSelectedTasks,
@@ -46,10 +43,6 @@ const DEFAULT_SETTINGS: EyeSettings = {
 
 function isRelevantFile(file: TAbstractFile): boolean {
   return file.path.startsWith(`${NOTES_FOLDER_PATH}/`);
-}
-
-function isTimelineFile(file: TAbstractFile): boolean {
-  return file.path.startsWith(`${TIMELINE_FOLDER_PATH}/`);
 }
 
 export default class TheEyePlugin extends Plugin {
@@ -111,49 +104,25 @@ export default class TheEyePlugin extends Plugin {
       },
     });
 
-    for (const blockName of [
-      "ggajos-tasks-eye-daily-completed",
-      "obsidian-tasks-eye-daily-completed",
-      "eye-daily-completed",
-    ] as const) {
-      this.registerMarkdownCodeBlockProcessor(
-        blockName,
-        async (source, el, ctx) => {
-          await renderDailyCompletedBlock(
-            this.app,
-            source,
-            el,
-            ctx.sourcePath,
-            this,
-          );
-        },
-      );
-    }
-
     this.registerEvent(this.app.metadataCache.on("changed", (file) => {
-      if (isRelevantFile(file) || isTimelineFile(file)) this.queueRefresh();
+      if (isRelevantFile(file)) this.queueRefresh();
     }));
     this.registerEvent(this.app.vault.on("create", (file) => {
-      if (isRelevantFile(file) || isTimelineFile(file)) this.queueRefresh();
+      if (isRelevantFile(file)) this.queueRefresh();
     }));
     this.registerEvent(this.app.vault.on("modify", (file) => {
-      if (isRelevantFile(file) || isTimelineFile(file)) this.queueRefresh();
+      if (isRelevantFile(file)) this.queueRefresh();
     }));
     this.registerEvent(this.app.vault.on("delete", (file) => {
-      if (isRelevantFile(file) || isTimelineFile(file)) this.queueRefresh();
+      if (isRelevantFile(file)) this.queueRefresh();
     }));
     this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
       if (
         isRelevantFile(file) ||
-        isTimelineFile(file) ||
-        oldPath.startsWith(`${NOTES_FOLDER_PATH}/`) ||
-        oldPath.startsWith(`${TIMELINE_FOLDER_PATH}/`)
+        oldPath.startsWith(`${NOTES_FOLDER_PATH}/`)
       ) {
         this.queueRefresh();
       }
-    }));
-    this.registerEvent(this.app.workspace.on("active-leaf-change", () => {
-      void this.syncDoneDateToActiveDaily();
     }));
     if (!this.tasksApiAvailable()) {
       new Notice("Tasks Eye requires the Obsidian Tasks plugin API.");
@@ -202,7 +171,7 @@ export default class TheEyePlugin extends Plugin {
     const leaf = existingLeaf ?? this.app.workspace.getLeaf(false);
     const state: Record<string, unknown> = { mode };
     if (!existingLeaf && mode === "done") {
-      state.date = this.activeDailyDate() ?? todayIso();
+      state.date = todayIso();
     }
     await leaf.setViewState({
       type: VIEW_TYPE,
@@ -218,8 +187,7 @@ export default class TheEyePlugin extends Plugin {
 
   async openCompletedTasks(date?: string): Promise<void> {
     await this.setMode("done");
-    const activeDaily = this.activeDailyDate();
-    const viewDate = date ?? activeDaily ?? todayIso();
+    const viewDate = date ?? todayIso();
     const existingLeaf = this.findLeaf();
     const leaf = existingLeaf ?? this.app.workspace.getLeaf(false);
     await leaf.setViewState({
@@ -291,26 +259,6 @@ export default class TheEyePlugin extends Plugin {
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
     for (const leaf of leaves) {
       if (leaf.view instanceof EyeView) await leaf.view.requestRender();
-    }
-  }
-
-  private activeDailyDate(): string | null {
-    const file = this.app.workspace.getActiveFile();
-    if (!file || !file.path.startsWith(`${TIMELINE_FOLDER_PATH}/`)) {
-      return null;
-    }
-    return datePrefix(file.name);
-  }
-
-  private async syncDoneDateToActiveDaily(): Promise<void> {
-    const date = this.activeDailyDate();
-    if (!date) return;
-
-    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
-    for (const leaf of leaves) {
-      if (leaf.view instanceof EyeView) {
-        await leaf.view.setDate(date);
-      }
     }
   }
 }

@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { collectCompletedTasks, groupCompletedTasks } from "../../src/dailyCore";
+import {
+  cleanCompletedTaskText,
+  collectCompletedTasks,
+  groupCompletedTasks,
+} from "../../src/completedTasks";
 import { file } from "../testSupport";
 
 describe("Done mode feature", () => {
+  it("cleans completion dates and tags from task text", () => {
+    expect(cleanCompletedTaskText("Ship feature #work ✅ 2026-07-07"))
+      .toBe("Ship feature");
+  });
+
   it("collects completed tasks for the selected date", () => {
     const tasks = collectCompletedTasks([
       file(

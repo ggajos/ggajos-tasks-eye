@@ -12,8 +12,8 @@ import {
 import {
   collectCompletedTasks,
   groupCompletedTasks,
-} from "./dailyCore";
-import type { CompletedTask } from "./dailyCore";
+} from "./completedTasks";
+import type { CompletedTask } from "./completedTasks";
 import {
   boardItemsForContext,
   buildBoardBuckets,

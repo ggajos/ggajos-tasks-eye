@@ -1,5 +1,4 @@
 export const NOTES_FOLDER_PATH = "Db";
-export const TIMELINE_FOLDER_PATH = "Timeline";
 
 export const STATUSES = [
   "hold",

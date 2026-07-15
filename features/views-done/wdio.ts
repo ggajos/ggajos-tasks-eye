@@ -23,7 +23,6 @@ const doneFixture = fixture([
       status: "hold",
       tasks: [{ text: "Review platform isolation", due: "2026-07-08" }],
     }),
-    note("Timeline/2026/2026-07-09 - Thu.md", "# Thursday\n"),
 ]);
 
 async function unifiedViewState() {
@@ -83,7 +82,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
       },
     },
     {
-      title: "remembers tab dates and keeps command and daily-note jumps",
+      title: "remembers tab dates and lets the command jump to today",
       async run() {
         await tasksEyePage.openDone(COMPLETED);
         await browser.execute(() => {
@@ -115,16 +114,6 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         if (commandJump.date !== "2026-07-08") {
           throw new Error(`Done command did not jump to today: ${JSON.stringify(commandJump)}`);
         }
-
-        await tasksEyePage.openPreview(
-          "Timeline/2026/2026-07-09 - Thu.md",
-          "Thursday",
-        );
-        await browser.waitUntil(async () =>
-          (await unifiedViewState()).date === "2026-07-09", {
-          timeout: 10_000,
-          timeoutMsg: "Expected active daily note to synchronize the Done date",
-        });
       },
     },
   ], screenshots: [
