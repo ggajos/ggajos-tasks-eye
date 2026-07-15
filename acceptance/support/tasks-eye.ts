@@ -140,6 +140,9 @@ function defaultViolationScreenshotScenarios(
       const subject = violation.fixture.subject;
       const expectedTitle = path.basename(subject.path, path.extname(subject.path));
       await tasksEyePage.openBoard(mode, expectedTitle);
+      if (mode === "open") {
+        await tasksEyePage.expandBucketForText(expectedTitle);
+      }
       await tasksEyePage.setContextFilter(getContextFromPath(subject.path));
       const root = await tasksEyePage.plugin(expectedTitle);
       await tasksEyePage.expectSingleViolation(violation.code);

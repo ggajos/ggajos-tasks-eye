@@ -1,4 +1,5 @@
 import { $, browser } from "@wdio/globals";
+import type { DueBucket } from "../../src/constants";
 
 export type EyeMode = "open" | "inbox" | "hold";
 export type WdioElement = WebdriverIO.Element;
@@ -24,6 +25,38 @@ async function activeView(selector: string, text: string): Promise<WdioElement> 
   const element = await $(selector);
   await element.waitForDisplayed({ timeout: 5_000 });
   return element as unknown as WdioElement;
+}
+
+async function activeViewContent(
+  selector: string,
+  text: string,
+): Promise<WdioElement> {
+  let actual = "";
+  try {
+    await browser.waitUntil(async () => {
+      actual = await browser.execute((query) =>
+        document.querySelector(query)?.textContent ?? "", selector);
+      return actual.includes(text);
+    }, { timeout: 20_000 });
+  } catch {
+    throw new Error(
+      `Expected active view content to contain "${text}"; last content was ${JSON.stringify(actual)}`,
+    );
+  }
+  const element = await $(selector);
+  await element.waitForDisplayed({ timeout: 5_000 });
+  return element as unknown as WdioElement;
+}
+
+async function bucketExpanded(bucket: DueBucket): Promise<boolean | null> {
+  return await browser.execute((bucketKey) => {
+    const group = document.querySelector<HTMLElement>(
+      `.workspace-leaf.mod-active .eye-bucket[data-eye-bucket="${bucketKey}"]`,
+    );
+    const value = group?.querySelector(".eye-bucket-header")
+      ?.getAttribute("aria-expanded");
+    return value === null || value === undefined ? null : value === "true";
+  }, bucket);
 }
 
 async function openMarkdown(
@@ -70,7 +103,7 @@ export const tasksEyePage = {
 
   async openBoard(mode: EyeMode, text: string): Promise<WdioElement> {
     await browser.executeObsidianCommand(`ggajos-tasks-eye:open-${mode}`);
-    return await activeView(PLUGIN, text);
+    return await activeViewContent(PLUGIN, text);
   },
 
   async openDone(text: string): Promise<WdioElement> {
@@ -90,6 +123,66 @@ export const tasksEyePage = {
       select.value = nextValue;
       select.dispatchEvent(new Event("change", { bubbles: true }));
     }, value);
+  },
+
+  async expectBucketExpanded(
+    bucket: DueBucket,
+    expanded: boolean,
+  ): Promise<void> {
+    await browser.waitUntil(async () =>
+      await bucketExpanded(bucket) === expanded, {
+      timeout: 10_000,
+      timeoutMsg: `Expected ${bucket} bucket to be ${expanded ? "expanded" : "collapsed"}`,
+    });
+  },
+
+  async toggleBucket(bucket: DueBucket): Promise<void> {
+    const toggled = await browser.execute((bucketKey) => {
+      const header = document.querySelector<HTMLElement>(
+        `.workspace-leaf.mod-active .eye-bucket[data-eye-bucket="${bucketKey}"] .eye-bucket-header`,
+      );
+      header?.click();
+      return header !== null;
+    }, bucket);
+    if (!toggled) throw new Error(`Missing ${bucket} bucket`);
+  },
+
+  async expandBucketForText(text: string): Promise<void> {
+    await browser.waitUntil(async () => await browser.execute((expected) => {
+      const rows = document.querySelectorAll<HTMLElement>(
+        ".workspace-leaf.mod-active .eye-bucket .eye-row",
+      );
+      const row = [...rows].find((candidate) =>
+        candidate.textContent?.includes(expected)
+      );
+      const group = row?.closest<HTMLElement>(".eye-bucket");
+      const header = group?.querySelector<HTMLElement>(".eye-bucket-header");
+      if (!header) return false;
+      if (header.getAttribute("aria-expanded") !== "true") header.click();
+      return header.getAttribute("aria-expanded") === "true";
+    }, text), {
+      timeout: 10_000,
+      timeoutMsg: `Expected a bucket containing "${text}" to expand`,
+    });
+  },
+
+  async requestRender(): Promise<void> {
+    await browser.executeObsidian(async ({ app }) => {
+      const leaf = app.workspace.getLeavesOfType("ggajos-tasks-eye-view")[0];
+      const view = leaf?.view as unknown as {
+        requestRender?: () => Promise<void>;
+      };
+      if (!view.requestRender) throw new Error("Tasks Eye view is missing");
+      await view.requestRender();
+    });
+  },
+
+  async closePane(): Promise<void> {
+    await browser.executeObsidian(({ app }) => {
+      for (const leaf of app.workspace.getLeavesOfType("ggajos-tasks-eye-view")) {
+        leaf.detach();
+      }
+    });
   },
 
   async expectRowAction(rowText: string, ariaLabel: string): Promise<void> {

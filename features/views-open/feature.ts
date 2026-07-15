@@ -9,6 +9,8 @@ export default defineFeature({
     "Hold notes do not appear in Open.",
     "Rows use the earliest unfinished due task as the next action.",
     "Rows are grouped into No due, Today, Tomorrow, This Month, Next Month, and Future buckets.",
+    "A new Open pane starts with Today expanded and every other due-date bucket collapsed.",
+    "Manual bucket choices survive rerenders and tab switches until the pane is closed.",
   ],
   screenshots: [
     {

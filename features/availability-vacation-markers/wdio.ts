@@ -15,7 +15,7 @@ export const { screenshotScenarios } = featureScenarios(
     async run({ save }) {
       await tasksEyePage.openBoard("open", "Open");
       await tasksEyePage.setContextFilter("*");
-      await tasksEyePage.plugin(WORK);
+      await tasksEyePage.expandBucketForText(WORK);
       await tasksEyePage.setContextFilter("ooo");
       const root = await tasksEyePage.plugin("Vacation");
       await expect(root).toHaveText(expect.stringContaining("OOO"));

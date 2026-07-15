@@ -1,5 +1,6 @@
 import { ItemView, MarkdownRenderer, setIcon } from "obsidian";
 import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
+import { BoardCollapseState } from "./boardCollapse";
 import { isEyeMode, MODE_LABELS, MODES } from "./constants";
 import type { EyeMode } from "./constants";
 import {
@@ -88,7 +89,7 @@ export class EyeView extends ItemView {
   private mode: EyeMode;
   private date: string;
   private renderToken = 0;
-  private collapsedBuckets = new Set<string>();
+  private readonly bucketCollapse = new BoardCollapseState();
 
   constructor(leaf: WorkspaceLeaf, plugin: TheEyePlugin) {
     super(leaf);
@@ -424,9 +425,9 @@ export class EyeView extends ItemView {
     list: HTMLElement,
     bucket: BoardBucket,
   ): Promise<void> {
-    const stateKey = this.bucketStateKey(bucket.key);
-    const collapsed = this.collapsedBuckets.has(stateKey);
+    const collapsed = this.bucketCollapse.isCollapsed(this.mode, bucket.key);
     const group = element("section", "eye-bucket tree-item");
+    group.dataset.eyeBucket = bucket.key;
     if (collapsed) group.classList.add("is-collapsed");
 
     const header = element("div", "eye-bucket-header tree-item-self");
@@ -453,14 +454,11 @@ export class EyeView extends ItemView {
     ));
 
     const toggleBucket = () => {
-      const nextCollapsed = !group.classList.contains("is-collapsed");
+      const nextCollapsed = this.bucketCollapse.toggle(this.mode, bucket.key);
       group.classList.toggle("is-collapsed", nextCollapsed);
       children.hidden = nextCollapsed;
       header.setAttribute("aria-expanded", `${!nextCollapsed}`);
       this.setBucketCollapseIcon(collapseIcon, nextCollapsed);
-
-      if (nextCollapsed) this.collapsedBuckets.add(stateKey);
-      else this.collapsedBuckets.delete(stateKey);
     };
 
     header.addEventListener("click", toggleBucket);
@@ -482,10 +480,6 @@ export class EyeView extends ItemView {
 
     group.appendChild(children);
     list.appendChild(group);
-  }
-
-  private bucketStateKey(bucketKey: string): string {
-    return `${this.mode}:${bucketKey}`;
   }
 
   private setBucketCollapseIcon(
