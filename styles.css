@@ -275,6 +275,7 @@
   align-items: start;
   border-radius: var(--radius-s, 4px);
   display: grid;
+  flex-shrink: 0;
   gap: 4px;
   grid-template-columns: minmax(0, 1fr) auto;
   min-height: 28px;

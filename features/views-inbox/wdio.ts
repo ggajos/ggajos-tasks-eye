@@ -3,27 +3,20 @@ import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
 import { fixture, note } from "../fixtures";
 
+const crowdedInbox = Array.from({ length: 40 }, (_, index) => {
+  const number = String(index + 1).padStart(2, "0");
+  return note(`Archive/Imported Note ${number}.md`, {
+    body: `Imported reference ${number} has no actionable tasks.`,
+  });
+});
+
 export const { screenshotScenarios } = featureScenarios(
-  fixture([
-    note("Strategy/Engineering Strategy.md", {
-      status: "open",
-      body: "The strategy needs a concrete next action.",
-    }),
-    note("Architecture/Service Ownership.md", {
-      status: "reviewing",
-      tasks: ["Align escalation boundaries"],
-    }),
-    note("Architecture/Tenant Isolation.md", {
-      status: "closed",
-      tasks: ["Publish migration guardrails"],
-    }),
-  ]),
+  fixture(crowdedInbox),
   { screenshots: [{
     screenshotSlug: "repair-queue",
     async run({ save }) {
-      const root = await tasksEyePage.openBoard("inbox", "Engineering Strategy");
-      await expect(root).toHaveText(expect.stringContaining("Service Ownership"));
-      await expect(root).toHaveText(expect.stringContaining("Tenant Isolation"));
+      const root = await tasksEyePage.openBoard("inbox", "Imported Note 01");
+      await expect(root).toHaveText(expect.stringContaining("Imported Note 40"));
       await save(root);
     },
   }] },

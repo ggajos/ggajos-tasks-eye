@@ -14,7 +14,7 @@ export default defineFeature({
     {
       slug: "repair-queue",
       title: "Repair queue",
-      alt: "Inbox repair queue showing architecture and engineering strategy notes",
+      alt: "Crowded Inbox repair queue showing many imported notes with validation errors",
     },
   ],
 });
