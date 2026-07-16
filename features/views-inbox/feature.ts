@@ -3,7 +3,7 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Inbox view",
   summary:
-    "Inbox collects notes that need workflow cleanup, regardless of their current status.",
+    "Inbox collects notes that need a small repair before the workflow can treat them reliably.",
   acceptanceCriteria: [
     "Inbox shows notes with validation issues.",
     "Inbox includes notes with issues regardless of whether their status is open, hold, or closed.",
@@ -13,8 +13,8 @@ export default defineFeature({
   screenshots: [
     {
       slug: "repair-queue",
-      title: "Notes that need attention",
-      alt: "Crowded Inbox showing imported notes that need workflow cleanup",
+      title: "A repair queue with clear next steps",
+      alt: "Inbox showing realistic notes with different workflow issues and repair actions",
     },
   ],
 });

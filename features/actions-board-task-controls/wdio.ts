@@ -4,16 +4,28 @@ import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
 import { fixture, note } from "../fixtures";
 
-const FILE = "Mission/Platform/Billing Platform Modernization.md";
-const ACTION = "Approve the billing domain event contract";
+const FILE = "Work/Client Website Refresh.md";
+const ACTION = "Send the revised homepage copy to Marta";
 
 const boardFixture = fixture([note(FILE, {
     status: "open",
     tasks: [
       { text: ACTION, due: "2026-07-08" },
-      { text: "Review the migration runbook", due: "2026-07-15" },
+      { text: "Review the launch checklist", due: "2026-07-15" },
     ],
-})]);
+  }),
+  note("Home/Kitchen Renovation.md", {
+    status: "open",
+    tasks: [{
+      text: "Call the electrician about the updated quote",
+      due: "2026-07-08",
+    }],
+  }),
+  note("Family/Summer Trip.md", {
+    status: "open",
+    tasks: [{ text: "Book train tickets to Gdańsk", due: "2026-07-08" }],
+  }),
+]);
 
 async function waitForFileText(text: string): Promise<void> {
   await browser.waitUntil(async () => (await obsidianPage.read(FILE)).includes(text), {

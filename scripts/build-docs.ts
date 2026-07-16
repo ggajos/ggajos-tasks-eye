@@ -18,9 +18,9 @@ import type {
 const DOCS_SRC_ROOT = path.resolve("docs-src");
 const CONTENT_ROOT = path.join(DOCS_SRC_ROOT, "src", "content", "docs");
 const FEATURE_CONTENT_ROOT = path.join(CONTENT_ROOT, "features");
+const REFERENCE_CONTENT_ROOT = path.join(CONTENT_ROOT, "reference");
 const GENERATED_ROOT = path.join(DOCS_SRC_ROOT, "src", "generated");
 const TEMPLATE_ROOT = path.join(DOCS_SRC_ROOT, "templates");
-const DEFAULT_SCREENSHOT_VARIANT = "dark-minimal";
 const SCREENSHOT_VARIANT_ORDER = ["dark-minimal", "dark", "light"];
 
 const screenshotVariants = [...DOCUMENTATION_VARIANTS].sort((a, b) =>
@@ -78,6 +78,75 @@ const FALLBACK_GROUP: FeatureGroup = {
   order: 999,
 };
 
+interface SidebarFeatureLink {
+  slug: string;
+  label: string;
+}
+
+interface SidebarFeatureSection {
+  label: string;
+  items: readonly SidebarFeatureLink[];
+}
+
+const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
+  {
+    label: "Everyday workflow",
+    items: [
+      { slug: "views-open", label: "Choose what to do next" },
+      { slug: "actions-board-task-controls", label: "Complete or reschedule" },
+      { slug: "filters-context-filtering", label: "Focus on a context" },
+      { slug: "views-inbox", label: "Repair notes in Inbox" },
+      { slug: "views-hold", label: "Pause work in Hold" },
+      { slug: "views-done", label: "Review completed work" },
+    ],
+  },
+  {
+    label: "Notes in the workflow",
+    items: [
+      { slug: "actions-create-new-note", label: "Create a note" },
+      { slug: "actions-change-note-status", label: "Change a note's state" },
+      { slug: "data-vault-conventions", label: "Organize notes and tasks" },
+    ],
+  },
+  {
+    label: "Workflow checks",
+    items: [
+      {
+        slug: "violations-open-note-without-due-date",
+        label: "Add a dated next action",
+      },
+      {
+        slug: "violations-open-note-without-uncompleted-tasks",
+        label: "Add an unchecked task",
+      },
+      {
+        slug: "violations-note-in-managed-root",
+        label: "Move a note into context",
+      },
+      {
+        slug: "violations-invalid-status",
+        label: "Use a supported status",
+      },
+      {
+        slug: "violations-closed-note-with-unchecked-tasks",
+        label: "Resolve work in a closed note",
+      },
+      {
+        slug: "violations-task-scheduled-on-vacation",
+        label: "Move work off an unavailable day",
+      },
+    ],
+  },
+  {
+    label: "More tools",
+    items: [
+      { slug: "availability-vacation-markers", label: "Plan around time away" },
+      { slug: "actions-markdown-rendering", label: "Use Markdown in board tasks" },
+      { slug: "actions-uncheck-selected-tasks", label: "Reopen completed tasks" },
+    ],
+  },
+];
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -111,28 +180,8 @@ function byGroupThenTitle(a: LoadedFeature, b: LoadedFeature): number {
   );
 }
 
-function groupFeatures(features: readonly LoadedFeature[]): Map<string, LoadedFeature[]> {
-  const grouped = new Map<string, { group: FeatureGroup; features: LoadedFeature[] }>();
-  for (const feature of features) {
-    const group = groupForFeature(feature.feature);
-    const entry = grouped.get(group.label) ?? { group, features: [] };
-    entry.features.push(feature);
-    grouped.set(group.label, entry);
-  }
-
-  return new Map(
-    [...grouped.entries()]
-      .sort(([, entryA], [, entryB]) => entryA.group.order - entryB.group.order)
-      .map(([label, entry]) => [label, entry.features]),
-  );
-}
-
 function featurePath(feature: LoadedFeatureDefinition): string {
   return `/features/${feature.slug}/`;
-}
-
-function relativeFeaturePath(feature: LoadedFeatureDefinition): string {
-  return `features/${feature.slug}/`;
 }
 
 function screenshotAssetPath(
@@ -144,41 +193,10 @@ function screenshotAssetPath(
   return `${prefix}assets/features/${feature.slug}/${variantKey}/${screenshot.slug}.png`;
 }
 
-function renderIndexFeatureCards(features: readonly LoadedFeature[]): string {
-  return [...groupFeatures(features)]
-    .map(([label, groupFeaturesForLabel]) => {
-      const group = groupForFeature(groupFeaturesForLabel[0]!.feature);
-      const cards = groupFeaturesForLabel
-        .sort(byGroupThenTitle)
-        .map(({ feature }) => {
-          const shot = feature.screenshots[0]!;
-          const src = screenshotAssetPath(feature, shot, DEFAULT_SCREENSHOT_VARIANT, "");
-          return `<article class="feature-card">
-  <a href="${relativeFeaturePath(feature)}" class="feature-card__media" aria-label="${escapeHtml(feature.title)} documentation">
-    <img src="${escapeHtml(src)}" alt="${escapeHtml(shot.alt)}" loading="lazy" />
-  </a>
-  <div class="feature-card__body">
-    <h3><a href="${relativeFeaturePath(feature)}">${escapeHtml(feature.title)}</a></h3>
-    <p>${escapeHtml(singleLine(feature.summary))}</p>
-  </div>
-</article>`;
-        })
-        .join("\n");
-
-      return `<section class="feature-group" aria-labelledby="feature-group-${slugPrefix(groupFeaturesForLabel[0]!.feature.slug)}">
-  <div class="feature-group__heading">
-    <h3 id="feature-group-${slugPrefix(groupFeaturesForLabel[0]!.feature.slug)}">${escapeHtml(label)}</h3>
-    <p>${escapeHtml(group.description)}</p>
-  </div>
-  <div class="feature-grid">
-${cards}
-  </div>
-</section>`;
-    })
-    .join("\n\n");
-}
-
-function renderCommandTable(features: readonly LoadedFeature[]): string {
+function renderCommandTable(
+  features: readonly LoadedFeature[],
+  featureLinkPrefix: string,
+): string {
   const featureSlugs = new Set(features.map(({ feature }) => feature.slug));
   const renderRows = (commands: readonly DocumentedCommand[]) =>
     commands.map((command) => {
@@ -193,7 +211,7 @@ function renderCommandTable(features: readonly LoadedFeature[]): string {
         throw new Error(`Command ${command.id} references unknown feature ${command.featureSlug}`);
       }
       const featureCell = command.featureSlug && command.featureTitle
-        ? `<a href="features/${escapeHtml(command.featureSlug)}/">${escapeHtml(command.featureTitle)}</a>`
+        ? `<a href="${featureLinkPrefix}features/${escapeHtml(command.featureSlug)}/">${escapeHtml(command.featureTitle)}</a>`
         : "&mdash;";
 
       return `<tr>
@@ -205,16 +223,17 @@ function renderCommandTable(features: readonly LoadedFeature[]): string {
     })
     .join("\n");
 
-  return DOCUMENTED_COMMAND_GROUPS.map((group) => `<section class="command-group">
-<h3>${escapeHtml(group.title)}</h3>
-<p>${escapeHtml(group.description)}</p>
+  return DOCUMENTED_COMMAND_GROUPS.map((group) => `## ${escapeHtml(group.title)}
+
+<p class="command-group-description">${escapeHtml(group.description)}</p>
+<div class="command-group">
 <div class="table-scroll">
 <table class="shortcut-table">
   <thead>
     <tr>
       <th>Default shortcut</th>
       <th>Command</th>
-      <th>Feature</th>
+      <th>Learn more</th>
       <th>Purpose</th>
     </tr>
   </thead>
@@ -223,19 +242,18 @@ ${renderRows(group.commands)}
   </tbody>
 </table>
 </div>
-</section>`).join("\n\n");
+</div>`).join("\n\n");
 }
 
-async function renderIndexPage(features: readonly LoadedFeature[]): Promise<string> {
-  let template = await readFile(path.join(TEMPLATE_ROOT, "index.mdx"), "utf8");
-  const replacements = {
-    FEATURE_CARDS: renderIndexFeatureCards(features),
-    COMMAND_TABLE: renderCommandTable(features),
-  };
+async function renderTemplate(
+  filename: string,
+  replacements: Readonly<Record<string, string>> = {},
+): Promise<string> {
+  let template = await readFile(path.join(TEMPLATE_ROOT, filename), "utf8");
   for (const [token, value] of Object.entries(replacements)) {
     const marker = `{{${token}}}`;
     if (template.split(marker).length !== 2) {
-      throw new Error(`Documentation template must contain one ${marker}`);
+      throw new Error(`${filename} must contain one ${marker}`);
     }
     template = template.replace(marker, value);
   }
@@ -254,7 +272,7 @@ function renderViolationSample(feature: FeatureDefinition): string {
   const sample = violation.fixture.subject;
 
   return `
-## Example note that needs attention
+## Example note to repair
 
 \`\`\`md
 ${sample.markdown.trimEnd()}
@@ -313,39 +331,53 @@ ${feature.feature.summary}
 
 ${withoutLeadingHeading(feature.whyMarkdown.trim())}
 
-## Rules
+## What to expect
 
 ${renderAcceptanceCriteria(feature.feature)}
 ${renderViolationSample(feature.feature)}
-## Preview
+## What it looks like
 
 ${renderScreenshots(feature.feature)}
 `;
 }
 
 function renderSidebar(features: readonly LoadedFeature[]): string {
-  const featureGroups = [...groupFeatures(features)]
-    .map(([label, groupFeaturesForLabel]) => {
-      const items = groupFeaturesForLabel
-        .sort(byGroupThenTitle)
-        .map(({ feature }) => ({
-          label: feature.title,
-          link: featurePath(feature),
-        }));
+  const featuresBySlug = new Map(
+    features.map(({ feature }) => [feature.slug, feature]),
+  );
+  const linkedSlugs = new Set<string>();
+  const featureSections = SIDEBAR_FEATURE_SECTIONS.map((section) => ({
+    label: section.label,
+    collapsed: true,
+    items: section.items.map((item) => {
+      const feature = featuresBySlug.get(item.slug);
+      if (!feature) {
+        throw new Error(`Sidebar references unknown feature ${item.slug}`);
+      }
+      if (linkedSlugs.has(item.slug)) {
+        throw new Error(`Sidebar references feature ${item.slug} more than once`);
+      }
+      linkedSlugs.add(item.slug);
+      return { label: item.label, link: featurePath(feature) };
+    }),
+  }));
 
-      return {
-        label,
-        collapsed: false,
-        items,
-      };
-    });
+  const unlinked = features
+    .map(({ feature }) => feature.slug)
+    .filter((slug) => !linkedSlugs.has(slug));
+  if (unlinked.length > 0) {
+    throw new Error(`Sidebar is missing features: ${unlinked.join(", ")}`);
+  }
 
   const sidebar = [
     { label: "Overview", link: "/" },
+    ...featureSections,
     {
-      label: "Features",
-      collapsed: false,
-      items: featureGroups,
+      label: "Reference",
+      collapsed: true,
+      items: [
+        { label: "Commands and shortcuts", link: "/reference/commands/" },
+      ],
     },
   ];
 
@@ -358,12 +390,20 @@ async function build(): Promise<void> {
   await mkdir(CONTENT_ROOT, { recursive: true });
   await mkdir(GENERATED_ROOT, { recursive: true });
   await rm(FEATURE_CONTENT_ROOT, { recursive: true, force: true });
+  await rm(REFERENCE_CONTENT_ROOT, { recursive: true, force: true });
   await rm(path.join(CONTENT_ROOT, "testing.mdx"), { force: true });
   await mkdir(FEATURE_CONTENT_ROOT, { recursive: true });
+  await mkdir(REFERENCE_CONTENT_ROOT, { recursive: true });
 
   await writeFile(
     path.join(CONTENT_ROOT, "index.mdx"),
-    await renderIndexPage(features),
+    await renderTemplate("index.mdx"),
+  );
+  await writeFile(
+    path.join(REFERENCE_CONTENT_ROOT, "commands.mdx"),
+    await renderTemplate("commands.mdx", {
+      COMMAND_TABLE: renderCommandTable(features, "../../"),
+    }),
   );
   await writeFile(path.join(GENERATED_ROOT, "sidebar.mjs"), renderSidebar(features));
 

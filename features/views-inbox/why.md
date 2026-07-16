@@ -1,9 +1,10 @@
 ## Why Inbox Exists
 
-The board is only useful when notes follow the project rules. Inbox collects the
-notes that need cleanup so the user can improve data quality separately from
-choosing what to work on.
+Open is trustworthy only when every active note has a clear next action. Inbox
+collects the exceptions in one repair queue, so fixing a missing date or an
+unfinished note does not get mixed up with choosing today's work.
 
-The view is status-independent on purpose: a closed note with unchecked work is
-still inconsistent, and an unsupported status should be visible even if the
-user intended the note to be active.
+Inbox checks every workflow state. A closed note with unchecked work still
+needs a decision, and an unsupported status should not make a note silently
+disappear. Once the note is repaired, it returns to the view that matches its
+state.

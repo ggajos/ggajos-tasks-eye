@@ -3,13 +3,9 @@ import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
 import { fixture, note } from "../fixtures";
 
-const BILLING = "Approve the billing domain event contract";
-const MENTORING = "Prepare the system design coaching plan";
-const NO_DUE = "Define the platform discovery milestone";
-const THIS_MONTH = "Review the service ownership map";
-const NEXT_MONTH = "Run the architecture capability review";
-const FUTURE = "Plan the reliability investment cycle";
-const HOLD_FUTURE = "Revisit the deferred platform migration";
+const TODAY_ANCHOR = "Send the revised homepage copy to Marta";
+const TOMORROW_ANCHOR = "Review Q3 priorities with the team";
+const HOLD_FUTURE = "Revisit the camper van route";
 
 const DEFAULT_BUCKETS = [
   ["noDue", false],
@@ -28,31 +24,50 @@ async function expectDefaultOpenBuckets(): Promise<void> {
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   fixture([
-    note("Mission/Platform/Platform Discovery.md", {
+    note("Ideas/Neighborhood Dinner.md", {
       status: "open",
-      tasks: [{ text: NO_DUE }],
+      tasks: [{ text: "Choose a date for the neighborhood dinner" }],
     }),
-    note("Mission/Platform/Billing Platform Modernization.md", {
+    note("Work/Client Website Refresh.md", {
       status: "open",
-      tasks: [{ text: BILLING, due: "2026-07-08" }],
+      tasks: [{ text: TODAY_ANCHOR, due: "2026-07-08" }],
     }),
-    note("Leadership/Staff Engineering Mentorship.md", {
+    note("Home/Kitchen Renovation.md", {
       status: "open",
-      tasks: [{ text: MENTORING, due: "2026-07-09" }],
+      tasks: [{
+        text: "Call the electrician about the updated quote",
+        due: "2026-07-08",
+      }],
     }),
-    note("Architecture/Service Ownership.md", {
+    note("Family/Summer Trip.md", {
       status: "open",
-      tasks: [{ text: THIS_MONTH, due: "2026-07-15" }],
+      tasks: [{ text: "Book train tickets to Gdańsk", due: "2026-07-08" }],
     }),
-    note("Architecture/Capability Review.md", {
+    note("Work/Quarterly Planning.md", {
       status: "open",
-      tasks: [{ text: NEXT_MONTH, due: "2026-08-05" }],
+      tasks: [{ text: TOMORROW_ANCHOR, due: "2026-07-09" }],
     }),
-    note("Planning/Reliability Investment.md", {
+    note("Health/Annual Checkups.md", {
       status: "open",
-      tasks: [{ text: FUTURE, due: "2026-09-01" }],
+      tasks: [{ text: "Confirm the dentist appointment", due: "2026-07-09" }],
     }),
-    note("Planning/Deferred Migration.md", {
+    note("Home/Insurance Renewal.md", {
+      status: "open",
+      tasks: [{ text: "Compare home insurance offers", due: "2026-07-15" }],
+    }),
+    note("Learning/Reading Group.md", {
+      status: "open",
+      tasks: [{ text: "Finish notes for the reading group", due: "2026-07-29" }],
+    }),
+    note("Personal/Tax Archive.md", {
+      status: "open",
+      tasks: [{ text: "Scan the 2025 tax documents", due: "2026-08-05" }],
+    }),
+    note("Home/Balcony Garden.md", {
+      status: "open",
+      tasks: [{ text: "Order spring seed trays", due: "2026-09-01" }],
+    }),
+    note("Travel/Camper Van Trip.md", {
       status: "hold",
       tasks: [{ text: HOLD_FUTURE, due: "2026-09-01" }],
     }),
@@ -60,7 +75,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   { acceptance: [{
     title: "expands only Today and keeps pane-scoped manual bucket choices",
     async run() {
-      await tasksEyePage.openBoard("open", BILLING);
+      await tasksEyePage.openBoard("open", TODAY_ANCHOR);
       await expectDefaultOpenBuckets();
 
       await tasksEyePage.toggleBucket("tomorrow");
@@ -71,21 +86,23 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
 
       await tasksEyePage.openBoard("hold", HOLD_FUTURE);
       await tasksEyePage.expectBucketExpanded("future", true);
-      await tasksEyePage.openBoard("open", MENTORING);
+      await tasksEyePage.openBoard("open", TOMORROW_ANCHOR);
       await tasksEyePage.expectBucketExpanded("tomorrow", true);
       await tasksEyePage.expectBucketExpanded("today", false);
 
       await tasksEyePage.closePane();
-      await tasksEyePage.openBoard("open", BILLING);
+      await tasksEyePage.openBoard("open", TODAY_ANCHOR);
       await expectDefaultOpenBuckets();
     },
   }], screenshots: [{
     screenshotSlug: "board",
     async run({ save }) {
-      const root = await tasksEyePage.openBoard("open", BILLING);
+      const root = await tasksEyePage.openBoard("open", TODAY_ANCHOR);
       await expectDefaultOpenBuckets();
-      await expect(root).toHaveText(expect.stringContaining(BILLING));
-      await expect(root).toHaveText(expect.not.stringContaining(MENTORING));
+      await tasksEyePage.toggleBucket("tomorrow");
+      await tasksEyePage.expectBucketExpanded("tomorrow", true);
+      await expect(root).toHaveText(expect.stringContaining(TODAY_ANCHOR));
+      await expect(root).toHaveText(expect.stringContaining(TOMORROW_ANCHOR));
       await save(root);
     },
   }] },

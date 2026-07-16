@@ -1,8 +1,8 @@
 ## Why board task controls exist
 
-The board is meant to be a working surface, not just a report. If the next
-action is clear, the user should be able to mark it done or move its due date
-without opening the note and editing Tasks syntax by hand.
+Sometimes the next action needs no more context: you did it, or you know when it
+should surface again. The row controls let you make that decision immediately
+instead of opening the note just to edit a checkbox or date.
 
-Tasks Eye keeps the note as the durable record. The controls are only shortcuts
-for changing the exact task line represented by the visible row.
+The original note still holds the task. Completing or rescheduling from the
+board updates the exact Tasks checkbox shown in the row.

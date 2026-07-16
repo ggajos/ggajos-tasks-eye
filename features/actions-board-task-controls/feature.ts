@@ -13,8 +13,8 @@ export default defineFeature({
   screenshots: [
     {
       slug: "controls",
-      title: "Row controls",
-      alt: "Billing platform task with mark-done and due-date controls",
+      title: "Act on the next task",
+      alt: "Open board with realistic Today tasks and controls for completing or rescheduling one task",
     },
   ],
 });

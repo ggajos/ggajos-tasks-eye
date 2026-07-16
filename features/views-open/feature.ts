@@ -3,7 +3,7 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Open view",
   summary:
-    "Open is the active-work board for `status: open` notes, grouped by due-date buckets and ordered by next action.",
+    "Open turns active notes into a dated view of their next actions, so you can see what needs attention now without losing the surrounding note context.",
   acceptanceCriteria: [
     "Notes with missing, blank, or explicit `status: open` appear in Open.",
     "Hold notes do not appear in Open.",
@@ -15,8 +15,8 @@ export default defineFeature({
   screenshots: [
     {
       slug: "board",
-      title: "Open board",
-      alt: "Open architecture workspace grouped by due-date buckets",
+      title: "A lived-in Open board",
+      alt: "Mature Open board with realistic notes across several expanded due-date sections",
     },
   ],
 });

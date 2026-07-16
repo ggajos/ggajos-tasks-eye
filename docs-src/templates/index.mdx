@@ -1,42 +1,139 @@
 ---
 title: "Tasks Eye"
-description: "A note-centered task view for active work, workflow cleanup, backlog, and completed history."
+description: "A note-centered way to decide what to work on next in Obsidian."
 sidebar:
   label: "Overview"
   order: 0
 ---
 
-Tasks Eye turns Markdown notes and Tasks checkboxes into a note-centered work
-view. Open shows active notes, Inbox surfaces notes that need cleanup, Hold keeps
-backlog and paused work visible, and Done reviews completed tasks by date.
+<p class="overview-lede">
+  You already know how to put tasks in Obsidian. The harder part comes later:
+  returning to a vault full of notes and knowing which one deserves your
+  attention now.
+</p>
 
-## Getting started
+Tasks Eye turns those notes into one daily control panel. Each row represents a
+note, its earliest unchecked dated task becomes the visible next action, and its
+folder tells you the context. When you are unsure what to do next, press
+<kbd>Ctrl+1</kbd> and start with **Open**.
 
-1. Install and enable the Obsidian Tasks community plugin.
-2. Choose the notes folder in Tasks Eye settings; it defaults to the vault root (<code>/</code>).
-3. Use <code>status: open</code>, <code>hold</code>, <code>closed</code>, or <code>archived</code> in note frontmatter.
-4. Open Tasks Eye from its ribbon icon or a keyboard shortcut.
+Your Markdown remains the source of truth. Tasks Eye reads and updates the same
+checkboxes and dates you already use with the Obsidian Tasks plugin; it does not
+create a second task database.
 
-## Workflow
+## See the work, not the task database
 
-<ol class="workflow-list">
-  <li><strong>Open</strong><span>Review active notes by their next due task.</span></li>
-  <li><strong>Inbox</strong><span>Clean up notes with missing or inconsistent workflow data.</span></li>
-  <li><strong>Hold</strong><span>Keep backlog and paused notes visible outside active work.</span></li>
-  <li><strong>Done</strong><span>Review tasks completed on a selected date.</span></li>
+<figure class="overview-shot overview-shot--hero">
+  <img src="assets/features/views-open/dark-minimal/board.png" alt="A mature Tasks Eye Open view with realistic notes spread across due-date sections" />
+  <figcaption>
+    A lived-in Open view. Several sections are expanded here for explanation;
+    in everyday use, Today is the only section expanded when a new pane opens.
+  </figcaption>
+</figure>
+
+### How to read Open
+
+<ol class="overview-anatomy">
+  <li>
+    <strong>Begin with Today.</strong>
+    <span>It contains work due today and anything overdue, so it is the shortest path to a deliberate next decision.</span>
+  </li>
+  <li>
+    <strong>Read one row as one note.</strong>
+    <span>The bold line is the earliest unchecked dated task; the note title underneath opens the surrounding context.</span>
+  </li>
+  <li>
+    <strong>Let sections hide the horizon.</strong>
+    <span>Tomorrow, This Month, Next Month, and Future keep later work visible without letting it compete with today.</span>
+  </li>
+  <li>
+    <strong>Use folders as contexts.</strong>
+    <span>The label on the right comes from the note's folder. Use the filter at the top when you want to focus on one part of life or work.</span>
+  </li>
 </ol>
 
-## Feature index
+<aside class="attention-date">
+  <strong>Think “next attention date,” not only “deadline.”</strong>
+  A task date answers “when should this note surface again?” If today is not the
+  right moment, moving the date is a valid decision—not a failure to finish the
+  task.
+</aside>
 
-Browse by the result you want: create or update a task, filter work, open a
-view, or clean up a note.
+## The daily loop
 
-{{FEATURE_CARDS}}
+<p>
+  The goal is not to finish every possible task. It is to handle every item that
+  asks for attention today, then keep the system trustworthy enough to use
+  again tomorrow.
+</p>
 
-## Commands
+<div class="workflow-map" role="group" aria-label="Tasks Eye daily workflow">
+  <div class="workflow-map__start">
+    <span class="workflow-map__eyebrow">When you need direction</span>
+    <strong><kbd>Ctrl+1</kbd> → Open → Today</strong>
+    <span>Choose the first note that needs a decision.</span>
+  </div>
+  <div class="workflow-map__routes" role="group" aria-label="Three ways to handle an item">
+    <div class="workflow-map__route">
+      <strong>Do it</strong>
+      <span>Complete the visible next task.</span>
+    </div>
+    <div class="workflow-map__route">
+      <strong>Move it</strong>
+      <span>Give it a new attention date.</span>
+    </div>
+    <div class="workflow-map__route">
+      <strong>Change its state</strong>
+      <span>Move the note to Hold or close it.</span>
+    </div>
+  </div>
+  <div class="workflow-map__return">
+    <strong>Return to Today until every item has been handled.</strong>
+    <span>Later work stays in Open, paused work waits in Hold, and completed tasks can be reviewed in Done.</span>
+  </div>
+  <div class="workflow-map__trust">
+    <span class="workflow-map__eyebrow">The trust loop</span>
+    <strong><kbd>Ctrl+2</kbd> → Inbox → repair</strong>
+    <span>Give malformed or unrouted notes a next action, a date, a context, or the right status.</span>
+  </div>
+</div>
 
-Obsidian prefixes these registered command names with **Tasks Eye**. Default
-shortcuts can be changed in Obsidian's hotkey settings; commands without one
-are marked as not assigned.
+## Act from the board—or open the note
 
-{{COMMAND_TABLE}}
+<figure class="overview-shot overview-shot--controls">
+  <img src="assets/features/actions-board-task-controls/dark-minimal/controls.png" alt="A Tasks Eye row with controls for completing a task or moving its date" loading="lazy" />
+  <figcaption>
+    Focus a row to reveal the checkmark and ±1/±7 day controls. Every change is
+    written back to the original Tasks checkbox.
+  </figcaption>
+</figure>
+
+If the next action is already clear, complete or reschedule it without leaving
+Open. If you need the decision history, meeting notes, links, or supporting
+material, open the note and work with the task in its full context. The board is
+a fast point of contact, not a replacement for the note.
+
+## Inbox keeps Open believable
+
+<figure class="overview-shot overview-shot--inbox">
+  <img src="assets/features/views-inbox/dark-minimal/repair-queue.png" alt="Tasks Eye Inbox showing several realistic notes and the specific workflow issue to repair in each one" loading="lazy" />
+  <figcaption>
+    Inbox explains why each note needs attention. It is a repair queue, not
+    another place to choose today's work.
+  </figcaption>
+</figure>
+
+Open is useful only when every active note has a clear next action. Inbox finds
+the exceptions: a missing task date, an open note with nothing left to do, an
+unsupported status, or a note that still needs a context folder. Repair these
+items until Inbox is empty, and Open stays dependable.
+
+## A useful everyday rhythm
+
+1. Press <kbd>Ctrl+1</kbd> and handle **Today** toward zero: complete, reschedule, pause, or close each item.
+2. Press <kbd>Ctrl+2</kbd> and repair **Inbox** toward zero so tomorrow's Open view remains trustworthy.
+3. Check **Hold** when you are ready to reactivate paused work, and use **Done** when you want to look back at what was completed.
+
+The deeper reference explains [how Open behaves](features/views-open/),
+[how notes participate in the workflow](features/data-vault-conventions/), and
+[all commands and shortcuts](reference/commands/).

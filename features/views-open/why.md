@@ -1,11 +1,13 @@
 ## Why Open Exists
 
-Open is the daily command surface. It should show what can be acted on now,
-organized by due date, without mixing in backlog notes or completed work.
-Today starts expanded while the other scheduling buckets start collapsed, so
-the board keeps immediate work visible without letting later work dominate the
-view. Those sections remain manually adjustable while the pane is open.
+A long task list can tell you everything you might do without helping you decide
+what deserves attention now. Open narrows that decision. It shows each active
+note through its next dated task and groups those notes by when they should
+surface.
 
-The view keeps scheduling in Tasks due markers. Moving work forward or backward
-therefore remains visible in the Markdown source and compatible with Obsidian
-Tasks.
+Today opens first. Later sections stay collapsed until you want to look ahead,
+so tomorrow's work does not compete with today's. You can expand those sections
+for planning, and your choices remain in place while the pane is open.
+
+Scheduling stays in the Tasks due markers inside your Markdown. Moving work to
+another day changes the original task rather than creating a separate copy.

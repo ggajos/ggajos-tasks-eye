@@ -18,7 +18,7 @@ export default defineConfig({
     starlight({
       title: "Tasks Eye",
       description:
-        "Native Obsidian task views and executable feature documentation.",
+        "A note-centered way to decide what to work on next in Obsidian.",
       favicon: "/favicon.svg",
       customCss: ["./docs-src/src/styles/custom.css"],
       pagefind: true,
