@@ -66,6 +66,11 @@ Screenshot baselines under `acceptance/snapshots/docs/` change only through
 `npm run test:visual:approve` after reviewing the report at
 `acceptance/artifacts/visual/report/index.html`.
 
+Agents must never run `npm run test:visual:approve`, directly edit screenshot
+baselines, or otherwise promote or delete visual results. After
+`npm run test:visual`, report the comparison-report path and ask the user to
+review it and run the approval command themselves.
+
 ## Developer Documentation
 
 Keep developer setup, testing, visual-review, and release instructions in

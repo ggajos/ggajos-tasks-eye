@@ -1,10 +1,11 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
-  DOCUMENTED_COMMANDS,
+  DOCUMENTED_COMMAND_GROUPS,
   formatCommandName,
   formatHotkey,
 } from "../features/commands";
+import type { DocumentedCommand } from "../features/commands";
 import { discoverFeatures } from "../features/discovery";
 import { DOCUMENTATION_VARIANTS } from "../features/visualVariants";
 import type {
@@ -179,8 +180,8 @@ ${cards}
 
 function renderCommandTable(features: readonly LoadedFeature[]): string {
   const featureSlugs = new Set(features.map(({ feature }) => feature.slug));
-  const rows = DOCUMENTED_COMMANDS
-    .map((command) => {
+  const renderRows = (commands: readonly DocumentedCommand[]) =>
+    commands.map((command) => {
       const shortcut = escapeHtml(formatHotkey(command.hotkey));
       const shortcutCell = command.hotkey
         ? `<kbd>${shortcut}</kbd>`
@@ -204,7 +205,10 @@ function renderCommandTable(features: readonly LoadedFeature[]): string {
     })
     .join("\n");
 
-  return `<div class="table-scroll">
+  return DOCUMENTED_COMMAND_GROUPS.map((group) => `<section class="command-group">
+<h3>${escapeHtml(group.title)}</h3>
+<p>${escapeHtml(group.description)}</p>
+<div class="table-scroll">
 <table class="shortcut-table">
   <thead>
     <tr>
@@ -215,10 +219,11 @@ function renderCommandTable(features: readonly LoadedFeature[]): string {
     </tr>
   </thead>
   <tbody>
-${rows}
+${renderRows(group.commands)}
   </tbody>
 </table>
-</div>`;
+</div>
+</section>`).join("\n\n");
 }
 
 async function renderIndexPage(features: readonly LoadedFeature[]): Promise<string> {

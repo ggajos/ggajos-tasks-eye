@@ -19,6 +19,7 @@ import {
   CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
+  STATUS_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "./commands";
 import {
@@ -26,7 +27,7 @@ import {
   isEyeMode,
   TASKS_PLUGIN_REQUIRED_MESSAGE,
 } from "./constants";
-import type { EyeMode } from "./constants";
+import type { EyeMode, EyeStatus } from "./constants";
 import { todayIso } from "./date";
 import {
   canUncheckSelectedTasks,
@@ -42,6 +43,7 @@ import {
   normalizeManagedFolderPath,
 } from "./managedPath";
 import { openNewEyeNoteFlow } from "./newNote";
+import { setNoteStatus } from "./noteStatus";
 import { TasksEyeSettingTab } from "./settings";
 import { getTasksApi } from "./tasksApi";
 import type { TasksApiV1 } from "./tasksApi";
@@ -117,6 +119,20 @@ export default class TheEyePlugin extends Plugin {
         return true;
       },
     });
+    for (const status of Object.keys(STATUS_COMMANDS) as EyeStatus[]) {
+      const command = STATUS_COMMANDS[status];
+      this.addCommand({
+        id: command.id,
+        name: command.name,
+        hotkeys: [command.hotkey],
+        checkCallback: (checking) => {
+          const file = this.app.workspace.getActiveFile();
+          if (!file || file.extension !== "md") return false;
+          if (!checking) void this.setStatus(file, status);
+          return true;
+        },
+      });
+    }
 
     this.registerEvent(this.app.metadataCache.on("changed", (file) => {
       if (this.isRelevantFile(file)) this.queueRefresh();
@@ -277,6 +293,17 @@ export default class TheEyePlugin extends Plugin {
     return uncheckSelectedTasks(editor, (line) =>
       api.executeToggleTaskDoneCommand(line, filePath),
     );
+  }
+
+  private async setStatus(file: TFile, status: EyeStatus): Promise<void> {
+    try {
+      await setNoteStatus(this.app, file, status);
+      if (this.isRelevantFile(file)) this.queueRefresh();
+      new Notice(`Tasks Eye: note status set to ${status}.`);
+    } catch (error) {
+      console.error(`Tasks Eye could not set note status to ${status}.`, error);
+      new Notice(`Tasks Eye: could not set note status to ${status}.`);
+    }
   }
 
   private findLeaf(): WorkspaceLeaf | null {

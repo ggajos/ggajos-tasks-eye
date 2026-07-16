@@ -1,5 +1,5 @@
 import type { Hotkey } from "obsidian";
-import type { EyeMode } from "./constants";
+import type { EyeMode, EyeStatus } from "./constants";
 
 export interface CommandDefinition {
   id: string;
@@ -48,4 +48,30 @@ export const UNCHECK_SELECTED_COMMAND: CommandWithHotkeyDefinition = {
   id: "uncheck-selected-tasks",
   name: "Reopen selected tasks",
   hotkey: { modifiers: ["Ctrl", "Shift"], key: "D" },
+};
+
+export const STATUS_COMMANDS: Record<
+  EyeStatus,
+  CommandWithHotkeyDefinition
+> = {
+  open: {
+    id: "set-note-status-open",
+    name: "Set note status: Open",
+    hotkey: { modifiers: ["Ctrl", "Shift"], key: "1" },
+  },
+  hold: {
+    id: "set-note-status-hold",
+    name: "Set note status: Hold",
+    hotkey: { modifiers: ["Ctrl", "Shift"], key: "2" },
+  },
+  closed: {
+    id: "set-note-status-closed",
+    name: "Set note status: Closed",
+    hotkey: { modifiers: ["Ctrl", "Shift"], key: "3" },
+  },
+  archived: {
+    id: "set-note-status-archived",
+    name: "Set note status: Archived",
+    hotkey: { modifiers: ["Ctrl", "Shift"], key: "4" },
+  },
 };

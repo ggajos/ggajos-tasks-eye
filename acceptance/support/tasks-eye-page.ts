@@ -114,6 +114,9 @@ export const tasksEyePage = {
   openPreview: (filePath: string, text: string) =>
     openMarkdown(filePath, "preview", text),
 
+  openEditor: (filePath: string, text: string) =>
+    openMarkdown(filePath, "source", text),
+
   async setContextFilter(value: string): Promise<void> {
     await browser.execute((nextValue) => {
       const select = document.querySelector<HTMLSelectElement>(
