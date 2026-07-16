@@ -1,6 +1,6 @@
 {
   "name": "ggajos-tasks-eye",
-  "version": "6.0.0-beta.10",
+  "version": "6.0.0-beta.11",
   "description": "A note-centered task view for active work, workflow cleanup, backlog, and completed history.",
   "main": "main.js",
   "type": "module",
