@@ -1,9 +1,9 @@
 import { defineFeature } from "../types";
 
 export default defineFeature({
-  title: "Context filtering",
+  title: "Filter by context",
   summary:
-    "Tasks Eye derives literal context labels relative to the configured notes folder and uses the toolbar filter to narrow board and Done modes.",
+    "Tasks Eye derives context labels relative to the notes folder and uses the toolbar filter to narrow board and Done views.",
   acceptanceCriteria: [
     "Context labels preserve every relative folder segment, including casing, spacing, and numeric prefixes.",
     "A nested folder such as `Mission/Platform` is displayed exactly as `Mission/Platform`.",

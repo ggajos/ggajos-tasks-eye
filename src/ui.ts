@@ -49,6 +49,7 @@ export function contextFilterControl(
   control.appendChild(icon);
 
   const select = element("select", "eye-context-select");
+  select.setAttribute("aria-label", "Filter by context");
   select.appendChild(new Option("All", "*"));
   for (const context of contexts) {
     select.appendChild(new Option(formatContextLabel(context), context));

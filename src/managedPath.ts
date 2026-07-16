@@ -39,7 +39,7 @@ export function isPathRelatedToManagedFolder(
 export function missingManagedFolderMessage(
   managedFolderPath: string,
 ): string {
-  return `Tasks Eye: configured notes folder not found: ${
+  return `Tasks Eye can't find the notes folder "${
     normalizeManagedFolderPath(managedFolderPath)
-  }`;
+  }". Choose another folder in settings.`;
 }

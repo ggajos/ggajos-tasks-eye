@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { file, violationCodes } from "../testSupport";
+import { file, violationCodes, violationMessages } from "../testSupport";
 
 const VIOLATION = "open-without-due-date";
 
@@ -60,5 +60,14 @@ describe("Open note without due date violation", () => {
 
     expect(violations).toContain("open-without-uncompleted-tasks");
     expect(violations).not.toContain(VIOLATION);
+  });
+
+  it("asks for a due date on an unchecked task", () => {
+    expect(violationMessages(file(
+      "Growth/Unscheduled.md",
+      "---\nstatus: open\n---\n\n- [ ] choose next action",
+    ))).toContain(
+      "Open note needs a due date on at least one unchecked task.",
+    );
   });
 });

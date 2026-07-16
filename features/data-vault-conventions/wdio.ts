@@ -6,7 +6,8 @@ import { fixture, note } from "../fixtures";
 const ACTION = "Approve the billing domain event contract";
 const OUTSIDE = "Ignore the unrelated vault note";
 const MISSING_ERROR =
-  "Tasks Eye: configured notes folder not found: Missing";
+  'Tasks Eye can\'t find the notes folder "Missing". ' +
+  "Choose another folder in settings.";
 
 const configuredFolderScenarios = featureScenarios(
   fixture([

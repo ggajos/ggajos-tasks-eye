@@ -1,40 +1,42 @@
 ---
 title: "Tasks Eye"
-description: "Native Obsidian task views for Tasks-driven vaults."
+description: "A note-centered task view for active work, workflow cleanup, backlog, and completed history."
 sidebar:
   label: "Overview"
   order: 0
 ---
 
-Tasks Eye is an Obsidian plugin for note-centered task boards, repair queues,
-completed-task review views, and editor commands.
+Tasks Eye turns Markdown notes and Tasks checkboxes into a note-centered work
+view. Open shows active notes, Inbox surfaces notes that need cleanup, Hold keeps
+backlog and paused work visible, and Done reviews completed tasks by date.
 
-## Getting Started
+## Getting started
 
 1. Install and enable the Obsidian Tasks community plugin.
-2. Choose the managed notes folder in Tasks Eye settings; it defaults to the vault root (<code>/</code>).
+2. Choose the notes folder in Tasks Eye settings; it defaults to the vault root (<code>/</code>).
 3. Use <code>status: open</code>, <code>hold</code>, <code>closed</code>, or <code>archived</code> in note frontmatter.
 4. Open Tasks Eye from its ribbon icon or a keyboard shortcut.
 
 ## Workflow
 
 <ol class="workflow-list">
-  <li><strong>Open</strong><span>Review actionable notes grouped by due date.</span></li>
-  <li><strong>Inbox</strong><span>Fix one validation rule at a time.</span></li>
-  <li><strong>Hold</strong><span>Keep backlog notes visible outside today's work.</span></li>
-  <li><strong>Done</strong><span>Review completed tasks by selected date.</span></li>
+  <li><strong>Open</strong><span>Review active notes by their next due task.</span></li>
+  <li><strong>Inbox</strong><span>Clean up notes with missing or inconsistent workflow data.</span></li>
+  <li><strong>Hold</strong><span>Keep backlog and paused notes visible outside active work.</span></li>
+  <li><strong>Done</strong><span>Review tasks completed on a selected date.</span></li>
 </ol>
 
-## Feature Index
+## Feature index
 
-Browse by the result you want: change a task, filter work, open a view, or repair
-an invalid note.
+Browse by the result you want: create or update a task, filter work, open a
+view, or clean up a note.
 
 {{FEATURE_CARDS}}
 
 ## Commands
 
-These commands are registered by the plugin. Default shortcuts can be changed
-in Obsidian's hotkey settings; commands without one are marked as not assigned.
+Obsidian prefixes these registered command names with **Tasks Eye**. Default
+shortcuts can be changed in Obsidian's hotkey settings; commands without one
+are marked as not assigned.
 
 {{COMMAND_TABLE}}

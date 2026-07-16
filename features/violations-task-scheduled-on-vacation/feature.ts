@@ -2,15 +2,15 @@ import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
-  title: "Task scheduled on vacation",
+  title: "Task due on an unavailable day",
   summary:
-    "An unfinished task with a due date on a configured unavailable day is reported as an Inbox violation.",
+    "An unchecked task due on a configured unavailable day is reported as an Inbox issue.",
   acceptanceCriteria: [
-    "Unfinished tasks due on configured vacation dates are reported in Inbox.",
-    "The violation includes the due date and vacation reason.",
+    "Unchecked tasks due on configured vacation dates are reported in Inbox.",
+    "The issue includes the due date and vacation reason.",
     "Rows show only the earliest vacation collision for the note.",
-    "Tasks on normal working days do not trigger this violation.",
-    "The violation is visible in both Inbox and Open.",
+    "Tasks on normal working days do not trigger this issue.",
+    "The issue is visible in both Inbox and Open.",
   ],
   violation: {
     code: "task-on-vacation",

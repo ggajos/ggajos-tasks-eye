@@ -1,4 +1,4 @@
-## Why This Violation Exists
+## Why this issue exists
 
 Open notes represent active work. When none of their unchecked tasks has a due
 date, the work has no place in the dated plan and is easy to overlook.

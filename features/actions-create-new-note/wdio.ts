@@ -10,7 +10,7 @@ const ROOT_FOLDER = "- (root)";
 const TARGET_FOLDER = "Projects";
 const CREATED_FILE = `${MANAGED_FOLDER}/${TARGET_FOLDER}/Untitled 1.md`;
 const ROOT_FILE = `${MANAGED_FOLDER}/Untitled.md`;
-const ROOT_VIOLATION = "note is unprocessed in the managed root folder";
+const ROOT_VIOLATION = "Note needs to be moved into a context folder.";
 const CAPTURE_ATTRIBUTE = "data-tasks-eye-modal-capture";
 
 const creationFixture = fixture([
@@ -113,7 +113,7 @@ async function closeModalIfOpen(): Promise<void> {
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   creationFixture,
   { acceptance: [{
-    title: "creates and opens an initialized note in the selected managed folder",
+    title: "creates and opens an initialized note in the selected notes folder",
     async run() {
       try {
         const folderModal = await openFolderPicker();
@@ -132,7 +132,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
       }
     },
   }, {
-    title: "routes a default-root capture to Inbox as unprocessed",
+    title: "routes a default-root capture to Inbox until it gets a context",
     async run() {
       try {
         await openFolderPicker();

@@ -1,7 +1,7 @@
 import { defineFeature } from "../types";
 
 export default defineFeature({
-  title: "Markdown-formatted board actions",
+  title: "Markdown in board tasks",
   summary:
     "Board actions use Obsidian's Markdown renderer so links and inline formatting remain meaningful outside the source note.",
   acceptanceCriteria: [
@@ -13,8 +13,8 @@ export default defineFeature({
   screenshots: [
     {
       slug: "formatted-action",
-      title: "Markdown-formatted architecture action",
-      alt: "Architecture Hold board action with an Obsidian internal link, bold emphasis, and inline code",
+      title: "Markdown-formatted architecture task",
+      alt: "Architecture task in Hold with an internal link, bold emphasis, and inline code",
     },
   ],
 });

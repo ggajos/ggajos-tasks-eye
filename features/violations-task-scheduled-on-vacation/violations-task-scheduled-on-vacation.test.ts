@@ -15,7 +15,7 @@ status: open
 `,
     ))).toMatchObject([{
       code: "task-on-vacation",
-      message: "task scheduled on vacation: 2026-07-13 (custom)",
+      message: "Task is due on an unavailable day: 2026-07-13 (vacation).",
     }]);
   });
 });

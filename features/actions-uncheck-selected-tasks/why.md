@@ -1,4 +1,4 @@
-## Why Uncheck Selected Tasks Exists
+## Why reopening selected tasks exists
 
 Completed task markers are easy to create accidentally, especially when using
 keyboard shortcuts in a long note. Reopening the task should not require the

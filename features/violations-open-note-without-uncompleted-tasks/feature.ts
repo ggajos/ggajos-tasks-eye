@@ -2,14 +2,14 @@ import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
-  title: "Open note without an unchecked task",
+  title: "Open note with no unchecked tasks",
   summary:
-    "An open note is invalid when it has no unchecked task left to act on.",
+    "An open note needs an unchecked task that identifies what to do next.",
   acceptanceCriteria: [
     "`status: open` notes with no unchecked tasks are reported in Inbox.",
     "Missing or blank status is treated as Open for this rule.",
-    "Open notes with at least one unchecked task do not trigger this violation.",
-    "The violation is visible in both Inbox and Open.",
+    "Open notes with at least one unchecked task do not trigger this issue.",
+    "The issue is visible in both Inbox and Open.",
   ],
   violation: {
     code: "open-without-uncompleted-tasks",

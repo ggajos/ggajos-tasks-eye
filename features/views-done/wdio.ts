@@ -73,7 +73,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           state.mode !== "done" ||
           state.date !== "2026-07-08" ||
           state.icon !== "eye" ||
-          state.title !== "Tasks Eye: Done: 2026-07-08" ||
+          state.title !== "Tasks Eye: Done — 2026-07-08" ||
           state.eyeRibbonCount !== 1 ||
           state.doneRibbonCount !== 0
         ) {
@@ -87,9 +87,9 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         await tasksEyePage.openDone(COMPLETED);
         await browser.execute(() => {
           const input = document.querySelector<HTMLInputElement>(
-            '.workspace-leaf.mod-active input[aria-label="Done date"]',
+            '.workspace-leaf.mod-active input[aria-label="Completion date"]',
           );
-          if (!input) throw new Error("Done date input is missing");
+          if (!input) throw new Error("Completion date input is missing");
           input.value = "2026-07-07";
           input.dispatchEvent(new Event("change", { bubbles: true }));
         });

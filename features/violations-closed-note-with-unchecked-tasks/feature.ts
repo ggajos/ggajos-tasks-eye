@@ -4,11 +4,11 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Closed note with unchecked tasks",
   summary:
-    "A note with `status: closed` is invalid when it still contains unchecked task lines.",
+    "A note with `status: closed` is inconsistent when it still contains unchecked tasks.",
   acceptanceCriteria: [
     "`status: closed` notes with unchecked tasks are reported in Inbox.",
-    "Closed notes with only completed tasks do not trigger this violation.",
-    "The violation text is `closed note has unchecked tasks`.",
+    "Closed notes with only completed tasks do not trigger this issue.",
+    "The issue text is `Closed note still has unchecked tasks.`",
   ],
   violation: {
     code: "closed-with-unchecked-tasks",

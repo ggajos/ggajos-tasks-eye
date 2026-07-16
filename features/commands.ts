@@ -17,38 +17,38 @@ export const DOCUMENTED_COMMANDS: readonly DocumentedCommand[] = [
     ...MODE_COMMANDS.open,
     featureSlug: "views-open",
     featureTitle: "Open view",
-    explanation: "Jump to the active-work board.",
+    explanation: "Show active notes grouped by due date.",
   },
   {
     ...MODE_COMMANDS.inbox,
     featureSlug: "views-inbox",
     featureTitle: "Inbox view",
-    explanation: "Jump to the repair queue for validation violations.",
+    explanation: "Show notes that need workflow cleanup.",
   },
   {
     ...MODE_COMMANDS.hold,
     featureSlug: "views-hold",
     featureTitle: "Hold view",
-    explanation: "Jump to backlog notes that should stay out of active work.",
+    explanation: "Show backlog and paused notes.",
   },
   {
     ...CREATE_NEW_NOTE_COMMAND,
     featureSlug: "actions-create-new-note",
-    featureTitle: "Create a Tasks Eye note",
-    explanation: "Choose a managed folder and create an initialized Untitled note.",
+    featureTitle: "Create a note",
+    explanation: "Create an open note in the notes folder.",
   },
   {
     ...OPEN_COMPLETED_COMMAND,
     featureSlug: "views-done",
-    featureTitle: "Done mode",
-    explanation: "Switch the unified view to completed-task review for the current day.",
+    featureTitle: "Done view",
+    explanation: "Show the Done view for today.",
   },
   {
     ...UNCHECK_SELECTED_COMMAND,
     featureSlug: "actions-uncheck-selected-tasks",
-    featureTitle: "Uncheck selected tasks",
+    featureTitle: "Reopen selected tasks",
     explanation:
-      "Reopen selected checked task lines as the inverse of the user's task-checking shortcut.",
+      "Turn selected completed tasks back into unchecked tasks.",
   },
 ];
 
@@ -57,4 +57,8 @@ export function formatHotkey(
 ): string {
   if (!hotkey) return "Not assigned";
   return [...hotkey.modifiers, hotkey.key].join("+");
+}
+
+export function formatCommandName(name: string): string {
+  return `Tasks Eye: ${name}`;
 }

@@ -1,5 +1,6 @@
 import { Notice, TFile } from "obsidian";
 import type { App } from "obsidian";
+import { fileNotFoundMessage } from "./constants";
 import {
   replaceTaskLine,
   shiftTaskDueInMarkdown,
@@ -20,7 +21,7 @@ async function processTaskLine(
 ): Promise<void> {
   const file = findMarkdownFile(app, filePath);
   if (!file) {
-    new Notice(`Tasks Eye: file not found: ${filePath}`);
+    new Notice(fileNotFoundMessage(filePath));
     return;
   }
 
@@ -37,7 +38,7 @@ export async function shiftTaskDueInFile(
 ): Promise<void> {
   const file = findMarkdownFile(app, filePath);
   if (!file) {
-    new Notice(`Tasks Eye: file not found: ${filePath}`);
+    new Notice(fileNotFoundMessage(filePath));
     return;
   }
 

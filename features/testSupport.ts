@@ -14,3 +14,7 @@ export function rowNames(rows: RowModel[]): string[] {
 export function violationCodes(file: EyeFile): ViolationCode[] {
   return validateFile(file).map((violation) => violation.code);
 }
+
+export function violationMessages(file: EyeFile): string[] {
+  return validateFile(file).map((violation) => violation.message);
+}

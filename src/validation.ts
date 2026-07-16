@@ -61,7 +61,8 @@ const invalidStatus: ValidationRule = ({ file, status, hasExplicitStatus }) => {
   }
   return singleViolation(
     "invalid-status",
-    `invalid status: "${String(file.status)}"`,
+    `Unsupported status "${String(file.status)}". ` +
+      "Use open, hold, closed, or archived.",
   );
 };
 
@@ -69,7 +70,7 @@ const noteInManagedRoot: ValidationRule = ({ file }) => {
   if (getContextFromPath(file.path, file.managedFolderPath) !== "-") return [];
   return singleViolation(
     "note-in-managed-root",
-    "note is unprocessed in the managed root folder",
+    "Note needs to be moved into a context folder.",
   );
 };
 
@@ -79,7 +80,7 @@ const closedWithUncheckedTasks: ValidationRule = (
   if (status !== "closed" || uncompletedTasks.length === 0) return [];
   return singleViolation(
     "closed-with-unchecked-tasks",
-    "closed note has unchecked tasks",
+    "Closed note still has unchecked tasks.",
   );
 };
 
@@ -87,7 +88,7 @@ const openWithoutTasks: ValidationRule = ({ status, uncompletedTasks }) => {
   if (status !== "open" || uncompletedTasks.length > 0) return [];
   return singleViolation(
     "open-without-uncompleted-tasks",
-    "open note has no uncompleted tasks",
+    "Open note needs an unchecked task.",
   );
 };
 
@@ -101,7 +102,7 @@ const openWithoutDueDate: ValidationRule = ({ status, uncompletedTasks }) => {
   }
   return singleViolation(
     "open-without-due-date",
-    "open note has no uncompleted task with due date",
+    "Open note needs a due date on at least one unchecked task.",
   );
 };
 
@@ -111,10 +112,14 @@ const tasksOnVacation: ValidationRule = ({ uncompletedTasks }) => {
     if (task.dueTs === null) continue;
     const vacationReason = vacationReasonForTs(task.dueTs, VACATION);
     if (!vacationReason) continue;
+    const reasonLabel = vacationReason === "custom"
+      ? "vacation"
+      : vacationReason;
     violations.push({
       code: "task-on-vacation",
       message:
-        `task scheduled on vacation: ${formatYmd(task.dueTs)} (${vacationReason})`,
+        `Task is due on an unavailable day: ${formatYmd(task.dueTs)} ` +
+        `(${reasonLabel}).`,
       dueTs: task.dueTs,
       vacationReason,
     });

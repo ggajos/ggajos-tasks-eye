@@ -36,13 +36,21 @@ export type DueBucket =
   | "future";
 
 export const DUE_BUCKETS: ReadonlyArray<{ key: DueBucket; label: string }> = [
-  { key: "noDue", label: "No due" },
+  { key: "noDue", label: "No Due Date" },
   { key: "today", label: "Today" },
   { key: "tomorrow", label: "Tomorrow" },
   { key: "thisMonth", label: "This Month" },
   { key: "nextMonth", label: "Next Month" },
   { key: "future", label: "Future" },
 ] as const;
+
+export const TASKS_PLUGIN_REQUIRED_MESSAGE =
+  "Tasks Eye needs a compatible version of the Tasks community plugin. " +
+  "Install, enable, or update Tasks, then reload Obsidian.";
+
+export function fileNotFoundMessage(path: string): string {
+  return `Tasks Eye can't find the file "${path}".`;
+}
 
 export const VACATION = {
   weekendDays: [0, 6],

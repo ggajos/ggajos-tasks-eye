@@ -2,16 +2,16 @@ import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
-  title: "Open note without a due date",
+  title: "Open note with no dated unchecked task",
   summary:
-    "An open note is invalid when it has unchecked tasks but none of them has a Tasks due date.",
+    "An open note needs a Tasks due date on at least one unchecked task.",
   acceptanceCriteria: [
     "`status: open` notes with unchecked tasks but no due dates are reported in Inbox.",
     "Missing or blank status is treated as Open for this rule.",
     "One unchecked task with a due date is enough to satisfy the rule, even when other unchecked tasks are undated.",
     "Completed tasks with due dates do not satisfy the rule.",
-    "Hold, closed, and archived notes do not trigger this specific violation.",
-    "The violation is visible in both Inbox and Open.",
+    "Hold, closed, and archived notes do not trigger this issue.",
+    "The issue is visible in both Inbox and Open.",
   ],
   violation: {
     code: "open-without-due-date",

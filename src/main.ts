@@ -21,7 +21,11 @@ import {
   OPEN_COMPLETED_COMMAND,
   UNCHECK_SELECTED_COMMAND,
 } from "./commands";
-import { isEyeMode } from "./constants";
+import {
+  fileNotFoundMessage,
+  isEyeMode,
+  TASKS_PLUGIN_REQUIRED_MESSAGE,
+} from "./constants";
 import type { EyeMode } from "./constants";
 import { todayIso } from "./date";
 import {
@@ -142,7 +146,7 @@ export default class TheEyePlugin extends Plugin {
       }
     }));
     if (!this.tasksApiAvailable()) {
-      new Notice("Tasks Eye requires the Obsidian Tasks plugin API.");
+      new Notice(TASKS_PLUGIN_REQUIRED_MESSAGE);
     }
   }
 
@@ -160,7 +164,7 @@ export default class TheEyePlugin extends Plugin {
   getTasksApi(): TasksApiV1 | null {
     const api = getTasksApi(this.app);
     if (!api) {
-      new Notice("Tasks Eye requires the Obsidian Tasks plugin API.");
+      new Notice(TASKS_PLUGIN_REQUIRED_MESSAGE);
     }
     return api;
   }
@@ -237,7 +241,7 @@ export default class TheEyePlugin extends Plugin {
   async openFile(path: string): Promise<void> {
     const file = this.app.vault.getAbstractFileByPath(path);
     if (!(file instanceof TFile)) {
-      new Notice(`Tasks Eye: file not found: ${path}`);
+      new Notice(fileNotFoundMessage(path));
       return;
     }
     await this.app.workspace.getLeaf(false).openFile(file);

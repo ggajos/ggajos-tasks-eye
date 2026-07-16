@@ -1,8 +1,8 @@
 # Tasks Eye
 
-Tasks Eye turns regular Obsidian notes and Tasks checkboxes into a focused,
-note-centered work system. One native view keeps active work, workflow repairs,
-backlog, and completed history close to the notes that explain them.
+Tasks Eye turns Markdown notes and Tasks checkboxes into a note-centered work
+view. Open shows active notes, Inbox surfaces notes that need cleanup, Hold keeps
+backlog and paused work visible, and Done reviews completed tasks by date.
 
 [Explore the full documentation](https://ggajos.com/ggajos-tasks-eye/)
 
@@ -13,9 +13,9 @@ backlog, and completed history close to the notes that explain them.
 - Keep Markdown notes as the source of truth instead of maintaining another
   task database.
 - See next actions organized by due date and vault context.
-- Find incomplete or inconsistent notes in a dedicated repair queue.
+- Find notes that need workflow cleanup in a dedicated Inbox.
 - Complete and reschedule tasks directly from the board.
-- Review active, held, and completed work in one Obsidian view.
+- Review active, paused, and completed work in one view.
 
 ## Install with BRAT
 

@@ -28,7 +28,10 @@ describe("managed notes folder paths", () => {
 
   it("uses one missing-folder error across surfaces", () => {
     expect(missingManagedFolderMessage("Missing"))
-      .toBe("Tasks Eye: configured notes folder not found: Missing");
+      .toBe(
+        'Tasks Eye can\'t find the notes folder "Missing". ' +
+          "Choose another folder in settings.",
+      );
   });
 
   it("recognizes parent folder changes without following renames", () => {

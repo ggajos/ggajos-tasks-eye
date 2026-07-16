@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildEyeFileFromMarkdown } from "../../src/indexer";
-import { violationCodes } from "../testSupport";
+import { violationCodes, violationMessages } from "../testSupport";
 
 const VIOLATION = "note-in-managed-root";
 const VALID_NOTE = `---
@@ -31,5 +31,14 @@ describe("Note in managed root violation", () => {
       undefined,
       "Workspace",
     ))).not.toContain(VIOLATION);
+  });
+
+  it("tells the user how to process the note", () => {
+    expect(violationMessages(buildEyeFileFromMarkdown(
+      "Workspace/Unprocessed.md",
+      VALID_NOTE,
+      undefined,
+      "Workspace",
+    ))).toContain("Note needs to be moved into a context folder.");
   });
 });

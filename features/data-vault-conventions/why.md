@@ -1,4 +1,4 @@
-## Why Vault Conventions Exist
+## Why note conventions exist
 
 Tasks Eye is deliberately not a separate database. Notes remain normal Markdown,
 status remains frontmatter, and task state remains in the Obsidian Tasks format.

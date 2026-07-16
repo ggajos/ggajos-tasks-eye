@@ -1,7 +1,12 @@
 import { ItemView, MarkdownRenderer, setIcon } from "obsidian";
 import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { BoardCollapseState } from "./boardCollapse";
-import { isEyeMode, MODE_LABELS, MODES } from "./constants";
+import {
+  isEyeMode,
+  MODE_LABELS,
+  MODES,
+  TASKS_PLUGIN_REQUIRED_MESSAGE,
+} from "./constants";
 import type { EyeMode } from "./constants";
 import {
   discoverContexts,
@@ -63,6 +68,18 @@ function pill(text: string): HTMLElement {
   return element("span", "eye-pill", text);
 }
 
+function attentionPill(): HTMLElement {
+  const marker = pill("!");
+  marker.title = "Needs attention";
+  marker.setAttribute("aria-label", "Needs attention");
+  return marker;
+}
+
+function dueShiftLabel(deltaDays: number): string {
+  const interval = Math.abs(deltaDays) === 7 ? "1 week" : "1 day";
+  return `Move due date ${interval} ${deltaDays > 0 ? "later" : "earlier"}`;
+}
+
 function headingId(prefix: string, key: string): string {
   return `eye-${prefix}-${key.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase()}`;
 }
@@ -103,7 +120,7 @@ export class EyeView extends ItemView {
   }
 
   getDisplayText(): string {
-    if (this.mode === "done") return `Tasks Eye: Done: ${this.date}`;
+    if (this.mode === "done") return `Tasks Eye: Done — ${this.date}`;
     return `Tasks Eye: ${MODE_LABELS[this.mode]}`;
   }
 
@@ -163,7 +180,7 @@ export class EyeView extends ItemView {
     );
     this.contentEl.replaceChildren(root);
     this.renderToolbar(root, []);
-    root.appendChild(element("div", "eye-empty", "Loading..."));
+    root.appendChild(element("div", "eye-empty", "Loading…"));
 
     const folderError = this.plugin.managedFolderError();
     if (folderError) {
@@ -194,7 +211,7 @@ export class EyeView extends ItemView {
       root.appendChild(element(
         "div",
         "eye-error",
-        "Tasks Eye requires the Obsidian Tasks plugin API.",
+        TASKS_PLUGIN_REQUIRED_MESSAGE,
       ));
       return;
     }
@@ -229,8 +246,8 @@ export class EyeView extends ItemView {
   }
 
   private emptyMessage(): string {
-    if (this.mode === "inbox") return "All files pass validation";
-    return `No notes in ${MODE_LABELS[this.mode]}`;
+    if (this.mode === "inbox") return "No notes need attention.";
+    return `No notes in ${MODE_LABELS[this.mode]}.`;
   }
 
   private contextsForMode(contexts: string[]): string[] {
@@ -289,7 +306,7 @@ export class EyeView extends ItemView {
     const input = element("input", "eye-date-input");
     input.type = "date";
     input.value = this.date;
-    input.setAttribute("aria-label", "Done date");
+    input.setAttribute("aria-label", "Completion date");
     input.addEventListener("change", () => {
       void this.setDate(input.value);
     });
@@ -329,7 +346,7 @@ export class EyeView extends ItemView {
       list.appendChild(element(
         "div",
         "eye-empty",
-        `No completed tasks for ${formatHumanDate(this.date)}`,
+        `No completed tasks for ${formatHumanDate(this.date)}.`,
       ));
       return;
     }
@@ -548,8 +565,8 @@ export class EyeView extends ItemView {
 
   private renderMarkerBadge(marker: VacationMarker): HTMLElement {
     const badge = element("div", "eye-context-badge eye-marker-badge", "OOO");
-    badge.title = marker.reason;
-    badge.setAttribute("aria-label", `Marker: ${marker.reason}`);
+    badge.title = marker.label;
+    badge.setAttribute("aria-label", `OOO marker: ${marker.label}`);
     return badge;
   }
 
@@ -591,7 +608,7 @@ export class EyeView extends ItemView {
       const action = element("div", "eye-task-title");
       const note = element("div", "eye-note-line");
       note.appendChild(this.renderNoteLink(model));
-      if (model.errors.length > 0) note.appendChild(pill("!"));
+      if (model.errors.length > 0) note.appendChild(attentionPill());
       appendMeta(meta, model, false);
       await this.renderActionMarkdown(action, model);
 
@@ -600,7 +617,7 @@ export class EyeView extends ItemView {
     } else {
       const title = element("div", "eye-row-title");
       title.appendChild(this.renderNoteLink(model));
-      if (model.errors.length > 0) title.appendChild(pill("!"));
+      if (model.errors.length > 0) title.appendChild(attentionPill());
 
       main.appendChild(title);
 
@@ -651,7 +668,7 @@ export class EyeView extends ItemView {
 
     const done = button(
       "eye-icon-button",
-      "Complete task",
+      "Mark task done",
       () => void this.plugin.completeTask(model),
     );
     setIcon(done, "check");
@@ -661,7 +678,7 @@ export class EyeView extends ItemView {
       for (const delta of [1, -1, 7, -7]) {
         actions.appendChild(button(
           "eye-shift-button",
-          `Shift due date ${delta > 0 ? "+" : ""}${delta} day(s)`,
+          dueShiftLabel(delta),
           () => void this.plugin.shiftTaskDue(model, delta),
           delta > 0 ? `+${delta}` : `${delta}`,
         ));

@@ -1,4 +1,4 @@
-## Why This Violation Exists
+## Why this issue exists
 
 Open notes are supposed to represent actionable work. If an open note has no
 unchecked task, it is not clear what the next action is.

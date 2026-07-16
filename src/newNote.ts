@@ -69,7 +69,7 @@ class FolderSuggestModal extends FuzzySuggestModal<FolderOption> {
     super(app);
     this.options = options;
     this.onChoose = onChoose;
-    this.setPlaceholder("Select Tasks Eye folder");
+    this.setPlaceholder("Choose a folder for the new note");
   }
 
   getItems(): FolderOption[] {

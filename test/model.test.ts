@@ -40,7 +40,7 @@ describe("row model", () => {
     const row = buildRowModel(fixture("no-due.md"));
 
     expect(row.actionLabel).toBe("first undated task");
-    expect(row.dateLabel).toBe("no due");
+    expect(row.dateLabel).toBe("No Due Date");
   });
 
   it("ignores completed tasks when selecting the next action", () => {

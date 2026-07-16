@@ -2,13 +2,13 @@ import { note, violationFixture } from "../fixtures";
 import { defineFeature } from "../types";
 
 export default defineFeature({
-  title: "Invalid status",
+  title: "Unsupported status",
   summary:
-    "A note with explicit status outside `open`, `hold`, `closed`, or `archived` is invalid.",
+    "A note needs `open`, `hold`, `closed`, or `archived` when it declares a status.",
   acceptanceCriteria: [
     "Explicit unsupported status values are reported in Inbox.",
     "Non-string status values are reported in Inbox.",
-    "Missing or blank status does not trigger this violation because it defaults to Open.",
+    "Missing or blank status does not trigger this issue because it defaults to Open.",
   ],
   violation: {
     code: "invalid-status",

@@ -58,7 +58,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     }),
   ]),
   { acceptance: [{
-    title: "opens only Today and keeps pane-scoped manual bucket choices",
+    title: "expands only Today and keeps pane-scoped manual bucket choices",
     async run() {
       await tasksEyePage.openBoard("open", BILLING);
       await expectDefaultOpenBuckets();

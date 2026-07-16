@@ -1,4 +1,4 @@
-## Why Context Filtering Exists
+## Why context filtering exists
 
 The folder tree already describes the broad context of a note. Tasks Eye uses
 that structure instead of adding another tag or frontmatter field.

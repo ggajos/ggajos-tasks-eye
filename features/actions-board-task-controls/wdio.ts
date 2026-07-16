@@ -28,21 +28,21 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     title: "shifts task due dates through board controls",
     async run() {
       await tasksEyePage.openBoard("open", ACTION);
-      await tasksEyePage.clickRowAction(ACTION, "Shift due date +1 day(s)");
+      await tasksEyePage.clickRowAction(ACTION, "Move due date 1 day later");
       await waitForFileText(`${ACTION} 📅 2026-07-09`);
     },
   }, {
     title: "completes tasks through board controls and the Tasks API",
     async run() {
       await tasksEyePage.openBoard("open", ACTION);
-      await tasksEyePage.clickRowAction(ACTION, "Complete task");
+      await tasksEyePage.clickRowAction(ACTION, "Mark task done");
       await waitForFileText(`- [x] ${ACTION}`);
     },
   }], screenshots: [{
     screenshotSlug: "controls",
     async run({ save }) {
       const root = await tasksEyePage.openBoard("open", ACTION);
-      await tasksEyePage.focusRowAction(ACTION, "Complete task");
+      await tasksEyePage.focusRowAction(ACTION, "Mark task done");
       await save(root);
     },
   }] },

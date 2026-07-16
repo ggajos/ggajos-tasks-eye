@@ -1,12 +1,12 @@
 import { defineFeature } from "../types";
 
 export default defineFeature({
-  title: "Vacation availability markers",
+  title: "Vacation markers",
   summary:
-    "Open boards show configured weekends, holidays, and custom OOO dates as availability markers through the work timeline.",
+    "Tasks Eye treats weekends, holidays, and vacation dates as unavailable when validating due dates, and shows holidays and vacation dates as markers in Open.",
   acceptanceCriteria: [
     "Configured weekends, annual holidays, movable holidays, and custom dates are recognized as unavailable.",
-    "Open boards interleave vacation markers with dated work.",
+    "Open boards interleave holiday and vacation markers with dated work.",
     "The `OOO` filter shows only availability markers.",
     "Normal context filters suppress availability markers.",
   ],

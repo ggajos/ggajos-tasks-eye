@@ -1,6 +1,10 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { DOCUMENTED_COMMANDS, formatHotkey } from "../features/commands";
+import {
+  DOCUMENTED_COMMANDS,
+  formatCommandName,
+  formatHotkey,
+} from "../features/commands";
 import { discoverFeatures } from "../features/discovery";
 import { DOCUMENTATION_VARIANTS } from "../features/visualVariants";
 import type {
@@ -61,8 +65,8 @@ const FEATURE_GROUPS: Record<string, FeatureGroup> = {
     order: 60,
   },
   violations: {
-    label: "Violations",
-    description: "One feature per validation rule shown in Inbox.",
+    label: "Workflow cleanup",
+    description: "Validation issues shown in Inbox.",
     order: 70,
   },
 };
@@ -193,7 +197,7 @@ function renderCommandTable(features: readonly LoadedFeature[]): string {
 
       return `<tr>
   <td>${shortcutCell}</td>
-  <td><code>${escapeHtml(command.name)}</code></td>
+  <td><code>${escapeHtml(formatCommandName(command.name))}</code></td>
   <td>${featureCell}</td>
   <td>${escapeHtml(command.explanation)}</td>
 </tr>`;
@@ -245,7 +249,7 @@ function renderViolationSample(feature: FeatureDefinition): string {
   const sample = violation.fixture.subject;
 
   return `
-## Example Invalid Note
+## Example note that needs attention
 
 \`\`\`md
 ${sample.markdown.trimEnd()}
@@ -300,7 +304,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ${feature.feature.summary}
 
-## Why It Matters
+## Why it matters
 
 ${withoutLeadingHeading(feature.whyMarkdown.trim())}
 

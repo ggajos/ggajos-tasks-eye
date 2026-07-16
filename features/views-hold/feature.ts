@@ -1,7 +1,7 @@
 import { defineFeature } from "../types";
 
 export default defineFeature({
-  title: "Hold",
+  title: "Hold view",
   summary:
     "A backlog board for notes with `status: hold`, kept visible without mixing deferred work into the active Open board.",
   acceptanceCriteria: [

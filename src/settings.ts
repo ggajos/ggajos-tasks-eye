@@ -24,7 +24,7 @@ class ManagedFolderSuggestModal extends FuzzySuggestModal<FolderOption> {
     super(app);
     this.options = options;
     this.onChoose = onChoose;
-    this.setPlaceholder("Select managed notes folder");
+    this.setPlaceholder("Choose a notes folder");
   }
 
   getItems(): FolderOption[] {
@@ -54,11 +54,11 @@ export class TasksEyeSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Notes folder")
-      .setDesc("Tasks Eye manages Markdown notes in this folder and its subfolders.")
+      .setDesc("Tasks Eye reads Markdown notes in this folder and all subfolders.")
       .addButton((button) => {
         button
           .setButtonText(this.plugin.settings.notesFolderPath)
-          .setTooltip("Choose managed notes folder")
+          .setTooltip("Choose a notes folder")
           .onClick(() => this.openFolderPicker());
       });
 

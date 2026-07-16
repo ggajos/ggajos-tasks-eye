@@ -87,10 +87,10 @@ export function buildRowModel(file: EyeFile): RowModel {
     errors: rowErrors(file),
     isToday: earliestDue !== null && isToday(earliestDue),
     isFuture: earliestDue !== null && isAfterToday(earliestDue),
-    dateLabel: earliestDue === null ? "no due" : formatMonthDay(earliestDue),
+    dateLabel: earliestDue === null ? "No Due Date" : formatMonthDay(earliestDue),
     yearLabel: year === currentYear() ? "" : year,
     dayLabel: earliestDue === null ? "" : formatWeekday(earliestDue),
-    actionLabel: earliestTask ? stripDueDate(earliestTask.text) : "No uncompleted tasks",
+    actionLabel: earliestTask ? stripDueDate(earliestTask.text) : "No unchecked tasks",
     contextKey: getTopLevelContext(file.path, file.managedFolderPath),
     contextLabel: getContextFromPath(file.path, file.managedFolderPath),
   };
@@ -267,7 +267,7 @@ function dayKey(ts: number | null): string {
 }
 
 function dayLabel(ts: number | null): string {
-  return ts === null ? "No due" : formatHumanDate(ts);
+  return ts === null ? "No Due Date" : formatHumanDate(ts);
 }
 
 function emptyBoardBucket(
