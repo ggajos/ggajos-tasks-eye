@@ -16,6 +16,8 @@ const [command, ...args] = process.argv.slice(2);
 
 if (command === "check") {
   await checkVersions();
+} else if (command === "check-release-visual") {
+  await checkReleaseVisual();
 } else if (command === "sync") {
   await syncObsidianVersion(args[0]);
 } else if (command === "next-beta") {
@@ -26,7 +28,7 @@ if (command === "check") {
   await release(args[0], args.slice(1));
 } else {
   console.error(
-    "Usage: node scripts/obsidian-release.mjs check|next-beta|sync <version>|github-release <version>|release <beta|public>",
+    "Usage: node scripts/obsidian-release.mjs check|check-release-visual|next-beta|sync <version>|github-release <version>|release <beta|public>",
   );
   process.exit(1);
 }
@@ -121,12 +123,27 @@ async function nextBetaVersion() {
 
 async function release(channel, extraArgs) {
   if (channel === "beta") {
+    process.env.TASKS_EYE_RELEASE_CHANNEL = channel;
     await runReleaseIt([await nextBetaVersion(), "--ci", ...extraArgs]);
   } else if (channel === "public") {
+    process.env.TASKS_EYE_RELEASE_CHANNEL = channel;
     await runReleaseIt(["major", "--ci", ...extraArgs]);
   } else {
     throw new Error("Release channel must be beta or public.");
   }
+}
+
+async function checkReleaseVisual() {
+  const channel = process.env.TASKS_EYE_RELEASE_CHANNEL;
+  if (channel === "beta") {
+    console.log("Skipping Podman WDIO for beta release.");
+    return;
+  }
+  if (channel === "public") {
+    await run("npm", ["run", "test:visual"]);
+    return;
+  }
+  throw new Error("Release channel context is missing.");
 }
 
 async function runReleaseIt(args) {

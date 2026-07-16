@@ -17,8 +17,8 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 - `npm run test:visual:approve` promotes a complete reviewed visual run and
   rebuilds generated docs. Visual runs never update baselines implicitly.
 - `npm run docs` publishes accepted screenshots and rebuilds generated docs.
-- `npm run release` and `npm run release:public` automatically run unit, build,
-  Podman WDIO, and docs gates before versioning.
+- `npm run release` runs unit, build, and docs gates for beta releases;
+  `npm run release:public` additionally runs the Podman WDIO gate.
 
 Use focused commands first when changing a narrow rule, then broaden only when
 the change touches integration behavior or generated docs.

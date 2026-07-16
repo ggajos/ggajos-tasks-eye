@@ -102,7 +102,8 @@ Desktop first and, on macOS, create its VM once with `podman machine init`.
 `npm run test:visual` never edits committed screenshots. Review expected,
 actual, and difference images in the printed HTML report, then use
 `npm run test:visual:approve` to promote intentional changes and rebuild docs.
-The release commands run this Podman gate automatically.
+The public release command runs this Podman gate automatically; beta releases
+skip it.
 
 Feature-owned executable documentation lives under `features/<slug>/`. A
 feature folder can provide typed metadata, `why.md`, focused Vitest specs, and
@@ -137,7 +138,8 @@ The visual review workflow is:
 
 1. Use `npm test` during regular development.
 2. Use `npm run build` when a bundled plugin is needed.
-3. Run `npm run test:visual` before release or when UI documentation changes.
+3. Run `npm run test:visual` before a public release or when UI documentation
+   changes.
 4. Review every expected/actual/diff entry in the printed HTML report.
 5. Run `npm run test:visual:approve` only for intentional differences.
 6. Rerun `npm run test:visual` and confirm a clean baseline.
@@ -162,10 +164,11 @@ npm run release:public
 ```
 
 Both commands verify version metadata, run unit tests, type-check and build
-`main.js`, run all WDIO checks in Podman, and rebuild the generated docs before
-bumping the version. They then update public metadata when applicable, commit,
-tag without a `v` prefix, push, and create the GitHub release. Beta releases
-keep the repository `manifest.json` on the latest public version but upload a
+`main.js`, and rebuild the generated docs before bumping the version. Public
+releases additionally run all WDIO checks in Podman; beta releases skip that
+gate. The commands then update public metadata when applicable, commit, tag
+without a `v` prefix, push, and create the GitHub release. Beta releases keep
+the repository `manifest.json` on the latest public version but upload a
 beta-version manifest for BRAT. Release assets are `manifest.json`, `main.js`,
 and `styles.css` when present; `main.js` remains ignored by git.
 

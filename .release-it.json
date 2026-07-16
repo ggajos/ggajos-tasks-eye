@@ -18,7 +18,7 @@
       "node scripts/obsidian-release.mjs check",
       "npm test",
       "npm run build",
-      "npm run test:visual",
+      "node scripts/obsidian-release.mjs check-release-visual",
       "npm run docs"
     ],
     "after:bump": "node scripts/obsidian-release.mjs sync ${version}",
