@@ -1,4 +1,5 @@
 import { STATUSES, VACATION } from "./constants";
+import { getContextFromPath } from "./context";
 import { formatYmd } from "./date";
 import { isPathInManagedFolder } from "./managedPath";
 import type { EyeFile, EyeTask } from "./types";
@@ -7,6 +8,7 @@ import type { VacationReason } from "./vacation";
 
 export const VIOLATION_CODES = [
   "invalid-status",
+  "note-in-managed-root",
   "closed-with-unchecked-tasks",
   "open-without-uncompleted-tasks",
   "open-without-due-date",
@@ -63,6 +65,14 @@ const invalidStatus: ValidationRule = ({ file, status, hasExplicitStatus }) => {
   );
 };
 
+const noteInManagedRoot: ValidationRule = ({ file }) => {
+  if (getContextFromPath(file.path, file.managedFolderPath) !== "-") return [];
+  return singleViolation(
+    "note-in-managed-root",
+    "note is unprocessed in the managed root folder",
+  );
+};
+
 const closedWithUncheckedTasks: ValidationRule = (
   { status, uncompletedTasks },
 ) => {
@@ -114,6 +124,7 @@ const tasksOnVacation: ValidationRule = ({ uncompletedTasks }) => {
 
 const VALIDATION_RULES: readonly ValidationRule[] = [
   invalidStatus,
+  noteInManagedRoot,
   closedWithUncheckedTasks,
   openWithoutTasks,
   openWithoutDueDate,

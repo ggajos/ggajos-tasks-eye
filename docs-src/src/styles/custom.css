@@ -240,6 +240,12 @@ body {
   white-space: nowrap;
 }
 
+.shortcut-unassigned {
+  color: var(--sl-color-gray-2);
+  font-style: italic;
+  white-space: nowrap;
+}
+
 starlight-tabs {
   display: block;
   overflow: hidden;

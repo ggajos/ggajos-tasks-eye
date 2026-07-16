@@ -1,4 +1,4 @@
-import { FuzzySuggestModal, Modal, Notice, Setting } from "obsidian";
+import { FuzzySuggestModal, Notice } from "obsidian";
 import type { App } from "obsidian";
 import { getContextFromFolderPath } from "./context";
 import {
@@ -43,24 +43,15 @@ function noteBody(): string {
   return lines.join("\n");
 }
 
-function safeFileName(title: string): string {
-  return title
-    .replace(/[\\/:|#^[\]]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 async function uniquePath(
   app: App,
   folderPath: string,
-  title: string,
 ): Promise<string> {
-  const base = safeFileName(title) || "Untitled";
   const inFolder = (name: string) => folderPath ? `${folderPath}/${name}` : name;
-  let candidate = inFolder(`${base}.md`);
+  let candidate = inFolder("Untitled.md");
   let suffix = 1;
   while (await app.vault.adapter.exists(candidate)) {
-    candidate = inFolder(`${base} ${suffix}.md`);
+    candidate = inFolder(`Untitled ${suffix}.md`);
     suffix++;
   }
   return candidate;
@@ -94,58 +85,10 @@ class FolderSuggestModal extends FuzzySuggestModal<FolderOption> {
   }
 }
 
-class TitleModal extends Modal {
-  private folderPath: string;
-
-  constructor(app: App, folderPath: string) {
-    super(app);
-    this.folderPath = folderPath;
-  }
-
-  onOpen(): void {
-    this.titleEl.setText("New Tasks Eye note");
-    const { contentEl } = this;
-    contentEl.empty();
-
-    let title = "";
-    new Setting(contentEl)
-      .setName("Title")
-      .addText((text) => {
-        text.setPlaceholder("Note title");
-        text.inputEl.addEventListener("keydown", (event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            void this.create(title);
-          }
-        });
-        text.onChange((value) => {
-          title = value;
-        });
-      });
-
-    new Setting(contentEl)
-      .addButton((button) => {
-        button
-          .setButtonText("Create")
-          .setCta()
-          .onClick(() => {
-            void this.create(title);
-          });
-      });
-  }
-
-  private async create(title: string): Promise<void> {
-    const trimmed = safeFileName(title);
-    if (!trimmed) {
-      new Notice("Tasks Eye: note title is required.");
-      return;
-    }
-
-    const path = await uniquePath(this.app, this.folderPath, trimmed);
-    const file = await this.app.vault.create(path, noteBody());
-    await this.app.workspace.getLeaf(false).openFile(file);
-    this.close();
-  }
+async function createNote(app: App, folderPath: string): Promise<void> {
+  const path = await uniquePath(app, folderPath);
+  const file = await app.vault.create(path, noteBody());
+  await app.workspace.getLeaf(false).openFile(file);
 }
 
 export function openNewEyeNoteFlow(app: App, managedFolderPath: string): void {
@@ -156,6 +99,6 @@ export function openNewEyeNoteFlow(app: App, managedFolderPath: string): void {
   }
 
   new FolderSuggestModal(app, options, (folder) => {
-    new TitleModal(app, folder.path).open();
+    void createNote(app, folder.path);
   }).open();
 }

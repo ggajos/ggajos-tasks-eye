@@ -1,17 +1,19 @@
+import type { Hotkey } from "obsidian";
 import type { EyeMode } from "./constants";
 
 export interface CommandDefinition {
   id: string;
   name: string;
-  hotkey: {
-    modifiers: Array<"Mod" | "Ctrl" | "Meta" | "Shift" | "Alt">;
-    key: string;
-  };
+  hotkey?: Hotkey;
+}
+
+interface CommandWithHotkeyDefinition extends CommandDefinition {
+  hotkey: Hotkey;
 }
 
 export const MODE_COMMANDS: Record<
   Exclude<EyeMode, "done">,
-  CommandDefinition
+  CommandWithHotkeyDefinition
 > = {
   open: {
     id: "open-open",
@@ -30,13 +32,19 @@ export const MODE_COMMANDS: Record<
   },
 };
 
-export const OPEN_COMPLETED_COMMAND: CommandDefinition = {
+export const CREATE_NEW_NOTE_COMMAND: CommandWithHotkeyDefinition = {
+  id: "create-new-note",
+  name: "Create new Tasks Eye note",
+  hotkey: { modifiers: ["Ctrl", "Shift"], key: "N" },
+};
+
+export const OPEN_COMPLETED_COMMAND: CommandWithHotkeyDefinition = {
   id: "open-completed-tasks",
   name: "Open Tasks Eye Done",
   hotkey: { modifiers: ["Ctrl"], key: "4" },
 };
 
-export const UNCHECK_SELECTED_COMMAND: CommandDefinition = {
+export const UNCHECK_SELECTED_COMMAND: CommandWithHotkeyDefinition = {
   id: "uncheck-selected-tasks",
   name: "Uncheck selected tasks",
   hotkey: { modifiers: ["Ctrl", "Shift"], key: "D" },

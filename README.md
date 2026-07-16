@@ -1,190 +1,32 @@
 # Tasks Eye
 
-Tasks Eye is a native Obsidian plugin for managing note-centered work queues on
-top of the Tasks plugin. Its single native view provides focused Open, Inbox,
-Hold, and Done modes from regular markdown notes and Tasks emoji task metadata.
+Tasks Eye turns regular Obsidian notes and Tasks checkboxes into a focused,
+note-centered work system. One native view keeps active work, workflow repairs,
+backlog, and completed history close to the notes that explain them.
 
-The full documentation site lives in [`docs/`](docs/) and is ready for GitHub
-Pages configured as "deploy from branch" using the `/docs` folder. No GitHub
-Actions workflow is required. The docs build defaults to the project Pages base
-path `/ggajos-tasks-eye/`; set `DOCS_SITE` and `DOCS_BASE` when building for a
-custom domain or another mount point.
+[Explore the full documentation](https://ggajos.com/ggajos-tasks-eye/)
 
-Tasks Eye manages Markdown notes under the configured notes folder and all of
-its subfolders. The setting defaults to the vault root (`/`). Change the folder
-from **Settings → Tasks Eye → Notes folder**. A note's work status is stored
-in frontmatter:
+![Tasks Eye Open view](docs/assets/features/views-open/dark-minimal/board.png)
 
-```yaml
----
-status: open
----
-```
+## Why Tasks Eye?
 
-Supported statuses are `open`, `hold`, `closed`, and `archived`. Missing or blank
-status is treated as `open`.
+- Keep Markdown notes as the source of truth instead of maintaining another
+  task database.
+- See next actions organized by due date and vault context.
+- Find incomplete or inconsistent notes in a dedicated repair queue.
+- Complete and reschedule tasks directly from the board.
+- Review active, held, and completed work in one Obsidian view.
 
-## Requirements
+## Install with BRAT
 
-- Obsidian desktop `1.10.0` or newer.
-- Tasks community plugin. Tasks Eye uses the Tasks plugin API to complete tasks
-  without reimplementing Tasks' emoji format.
+Tasks Eye requires Obsidian 1.10 or newer and the
+[Tasks](https://obsidian.md/plugins?id=obsidian-tasks-plugin) community plugin.
 
-## Views
+1. Install and enable **Tasks** from Obsidian's Community Plugins.
+2. Install and enable
+   [BRAT](https://obsidian.md/plugins?id=obsidian42-brat).
+3. In BRAT settings, choose **Add Beta Plugin** and enter
+   `https://github.com/ggajos/ggajos-tasks-eye`.
+4. Enable **Tasks Eye** in Community Plugins.
 
-The eye ribbon icon opens one Tasks Eye view. Use its Open, Inbox, Hold, and Done
-tabs to keep every task workflow in the same Obsidian leaf.
-
-### Open
-
-Open shows actionable notes grouped by due date. Future work stays `status: open`
-and is deferred by adding a Tasks due date (`📅 YYYY-MM-DD`).
-
-![Open board](docs/assets/features/views-open/dark-minimal/board.png)
-
-### Inbox
-
-Inbox shows notes that need attention, such as open notes with no remaining
-unchecked task, open notes whose unchecked tasks have no due date, or notes
-with invalid status frontmatter.
-
-### Hold
-
-Hold shows notes with `status: hold`, grouped with the same board mechanics as
-Open.
-
-### Done
-
-Done shows completed Tasks items for a selected date, grouped by note context,
-inside the same Tasks Eye view as the work queues.
-
-![Done tasks](docs/assets/features/views-done/dark-minimal/done-view.png)
-
-## Commands
-
-- `Tasks Eye: Open Tasks Eye: open`
-- `Tasks Eye: Open Tasks Eye: inbox`
-- `Tasks Eye: Open Tasks Eye: hold`
-- `Tasks Eye: Create new Tasks Eye note`
-- `Tasks Eye: Open Tasks Eye Done`
-- `Tasks Eye: Uncheck selected tasks`
-
-## Development
-
-Use Node `22.13.0` or newer.
-
-```bash
-npm install
-npm test
-npm run build
-```
-
-`npm test` runs the Vitest unit suite only. It is the normal development loop
-and does not build documentation, start Obsidian, run WDIO, or require Podman.
-`npm run build` type-checks the project and produces the plugin bundle.
-
-All WDIO coverage is a final integration gate. The only WDIO entry point builds
-or reuses a pinned Linux ARM64 Podman image, starts Obsidian under Xvfb, runs
-the behavioral acceptance scenarios, and then compares every documentation
-screenshot:
-
-```bash
-npm run test:visual
-# review the printed HTML report path
-npm run test:visual:approve
-```
-
-WDIO never runs directly on the development machine. The container cannot move,
-focus, or cover local windows. Its first run downloads the isolated Obsidian
-runtime; later runs reuse the image and application caches. Install Podman
-Desktop first and, on macOS, create its VM once with `podman machine init`.
-
-`npm run test:visual` never edits committed screenshots. Review expected,
-actual, and difference images in the printed HTML report, then use
-`npm run test:visual:approve` to promote intentional changes and rebuild docs.
-The public release command runs this Podman gate automatically; beta releases
-skip it.
-
-Feature-owned executable documentation lives under `features/<slug>/`. A
-feature folder can provide typed metadata, `why.md`, focused Vitest specs, and
-isolated WDIO fixtures/screenshots that feed generated documentation. Standard
-violation fixtures also generate their model contracts and screenshots.
-
-The acceptance and documentation structure is:
-
-- `acceptance/fixtures/base/` is a minimal seed vault.
-- `acceptance/specs/` discovers feature acceptance and screenshot scenarios.
-- `acceptance/snapshots/docs/features/` stores reviewed screenshot baselines.
-- `acceptance/artifacts/visual/` stores ignored actual images, diffs, the run
-  manifest, and the HTML report.
-- `acceptance/Containerfile.visual` pins the Linux display, fonts, and Electron
-  runtime dependencies.
-- `features/<slug>/` owns typed metadata, rationale, tests, fixtures, and
-  optional WDIO scenarios.
-- `docs-src/` contains authored public-doc templates and generated staging;
-  `docs/` is the generated GitHub Pages output.
-
-Each acceptance or screenshot scenario declares a complete `FeatureFixture`.
-Use `fixture()`, `note()`, and `task()` for normal notes, and literal Markdown
-when exact or malformed syntax is under test. Scenarios must not inherit notes
-from another feature. A violation fixture drives its model contract and the
-standard Inbox/Open screenshots; a custom scenario with the same screenshot
-slug replaces that generated flow.
-
-The Podman gate pins Obsidian `1.12.7`, Tasks `8.2.2`, Minimal `8.2.1`, Inter
-fonts, device pixel ratio `1`, and a `1030x824` display.
-
-The visual review workflow is:
-
-1. Use `npm test` during regular development.
-2. Use `npm run build` when a bundled plugin is needed.
-3. Run `npm run test:visual` before a public release or when UI documentation
-   changes.
-4. Review every expected/actual/diff entry in the printed HTML report.
-5. Run `npm run test:visual:approve` only for intentional differences.
-6. Rerun `npm run test:visual` and confirm a clean baseline.
-
-`TASKS_EYE_TODAY` fixes the acceptance date. Captures wait for fonts and
-disable animation, blinking carets, scrollbars, and pointer hit testing;
-scenarios that document focus establish it explicitly. Missing, changed,
-stale, or incomplete captures fail without mutating committed baselines.
-
-## Releases
-
-Releases use a local `release-it` flow. Requirements are Node `22.13.0` or
-newer, an authenticated GitHub CLI (`gh auth status`), push access to `origin`,
-a clean worktree, and the `master` branch.
-
-```bash
-# Next BRAT beta, for example 6.0.0-beta.2 → 6.0.0-beta.3
-npm run release
-
-# Next public Obsidian release, for example 6.0.0-beta.3 → 6.0.0
-npm run release:public
-```
-
-Both commands verify version metadata, run unit tests, type-check and build
-`main.js`, and rebuild the generated docs before bumping the version. Public
-releases additionally run all WDIO checks in Podman; beta releases skip that
-gate. The commands then update public metadata when applicable, commit, tag
-without a `v` prefix, push, and create the GitHub release. Beta releases keep
-the repository `manifest.json` on the latest public version but upload a
-beta-version manifest for BRAT. Release assets are `manifest.json`, `main.js`,
-and `styles.css` when present; `main.js` remains ignored by git.
-
-BRAT installs this repository as `ggajos/ggajos-tasks-eye`. Beta releases are
-GitHub pre-releases; public releases use plain semantic versions.
-
-If a release fails before the version bump, fix the cause and rerun it. If it
-fails after the bump but before the release commit, restore the metadata first:
-
-```bash
-git restore package.json package-lock.json manifest.json versions.json
-npm run release # or npm run release:public
-```
-
-If the tag was pushed but GitHub release creation failed, finish it with:
-
-```bash
-node scripts/obsidian-release.mjs github-release <version>
-```
+BRAT will install Tasks Eye and keep it updated from this repository's releases.

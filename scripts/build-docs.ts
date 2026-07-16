@@ -1,6 +1,6 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { COMMAND_SHORTCUTS, formatHotkey } from "../features/commands";
+import { DOCUMENTED_COMMANDS, formatHotkey } from "../features/commands";
 import { discoverFeatures } from "../features/discovery";
 import { DOCUMENTATION_VARIANTS } from "../features/visualVariants";
 import type {
@@ -173,16 +173,31 @@ ${cards}
     .join("\n\n");
 }
 
-function renderShortcutTable(features: readonly LoadedFeature[]): string {
+function renderCommandTable(features: readonly LoadedFeature[]): string {
   const featureSlugs = new Set(features.map(({ feature }) => feature.slug));
-  const rows = COMMAND_SHORTCUTS
-    .filter((command) => featureSlugs.has(command.featureSlug))
-    .map((command) => `<tr>
-  <td><kbd>${escapeHtml(formatHotkey(command.hotkey))}</kbd></td>
+  const rows = DOCUMENTED_COMMANDS
+    .map((command) => {
+      const shortcut = escapeHtml(formatHotkey(command.hotkey));
+      const shortcutCell = command.hotkey
+        ? `<kbd>${shortcut}</kbd>`
+        : `<span class="shortcut-unassigned">${shortcut}</span>`;
+      if ((command.featureSlug === undefined) !== (command.featureTitle === undefined)) {
+        throw new Error(`Command ${command.id} must define both featureSlug and featureTitle`);
+      }
+      if (command.featureSlug && !featureSlugs.has(command.featureSlug)) {
+        throw new Error(`Command ${command.id} references unknown feature ${command.featureSlug}`);
+      }
+      const featureCell = command.featureSlug && command.featureTitle
+        ? `<a href="features/${escapeHtml(command.featureSlug)}/">${escapeHtml(command.featureTitle)}</a>`
+        : "&mdash;";
+
+      return `<tr>
+  <td>${shortcutCell}</td>
   <td><code>${escapeHtml(command.name)}</code></td>
-  <td><a href="features/${escapeHtml(command.featureSlug)}/">${escapeHtml(command.featureTitle)}</a></td>
+  <td>${featureCell}</td>
   <td>${escapeHtml(command.explanation)}</td>
-</tr>`)
+</tr>`;
+    })
     .join("\n");
 
   return `<div class="table-scroll">
@@ -192,7 +207,7 @@ function renderShortcutTable(features: readonly LoadedFeature[]): string {
       <th>Default shortcut</th>
       <th>Command</th>
       <th>Feature</th>
-      <th>Why</th>
+      <th>Purpose</th>
     </tr>
   </thead>
   <tbody>
@@ -206,7 +221,7 @@ async function renderIndexPage(features: readonly LoadedFeature[]): Promise<stri
   let template = await readFile(path.join(TEMPLATE_ROOT, "index.mdx"), "utf8");
   const replacements = {
     FEATURE_CARDS: renderIndexFeatureCards(features),
-    SHORTCUT_TABLE: renderShortcutTable(features),
+    COMMAND_TABLE: renderCommandTable(features),
   };
   for (const [token, value] of Object.entries(replacements)) {
     const marker = `{{${token}}}`;

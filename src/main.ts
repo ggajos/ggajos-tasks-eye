@@ -16,6 +16,7 @@ import {
   shiftTaskDueInFile,
 } from "./actions";
 import {
+  CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
   UNCHECK_SELECTED_COMMAND,
@@ -87,8 +88,9 @@ export default class TheEyePlugin extends Plugin {
     }
 
     this.addCommand({
-      id: "create-new-note",
-      name: "Create new Tasks Eye note",
+      id: CREATE_NEW_NOTE_COMMAND.id,
+      name: CREATE_NEW_NOTE_COMMAND.name,
+      hotkeys: [CREATE_NEW_NOTE_COMMAND.hotkey],
       callback: () => {
         openNewEyeNoteFlow(this.app, this.settings.notesFolderPath);
       },
