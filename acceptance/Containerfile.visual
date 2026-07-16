@@ -4,8 +4,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     DISPLAY=:99 \
     LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
-    TASKS_EYE_SUITE=visual \
-    TASKS_EYE_VISUAL_CONTAINER=1 \
+    TASKS_EYE_SUITE=all \
+    TASKS_EYE_WDIO_CONTAINER=1 \
     TZ=UTC
 
 RUN apt-get update \
@@ -48,7 +48,8 @@ COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-RUN npm run build && npm run typecheck:acceptance
+RUN npm run build \
+    && ./node_modules/.bin/tsc -p tsconfig.acceptance.json --noEmit --skipLibCheck
 
 ENTRYPOINT ["/app/acceptance/scripts/visual-entrypoint.sh"]
 CMD ["node", "acceptance/scripts/run-visual-container.mjs"]

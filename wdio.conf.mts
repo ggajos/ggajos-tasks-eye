@@ -2,14 +2,15 @@ import path from "node:path";
 import { parseObsidianVersions } from "wdio-obsidian-service";
 import type { PluginEntry, ThemeEntry } from "wdio-obsidian-service";
 
-const cacheDir = path.resolve(".obsidian-cache");
-const suite = process.env.TASKS_EYE_SUITE ?? "acceptance";
-const visualSuite = suite === "visual" || suite === "all";
-if (visualSuite && process.env.TASKS_EYE_VISUAL_CONTAINER !== "1") {
+if (process.env.TASKS_EYE_WDIO_CONTAINER !== "1") {
   throw new Error(
-    "Visual tests only run in Podman. Use `npm run test:visual`.",
+    "WDIO tests only run in Podman. Use `npm run test:visual`.",
   );
 }
+
+const cacheDir = path.resolve(".obsidian-cache");
+const suite = process.env.TASKS_EYE_SUITE ?? "all";
+const visualSuite = suite === "visual" || suite === "all";
 const obsidianVersions = await parseObsidianVersions(
   process.env.OBSIDIAN_VERSIONS ?? (
     visualSuite ? "1.12.7/1.12.7" : "latest/latest"

@@ -61,7 +61,7 @@ try {
   mkdirSync(cache, { recursive: true });
   mkdirSync(artifacts, { recursive: true });
 
-  console.log("Building the cached visual-test image...");
+  console.log("Building the cached WDIO-test image...");
   const build = tryRun(podman, [
     "build",
     "--platform",
@@ -74,7 +74,9 @@ try {
   ]);
   if (build.status !== 0) process.exit(build.status ?? 1);
 
-  console.log("Running canonical screenshots in the virtual Linux display...");
+  console.log(
+    "Running behavioral acceptance and canonical screenshots in the virtual Linux display...",
+  );
   const visual = tryRun(podman, [
     "run",
     "--rm",
@@ -93,7 +95,9 @@ try {
   if (existsSync(report)) {
     console.log(`Visual report: ${report}`);
     if (visual.status !== 0) {
-      console.log("After reviewing it, approve with: npm run test:visual:approve");
+      console.log(
+        "Inspect the WDIO output and report; approve only intentional screenshot changes with: npm run test:visual:approve",
+      );
     }
   } else {
     console.error("No visual report was produced; inspect the runner output above.");

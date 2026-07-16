@@ -17,7 +17,9 @@
     "before:bump": [
       "node scripts/obsidian-release.mjs check",
       "npm test",
-      "npm run build"
+      "npm run build",
+      "npm run test:visual",
+      "npm run docs"
     ],
     "after:bump": "node scripts/obsidian-release.mjs sync ${version}",
     "after:git:release": "node scripts/obsidian-release.mjs github-release ${version}"

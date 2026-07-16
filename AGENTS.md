@@ -9,22 +9,22 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 ## Common Commands
 
 - `npm run build` type-checks and bundles the plugin.
-- `npm run test:unit` runs Vitest.
-- `npm run test:acceptance` builds and runs behavioral WDIO acceptance locally;
-  it never captures documentation screenshots.
-- `npm run test:visual` runs every visual test only inside the pinned Podman
-  Linux/Xvfb environment and writes an ignored HTML comparison report.
+- `npm test` runs the Vitest unit suite only; this is the regular development
+  feedback loop.
+- `npm run test:visual` runs all behavioral and screenshot WDIO scenarios only
+  inside the pinned Podman Linux/Xvfb environment and writes an ignored HTML
+  comparison report.
 - `npm run test:visual:approve` promotes a complete reviewed visual run and
   rebuilds generated docs. Visual runs never update baselines implicitly.
 - `npm run docs` publishes accepted screenshots and rebuilds generated docs.
-- `npm test` runs unit tests, local behavioral acceptance, Podman visual tests,
-  and docs generation.
+- `npm run release` and `npm run release:public` automatically run unit, build,
+  Podman WDIO, and docs gates before versioning.
 
 Use focused commands first when changing a narrow rule, then broaden only when
-the change touches acceptance or generated docs.
+the change touches integration behavior or generated docs.
 
-Do not run visual WDIO directly on the host. `npm run test:visual` is the sole
-visual-test entry point; the WDIO configuration rejects a host visual run.
+Do not run WDIO directly on the host. `npm run test:visual` is the sole WDIO
+entry point; the WDIO configuration rejects every host run.
 
 ## Validation Rules
 

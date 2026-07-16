@@ -76,28 +76,17 @@ Use Node `22.13.0` or newer.
 ```bash
 npm install
 npm test
-```
-
-Useful focused commands are:
-
-```bash
 npm run build
-npm run test:unit
-npm run test:acceptance
-npm run test:visual
-npm run docs
 ```
 
-Behavioral acceptance testing runs a sandboxed Obsidian app locally against a
-copied fixture vault. It does not capture documentation screenshots:
+`npm test` runs the Vitest unit suite only. It is the normal development loop
+and does not build documentation, start Obsidian, run WDIO, or require Podman.
+`npm run build` type-checks the project and produces the plugin bundle.
 
-```bash
-npm run test:acceptance
-```
-
-Visual tests never run directly on the development machine. The sole visual
-entry point starts a pinned Linux ARM64 container in Podman, where Obsidian runs
-under Xvfb and a window manager. It cannot move, focus, or cover local windows:
+All WDIO coverage is a final integration gate. The only WDIO entry point builds
+or reuses a pinned Linux ARM64 Podman image, starts Obsidian under Xvfb, runs
+the behavioral acceptance scenarios, and then compares every documentation
+screenshot:
 
 ```bash
 npm run test:visual
@@ -105,12 +94,15 @@ npm run test:visual
 npm run test:visual:approve
 ```
 
-The first visual run builds a cached image and downloads its isolated Obsidian
-runtime. Later runs reuse both caches. Install Podman Desktop first; on macOS,
-create its VM once with `podman machine init` if one does not already exist.
-The command never edits committed screenshots. Review expected, actual, and
-difference images in the printed local HTML report, then use
+WDIO never runs directly on the development machine. The container cannot move,
+focus, or cover local windows. Its first run downloads the isolated Obsidian
+runtime; later runs reuse the image and application caches. Install Podman
+Desktop first and, on macOS, create its VM once with `podman machine init`.
+
+`npm run test:visual` never edits committed screenshots. Review expected,
+actual, and difference images in the printed HTML report, then use
 `npm run test:visual:approve` to promote intentional changes and rebuild docs.
+The release commands run this Podman gate automatically.
 
 Feature-owned executable documentation lives under `features/<slug>/`. A
 feature folder can provide typed metadata, `why.md`, focused Vitest specs, and
@@ -138,22 +130,17 @@ from another feature. A violation fixture drives its model contract and the
 standard Inbox/Open screenshots; a custom scenario with the same screenshot
 slug replaces that generated flow.
 
-Local behavioral acceptance uses the latest Obsidian and Tasks plugin by
-default. Podman screenshots pin Obsidian `1.12.7`, Tasks `8.2.2`, Minimal
-`8.2.1`, Inter fonts, device pixel ratio `1`, and a `1030x824` display. Override
-behavioral versions when diagnosing compatibility:
-
-```bash
-OBSIDIAN_VERSIONS="1.12.7/latest" TASKS_PLUGIN_VERSION=8.2.2 npm run test:acceptance
-```
+The Podman gate pins Obsidian `1.12.7`, Tasks `8.2.2`, Minimal `8.2.1`, Inter
+fonts, device pixel ratio `1`, and a `1030x824` display.
 
 The visual review workflow is:
 
-1. Run `npm run test:acceptance` for quick behavioral feedback.
-2. Run `npm run test:visual` when UI or feature docs may have changed.
-3. Review every expected/actual/diff entry in the printed HTML report.
-4. Run `npm run test:visual:approve` only for intentional differences.
-5. Rerun `npm run test:visual` and confirm a clean baseline.
+1. Use `npm test` during regular development.
+2. Use `npm run build` when a bundled plugin is needed.
+3. Run `npm run test:visual` before release or when UI documentation changes.
+4. Review every expected/actual/diff entry in the printed HTML report.
+5. Run `npm run test:visual:approve` only for intentional differences.
+6. Rerun `npm run test:visual` and confirm a clean baseline.
 
 `TASKS_EYE_TODAY` fixes the acceptance date. Captures wait for fonts and
 disable animation, blinking carets, scrollbars, and pointer hit testing;
@@ -174,13 +161,13 @@ npm run release
 npm run release:public
 ```
 
-Both commands verify version metadata, run the complete `npm test` gate
-(including Podman visual tests and generated docs), build `main.js`, bump the
-version, update public metadata when applicable, commit, tag without a `v`
-prefix, push, and create the GitHub release. Beta releases keep the repository
-`manifest.json` on the latest public version but upload a beta-version manifest
-for BRAT. Release assets are `manifest.json`, `main.js`, and `styles.css` when
-present; `main.js` remains ignored by git.
+Both commands verify version metadata, run unit tests, type-check and build
+`main.js`, run all WDIO checks in Podman, and rebuild the generated docs before
+bumping the version. They then update public metadata when applicable, commit,
+tag without a `v` prefix, push, and create the GitHub release. Beta releases
+keep the repository `manifest.json` on the latest public version but upload a
+beta-version manifest for BRAT. Release assets are `manifest.json`, `main.js`,
+and `styles.css` when present; `main.js` remains ignored by git.
 
 BRAT installs this repository as `ggajos/ggajos-tasks-eye`. Beta releases are
 GitHub pre-releases; public releases use plain semantic versions.
