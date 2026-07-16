@@ -42,7 +42,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     screenshotSlug: "controls",
     async run({ save }) {
       const root = await tasksEyePage.openBoard("open", ACTION);
-      await tasksEyePage.expectRowAction(ACTION, "Complete task");
+      await tasksEyePage.focusRowAction(ACTION, "Complete task");
       await save(root);
     },
   }] },

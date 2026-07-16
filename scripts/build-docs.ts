@@ -323,11 +323,6 @@ function renderSidebar(features: readonly LoadedFeature[]): string {
       collapsed: false,
       items: featureGroups,
     },
-    {
-      label: "Reference",
-      collapsed: false,
-      items: [{ label: "Acceptance testing", link: "/testing/" }],
-    },
   ];
 
   return `export const sidebar = ${JSON.stringify(sidebar, null, 2)};\n`;
@@ -339,15 +334,12 @@ async function build(): Promise<void> {
   await mkdir(CONTENT_ROOT, { recursive: true });
   await mkdir(GENERATED_ROOT, { recursive: true });
   await rm(FEATURE_CONTENT_ROOT, { recursive: true, force: true });
+  await rm(path.join(CONTENT_ROOT, "testing.mdx"), { force: true });
   await mkdir(FEATURE_CONTENT_ROOT, { recursive: true });
 
   await writeFile(
     path.join(CONTENT_ROOT, "index.mdx"),
     await renderIndexPage(features),
-  );
-  await writeFile(
-    path.join(CONTENT_ROOT, "testing.mdx"),
-    await readFile(path.join(TEMPLATE_ROOT, "testing.mdx"), "utf8"),
   );
   await writeFile(path.join(GENERATED_ROOT, "sidebar.mjs"), renderSidebar(features));
 

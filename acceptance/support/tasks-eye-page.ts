@@ -199,6 +199,28 @@ export const tasksEyePage = {
     }
   },
 
+  async focusRowAction(rowText: string, ariaLabel: string): Promise<void> {
+    await this.expectRowAction(rowText, ariaLabel);
+    await browser.waitUntil(async () => await browser.execute((text, label) => {
+      const rows = document.querySelectorAll<HTMLElement>(
+        ".workspace-leaf.mod-active .eye-plugin .eye-row",
+      );
+      const row = [...rows].find((candidate) =>
+        candidate.textContent?.includes(text)
+      );
+      const button = [...row?.querySelectorAll<HTMLButtonElement>("button") ?? []]
+        .find((candidate) => candidate.getAttribute("aria-label") === label);
+      button?.focus();
+      return button !== undefined && document.activeElement === button &&
+        getComputedStyle(
+          row?.querySelector<HTMLElement>(".eye-actions") ?? document.body,
+        ).opacity === "1";
+    }, rowText, ariaLabel), {
+      timeout: 10_000,
+      timeoutMsg: `Expected row "${rowText}" to focus action "${ariaLabel}"`,
+    });
+  },
+
   async expectSingleViolation(code: string): Promise<void> {
     await browser.waitUntil(async () => await browser.execute((expected) => {
       const root = document.querySelector(

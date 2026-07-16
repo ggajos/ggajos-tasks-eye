@@ -1,0 +1,13 @@
+.git
+.obsidian-cache
+acceptance/.cache
+acceptance/artifacts
+data.json
+docs
+docs-src/.astro
+docs-src/public/assets
+docs-src/src/content/docs
+docs-src/src/generated
+main.js
+node_modules
+

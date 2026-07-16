@@ -1,16 +1,13 @@
 import {
   access,
   mkdir,
-  readFile,
   readdir,
-  rename,
   rm,
-  unlink,
+  writeFile,
 } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { browser } from "@wdio/globals";
-import { PNG } from "pngjs";
+import { $, browser } from "@wdio/globals";
 import { obsidianPage } from "wdio-obsidian-service";
 import {
   DOCUMENTATION_VARIANTS,
@@ -25,8 +22,12 @@ import { getContextFromPath } from "../../src/context";
 import { tasksEyePage, type WdioElement } from "./tasks-eye-page";
 
 export const SNAPSHOT_ROOT = path.resolve("acceptance", "snapshots", "docs");
-const MAX_NOISE_CHANNEL_DELTA = 8;
-const MAX_NOISE_PIXEL_RATIO = 0.0005;
+export const VISUAL_ARTIFACT_ROOT = path.resolve(
+  "acceptance",
+  "artifacts",
+  "visual",
+);
+const VISUAL_MANIFEST_PATH = path.join(VISUAL_ARTIFACT_ROOT, "manifest.json");
 
 export interface VisualVariant {
   key: DocumentationVariantKey;
@@ -74,6 +75,34 @@ export interface DiscoveredFeatureScreenshotScenario {
   feature: LoadedFeature;
   scenario: FeatureScreenshotScenario;
 }
+
+type VisualResultStatus =
+  | "matched"
+  | "changed"
+  | "missing-baseline"
+  | "error";
+
+interface VisualRunResult {
+  key: string;
+  title: string;
+  status: VisualResultStatus;
+  mismatchPercentage?: number;
+  baseline: string;
+  actual: string;
+  diff: string;
+  error?: string;
+}
+
+interface VisualRunManifest {
+  startedAt: string;
+  finishedAt?: string;
+  completed: boolean;
+  expected: string[];
+  staleBaselines: string[];
+  results: VisualRunResult[];
+}
+
+let visualRunManifest: VisualRunManifest | undefined;
 
 const VISUAL_VARIANT_CONFIG: Record<
   DocumentationVariantKey,
@@ -241,7 +270,7 @@ async function listFiles(root: string): Promise<string[]> {
   return files.flat();
 }
 
-function expectedSnapshotPaths(
+export function expectedSnapshotPaths(
   scenarios: readonly DiscoveredFeatureScreenshotScenario[],
 ): Set<string> {
   const expected = new Set<string>();
@@ -261,81 +290,165 @@ function expectedSnapshotPaths(
   return expected;
 }
 
-export async function resetDocSnapshotRoot(
-  scenarios: readonly DiscoveredFeatureScreenshotScenario[] = [],
-): Promise<void> {
-  await mkdir(SNAPSHOT_ROOT, { recursive: true });
-  const expected = expectedSnapshotPaths(scenarios);
-  const files = await listFiles(SNAPSHOT_ROOT);
-
-  await Promise.all(files.map(async (file) => {
-    const relativePath = path.relative(SNAPSHOT_ROOT, file);
-    if (
-      path.basename(file).includes(".tmp") ||
-      (scenarios.length > 0 &&
-        relativePath.startsWith(`features${path.sep}`) &&
-        !expected.has(relativePath))
-    ) {
-      await rm(file, { force: true });
-    }
-  }));
+function portablePath(value: string): string {
+  return value.split(path.sep).join("/");
 }
 
-async function pngPixelsEqual(
-  currentPath: string,
-  candidatePath: string,
-): Promise<boolean> {
-  if (!await exists(currentPath)) return false;
-  const [currentBuffer, candidateBuffer] = await Promise.all([
-    readFile(currentPath),
-    readFile(candidatePath),
-  ]);
-
-  try {
-    const current = PNG.sync.read(currentBuffer);
-    const candidate = PNG.sync.read(candidateBuffer);
-    if (current.width !== candidate.width || current.height !== candidate.height) {
-      return false;
-    }
-    if (current.data.equals(candidate.data)) return true;
-
-    const maxDifferingPixels = Math.ceil(
-      current.width * current.height * MAX_NOISE_PIXEL_RATIO,
-    );
-    let differingPixels = 0;
-    for (let index = 0; index < current.data.length; index += 4) {
-      const maxChannelDelta = Math.max(
-        Math.abs(current.data[index]! - candidate.data[index]!),
-        Math.abs(current.data[index + 1]! - candidate.data[index + 1]!),
-        Math.abs(current.data[index + 2]! - candidate.data[index + 2]!),
-        Math.abs(current.data[index + 3]! - candidate.data[index + 3]!),
-      );
-      if (maxChannelDelta === 0) continue;
-      if (maxChannelDelta > MAX_NOISE_CHANNEL_DELTA) return false;
-      if (++differingPixels > maxDifferingPixels) return false;
-    }
-    return true;
-  } catch {
-    return currentBuffer.equals(candidateBuffer);
-  }
+function snapshotPathFor(
+  featureSlug: string,
+  variant: VisualVariant,
+  screenshotSlug: string,
+): string {
+  const filename = screenshotSlug.endsWith(".png")
+    ? screenshotSlug
+    : `${screenshotSlug}.png`;
+  return path.join("features", featureSlug, variant.key, filename);
 }
 
-async function saveScreenshotIfPixelsChanged(
-  targetPath: string,
-  element: WdioElement,
-): Promise<void> {
-  const targetDir = path.dirname(targetPath);
-  const tempPath = path.join(
-    targetDir,
-    `.${path.basename(targetPath)}.${process.pid}.${Date.now()}.tmp.png`,
+async function baselinePaths(): Promise<string[]> {
+  return (await listFiles(path.join(SNAPSHOT_ROOT, "features")))
+    .filter((file) => file.endsWith(".png"))
+    .map((file) => portablePath(path.relative(SNAPSHOT_ROOT, file)))
+    .sort();
+}
+
+async function writeVisualManifest(): Promise<void> {
+  if (!visualRunManifest) return;
+  await mkdir(VISUAL_ARTIFACT_ROOT, { recursive: true });
+  await writeFile(
+    VISUAL_MANIFEST_PATH,
+    `${JSON.stringify(visualRunManifest, null, 2)}\n`,
   );
-  await mkdir(targetDir, { recursive: true });
-  await element.saveScreenshot(tempPath);
-  if (await pngPixelsEqual(targetPath, tempPath)) {
-    await unlink(tempPath);
-  } else {
-    await rename(tempPath, targetPath);
+}
+
+export async function beginVisualRun(
+  scenarios: readonly DiscoveredFeatureScreenshotScenario[],
+): Promise<void> {
+  await rm(VISUAL_ARTIFACT_ROOT, { recursive: true, force: true });
+  await Promise.all([
+    mkdir(path.join(VISUAL_ARTIFACT_ROOT, "actual"), { recursive: true }),
+    mkdir(path.join(VISUAL_ARTIFACT_ROOT, "diff"), { recursive: true }),
+    mkdir(path.join(VISUAL_ARTIFACT_ROOT, "report"), { recursive: true }),
+  ]);
+  const expected = [...expectedSnapshotPaths(scenarios)]
+    .map(portablePath)
+    .sort();
+  const expectedSet = new Set(expected);
+  visualRunManifest = {
+    startedAt: new Date().toISOString(),
+    completed: false,
+    expected,
+    staleBaselines: (await baselinePaths())
+      .filter((file) => !expectedSet.has(file)),
+    results: [],
+  };
+  await writeVisualManifest();
+}
+
+export async function finishVisualRun(): Promise<void> {
+  if (!visualRunManifest) return;
+  const resultsByKey = new Map(
+    visualRunManifest.results.map((result) => [result.key, result]),
+  );
+  const resultKeys = new Set(resultsByKey.keys());
+  const currentBaselines = await baselinePaths();
+  const expectedSet = new Set(visualRunManifest.expected);
+  visualRunManifest.staleBaselines = currentBaselines
+    .filter((file) => !expectedSet.has(file));
+  visualRunManifest.finishedAt = new Date().toISOString();
+  const completedResults = await Promise.all(
+    visualRunManifest.expected.map(async (key) => {
+      const result = resultsByKey.get(key);
+      return result !== undefined && result.status !== "error" &&
+        await exists(path.resolve(result.actual));
+    }),
+  );
+  visualRunManifest.completed = completedResults.every(Boolean);
+  await writeVisualManifest();
+
+  const missingResults = visualRunManifest.expected
+    .filter((key) => !resultKeys.has(key));
+  if (missingResults.length > 0) {
+    throw new Error(
+      `Visual run did not capture ${missingResults.length} expected screenshot(s): ${missingResults.join(", ")}`,
+    );
   }
+  if (visualRunManifest.staleBaselines.length > 0) {
+    throw new Error(
+      `Visual baselines contain ${visualRunManifest.staleBaselines.length} stale screenshot(s); review and approve the run to remove them: ${visualRunManifest.staleBaselines.join(", ")}`,
+    );
+  }
+}
+
+async function recordVisualResult(result: VisualRunResult): Promise<void> {
+  if (!visualRunManifest) {
+    throw new Error("Visual run was not initialized");
+  }
+  visualRunManifest.results = [
+    ...visualRunManifest.results.filter(({ key }) => key !== result.key),
+    result,
+  ].sort((a, b) => a.key.localeCompare(b.key));
+  await writeVisualManifest();
+}
+
+async function prepareStableCapture(): Promise<void> {
+  await browser.execute(async () => {
+    const style = document.createElement("style");
+    style.id = "tasks-eye-visual-capture";
+    style.textContent = `
+      html.tasks-eye-visual-capture body,
+      html.tasks-eye-visual-capture body * {
+        pointer-events: none !important;
+      }
+    `;
+    document.getElementById(style.id)?.remove();
+    document.head.append(style);
+    document.documentElement.classList.add("tasks-eye-visual-capture");
+    await document.fonts.ready;
+    await new Promise<void>((resolve) => requestAnimationFrame(() =>
+      requestAnimationFrame(() => resolve())
+    ));
+  });
+  await browser.pause(50);
+}
+
+async function cleanupStableCapture(): Promise<void> {
+  await browser.execute(() => {
+    document.documentElement.classList.remove("tasks-eye-visual-capture");
+    document.getElementById("tasks-eye-visual-capture")?.remove();
+  });
+}
+
+async function refreshCaptureElement(element: WdioElement): Promise<WdioElement> {
+  const selector = element.selector;
+  if (typeof selector !== "string") return element;
+  const refreshed = await $(selector);
+  await refreshed.waitForDisplayed({ timeout: 5_000 });
+  return refreshed as unknown as WdioElement;
+}
+
+async function compareElementWithRetry(
+  element: WdioElement,
+  screenshotSlug: string,
+  folders: { baselineFolder: string; actualFolder: string; diffFolder: string },
+): Promise<Awaited<ReturnType<typeof browser.checkElement>>> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      return await browser.checkElement(
+        await refreshCaptureElement(element),
+        screenshotSlug,
+        folders,
+      );
+    } catch (error) {
+      lastError = error;
+      if (!String(error).toLowerCase().includes("stale element") || attempt === 2) {
+        throw error;
+      }
+      await browser.pause(100);
+    }
+  }
+  throw lastError;
 }
 
 export async function assertEnglishObsidianLocale(): Promise<void> {
@@ -397,17 +510,68 @@ export async function applyVisualVariant(variant: VisualVariant): Promise<void> 
   }, variant.baseTheme);
 }
 
-export async function saveFeatureDocSnapshot(
+export async function checkFeatureDocSnapshot(
   featureSlug: string,
   variant: VisualVariant,
   screenshotSlug: string,
   element: WdioElement,
 ): Promise<void> {
-  const filename = screenshotSlug.endsWith(".png")
-    ? screenshotSlug
-    : `${screenshotSlug}.png`;
-  await saveScreenshotIfPixelsChanged(
-    path.join(SNAPSHOT_ROOT, "features", featureSlug, variant.key, filename),
-    element,
-  );
+  const key = portablePath(snapshotPathFor(
+    featureSlug,
+    variant,
+    screenshotSlug,
+  ));
+  const baseline = path.join(SNAPSHOT_ROOT, key);
+  const actual = path.join(VISUAL_ARTIFACT_ROOT, "actual", key);
+  const diff = path.join(VISUAL_ARTIFACT_ROOT, "diff", key);
+  const baselineExists = await exists(baseline);
+  let comparison: Awaited<ReturnType<typeof browser.checkElement>>;
+
+  await prepareStableCapture();
+  try {
+    comparison = await compareElementWithRetry(element, screenshotSlug, {
+      baselineFolder: path.dirname(baseline),
+      actualFolder: path.dirname(actual),
+      diffFolder: path.dirname(diff),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await recordVisualResult({
+      key,
+      title: `${featureSlug}: ${screenshotSlug} (${variant.label})`,
+      status: baselineExists ? "error" : "missing-baseline",
+      baseline: path.relative(process.cwd(), baseline),
+      actual: path.relative(process.cwd(), actual),
+      diff: path.relative(process.cwd(), diff),
+      error: message,
+    });
+    throw error;
+  } finally {
+    await cleanupStableCapture();
+  }
+
+  if (
+    typeof comparison !== "object" ||
+    comparison === null ||
+    !("misMatchPercentage" in comparison)
+  ) {
+    throw new Error(`Visual comparison for ${key} returned no image details`);
+  }
+
+  const mismatchPercentage = comparison.misMatchPercentage;
+  const status = mismatchPercentage === 0 ? "matched" : "changed";
+  await recordVisualResult({
+    key,
+    title: `${featureSlug}: ${screenshotSlug} (${variant.label})`,
+    status,
+    mismatchPercentage,
+    baseline: path.relative(process.cwd(), baseline),
+    actual: path.relative(process.cwd(), actual),
+    diff: path.relative(process.cwd(), diff),
+  });
+  if (status === "changed") {
+    throw new Error(
+      `Visual mismatch for ${key}: ${mismatchPercentage}% (see acceptance/artifacts/visual/report/index.html)`,
+    );
+  }
 }

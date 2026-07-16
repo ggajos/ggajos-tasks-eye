@@ -10,12 +10,21 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 
 - `npm run build` type-checks and bundles the plugin.
 - `npm run test:unit` runs Vitest.
-- `npm run test:acceptance` builds and runs the WDIO Obsidian acceptance suite.
+- `npm run test:acceptance` builds and runs behavioral WDIO acceptance locally;
+  it never captures documentation screenshots.
+- `npm run test:visual` runs every visual test only inside the pinned Podman
+  Linux/Xvfb environment and writes an ignored HTML comparison report.
+- `npm run test:visual:approve` promotes a complete reviewed visual run and
+  rebuilds generated docs. Visual runs never update baselines implicitly.
 - `npm run docs` publishes accepted screenshots and rebuilds generated docs.
-- `npm test` runs unit tests, acceptance tests, and docs generation.
+- `npm test` runs unit tests, local behavioral acceptance, Podman visual tests,
+  and docs generation.
 
 Use focused commands first when changing a narrow rule, then broaden only when
 the change touches acceptance or generated docs.
+
+Do not run visual WDIO directly on the host. `npm run test:visual` is the sole
+visual-test entry point; the WDIO configuration rejects a host visual run.
 
 ## Validation Rules
 
@@ -52,6 +61,16 @@ slugs.
 Generated docs under `docs/` and `docs-src/src/content/docs/features/` are
 rebuilt by `npm run docs`; avoid hand-editing generated output unless the task
 explicitly asks for it.
+
+Screenshot baselines under `acceptance/snapshots/docs/` change only through
+`npm run test:visual:approve` after reviewing the report at
+`acceptance/artifacts/visual/report/index.html`.
+
+## Developer Documentation
+
+Keep developer setup, testing, visual-review, and release instructions in
+`README.md`. Update it when commands or workflows change instead of adding a
+separate developer guide.
 
 ## Fixtures
 
