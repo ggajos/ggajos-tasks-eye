@@ -1,6 +1,6 @@
 export const STATUSES = [
-  "hold",
   "open",
+  "hold",
   "closed",
   "archived",
 ] as const;

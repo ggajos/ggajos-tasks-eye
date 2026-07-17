@@ -3,7 +3,7 @@ import {
   CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
-  STATUS_COMMANDS,
+  STATUS_STEP_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "../src/commands";
 import {
@@ -27,31 +27,23 @@ describe("documented commands", () => {
     ).toContain(CREATE_NEW_NOTE_COMMAND.id);
   });
 
-  it("maps lifecycle statuses to Ctrl+Shift+1 through 4", () => {
-    expect(Object.entries(STATUS_COMMANDS).map(([status, command]) => ({
-      status,
-      id: command.id,
-      hotkey: command.hotkey,
-    }))).toEqual([
+  it("maps status stepping to Ctrl+Shift+1 and 2", () => {
+    expect(
+      Object.entries(STATUS_STEP_COMMANDS).map(([direction, command]) => ({
+        direction,
+        id: command.id,
+        hotkey: command.hotkey,
+      })),
+    ).toEqual([
       {
-        status: "open",
-        id: "set-note-status-open",
+        direction: "previous",
+        id: "set-note-status-previous",
         hotkey: { modifiers: ["Ctrl", "Shift"], key: "1" },
       },
       {
-        status: "hold",
-        id: "set-note-status-hold",
+        direction: "next",
+        id: "set-note-status-next",
         hotkey: { modifiers: ["Ctrl", "Shift"], key: "2" },
-      },
-      {
-        status: "closed",
-        id: "set-note-status-closed",
-        hotkey: { modifiers: ["Ctrl", "Shift"], key: "3" },
-      },
-      {
-        status: "archived",
-        id: "set-note-status-archived",
-        hotkey: { modifiers: ["Ctrl", "Shift"], key: "4" },
       },
     ]);
   });
@@ -65,10 +57,8 @@ describe("documented commands", () => {
     expect(DOCUMENTED_COMMAND_GROUPS[1]?.commands.map((command) => command.id))
       .toEqual([
         CREATE_NEW_NOTE_COMMAND.id,
-        STATUS_COMMANDS.open.id,
-        STATUS_COMMANDS.hold.id,
-        STATUS_COMMANDS.closed.id,
-        STATUS_COMMANDS.archived.id,
+        STATUS_STEP_COMMANDS.previous.id,
+        STATUS_STEP_COMMANDS.next.id,
       ]);
   });
 
@@ -80,10 +70,8 @@ describe("documented commands", () => {
       OPEN_COMPLETED_COMMAND.name,
       CREATE_NEW_NOTE_COMMAND.name,
       UNCHECK_SELECTED_COMMAND.name,
-      STATUS_COMMANDS.open.name,
-      STATUS_COMMANDS.hold.name,
-      STATUS_COMMANDS.closed.name,
-      STATUS_COMMANDS.archived.name,
+      STATUS_STEP_COMMANDS.previous.name,
+      STATUS_STEP_COMMANDS.next.name,
     ]).toEqual([
       "Show Open",
       "Show Inbox",
@@ -91,10 +79,8 @@ describe("documented commands", () => {
       "Show Done",
       "Create note",
       "Reopen selected tasks",
-      "Set note status: Open",
-      "Set note status: Hold",
-      "Set note status: Closed",
-      "Set note status: Archived",
+      "Set note status: Previous",
+      "Set note status: Next",
     ]);
   });
 

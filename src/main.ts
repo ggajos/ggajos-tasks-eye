@@ -19,7 +19,7 @@ import {
   CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
-  STATUS_COMMANDS,
+  STATUS_STEP_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "./commands";
 import {
@@ -27,7 +27,7 @@ import {
   isEyeMode,
   TASKS_PLUGIN_REQUIRED_MESSAGE,
 } from "./constants";
-import type { EyeMode, EyeStatus } from "./constants";
+import type { EyeMode } from "./constants";
 import { todayIso } from "./date";
 import {
   canUncheckSelectedTasks,
@@ -43,7 +43,8 @@ import {
   normalizeManagedFolderPath,
 } from "./managedPath";
 import { openNewEyeNoteFlow } from "./newNote";
-import { setNoteStatus } from "./noteStatus";
+import { stepNoteStatus } from "./noteStatus";
+import type { StatusStepDirection } from "./noteStatus";
 import { TasksEyeSettingTab } from "./settings";
 import { getTasksApi } from "./tasksApi";
 import type { TasksApiV1 } from "./tasksApi";
@@ -119,8 +120,12 @@ export default class TheEyePlugin extends Plugin {
         return true;
       },
     });
-    for (const status of Object.keys(STATUS_COMMANDS) as EyeStatus[]) {
-      const command = STATUS_COMMANDS[status];
+    for (
+      const direction of Object.keys(
+        STATUS_STEP_COMMANDS,
+      ) as StatusStepDirection[]
+    ) {
+      const command = STATUS_STEP_COMMANDS[direction];
       this.addCommand({
         id: command.id,
         name: command.name,
@@ -128,7 +133,7 @@ export default class TheEyePlugin extends Plugin {
         checkCallback: (checking) => {
           const file = this.app.workspace.getActiveFile();
           if (!file || file.extension !== "md") return false;
-          if (!checking) void this.setStatus(file, status);
+          if (!checking) void this.stepStatus(file, direction);
           return true;
         },
       });
@@ -295,14 +300,19 @@ export default class TheEyePlugin extends Plugin {
     );
   }
 
-  private async setStatus(file: TFile, status: EyeStatus): Promise<void> {
+  private async stepStatus(
+    file: TFile,
+    direction: StatusStepDirection,
+  ): Promise<void> {
     try {
-      await setNoteStatus(this.app, file, status);
+      await stepNoteStatus(this.app, file, direction);
       if (this.isRelevantFile(file)) this.queueRefresh();
-      new Notice(`Tasks Eye: note status set to ${status}.`);
     } catch (error) {
-      console.error(`Tasks Eye could not set note status to ${status}.`, error);
-      new Notice(`Tasks Eye: could not set note status to ${status}.`);
+      console.error(
+        `Tasks Eye could not step note status (${direction}).`,
+        error,
+      );
+      new Notice(`Tasks Eye: could not change note status.`);
     }
   }
 

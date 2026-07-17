@@ -1,5 +1,5 @@
 import type { Hotkey } from "obsidian";
-import type { EyeMode, EyeStatus } from "./constants";
+import type { EyeMode } from "./constants";
 
 export interface CommandDefinition {
   id: string;
@@ -50,28 +50,18 @@ export const UNCHECK_SELECTED_COMMAND: CommandWithHotkeyDefinition = {
   hotkey: { modifiers: ["Ctrl", "Shift"], key: "D" },
 };
 
-export const STATUS_COMMANDS: Record<
-  EyeStatus,
+export const STATUS_STEP_COMMANDS: Record<
+  "previous" | "next",
   CommandWithHotkeyDefinition
 > = {
-  open: {
-    id: "set-note-status-open",
-    name: "Set note status: Open",
+  previous: {
+    id: "set-note-status-previous",
+    name: "Set note status: Previous",
     hotkey: { modifiers: ["Ctrl", "Shift"], key: "1" },
   },
-  hold: {
-    id: "set-note-status-hold",
-    name: "Set note status: Hold",
+  next: {
+    id: "set-note-status-next",
+    name: "Set note status: Next",
     hotkey: { modifiers: ["Ctrl", "Shift"], key: "2" },
-  },
-  closed: {
-    id: "set-note-status-closed",
-    name: "Set note status: Closed",
-    hotkey: { modifiers: ["Ctrl", "Shift"], key: "3" },
-  },
-  archived: {
-    id: "set-note-status-archived",
-    name: "Set note status: Archived",
-    hotkey: { modifiers: ["Ctrl", "Shift"], key: "4" },
   },
 };

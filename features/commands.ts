@@ -2,7 +2,7 @@ import {
   CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
-  STATUS_COMMANDS,
+  STATUS_STEP_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "../src/commands";
 import type { CommandDefinition } from "../src/commands";
@@ -19,13 +19,13 @@ export interface DocumentedCommandGroup {
   commands: readonly DocumentedCommand[];
 }
 
-const statusCommand = (
-  status: keyof typeof STATUS_COMMANDS,
+const statusStepCommand = (
+  direction: keyof typeof STATUS_STEP_COMMANDS,
   explanation: string,
 ): DocumentedCommand => ({
-  ...STATUS_COMMANDS[status],
-  featureSlug: "actions-change-note-status",
-  featureTitle: "Change note status",
+  ...STATUS_STEP_COMMANDS[direction],
+  featureSlug: "actions-step-note-status",
+  featureTitle: "Step note status",
   explanation,
 });
 
@@ -70,10 +70,14 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
         featureTitle: "Create a note",
         explanation: "Create an open note in the notes folder.",
       },
-      statusCommand("open", "Mark the active note as actionable."),
-      statusCommand("hold", "Move the active note to the backlog."),
-      statusCommand("closed", "Mark the active note as finished."),
-      statusCommand("archived", "Remove the active note from the workflow."),
+      statusStepCommand(
+        "previous",
+        "Move the active note one step back in its status chain.",
+      ),
+      statusStepCommand(
+        "next",
+        "Move the active note one step forward in its status chain.",
+      ),
     ],
   },
   {
