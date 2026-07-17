@@ -1,21 +1,30 @@
 import { describe, expect, it } from "vitest";
 import { isoToTs } from "../../src/date";
 import { boardItemsForContext, selectRows } from "../../src/model";
-import type { VacationConfig } from "../../src/vacation";
-import { vacationReasonForTs } from "../../src/vacation";
+import type { AvailabilityConfig } from "../../src/vacation";
+import { availabilityReasonsForTs } from "../../src/vacation";
 import { file } from "../testSupport";
 
-const config: VacationConfig = {
-  weekendDays: [0, 6],
-  bankHolidaysAnnual: ["05-01"],
-  customDates: ["2026-07-13"],
+const config: AvailabilityConfig = {
+  nonWorkingWeekdays: [0, 6],
+  publicHolidays: [{ date: "2026-07-18", name: "Founders Day" }],
+  personalTimeOff: [
+    {
+      id: "summer-break",
+      from: "2026-07-18",
+      to: "2026-07-19",
+      label: "Summer break",
+    },
+  ],
 };
 
 describe("Vacation availability feature", () => {
-  it("recognizes configured unavailable days", () => {
-    expect(vacationReasonForTs(isoToTs("2026-07-11"), config)).toBe("weekend");
-    expect(vacationReasonForTs(isoToTs("2026-05-01"), config)).toBe("holiday");
-    expect(vacationReasonForTs(isoToTs("2026-07-13"), config)).toBe("custom");
+  it("recognizes configured and overlapping unavailable days", () => {
+    expect(availabilityReasonsForTs(isoToTs("2026-07-18"), config)).toEqual([
+      { kind: "personal", label: "Summer break" },
+      { kind: "holiday", label: "Founders Day" },
+      { kind: "weekend", label: "Weekend" },
+    ]);
   });
 
   it("shows only markers for the OOO context filter", () => {
@@ -33,10 +42,11 @@ status: open
       ],
       "open",
       "*",
+      config,
     );
 
     expect(
-      boardItemsForContext(rows, rows, "ooo").every(
+      boardItemsForContext(rows, rows, "ooo", config).every(
         (item) => item.kind === "marker",
       ),
     ).toBe(true);
@@ -57,9 +67,10 @@ status: open
       ],
       "open",
       "*",
+      config,
     );
 
-    const items = boardItemsForContext(rows, rows, "*");
+    const items = boardItemsForContext(rows, rows, "*", config);
     expect(items.some((item) => item.kind === "marker")).toBe(true);
     expect(items.some((item) => item.kind === "task")).toBe(true);
   });
@@ -75,9 +86,14 @@ status: open
         "---\nstatus: open\n---\n\n- [ ] study 📅 2026-07-20",
       ),
     ];
-    const filteredRows = selectRows(files, "open", "Hardware");
-    const allRows = selectRows(files, "open", "*");
-    const items = boardItemsForContext(filteredRows, allRows, "Hardware");
+    const filteredRows = selectRows(files, "open", "Hardware", config);
+    const allRows = selectRows(files, "open", "*", config);
+    const items = boardItemsForContext(
+      filteredRows,
+      allRows,
+      "Hardware",
+      config,
+    );
 
     expect(items.every((item) => item.kind === "task")).toBe(true);
     expect(

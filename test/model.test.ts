@@ -205,7 +205,7 @@ status: open
       dateLabel: "07-13",
       yearLabel: "",
       dayLabel: "Mon",
-      reason: "custom" as const,
+      reasons: [{ kind: "personal" as const, label: "Vacation" }],
       label: "Vacation",
     };
 

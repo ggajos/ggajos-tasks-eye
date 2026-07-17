@@ -6,8 +6,8 @@ export default defineFeature({
   summary:
     "An unchecked task due on a configured unavailable day is reported as an Inbox issue.",
   acceptanceCriteria: [
-    "Unchecked tasks due on configured vacation dates are reported in Inbox.",
-    "The issue includes the due date and vacation reason.",
+    "Unchecked tasks due on configured non-working weekdays, public holidays, or personal time off are reported in Inbox.",
+    "The issue includes the due date and every named availability reason.",
     "Rows show only the earliest vacation collision for the note.",
     "Tasks on normal working days do not trigger this issue.",
     "The issue is visible in both Inbox and Open.",

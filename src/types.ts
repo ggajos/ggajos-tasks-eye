@@ -1,4 +1,5 @@
 import type { EyeMode } from "./constants";
+import type { AvailabilitySettings, HolidayCache } from "./vacation";
 import type { ValidationViolation } from "./validation";
 
 export interface EyeTask {
@@ -38,4 +39,6 @@ export interface EyeSettings {
   mode: EyeMode;
   contextFilter: string;
   notesFolderPath: string;
+  availability: AvailabilitySettings;
+  holidayCache: HolidayCache;
 }

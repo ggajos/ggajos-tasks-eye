@@ -22,6 +22,14 @@ import {
 } from "./constants";
 import { todayIso } from "./date";
 import { canUncheckSelectedTasks, uncheckSelectedTasks } from "./editorUncheck";
+import {
+  newPersonalTimeOff,
+  normalizeAvailabilitySettings,
+  normalizeHolidayCache,
+  requiredHolidayYears,
+  syncNagerCountries,
+  syncNagerHolidayYears,
+} from "./holidaySync";
 import { readEyeFiles } from "./indexer";
 import { findManagedFolder } from "./managedFolder";
 import {
@@ -38,32 +46,74 @@ import { TasksEyeSettingTab } from "./settings";
 import type { TasksApiV1 } from "./tasksApi";
 import { getTasksApi } from "./tasksApi";
 import type { EyeFile, EyeSettings, RowModel } from "./types";
+import type { AvailabilityConfig, PersonalTimeOff } from "./vacation";
+import {
+  availabilityConfigFromSettings,
+  DEFAULT_AVAILABILITY_SETTINGS,
+  EMPTY_HOLIDAY_CACHE,
+} from "./vacation";
 import { EyeView, VIEW_TYPE } from "./view";
 
-const DEFAULT_SETTINGS: EyeSettings = {
-  mode: "open",
-  contextFilter: "*",
-  notesFolderPath: DEFAULT_MANAGED_FOLDER_PATH,
-};
+function defaultSettings(): EyeSettings {
+  return {
+    mode: "open",
+    contextFilter: "*",
+    notesFolderPath: DEFAULT_MANAGED_FOLDER_PATH,
+    availability: {
+      countryCode: DEFAULT_AVAILABILITY_SETTINGS.countryCode,
+      nonWorkingWeekdays: [...DEFAULT_AVAILABILITY_SETTINGS.nonWorkingWeekdays],
+      personalTimeOff: [],
+    },
+    holidayCache: {
+      countryCode: EMPTY_HOLIDAY_CACHE.countryCode,
+      years: {},
+      countries: [],
+      countriesFetchedAt: null,
+    },
+  };
+}
+
+function normalizeSettings(value: unknown): EyeSettings {
+  const defaults = defaultSettings();
+  const saved =
+    typeof value === "object" && value !== null
+      ? (value as Record<string, unknown>)
+      : {};
+  return {
+    mode: isEyeMode(saved.mode) ? saved.mode : defaults.mode,
+    contextFilter:
+      typeof saved.contextFilter === "string" && saved.contextFilter
+        ? saved.contextFilter
+        : defaults.contextFilter,
+    notesFolderPath: normalizeManagedFolderPath(
+      typeof saved.notesFolderPath === "string"
+        ? saved.notesFolderPath
+        : defaults.notesFolderPath,
+    ),
+    availability: normalizeAvailabilitySettings(saved.availability),
+    holidayCache: normalizeHolidayCache(saved.holidayCache),
+  };
+}
 
 export default class TheEyePlugin extends Plugin {
-  settings: EyeSettings = DEFAULT_SETTINGS;
+  settings: EyeSettings = defaultSettings();
+  private settingsTab: TasksEyeSettingTab | null = null;
+  private holidaySyncChain: Promise<void> = Promise.resolve();
+  private holidaySyncCount = 0;
+  private holidaySyncError: string | null = null;
+  private personalSequence = 0;
   private refreshTimer: number | null = null;
 
+  get holidaySyncing(): boolean {
+    return this.holidaySyncCount > 0;
+  }
+
   async onload(): Promise<void> {
-    const saved = (await this.loadData()) as Partial<EyeSettings> | null;
-    this.settings = {
-      ...DEFAULT_SETTINGS,
-      ...(saved ?? {}),
-    };
-    if (!isEyeMode(this.settings.mode)) this.settings.mode = "open";
-    if (!this.settings.contextFilter) this.settings.contextFilter = "*";
-    this.settings.notesFolderPath = normalizeManagedFolderPath(
-      this.settings.notesFolderPath,
-    );
+    this.settings = normalizeSettings(await this.loadData());
 
     this.registerView(VIEW_TYPE, (leaf) => new EyeView(leaf, this));
-    this.addSettingTab(new TasksEyeSettingTab(this.app, this));
+    this.settingsTab = new TasksEyeSettingTab(this.app, this);
+    this.addSettingTab(this.settingsTab);
 
     this.addRibbonIcon("eye", "Open Tasks Eye", () => {
       void this.openEye(this.settings.mode);
@@ -163,6 +213,8 @@ export default class TheEyePlugin extends Plugin {
     if (!this.tasksApiAvailable()) {
       new Notice(TASKS_PLUGIN_REQUIRED_MESSAGE);
     }
+    void this.refreshHolidayCountries();
+    void this.refreshHolidayData();
   }
 
   onunload(): void {
@@ -185,7 +237,143 @@ export default class TheEyePlugin extends Plugin {
   }
 
   async readFiles(): Promise<EyeFile[]> {
-    return readEyeFiles(this.app, this.settings.notesFolderPath);
+    const files = await readEyeFiles(this.app, this.settings.notesFolderPath);
+    void this.refreshHolidayData(false, files);
+    return files;
+  }
+
+  availabilityConfig(): AvailabilityConfig {
+    return availabilityConfigFromSettings(
+      this.settings.availability,
+      this.settings.holidayCache,
+    );
+  }
+
+  holidaySyncStatus(): string {
+    if (this.holidaySyncing) return "Refreshing cached public holidays…";
+    if (this.holidaySyncError) {
+      return `Last refresh failed: ${this.holidaySyncError}`;
+    }
+    if (!this.settings.availability.countryCode) {
+      return "Choose a country to enable public holidays.";
+    }
+    const years = Object.keys(this.settings.holidayCache.years).sort();
+    return years.length > 0
+      ? `Cached years: ${years.join(", ")}. Data refreshes automatically.`
+      : "No cached public holidays yet.";
+  }
+
+  async refreshHolidayCountries(force = false): Promise<void> {
+    await this.enqueueHolidaySync(async () => {
+      const result = await syncNagerCountries(this.settings.holidayCache, {
+        force,
+      });
+      if (result.changed) {
+        this.settings.holidayCache = {
+          ...this.settings.holidayCache,
+          countries: result.cache.countries,
+          countriesFetchedAt: result.cache.countriesFetchedAt,
+        };
+        await this.saveData(this.settings);
+      }
+      this.recordHolidaySyncErrors(result.errors);
+    });
+  }
+
+  async refreshHolidayData(
+    force = false,
+    files: readonly EyeFile[] = [],
+  ): Promise<void> {
+    const countryCode = this.settings.availability.countryCode;
+    if (!countryCode) return;
+    const years = requiredHolidayYears(files);
+    await this.enqueueHolidaySync(async () => {
+      if (this.settings.availability.countryCode !== countryCode) return;
+      const result = await syncNagerHolidayYears(
+        this.settings.holidayCache,
+        countryCode,
+        years,
+        { force },
+      );
+      if (this.settings.availability.countryCode !== countryCode) return;
+      if (result.changed) {
+        this.settings.holidayCache = result.cache;
+        await this.saveData(this.settings);
+        await this.refreshViews();
+      }
+      this.recordHolidaySyncErrors(result.errors);
+    });
+  }
+
+  async setHolidayCountry(countryCode: string): Promise<void> {
+    const normalized = /^[A-Z]{2}$/.test(countryCode.toUpperCase())
+      ? countryCode.toUpperCase()
+      : "";
+    if (this.settings.availability.countryCode === normalized) return;
+    this.settings.availability.countryCode = normalized;
+    if (this.settings.holidayCache.countryCode !== normalized) {
+      this.settings.holidayCache = {
+        ...this.settings.holidayCache,
+        countryCode: normalized,
+        years: {},
+      };
+    }
+    this.holidaySyncError = null;
+    await this.saveData(this.settings);
+    await this.refreshViews();
+    this.settingsTab?.update();
+    if (normalized) await this.refreshHolidayData(true);
+  }
+
+  async setNonWorkingWeekday(day: number, enabled: boolean): Promise<void> {
+    if (!Number.isInteger(day) || day < 0 || day > 6) return;
+    const days = new Set(this.settings.availability.nonWorkingWeekdays);
+    if (enabled) days.add(day);
+    else days.delete(day);
+    this.settings.availability.nonWorkingWeekdays = [...days].sort(
+      (a, b) => a - b,
+    );
+    await this.saveData(this.settings);
+    await this.refreshViews();
+  }
+
+  async addPersonalTimeOff(): Promise<void> {
+    const id = `time-off-${Date.now().toString(36)}-${++this.personalSequence}`;
+    this.settings.availability.personalTimeOff = [
+      ...this.settings.availability.personalTimeOff,
+      newPersonalTimeOff(id),
+    ];
+    await this.saveData(this.settings);
+    await this.refreshViews();
+  }
+
+  async updatePersonalTimeOff(
+    id: string,
+    patch: Partial<Pick<PersonalTimeOff, "from" | "to" | "label">>,
+  ): Promise<void> {
+    const entry = this.settings.availability.personalTimeOff.find(
+      (candidate) => candidate.id === id,
+    );
+    if (!entry) return;
+    Object.assign(entry, patch);
+    entry.label = entry.label.trim();
+    this.settings.availability.personalTimeOff.sort(
+      (a, b) => a.from.localeCompare(b.from) || a.id.localeCompare(b.id),
+    );
+    await this.saveData(this.settings);
+    await this.refreshViews();
+  }
+
+  async deletePersonalTimeOff(id: string): Promise<void> {
+    const next = this.settings.availability.personalTimeOff.filter(
+      (entry) => entry.id !== id,
+    );
+    if (next.length === this.settings.availability.personalTimeOff.length) {
+      return;
+    }
+    this.settings.availability.personalTimeOff = next;
+    await this.saveData(this.settings);
+    await this.refreshViews();
   }
 
   managedFolderError(): string | null {
@@ -313,6 +501,27 @@ export default class TheEyePlugin extends Plugin {
       );
       new Notice(`Tasks Eye: could not change note status.`);
     }
+  }
+
+  private async enqueueHolidaySync(work: () => Promise<void>): Promise<void> {
+    this.holidaySyncCount++;
+    this.settingsTab?.update();
+    const run = this.holidaySyncChain.then(work, work);
+    this.holidaySyncChain = run.catch(() => undefined);
+    try {
+      await run;
+    } catch (error) {
+      this.holidaySyncError =
+        error instanceof Error ? error.message : String(error);
+      console.error("Tasks Eye could not refresh public holidays.", error);
+    } finally {
+      this.holidaySyncCount--;
+      this.settingsTab?.update();
+    }
+  }
+
+  private recordHolidaySyncErrors(errors: readonly string[]): void {
+    this.holidaySyncError = errors.length > 0 ? errors.join("; ") : null;
   }
 
   private findLeaf(): WorkspaceLeaf | null {

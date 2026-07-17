@@ -8,139 +8,166 @@ import {
   shiftIsoDate,
 } from "./date";
 
-export interface DateRange {
+export interface PersonalTimeOff {
+  id: string;
   from: string;
-  to: string;
+  to: string | null;
+  label: string;
 }
 
-export type CustomDate = string | DateRange;
-
-export interface VacationConfig {
-  weekendDays: readonly number[];
-  bankHolidaysAnnual: readonly string[];
-  customDates: readonly CustomDate[];
+export interface PublicHoliday {
+  date: string;
+  name: string;
 }
 
-export type VacationReason = "weekend" | "holiday" | "custom";
-export type MarkerReason = "custom" | "holiday";
+export interface AvailabilitySettings {
+  countryCode: string;
+  nonWorkingWeekdays: number[];
+  personalTimeOff: PersonalTimeOff[];
+}
+
+export interface CachedHolidayYear {
+  fetchedAt: string;
+  holidays: PublicHoliday[];
+}
+
+export interface HolidayCountry {
+  countryCode: string;
+  name: string;
+}
+
+export interface HolidayCache {
+  countryCode: string;
+  years: Record<string, CachedHolidayYear>;
+  countries: HolidayCountry[];
+  countriesFetchedAt: string | null;
+}
+
+export interface AvailabilityConfig {
+  nonWorkingWeekdays: readonly number[];
+  publicHolidays: readonly PublicHoliday[];
+  personalTimeOff: readonly PersonalTimeOff[];
+}
+
+export type AvailabilityReasonKind = "personal" | "holiday" | "weekend";
+
+export interface AvailabilityReason {
+  kind: AvailabilityReasonKind;
+  label: string;
+}
 
 export interface VacationMarker {
   ts: number;
   dateLabel: string;
   yearLabel: string;
   dayLabel: string;
-  reason: MarkerReason;
+  reasons: AvailabilityReason[];
   label: string;
 }
 
-interface DateParts {
-  ymd: string;
-  md: string;
-  weekday: number;
-  year: number;
+export const DEFAULT_AVAILABILITY_SETTINGS: Readonly<AvailabilitySettings> = {
+  countryCode: "",
+  nonWorkingWeekdays: [0, 6],
+  personalTimeOff: [],
+};
+
+export const EMPTY_HOLIDAY_CACHE: Readonly<HolidayCache> = {
+  countryCode: "",
+  years: {},
+  countries: [],
+  countriesFetchedAt: null,
+};
+
+export const EMPTY_AVAILABILITY_CONFIG: Readonly<AvailabilityConfig> = {
+  nonWorkingWeekdays: [0, 6],
+  publicHolidays: [],
+  personalTimeOff: [],
+};
+
+function personalLabel(entry: PersonalTimeOff): string {
+  return entry.label.trim() || "Vacation";
 }
 
-function tsToParts(ts: number): DateParts {
-  const d = new Date(ts);
+function inPersonalTimeOff(ymd: string, entry: PersonalTimeOff): boolean {
+  const to = entry.to ?? entry.from;
+  const lo = entry.from <= to ? entry.from : to;
+  const hi = entry.from <= to ? to : entry.from;
+  return ymd >= lo && ymd <= hi;
+}
+
+function uniqueReasons(reasons: AvailabilityReason[]): AvailabilityReason[] {
+  const seen = new Set<string>();
+  return reasons.filter((reason) => {
+    const key = `${reason.kind}\u0000${reason.label}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export function availabilityReasonsForTs(
+  ts: number,
+  config: AvailabilityConfig,
+): AvailabilityReason[] {
+  const ymd = formatYmd(ts);
+  const reasons: AvailabilityReason[] = [];
+
+  for (const entry of config.personalTimeOff) {
+    if (inPersonalTimeOff(ymd, entry)) {
+      reasons.push({ kind: "personal", label: personalLabel(entry) });
+    }
+  }
+
+  for (const holiday of config.publicHolidays) {
+    if (holiday.date === ymd) {
+      reasons.push({
+        kind: "holiday",
+        label: holiday.name.trim() || "Holiday",
+      });
+    }
+  }
+
+  if (config.nonWorkingWeekdays.includes(new Date(ts).getDay())) {
+    reasons.push({ kind: "weekend", label: "Weekend" });
+  }
+
+  return uniqueReasons(reasons);
+}
+
+export function availabilityConfigFromSettings(
+  settings: AvailabilitySettings,
+  cache: HolidayCache,
+): AvailabilityConfig {
+  const publicHolidays =
+    settings.countryCode && cache.countryCode === settings.countryCode
+      ? Object.values(cache.years).flatMap((year) => year.holidays)
+      : [];
   return {
-    ymd: formatYmd(ts),
-    md: formatMonthDay(ts),
-    weekday: d.getDay(),
-    year: d.getFullYear(),
+    nonWorkingWeekdays: settings.nonWorkingWeekdays,
+    publicHolidays,
+    personalTimeOff: settings.personalTimeOff,
   };
 }
 
-function easterSunday(year: number): string {
-  const a = year % 19;
-  const b = Math.floor(year / 100);
-  const c = year % 100;
-  const d = Math.floor(b / 4);
-  const e = b % 4;
-  const f = Math.floor((b + 8) / 25);
-  const g = Math.floor((b - f + 1) / 3);
-  const h = (19 * a + b - d - g + 15) % 30;
-  const i = Math.floor(c / 4);
-  const k = c % 4;
-  const l = (32 + 2 * e + 2 * i - h - k) % 7;
-  const m = Math.floor((a + 11 * h + 22 * l) / 451);
-  const month = Math.floor((h + l - 7 * m + 114) / 31);
-  const day = ((h + l - 7 * m + 114) % 31) + 1;
-  return formatYmd(new Date(year, month - 1, day).getTime());
-}
-
-function movableHolidays(year: number): readonly string[] {
-  const easter = easterSunday(year);
-  return [
-    easter,
-    shiftIsoDate(easter, 1),
-    shiftIsoDate(easter, 49),
-    shiftIsoDate(easter, 60),
-  ];
-}
-
-function isRange(entry: CustomDate): entry is DateRange {
-  return typeof entry === "object" && entry !== null;
-}
-
-export function inCustomDates(
-  ymd: string,
-  customDates: readonly CustomDate[],
-): boolean {
-  for (const entry of customDates) {
-    if (isRange(entry)) {
-      const lo = entry.from <= entry.to ? entry.from : entry.to;
-      const hi = entry.from <= entry.to ? entry.to : entry.from;
-      if (ymd >= lo && ymd <= hi) return true;
-    } else if (entry === ymd) {
-      return true;
-    }
-  }
-  return false;
-}
-
-export function vacationReasonForTs(
-  ts: number,
-  config: VacationConfig,
-): VacationReason | null {
-  const parts = tsToParts(ts);
-  if (config.weekendDays.includes(parts.weekday)) return "weekend";
-  if (
-    config.bankHolidaysAnnual.includes(parts.md) ||
-    movableHolidays(parts.year).includes(parts.ymd)
-  ) {
-    return "holiday";
-  }
-  if (inCustomDates(parts.ymd, config.customDates)) return "custom";
-  return null;
-}
-
-function markerReasonForIso(
+function makeMarker(
   iso: string,
-  config: VacationConfig,
-): MarkerReason | null {
-  if (inCustomDates(iso, config.customDates)) return "custom";
-  if (vacationReasonForTs(isoToTs(iso), config) === "holiday") {
-    return "holiday";
-  }
-  return null;
-}
-
-function makeMarker(iso: string, reason: MarkerReason): VacationMarker {
+  reasons: AvailabilityReason[],
+): VacationMarker {
   const year = formatYear(iso);
   return {
     ts: isoToTs(iso),
     dateLabel: formatMonthDay(iso),
     yearLabel: year === currentYear() ? "" : year,
     dayLabel: formatWeekday(iso),
-    reason,
-    label: reason === "custom" ? "Vacation" : "Holiday",
+    reasons,
+    label: reasons.map((reason) => reason.label).join(" · "),
   };
 }
 
 export function vacationMarkers(
   fromTs: number,
   toTs: number,
-  config: VacationConfig,
+  config: AvailabilityConfig,
 ): VacationMarker[] {
   const markers: VacationMarker[] = [];
   if (toTs < fromTs) return markers;
@@ -148,8 +175,10 @@ export function vacationMarkers(
   const end = formatYmd(toTs);
   let iso = formatYmd(fromTs);
   while (iso <= end) {
-    const reason = markerReasonForIso(iso, config);
-    if (reason) markers.push(makeMarker(iso, reason));
+    const reasons = availabilityReasonsForTs(isoToTs(iso), config);
+    if (reasons.some((reason) => reason.kind !== "weekend")) {
+      markers.push(makeMarker(iso, reasons));
+    }
     iso = shiftIsoDate(iso, 1);
   }
   return markers;

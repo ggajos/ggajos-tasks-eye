@@ -11,7 +11,7 @@ const suite = process.env.TASKS_EYE_SUITE ?? "all";
 const visualSuite = suite === "visual" || suite === "all";
 const obsidianVersions = await parseObsidianVersions(
   process.env.OBSIDIAN_VERSIONS ??
-    (visualSuite ? "1.12.7/1.12.7" : "latest/latest"),
+    (visualSuite ? "1.13.1/1.12.7" : "latest/latest"),
   { cacheDir },
 );
 const tasksPluginVersion =

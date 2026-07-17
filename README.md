@@ -19,7 +19,7 @@ backlog and paused work visible, and Done reviews completed tasks by date.
 
 ## Install with BRAT
 
-Tasks Eye requires Obsidian 1.10 or newer and the
+Tasks Eye requires Obsidian 1.13 or newer and the
 [Tasks](https://obsidian.md/plugins?id=obsidian-tasks-plugin) community plugin.
 
 1. Install and enable **Tasks** from Obsidian's Community Plugins.
@@ -42,8 +42,10 @@ Common commands:
   `npm run test:coverage` adds a coverage report.
 - `npm run test:visual` runs the WDIO behavioral and screenshot scenarios inside
   the pinned Podman environment and writes an ignored HTML comparison report.
-  This is the only supported WDIO entry point.
+  This is the only supported WDIO entry point. While the pinned Obsidian 1.13
+  runtime is Insiders-only, provide `OBSIDIAN_EMAIL` and `OBSIDIAN_PASSWORD` in
+  your shell on the first run; subsequent runs use the ignored local download
+  cache.
 - `npm run docs` publishes accepted screenshots and rebuilds generated docs.
 - `npm run release` runs the beta release gates; `npm run release:public` also
   runs the Podman WDIO gate.
-

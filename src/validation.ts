@@ -1,10 +1,13 @@
-import { STATUSES, VACATION } from "./constants";
+import { STATUSES } from "./constants";
 import { getContextFromPath } from "./context";
 import { formatYmd } from "./date";
 import { isPathInManagedFolder } from "./managedPath";
 import type { EyeFile, EyeTask } from "./types";
-import type { VacationReason } from "./vacation";
-import { vacationReasonForTs } from "./vacation";
+import type { AvailabilityConfig, AvailabilityReason } from "./vacation";
+import {
+  availabilityReasonsForTs,
+  EMPTY_AVAILABILITY_CONFIG,
+} from "./vacation";
 
 export const VIOLATION_CODES = [
   "invalid-status",
@@ -21,11 +24,12 @@ export interface ValidationViolation {
   code: ViolationCode;
   message: string;
   dueTs?: number;
-  vacationReason?: VacationReason;
+  availabilityReasons?: AvailabilityReason[];
 }
 
 interface ValidationContext {
   file: EyeFile;
+  availability: AvailabilityConfig;
   status: string;
   hasExplicitStatus: boolean;
   uncompletedTasks: EyeTask[];
@@ -103,21 +107,28 @@ const openWithoutDueDate: ValidationRule = ({ status, uncompletedTasks }) => {
   );
 };
 
-const tasksOnVacation: ValidationRule = ({ uncompletedTasks }) => {
+const tasksOnVacation: ValidationRule = ({
+  availability,
+  uncompletedTasks,
+}) => {
   const violations: ValidationViolation[] = [];
   for (const task of uncompletedTasks) {
     if (task.dueTs === null) continue;
-    const vacationReason = vacationReasonForTs(task.dueTs, VACATION);
-    if (!vacationReason) continue;
-    const reasonLabel =
-      vacationReason === "custom" ? "vacation" : vacationReason;
+    const availabilityReasons = availabilityReasonsForTs(
+      task.dueTs,
+      availability,
+    );
+    if (availabilityReasons.length === 0) continue;
+    const reasonLabel = availabilityReasons
+      .map((reason) => reason.label)
+      .join(", ");
     violations.push({
       code: "task-on-vacation",
       message:
         `Task is due on an unavailable day: ${formatYmd(task.dueTs)} ` +
         `(${reasonLabel}).`,
       dueTs: task.dueTs,
-      vacationReason,
+      availabilityReasons,
     });
   }
   return violations;
@@ -132,11 +143,15 @@ const VALIDATION_RULES: readonly ValidationRule[] = [
   tasksOnVacation,
 ];
 
-export function validateFile(file: EyeFile): ValidationViolation[] {
+export function validateFile(
+  file: EyeFile,
+  availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+): ValidationViolation[] {
   if (!isPathInManagedFolder(file.path, file.managedFolderPath)) return [];
 
   const context: ValidationContext = {
     file,
+    availability,
     status: statusValue(file),
     hasExplicitStatus:
       file.status !== undefined && file.status !== null && file.status !== "",

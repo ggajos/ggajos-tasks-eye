@@ -29,6 +29,11 @@ export function nowTs(): number {
   return nowDate().getTime();
 }
 
+export function isIsoDate(value: unknown): value is string {
+  if (typeof value !== "string" || !ISO_DATE_RE.test(value)) return false;
+  return formatYmd(value) === value;
+}
+
 export function formatYmd(value: number | string): string {
   const dt = toLocalDate(value);
   return `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;

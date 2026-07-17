@@ -39,7 +39,7 @@ import {
   element,
   unwrapSingleParagraph,
 } from "./ui";
-import type { VacationMarker } from "./vacation";
+import type { AvailabilityConfig, VacationMarker } from "./vacation";
 
 export const VIEW_TYPE = "ggajos-tasks-eye-view";
 
@@ -233,20 +233,27 @@ export class EyeView extends ItemView {
       return;
     }
 
-    const rows = selectRows(files, this.state.mode, contextFilter);
+    const availability = this.plugin.availabilityConfig();
+    const rows = selectRows(
+      files,
+      this.state.mode,
+      contextFilter,
+      availability,
+    );
     const list = element("div", "eye-list");
     root.appendChild(list);
 
     if (isBoardMode(this.state.mode)) {
       const vacationSourceRows =
         this.state.mode === "open"
-          ? selectRows(files, this.state.mode, "*")
+          ? selectRows(files, this.state.mode, "*", availability)
           : rows;
       const rendered = await this.renderBoard(
         list,
         rows,
         vacationSourceRows,
         contextFilter,
+        availability,
       );
       if (!rendered) {
         list.appendChild(element("div", "eye-empty", this.emptyMessage()));
@@ -462,12 +469,18 @@ export class EyeView extends ItemView {
     rows: RowModel[],
     vacationSourceRows: RowModel[],
     contextFilter: string,
+    availability: AvailabilityConfig,
   ): Promise<boolean> {
     list.classList.add("eye-tree");
 
     const items =
       this.state.mode === "open"
-        ? boardItemsForContext(rows, vacationSourceRows, contextFilter)
+        ? boardItemsForContext(
+            rows,
+            vacationSourceRows,
+            contextFilter,
+            availability,
+          )
         : rows.map((model): RenderItem => ({ kind: "task", model }));
     const buckets = buildBoardBuckets(items, nowDate());
 

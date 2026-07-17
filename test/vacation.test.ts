@@ -1,35 +1,48 @@
 import { describe, expect, it } from "vitest";
 import { isoToTs } from "../src/date";
-import type { VacationConfig } from "../src/vacation";
-import {
-  inCustomDates,
-  vacationMarkers,
-  vacationReasonForTs,
-} from "../src/vacation";
+import type { AvailabilityConfig } from "../src/vacation";
+import { availabilityReasonsForTs, vacationMarkers } from "../src/vacation";
 
-const config: VacationConfig = {
-  weekendDays: [0, 6],
-  bankHolidaysAnnual: ["05-01"],
-  customDates: ["2026-07-13", { from: "2026-07-27", to: "2026-07-18" }],
+const config: AvailabilityConfig = {
+  nonWorkingWeekdays: [0, 6],
+  publicHolidays: [
+    { date: "2026-07-18", name: "Founders Day" },
+    { date: "2026-07-20", name: "Planning Day" },
+  ],
+  personalTimeOff: [
+    {
+      id: "trip",
+      from: "2026-07-18",
+      to: "2026-07-20",
+      label: "Family trip",
+    },
+  ],
 };
 
 describe("vacation helpers", () => {
-  it("matches custom dates and normalized ranges", () => {
-    expect(inCustomDates("2026-07-13", config.customDates)).toBe(true);
-    expect(inCustomDates("2026-07-20", config.customDates)).toBe(true);
-    expect(inCustomDates("2026-07-28", config.customDates)).toBe(false);
+  it("preserves every reason for overlapping unavailable days", () => {
+    expect(availabilityReasonsForTs(isoToTs("2026-07-18"), config)).toEqual([
+      { kind: "personal", label: "Family trip" },
+      { kind: "holiday", label: "Founders Day" },
+      { kind: "weekend", label: "Weekend" },
+    ]);
   });
 
-  it("detects movable holidays", () => {
-    expect(vacationReasonForTs(isoToTs("2026-04-06"), config)).toBe("holiday");
-    expect(vacationReasonForTs(isoToTs("2026-06-04"), config)).toBe("holiday");
-    expect(vacationReasonForTs(isoToTs("2026-07-14"), config)).toBeNull();
+  it("uses Vacation when a personal range has no label", () => {
+    expect(
+      availabilityReasonsForTs(isoToTs("2026-07-13"), {
+        ...config,
+        personalTimeOff: [
+          { id: "day", from: "2026-07-13", to: null, label: "" },
+        ],
+      }),
+    ).toEqual([{ kind: "personal", label: "Vacation" }]);
   });
 
-  it("emits markers only for custom dates and holidays", () => {
+  it("emits combined markers but suppresses ordinary weekends", () => {
     const markers = vacationMarkers(
-      isoToTs("2026-07-11"),
-      isoToTs("2026-07-14"),
+      isoToTs("2026-07-18"),
+      isoToTs("2026-07-21"),
       config,
     );
 
@@ -37,8 +50,24 @@ describe("vacation helpers", () => {
       markers.map((marker) => ({
         date: marker.dateLabel,
         label: marker.label,
-        reason: marker.reason,
+        reasons: marker.reasons.map((reason) => reason.kind),
       })),
-    ).toEqual([{ date: "07-13", label: "Vacation", reason: "custom" }]);
+    ).toEqual([
+      {
+        date: "07-18",
+        label: "Family trip · Founders Day · Weekend",
+        reasons: ["personal", "holiday", "weekend"],
+      },
+      {
+        date: "07-19",
+        label: "Family trip · Weekend",
+        reasons: ["personal", "weekend"],
+      },
+      {
+        date: "07-20",
+        label: "Family trip · Planning Day",
+        reasons: ["personal", "holiday"],
+      },
+    ]);
   });
 });

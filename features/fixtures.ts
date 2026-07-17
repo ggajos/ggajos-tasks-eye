@@ -14,6 +14,8 @@ export interface FeatureFixture {
     mode: FixtureMode;
     contextFilter: string;
     notesFolderPath: string;
+    availability: AvailabilitySettings;
+    holidayCache: HolidayCache;
   };
 }
 
@@ -37,6 +39,36 @@ export interface NoteFixture {
 export interface FixtureOptions {
   today?: string;
   settings?: Partial<FeatureFixture["settings"]>;
+}
+
+function defaultAvailability(): AvailabilitySettings {
+  return {
+    countryCode: "",
+    nonWorkingWeekdays: [0, 6],
+    personalTimeOff: [
+      {
+        id: "fixture-single-day",
+        from: "2026-07-13",
+        to: null,
+        label: "",
+      },
+      {
+        id: "fixture-vacation-range",
+        from: "2026-07-18",
+        to: "2026-07-27",
+        label: "",
+      },
+    ],
+  };
+}
+
+function emptyHolidayCache(): HolidayCache {
+  return {
+    countryCode: "",
+    years: {},
+    countries: [],
+    countriesFetchedAt: null,
+  };
 }
 
 function assertFixturePath(filePath: string): void {
@@ -98,6 +130,8 @@ export function fixture(
       mode: options.settings?.mode ?? "open",
       contextFilter: options.settings?.contextFilter ?? "*",
       notesFolderPath: options.settings?.notesFolderPath ?? "/",
+      availability: options.settings?.availability ?? defaultAvailability(),
+      holidayCache: options.settings?.holidayCache ?? emptyHolidayCache(),
     },
   };
 }
@@ -128,6 +162,12 @@ export function isFeatureFixture(value: unknown): value is FeatureFixture {
     typeof candidate.today === "string" &&
     typeof candidate.settings?.mode === "string" &&
     typeof candidate.settings?.contextFilter === "string" &&
-    typeof candidate.settings?.notesFolderPath === "string"
+    typeof candidate.settings?.notesFolderPath === "string" &&
+    typeof candidate.settings?.availability === "object" &&
+    candidate.settings.availability !== null &&
+    typeof candidate.settings?.holidayCache === "object" &&
+    candidate.settings.holidayCache !== null
   );
 }
+
+import type { AvailabilitySettings, HolidayCache } from "../src/vacation";

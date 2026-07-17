@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { selectRows } from "../src/model";
+import { availabilityConfigFromSettings } from "../src/vacation";
 import { discoverFeatures } from "./discovery";
 import { file, rowNames, violationCodes } from "./testSupport";
 
@@ -20,10 +21,16 @@ describe("documented violation contracts", () => {
       );
       const subject = files.find((item) => item.path === source.path)!;
       const expectedName = subject.basename;
+      const availability = availabilityConfigFromSettings(
+        violation.fixture.settings.availability,
+        violation.fixture.settings.holidayCache,
+      );
 
-      expect(violationCodes(subject)).toEqual([violation.code]);
-      expect(rowNames(selectRows(files, "inbox", "*"))).toEqual([expectedName]);
-      expect(rowNames(selectRows(files, "open", "*"))).toEqual(
+      expect(violationCodes(subject, availability)).toEqual([violation.code]);
+      expect(rowNames(selectRows(files, "inbox", "*", availability))).toEqual([
+        expectedName,
+      ]);
+      expect(rowNames(selectRows(files, "open", "*", availability))).toEqual(
         violation.appearsInOpen ? [expectedName] : [],
       );
     },

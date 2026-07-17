@@ -1,5 +1,5 @@
 import type { DueBucket, EyeMode } from "./constants";
-import { DUE_BUCKETS, VACATION } from "./constants";
+import { DUE_BUCKETS } from "./constants";
 import {
   getContextFromPath,
   getTopLevelContext,
@@ -20,8 +20,8 @@ import {
 } from "./date";
 import { stripDueDate } from "./taskParsing";
 import type { EyeFile, EyeTask, RowModel } from "./types";
-import type { VacationMarker } from "./vacation";
-import { vacationMarkers } from "./vacation";
+import type { AvailabilityConfig, VacationMarker } from "./vacation";
+import { EMPTY_AVAILABILITY_CONFIG, vacationMarkers } from "./vacation";
 import type { ValidationViolation } from "./validation";
 import { statusValue, validateFile } from "./validation";
 
@@ -69,15 +69,21 @@ function findEarliestDueTask(tasks: EyeTask[]): EyeTask | undefined {
   )[0];
 }
 
-export function rowErrors(file: EyeFile): ValidationViolation[] {
+export function rowErrors(
+  file: EyeFile,
+  availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+): ValidationViolation[] {
   const earliestDue = getEarliestDueDate(file.tasks);
-  return validateFile(file).filter(
+  return validateFile(file, availability).filter(
     (violation) =>
       violation.code !== "task-on-vacation" || violation.dueTs === earliestDue,
   );
 }
 
-export function buildRowModel(file: EyeFile): RowModel {
+export function buildRowModel(
+  file: EyeFile,
+  availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+): RowModel {
   const earliestDue = getEarliestDueDate(file.tasks);
   const year = earliestDue === null ? "" : formatYear(earliestDue);
   const earliestTask = findEarliestDueTask(file.tasks);
@@ -85,7 +91,7 @@ export function buildRowModel(file: EyeFile): RowModel {
     file,
     earliestDue,
     earliestTask,
-    errors: rowErrors(file),
+    errors: rowErrors(file, availability),
     isToday: earliestDue !== null && isToday(earliestDue),
     isFuture: earliestDue !== null && isAfterToday(earliestDue),
     dateLabel:
@@ -138,9 +144,10 @@ export function selectRows(
   files: EyeFile[],
   mode: EyeMode,
   contextFilter: string,
+  availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
 ): RowModel[] {
   return files
-    .map(buildRowModel)
+    .map((file) => buildRowModel(file, availability))
     .filter((model) => rowMatchesMode(model, mode))
     .filter((model) =>
       matchesContextFilter(
@@ -152,7 +159,10 @@ export function selectRows(
     .sort(compareRowModels);
 }
 
-function vacationMarkersForRows(rows: RowModel[]): VacationMarker[] {
+function vacationMarkersForRows(
+  rows: RowModel[],
+  availability: AvailabilityConfig,
+): VacationMarker[] {
   let lastDue: number | null = null;
   for (const model of rows) {
     if (
@@ -163,7 +173,7 @@ function vacationMarkersForRows(rows: RowModel[]): VacationMarker[] {
     }
   }
   if (lastDue === null) return [];
-  return vacationMarkers(isoToTs(todayIso()), lastDue, VACATION);
+  return vacationMarkers(isoToTs(todayIso()), lastDue, availability);
 }
 
 export function mergeItems(
@@ -207,12 +217,15 @@ export function boardItemsForContext(
   rows: RowModel[],
   vacationSourceRows: RowModel[],
   contextFilter: string,
+  availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
 ): RenderItem[] {
   if (contextFilter === VACATION_CONTEXT) {
-    return vacationMarkersForRows(vacationSourceRows).map((marker) => ({
-      kind: "marker",
-      marker,
-    }));
+    return vacationMarkersForRows(vacationSourceRows, availability).map(
+      (marker) => ({
+        kind: "marker",
+        marker,
+      }),
+    );
   }
 
   if (contextFilter && contextFilter !== "*") {
@@ -222,7 +235,10 @@ export function boardItemsForContext(
     }));
   }
 
-  return mergeItems(rows, vacationMarkersForRows(vacationSourceRows));
+  return mergeItems(
+    rows,
+    vacationMarkersForRows(vacationSourceRows, availability),
+  );
 }
 
 function startOfDay(ts: number): Date {

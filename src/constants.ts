@@ -50,19 +50,3 @@ export function taskUpdateFailedMessage(path: string): string {
 export const BOARD_RENDER_FAILED_MESSAGE =
   "Tasks Eye couldn't load your notes. Check the developer console for " +
   "details, then try reopening the view.";
-
-export const VACATION = {
-  weekendDays: [0, 6],
-  bankHolidaysAnnual: [
-    "01-01",
-    "01-06",
-    "05-01",
-    "05-03",
-    "08-15",
-    "11-01",
-    "11-11",
-    "12-25",
-    "12-26",
-  ],
-  customDates: ["2026-07-13", { from: "2026-07-18", to: "2026-07-27" }],
-} as const;
