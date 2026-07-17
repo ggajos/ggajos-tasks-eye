@@ -10,13 +10,12 @@ function appFor(frontmatter: Frontmatter): {
   file: TFile;
 } {
   const file = {} as TFile;
-  const processFrontMatter = vi.fn(async (
-    receivedFile: TFile,
-    update: (value: Frontmatter) => void,
-  ) => {
-    expect(receivedFile).toBe(file);
-    update(frontmatter);
-  });
+  const processFrontMatter = vi.fn(
+    async (receivedFile: TFile, update: (value: Frontmatter) => void) => {
+      expect(receivedFile).toBe(file);
+      update(frontmatter);
+    },
+  );
   const app = { fileManager: { processFrontMatter } } as unknown as App;
   return { app, processFrontMatter, file };
 }
@@ -104,7 +103,8 @@ describe("Step note status feature", () => {
       },
     } as unknown as App;
 
-    await expect(stepNoteStatus(app, {} as TFile, "next"))
-      .rejects.toBe(failure);
+    await expect(stepNoteStatus(app, {} as TFile, "next")).rejects.toBe(
+      failure,
+    );
   });
 });

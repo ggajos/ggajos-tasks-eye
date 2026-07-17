@@ -10,17 +10,21 @@ import {
 
 describe("context helpers", () => {
   it("preserves literal folders relative to the managed root", () => {
-    expect(getContextFromFolderPath("10 work/Client A"))
-      .toBe("10 work/Client A");
-    expect(getContextFromPath(
-      "Workspace/10 work/Client A/Modernization.md",
-      "Workspace",
-    )).toBe("10 work/Client A");
+    expect(getContextFromFolderPath("10 work/Client A")).toBe(
+      "10 work/Client A",
+    );
+    expect(
+      getContextFromPath(
+        "Workspace/10 work/Client A/Modernization.md",
+        "Workspace",
+      ),
+    ).toBe("10 work/Client A");
   });
 
   it("returns top-level contexts for colors and fallbacks", () => {
-    expect(getTopLevelContext("Mission/Platform/Modernization.md"))
-      .toBe("Mission");
+    expect(getTopLevelContext("Mission/Platform/Modernization.md")).toBe(
+      "Mission",
+    );
     expect(getTopLevelContext("Note.md")).toBe("-");
     expect(getTopLevelContext("Archive/Note.md", "Workspace")).toBe("-");
   });

@@ -5,8 +5,9 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
+    "build": "biome check --write . && tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:visual": "node acceptance/scripts/run-visual.mjs",
     "test:visual:approve": "node acceptance/scripts/approve-visual.mjs && npm run docs",
     "docs": "tsc --noEmit --skipLibCheck && node acceptance/scripts/publish-doc-screenshots.mjs && tsx scripts/build-docs.ts && astro build --config docs-src/astro.config.mjs",
@@ -25,8 +26,10 @@
   },
   "devDependencies": {
     "@astrojs/starlight": "^0.41.3",
+    "@biomejs/biome": "2.5.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.13.2",
+    "@vitest/coverage-v8": "3.2.7",
     "@wdio/cli": "^9.29.1",
     "@wdio/globals": "^9.29.1",
     "@wdio/local-runner": "^9.29.1",

@@ -15,7 +15,9 @@ describe("documented violation contracts", () => {
     "$title fixture proves its documented model contract",
     ({ violation }) => {
       const source = violation.fixture.subject;
-      const files = violation.fixture.files.map(({ path, markdown }) => file(path, markdown));
+      const files = violation.fixture.files.map(({ path, markdown }) =>
+        file(path, markdown),
+      );
       const subject = files.find((item) => item.path === source.path)!;
       const expectedName = subject.basename;
 

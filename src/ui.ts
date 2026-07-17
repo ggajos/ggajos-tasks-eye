@@ -31,7 +31,7 @@ export function button(
 
 export function unwrapSingleParagraph(el: HTMLElement): void {
   const child = el.firstElementChild;
-  if (!child || child.tagName !== "P" || child.nextElementSibling) return;
+  if (child?.tagName !== "P" || child.nextElementSibling) return;
 
   while (child.firstChild) el.insertBefore(child.firstChild, child);
   child.remove();

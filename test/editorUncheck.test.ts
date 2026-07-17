@@ -46,25 +46,25 @@ describe("editor uncheck selected tasks", () => {
   });
 
   it("targets whole lines touched by selections", () => {
-    expect(lineNumbersTouchedBySelections([
-      selection(1, 4, 3, 2),
-      selection(5, 1, 4, 1),
-    ], 9)).toEqual([1, 2, 3, 4, 5]);
+    expect(
+      lineNumbersTouchedBySelections(
+        [selection(1, 4, 3, 2), selection(5, 1, 4, 1)],
+        9,
+      ),
+    ).toEqual([1, 2, 3, 4, 5]);
   });
 
   it("excludes an untouched final line when selection ends at column zero", () => {
-    expect(lineNumbersTouchedBySelections([
-      selection(1, 0, 3, 0),
-    ], 9)).toEqual([1, 2]);
+    expect(lineNumbersTouchedBySelections([selection(1, 0, 3, 0)], 9)).toEqual([
+      1, 2,
+    ]);
   });
 
   it("creates changes for selected checked task lines only", () => {
-    const editor = editorFor([
-      "- [x] done",
-      "- [ ] open",
-      "plain",
-      "  + [X] nested",
-    ], [selection(0, 2, 3, 4)]);
+    const editor = editorFor(
+      ["- [x] done", "- [ ] open", "plain", "  + [X] nested"],
+      [selection(0, 2, 3, 4)],
+    );
 
     expect(getUncheckSelectedTaskChanges(editor)).toEqual([
       {
@@ -81,18 +81,23 @@ describe("editor uncheck selected tasks", () => {
   });
 
   it("uses a provided line transformer for selected checked task lines", () => {
-    const editor = editorFor([
-      "- [x] done ✅ 2026-07-08",
-      "- [ ] open",
-      "  + [X] nested ✅ 2026-07-08",
-    ], [selection(0, 0, 2, 26)]);
+    const editor = editorFor(
+      [
+        "- [x] done ✅ 2026-07-08",
+        "- [ ] open",
+        "  + [X] nested ✅ 2026-07-08",
+      ],
+      [selection(0, 0, 2, 26)],
+    );
 
-    expect(getUncheckSelectedTaskChanges(editor, (line) =>
-      line
-        .replace("[x]", "[ ]")
-        .replace("[X]", "[ ]")
-        .replace("✅ 2026-07-08", "api-cleaned")
-    )).toEqual([
+    expect(
+      getUncheckSelectedTaskChanges(editor, (line) =>
+        line
+          .replace("[x]", "[ ]")
+          .replace("[X]", "[ ]")
+          .replace("✅ 2026-07-08", "api-cleaned"),
+      ),
+    ).toEqual([
       {
         from: { line: 0, ch: 0 },
         to: { line: 0, ch: 23 },
@@ -108,30 +113,32 @@ describe("editor uncheck selected tasks", () => {
 
   it("uses the current line when there is no selection", () => {
     const transactions: EditorChange[][] = [];
-    const editor = editorFor([
-      "- [ ] open",
-      "- [x] current",
-      "- [x] later",
-    ], [selection(1, 4, 1, 4)], transactions);
+    const editor = editorFor(
+      ["- [ ] open", "- [x] current", "- [x] later"],
+      [selection(1, 4, 1, 4)],
+      transactions,
+    );
 
     expect(canUncheckSelectedTasks(editor)).toBe(true);
     expect(uncheckSelectedTasks(editor)).toBe(true);
-    expect(transactions).toEqual([[
-      {
-        from: { line: 1, ch: 0 },
-        to: { line: 1, ch: 13 },
-        text: "- [ ] current",
-      },
-    ]]);
+    expect(transactions).toEqual([
+      [
+        {
+          from: { line: 1, ch: 0 },
+          to: { line: 1, ch: 13 },
+          text: "- [ ] current",
+        },
+      ],
+    ]);
   });
 
   it("does nothing when selection contains no x task markers", () => {
     const transactions: EditorChange[][] = [];
-    const editor = editorFor([
-      "- [ ] open",
-      "- [-] custom",
-      "plain",
-    ], [selection(0, 0, 2, 5)], transactions);
+    const editor = editorFor(
+      ["- [ ] open", "- [-] custom", "plain"],
+      [selection(0, 0, 2, 5)],
+      transactions,
+    );
 
     expect(canUncheckSelectedTasks(editor)).toBe(false);
     expect(uncheckSelectedTasks(editor)).toBe(false);

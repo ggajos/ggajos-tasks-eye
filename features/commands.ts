@@ -1,3 +1,4 @@
+import type { CommandDefinition } from "../src/commands";
 import {
   CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
@@ -5,7 +6,6 @@ import {
   STATUS_STEP_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "../src/commands";
-import type { CommandDefinition } from "../src/commands";
 
 export interface DocumentedCommand extends CommandDefinition {
   featureSlug?: string;
@@ -88,8 +88,7 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
         ...UNCHECK_SELECTED_COMMAND,
         featureSlug: "actions-uncheck-selected-tasks",
         featureTitle: "Reopen selected tasks",
-        explanation:
-          "Turn selected completed tasks back into unchecked tasks.",
+        explanation: "Turn selected completed tasks back into unchecked tasks.",
       },
     ],
   },
@@ -98,9 +97,7 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
 export const DOCUMENTED_COMMANDS: readonly DocumentedCommand[] =
   DOCUMENTED_COMMAND_GROUPS.flatMap((group) => group.commands);
 
-export function formatHotkey(
-  hotkey: CommandDefinition["hotkey"],
-): string {
+export function formatHotkey(hotkey: CommandDefinition["hotkey"]): string {
   if (!hotkey) return "Not assigned";
   return [...hotkey.modifiers, hotkey.key].join("+");
 }

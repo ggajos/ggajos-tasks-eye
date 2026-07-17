@@ -34,10 +34,12 @@ Ship the safe path.
   it("rejects duplicate and unsafe paths", () => {
     const file = note("Plan.md", "# Plan\n");
     expect(() => fixture([file, file])).toThrow("Duplicate fixture path");
-    expect(() => note("../Plan.md", "# Plan\n"))
-      .toThrow("Invalid fixture Markdown path");
-    expect(() => note("Plan.txt", "Plan\n"))
-      .toThrow("Invalid fixture Markdown path");
+    expect(() => note("../Plan.md", "# Plan\n")).toThrow(
+      "Invalid fixture Markdown path",
+    );
+    expect(() => note("Plan.txt", "Plan\n")).toThrow(
+      "Invalid fixture Markdown path",
+    );
   });
 
   it("identifies a violation subject inside its complete fixture", () => {

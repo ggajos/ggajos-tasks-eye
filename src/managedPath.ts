@@ -21,8 +21,11 @@ export function isPathInManagedFolder(
 ): boolean {
   const root = vaultFolderPath(managedFolderPath);
   const normalizedPath = path.replace(/^\/+|\/+$/g, "");
-  return root === "" || normalizedPath === root ||
-    normalizedPath.startsWith(`${root}/`);
+  return (
+    root === "" ||
+    normalizedPath === root ||
+    normalizedPath.startsWith(`${root}/`)
+  );
 }
 
 export function isPathRelatedToManagedFolder(
@@ -32,14 +35,15 @@ export function isPathRelatedToManagedFolder(
   if (isPathInManagedFolder(path, managedFolderPath)) return true;
   const root = vaultFolderPath(managedFolderPath);
   const normalizedPath = path.replace(/^\/+|\/+$/g, "");
-  return root !== "" && normalizedPath !== "" &&
-    root.startsWith(`${normalizedPath}/`);
+  return (
+    root !== "" &&
+    normalizedPath !== "" &&
+    root.startsWith(`${normalizedPath}/`)
+  );
 }
 
-export function missingManagedFolderMessage(
-  managedFolderPath: string,
-): string {
-  return `Tasks Eye can't find the notes folder "${
-    normalizeManagedFolderPath(managedFolderPath)
-  }". Choose another folder in settings.`;
+export function missingManagedFolderMessage(managedFolderPath: string): string {
+  return `Tasks Eye can't find the notes folder "${normalizeManagedFolderPath(
+    managedFolderPath,
+  )}". Choose another folder in settings.`;
 }

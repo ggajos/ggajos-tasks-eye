@@ -13,9 +13,10 @@ export default defineFeature({
   violation: {
     code: "invalid-status",
     appearsInOpen: false,
-    fixture: violationFixture(note(
-      "Case Studies/Service Ownership Model.md",
-      `---
+    fixture: violationFixture(
+      note(
+        "Case Studies/Service Ownership Model.md",
+        `---
 status: reviewing
 ---
 
@@ -23,7 +24,8 @@ status: reviewing
 
 - [ ] Align escalation boundaries with platform and product leadership
 `,
-    )),
+      ),
+    ),
   },
   screenshots: [
     {

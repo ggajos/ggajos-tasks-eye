@@ -13,6 +13,8 @@ interface AppWithPlugins extends App {
 }
 
 export function getTasksApi(app: App): TasksApiV1 | null {
-  return (app as AppWithPlugins).plugins?.plugins?.["obsidian-tasks-plugin"]
-    ?.apiV1 ?? null;
+  return (
+    (app as AppWithPlugins).plugins?.plugins?.["obsidian-tasks-plugin"]
+      ?.apiV1 ?? null
+  );
 }

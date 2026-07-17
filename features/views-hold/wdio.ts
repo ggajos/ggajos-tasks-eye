@@ -1,6 +1,6 @@
 import { expect } from "@wdio/globals";
-import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
+import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { fixture, note } from "../fixtures";
 
 const HOLD_ACTION = "Review ADR-042 with Security Architecture";
@@ -17,13 +17,19 @@ export const { screenshotScenarios } = featureScenarios(
       tasks: [{ text: OPEN_ACTION, due: "2026-07-08" }],
     }),
   ]),
-  { screenshots: [{
-    screenshotSlug: "board",
-    async run({ save }) {
-      const root = await tasksEyePage.openBoard("hold", "Technology Radar");
-      await expect(root).toHaveText(expect.stringContaining(HOLD_ACTION));
-      await expect(root).toHaveText(expect.not.stringContaining(OPEN_ACTION));
-      await save(root);
-    },
-  }] },
+  {
+    screenshots: [
+      {
+        screenshotSlug: "board",
+        async run({ save }) {
+          const root = await tasksEyePage.openBoard("hold", "Technology Radar");
+          await expect(root).toHaveText(expect.stringContaining(HOLD_ACTION));
+          await expect(root).toHaveText(
+            expect.not.stringContaining(OPEN_ACTION),
+          );
+          await save(root);
+        },
+      },
+    ],
+  },
 );

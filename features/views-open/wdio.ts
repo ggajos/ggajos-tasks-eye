@@ -1,6 +1,6 @@
 import { expect } from "@wdio/globals";
-import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
+import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { fixture, note } from "../fixtures";
 
 const TODAY_ANCHOR = "Send the revised homepage copy to Marta";
@@ -34,10 +34,12 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     }),
     note("Home/Kitchen Renovation.md", {
       status: "open",
-      tasks: [{
-        text: "Call the electrician about the updated quote",
-        due: "2026-07-08",
-      }],
+      tasks: [
+        {
+          text: "Call the electrician about the updated quote",
+          due: "2026-07-08",
+        },
+      ],
     }),
     note("Family/Summer Trip.md", {
       status: "open",
@@ -57,7 +59,9 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     }),
     note("Learning/Reading Group.md", {
       status: "open",
-      tasks: [{ text: "Finish notes for the reading group", due: "2026-07-29" }],
+      tasks: [
+        { text: "Finish notes for the reading group", due: "2026-07-29" },
+      ],
     }),
     note("Personal/Tax Archive.md", {
       status: "open",
@@ -72,38 +76,47 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
       tasks: [{ text: HOLD_FUTURE, due: "2026-09-01" }],
     }),
   ]),
-  { acceptance: [{
-    title: "expands only Today and keeps pane-scoped manual bucket choices",
-    async run() {
-      await tasksEyePage.openBoard("open", TODAY_ANCHOR);
-      await expectDefaultOpenBuckets();
+  {
+    acceptance: [
+      {
+        title: "expands only Today and keeps pane-scoped manual bucket choices",
+        async run() {
+          await tasksEyePage.openBoard("open", TODAY_ANCHOR);
+          await expectDefaultOpenBuckets();
 
-      await tasksEyePage.toggleBucket("tomorrow");
-      await tasksEyePage.toggleBucket("today");
-      await tasksEyePage.requestRender();
-      await tasksEyePage.expectBucketExpanded("tomorrow", true);
-      await tasksEyePage.expectBucketExpanded("today", false);
+          await tasksEyePage.toggleBucket("tomorrow");
+          await tasksEyePage.toggleBucket("today");
+          await tasksEyePage.requestRender();
+          await tasksEyePage.expectBucketExpanded("tomorrow", true);
+          await tasksEyePage.expectBucketExpanded("today", false);
 
-      await tasksEyePage.openBoard("hold", HOLD_FUTURE);
-      await tasksEyePage.expectBucketExpanded("future", true);
-      await tasksEyePage.openBoard("open", TOMORROW_ANCHOR);
-      await tasksEyePage.expectBucketExpanded("tomorrow", true);
-      await tasksEyePage.expectBucketExpanded("today", false);
+          await tasksEyePage.openBoard("hold", HOLD_FUTURE);
+          await tasksEyePage.expectBucketExpanded("future", true);
+          await tasksEyePage.openBoard("open", TOMORROW_ANCHOR);
+          await tasksEyePage.expectBucketExpanded("tomorrow", true);
+          await tasksEyePage.expectBucketExpanded("today", false);
 
-      await tasksEyePage.closePane();
-      await tasksEyePage.openBoard("open", TODAY_ANCHOR);
-      await expectDefaultOpenBuckets();
-    },
-  }], screenshots: [{
-    screenshotSlug: "board",
-    async run({ save }) {
-      const root = await tasksEyePage.openBoard("open", TODAY_ANCHOR);
-      await expectDefaultOpenBuckets();
-      await tasksEyePage.toggleBucket("tomorrow");
-      await tasksEyePage.expectBucketExpanded("tomorrow", true);
-      await expect(root).toHaveText(expect.stringContaining(TODAY_ANCHOR));
-      await expect(root).toHaveText(expect.stringContaining(TOMORROW_ANCHOR));
-      await save(root);
-    },
-  }] },
+          await tasksEyePage.closePane();
+          await tasksEyePage.openBoard("open", TODAY_ANCHOR);
+          await expectDefaultOpenBuckets();
+        },
+      },
+    ],
+    screenshots: [
+      {
+        screenshotSlug: "board",
+        async run({ save }) {
+          const root = await tasksEyePage.openBoard("open", TODAY_ANCHOR);
+          await expectDefaultOpenBuckets();
+          await tasksEyePage.toggleBucket("tomorrow");
+          await tasksEyePage.expectBucketExpanded("tomorrow", true);
+          await expect(root).toHaveText(expect.stringContaining(TODAY_ANCHOR));
+          await expect(root).toHaveText(
+            expect.stringContaining(TOMORROW_ANCHOR),
+          );
+          await save(root);
+        },
+      },
+    ],
+  },
 );

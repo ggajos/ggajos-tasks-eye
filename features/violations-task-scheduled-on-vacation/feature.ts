@@ -15,9 +15,10 @@ export default defineFeature({
   violation: {
     code: "task-on-vacation",
     appearsInOpen: true,
-    fixture: violationFixture(note(
-      "Case Studies/Architecture Offsite.md",
-      `---
+    fixture: violationFixture(
+      note(
+        "Case Studies/Architecture Offsite.md",
+        `---
 status: open
 ---
 
@@ -25,7 +26,8 @@ status: open
 
 - [ ] Reschedule the platform strategy review away from OOO 📅 2026-07-13
 `,
-    )),
+      ),
+    ),
   },
   screenshots: [
     {

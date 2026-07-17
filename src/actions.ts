@@ -1,10 +1,7 @@
-import { Notice, TFile } from "obsidian";
 import type { App } from "obsidian";
-import { fileNotFoundMessage } from "./constants";
-import {
-  replaceTaskLine,
-  shiftTaskDueInMarkdown,
-} from "./taskParsing";
+import { Notice, TFile } from "obsidian";
+import { fileNotFoundMessage, taskUpdateFailedMessage } from "./constants";
+import { replaceTaskLine, shiftTaskDueInMarkdown } from "./taskParsing";
 import type { TasksApiV1 } from "./tasksApi";
 import type { EyeTask } from "./types";
 
@@ -13,11 +10,10 @@ function findMarkdownFile(app: App, path: string): TFile | null {
   return file instanceof TFile ? file : null;
 }
 
-async function processTaskLine(
+async function updateMarkdownFile(
   app: App,
   filePath: string,
-  task: EyeTask,
-  replacement: string,
+  transform: (markdown: string) => string,
 ): Promise<void> {
   const file = findMarkdownFile(app, filePath);
   if (!file) {
@@ -25,9 +21,15 @@ async function processTaskLine(
     return;
   }
 
-  await app.vault.process(file, (markdown) =>
-    replaceTaskLine(markdown, task, replacement)
-  );
+  try {
+    await app.vault.process(file, transform);
+  } catch (error) {
+    console.error(
+      `Tasks Eye failed to update the task in "${filePath}".`,
+      error,
+    );
+    new Notice(taskUpdateFailedMessage(filePath));
+  }
 }
 
 export async function shiftTaskDueInFile(
@@ -36,14 +38,8 @@ export async function shiftTaskDueInFile(
   task: EyeTask,
   deltaDays: number,
 ): Promise<void> {
-  const file = findMarkdownFile(app, filePath);
-  if (!file) {
-    new Notice(fileNotFoundMessage(filePath));
-    return;
-  }
-
-  await app.vault.process(file, (markdown) =>
-    shiftTaskDueInMarkdown(markdown, task, deltaDays)
+  await updateMarkdownFile(app, filePath, (markdown) =>
+    shiftTaskDueInMarkdown(markdown, task, deltaDays),
   );
 }
 
@@ -57,5 +53,7 @@ export async function completeTaskInFile(
     task.lineText,
     filePath,
   );
-  await processTaskLine(app, filePath, task, replacement);
+  await updateMarkdownFile(app, filePath, (markdown) =>
+    replaceTaskLine(markdown, task, replacement),
+  );
 }

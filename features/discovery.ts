@@ -28,7 +28,9 @@ function validateSemantics(
   feature: FeatureDefinition | undefined,
 ): LoadedFeatureDefinition {
   if (!feature) {
-    throw new Error(`Feature folder "${dirName}" must export a default feature`);
+    throw new Error(
+      `Feature folder "${dirName}" must export a default feature`,
+    );
   }
   if (feature.screenshots.length === 0) {
     throw new Error(`Feature "${dirName}" must define at least one screenshot`);
@@ -74,7 +76,7 @@ function validateSemantics(
 export async function discoverFeatures(
   featuresRoot = FEATURES_ROOT,
 ): Promise<LoadedFeature[]> {
-  if (!await exists(featuresRoot)) return [];
+  if (!(await exists(featuresRoot))) return [];
 
   const entries = await readdir(featuresRoot, { withFileTypes: true });
   const folders = entries
@@ -86,14 +88,16 @@ export async function discoverFeatures(
   for (const dirName of folders) {
     const rootDir = path.join(featuresRoot, dirName);
     const definitionPath = path.join(rootDir, "feature.ts");
-    if (!await exists(definitionPath)) continue;
+    if (!(await exists(definitionPath))) continue;
 
     const whyPath = path.join(rootDir, "why.md");
-    if (!await exists(whyPath)) {
+    if (!(await exists(whyPath))) {
       throw new Error(`Feature folder "${dirName}" is missing why.md`);
     }
 
-    const module = await import(pathToFileURL(definitionPath).href) as FeatureModule;
+    const module = (await import(
+      pathToFileURL(definitionPath).href
+    )) as FeatureModule;
     const feature = validateSemantics(dirName, module.default);
     const whyMarkdown = await readFile(whyPath, "utf8");
     if (whyMarkdown.trim() === "") {

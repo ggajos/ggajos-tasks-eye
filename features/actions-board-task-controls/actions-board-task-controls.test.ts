@@ -5,16 +5,18 @@ import { file } from "../testSupport";
 
 describe("Board task controls feature", () => {
   it("targets the earliest unfinished due task in a board row", () => {
-    const row = buildRowModel(file(
-      "Mission/Platform/Billing Platform Modernization.md",
-      `---
+    const row = buildRowModel(
+      file(
+        "Mission/Platform/Billing Platform Modernization.md",
+        `---
 status: open
 ---
 
 - [ ] Review the migration runbook 📅 2026-07-15
 - [ ] Approve the billing event contract 📅 2026-07-08
 `,
-    ));
+      ),
+    );
 
     expect(row.actionLabel).toBe("Approve the billing event contract");
     expect(row.earliestTask?.dueIso).toBe("2026-07-08");
@@ -39,7 +41,9 @@ status: open
       1,
     );
 
-    expect(updated).toContain("Approve the billing event contract 📅 2026-07-09");
+    expect(updated).toContain(
+      "Approve the billing event contract 📅 2026-07-09",
+    );
     expect(updated).toContain("Review the migration runbook 📅 2026-07-15");
   });
 });

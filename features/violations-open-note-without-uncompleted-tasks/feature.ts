@@ -14,9 +14,10 @@ export default defineFeature({
   violation: {
     code: "open-without-uncompleted-tasks",
     appearsInOpen: true,
-    fixture: violationFixture(note(
-      "Case Studies/Engineering Strategy Q3.md",
-      `---
+    fixture: violationFixture(
+      note(
+        "Case Studies/Engineering Strategy Q3.md",
+        `---
 status: open
 ---
 
@@ -25,7 +26,8 @@ status: open
 The strategy covers platform leverage and reliability investment, but still
 needs a concrete next action.
 `,
-    )),
+      ),
+    ),
   },
   screenshots: [
     {

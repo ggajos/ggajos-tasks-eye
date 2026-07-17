@@ -10,16 +10,17 @@ export async function stepNoteStatus(
 ): Promise<void> {
   await app.fileManager.processFrontMatter(file, (frontmatter) => {
     const hasKey = frontmatter.status !== undefined;
-    const current = typeof frontmatter.status === "string"
-      ? frontmatter.status
-      : undefined;
-    const index = current !== undefined
-      ? (STATUSES as readonly string[]).indexOf(current)
-      : -1;
+    const current =
+      typeof frontmatter.status === "string" ? frontmatter.status : undefined;
+    const index =
+      current !== undefined
+        ? (STATUSES as readonly string[]).indexOf(current)
+        : -1;
 
-    const target = direction === "next"
-      ? Math.min(index + 1, STATUSES.length - 1)
-      : Math.max(index - 1, -1);
+    const target =
+      direction === "next"
+        ? Math.min(index + 1, STATUSES.length - 1)
+        : Math.max(index - 1, -1);
 
     if (index >= 0 && target === index) return;
 

@@ -28,16 +28,12 @@ describe("Context filtering feature", () => {
   });
 
   it("matches rows by the same context value shown in the filter", () => {
-    expect(matchesContextFilter(
-      "Mission/Platform/Billing.md",
-      "Mission/Platform",
-    ))
-      .toBe(true);
-    expect(matchesContextFilter(
-      "Leadership/Mentorship.md",
-      "Mission/Platform",
-    ))
-      .toBe(false);
+    expect(
+      matchesContextFilter("Mission/Platform/Billing.md", "Mission/Platform"),
+    ).toBe(true);
+    expect(
+      matchesContextFilter("Leadership/Mentorship.md", "Mission/Platform"),
+    ).toBe(false);
     expect(normalizeContextFilter("missing", ["Architecture"])).toBe("*");
   });
 });

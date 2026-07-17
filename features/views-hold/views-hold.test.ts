@@ -33,8 +33,9 @@ status: open
     const rows = selectRows(files, "hold", "*");
 
     expect(rows.map((row) => row.file.basename)).toEqual(["Technology Radar"]);
-    expect(rows[0]?.actionLabel)
-      .toBe("Evaluate Temporal for durable workflow orchestration");
+    expect(rows[0]?.actionLabel).toBe(
+      "Evaluate Temporal for durable workflow orchestration",
+    );
   });
 
   it("filters hold rows by folder-derived context", () => {
@@ -68,11 +69,14 @@ status: hold
       ),
     ];
 
-    expect(selectRows(files, "hold", "Architecture").map((row) => row.file.path))
-      .toEqual(["Architecture/Technology Radar.md"]);
-    expect(selectRows(files, "hold", "Mission/Platform").map((row) => row.file.path))
-      .toEqual(["Mission/Platform/Modernization.md"]);
-    expect(selectRows(files, "hold", "mission").map((row) => row.file.path))
-      .toEqual([]);
+    expect(
+      selectRows(files, "hold", "Architecture").map((row) => row.file.path),
+    ).toEqual(["Architecture/Technology Radar.md"]);
+    expect(
+      selectRows(files, "hold", "Mission/Platform").map((row) => row.file.path),
+    ).toEqual(["Mission/Platform/Modernization.md"]);
+    expect(
+      selectRows(files, "hold", "mission").map((row) => row.file.path),
+    ).toEqual([]);
   });
 });

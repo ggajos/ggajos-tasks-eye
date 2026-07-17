@@ -1,5 +1,5 @@
-import { DUE_BUCKETS, VACATION } from "./constants";
 import type { DueBucket, EyeMode } from "./constants";
+import { DUE_BUCKETS, VACATION } from "./constants";
 import {
   getContextFromPath,
   getTopLevelContext,
@@ -14,16 +14,16 @@ import {
   formatYear,
   formatYmd,
   isAfterToday,
-  isToday,
   isoToTs,
+  isToday,
   todayIso,
 } from "./date";
 import { stripDueDate } from "./taskParsing";
 import type { EyeFile, EyeTask, RowModel } from "./types";
-import { statusValue, validateFile } from "./validation";
-import type { ValidationViolation } from "./validation";
-import { vacationMarkers } from "./vacation";
 import type { VacationMarker } from "./vacation";
+import { vacationMarkers } from "./vacation";
+import type { ValidationViolation } from "./validation";
+import { statusValue, validateFile } from "./validation";
 
 export type RenderItem =
   | { kind: "task"; model: RowModel }
@@ -64,15 +64,16 @@ function findEarliestDueTask(tasks: EyeTask[]): EyeTask | undefined {
   const dated = uncompleted.filter((task) => task.dueTs !== null);
   if (dated.length === 0) return uncompleted[0];
 
-  return [...dated].sort((a, b) =>
-    (a.dueTs as number) - (b.dueTs as number)
+  return [...dated].sort(
+    (a, b) => (a.dueTs as number) - (b.dueTs as number),
   )[0];
 }
 
 export function rowErrors(file: EyeFile): ValidationViolation[] {
   const earliestDue = getEarliestDueDate(file.tasks);
-  return validateFile(file).filter((violation) =>
-    violation.code !== "task-on-vacation" || violation.dueTs === earliestDue
+  return validateFile(file).filter(
+    (violation) =>
+      violation.code !== "task-on-vacation" || violation.dueTs === earliestDue,
   );
 }
 
@@ -87,10 +88,13 @@ export function buildRowModel(file: EyeFile): RowModel {
     errors: rowErrors(file),
     isToday: earliestDue !== null && isToday(earliestDue),
     isFuture: earliestDue !== null && isAfterToday(earliestDue),
-    dateLabel: earliestDue === null ? "No Due Date" : formatMonthDay(earliestDue),
+    dateLabel:
+      earliestDue === null ? "No Due Date" : formatMonthDay(earliestDue),
     yearLabel: year === currentYear() ? "" : year,
     dayLabel: earliestDue === null ? "" : formatWeekday(earliestDue),
-    actionLabel: earliestTask ? stripDueDate(earliestTask.text) : "No unchecked tasks",
+    actionLabel: earliestTask
+      ? stripDueDate(earliestTask.text)
+      : "No unchecked tasks",
     contextKey: getTopLevelContext(file.path, file.managedFolderPath),
     contextLabel: getContextFromPath(file.path, file.managedFolderPath),
   };
@@ -143,7 +147,7 @@ export function selectRows(
         model.file.path,
         contextFilter,
         model.file.managedFolderPath,
-      )
+      ),
     )
     .sort(compareRowModels);
 }
@@ -270,10 +274,7 @@ function dayLabel(ts: number | null): string {
   return ts === null ? "No Due Date" : formatHumanDate(ts);
 }
 
-function emptyBoardBucket(
-  key: DueBucket,
-  label: string,
-): MutableBoardBucket {
+function emptyBoardBucket(key: DueBucket, label: string): MutableBoardBucket {
   return {
     key,
     label,

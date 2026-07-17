@@ -1,16 +1,6 @@
-export const STATUSES = [
-  "open",
-  "hold",
-  "closed",
-  "archived",
-] as const;
+export const STATUSES = ["open", "hold", "closed", "archived"] as const;
 
-export const MODES = [
-  "open",
-  "inbox",
-  "hold",
-  "done",
-] as const;
+export const MODES = ["open", "inbox", "hold", "done"] as const;
 
 export const MODE_LABELS: Record<EyeMode, string> = {
   open: "Open",
@@ -23,8 +13,9 @@ export type EyeStatus = (typeof STATUSES)[number];
 export type EyeMode = (typeof MODES)[number];
 
 export function isEyeMode(value: unknown): value is EyeMode {
-  return typeof value === "string" &&
-    (MODES as readonly string[]).includes(value);
+  return (
+    typeof value === "string" && (MODES as readonly string[]).includes(value)
+  );
 }
 
 export type DueBucket =
@@ -52,6 +43,14 @@ export function fileNotFoundMessage(path: string): string {
   return `Tasks Eye can't find the file "${path}".`;
 }
 
+export function taskUpdateFailedMessage(path: string): string {
+  return `Tasks Eye couldn't update the task in "${path}".`;
+}
+
+export const BOARD_RENDER_FAILED_MESSAGE =
+  "Tasks Eye couldn't load your notes. Check the developer console for " +
+  "details, then try reopening the view.";
+
 export const VACATION = {
   weekendDays: [0, 6],
   bankHolidaysAnnual: [
@@ -65,8 +64,5 @@ export const VACATION = {
     "12-25",
     "12-26",
   ],
-  customDates: [
-    "2026-07-13",
-    { from: "2026-07-18", to: "2026-07-27" },
-  ],
+  customDates: ["2026-07-13", { from: "2026-07-18", to: "2026-07-27" }],
 } as const;

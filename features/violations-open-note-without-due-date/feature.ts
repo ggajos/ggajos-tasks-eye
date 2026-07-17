@@ -16,9 +16,10 @@ export default defineFeature({
   violation: {
     code: "open-without-due-date",
     appearsInOpen: true,
-    fixture: violationFixture(note(
-      "Case Studies/Platform Capability Map.md",
-      `---
+    fixture: violationFixture(
+      note(
+        "Case Studies/Platform Capability Map.md",
+        `---
 status: open
 ---
 
@@ -26,7 +27,8 @@ status: open
 
 - [ ] Define the next review milestone for the capability map
 `,
-    )),
+      ),
+    ),
   },
   screenshots: [
     {

@@ -24,7 +24,8 @@ export default defineFeature({
     {
       slug: "stepped-note",
       title: "Step the active note forward to Hold",
-      alt: "Obsidian note showing a project whose status property is hold " +
+      alt:
+        "Obsidian note showing a project whose status property is hold " +
         "after stepping forward from open",
     },
   ],

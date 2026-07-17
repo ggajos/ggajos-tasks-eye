@@ -50,15 +50,7 @@ export function formatYear(value: number | string): string {
   return String(toLocalDate(value).getFullYear());
 }
 
-const WEEKDAYS = [
-  "Sun",
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat",
-] as const;
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 const FULL_WEEKDAYS = [
   "Sunday",
   "Monday",
@@ -100,9 +92,11 @@ export function formatHumanDate(value: number | string): string {
 export function isToday(value: number | string): boolean {
   const dt = toLocalDate(value);
   const now = nowDate();
-  return dt.getFullYear() === now.getFullYear() &&
+  return (
+    dt.getFullYear() === now.getFullYear() &&
     dt.getMonth() === now.getMonth() &&
-    dt.getDate() === now.getDate();
+    dt.getDate() === now.getDate()
+  );
 }
 
 export function isAfterToday(value: number | string): boolean {

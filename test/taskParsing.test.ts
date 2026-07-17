@@ -27,8 +27,9 @@ describe("task parsing", () => {
   });
 
   it("shifts only the first due date marker", () => {
-    expect(shiftDueDateInText("- [ ] Review 📅 2026-07-08", 7))
-      .toBe("- [ ] Review 📅 2026-07-15");
+    expect(shiftDueDateInText("- [ ] Review 📅 2026-07-08", 7)).toBe(
+      "- [ ] Review 📅 2026-07-15",
+    );
   });
 
   it("strips due date markers from display labels", () => {
@@ -39,7 +40,10 @@ describe("task parsing", () => {
   });
 
   it("replaces the matched task line with multi-line Tasks output", () => {
-    const task = parseTaskLine("- [ ] Recurring 🔁 every week 📅 2026-07-08", 2);
+    const task = parseTaskLine(
+      "- [ ] Recurring 🔁 every week 📅 2026-07-08",
+      2,
+    );
     expect(task).not.toBeNull();
 
     const markdown = [

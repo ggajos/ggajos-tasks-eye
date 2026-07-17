@@ -14,13 +14,17 @@ export default defineFeature({
   violation: {
     code: "note-in-managed-root",
     appearsInOpen: true,
-    fixture: violationFixture(note("Architecture Decision.md", {
-      status: "open",
-      tasks: [{
-        text: "Route this decision into its owning architecture context",
-        due: "2026-07-08",
-      }],
-    })),
+    fixture: violationFixture(
+      note("Architecture Decision.md", {
+        status: "open",
+        tasks: [
+          {
+            text: "Route this decision into its owning architecture context",
+            due: "2026-07-08",
+          },
+        ],
+      }),
+    ),
   },
   screenshots: [
     {

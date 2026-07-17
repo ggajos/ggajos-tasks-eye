@@ -1,24 +1,15 @@
-import { FuzzySuggestModal, Notice } from "obsidian";
 import type { App } from "obsidian";
+import { FuzzySuggestModal, Notice } from "obsidian";
 import { getContextFromFolderPath } from "./context";
-import {
-  collectDescendantFolders,
-  findManagedFolder,
-} from "./managedFolder";
-import {
-  missingManagedFolderMessage,
-  vaultFolderPath,
-} from "./managedPath";
+import { collectDescendantFolders, findManagedFolder } from "./managedFolder";
+import { missingManagedFolderMessage, vaultFolderPath } from "./managedPath";
 
 interface FolderOption {
   text: string;
   path: string;
 }
 
-function folderOptions(
-  app: App,
-  managedFolderPath: string,
-): FolderOption[] {
+function folderOptions(app: App, managedFolderPath: string): FolderOption[] {
   const root = findManagedFolder(app, managedFolderPath);
   if (!root) return [];
 
@@ -35,19 +26,14 @@ function folderOptions(
 }
 
 function noteBody(): string {
-  const lines = [
-    "---",
-    "status: open",
-  ];
+  const lines = ["---", "status: open"];
   lines.push("---", "");
   return lines.join("\n");
 }
 
-async function uniquePath(
-  app: App,
-  folderPath: string,
-): Promise<string> {
-  const inFolder = (name: string) => folderPath ? `${folderPath}/${name}` : name;
+async function uniquePath(app: App, folderPath: string): Promise<string> {
+  const inFolder = (name: string) =>
+    folderPath ? `${folderPath}/${name}` : name;
   let candidate = inFolder("Untitled.md");
   let suffix = 1;
   while (await app.vault.adapter.exists(candidate)) {

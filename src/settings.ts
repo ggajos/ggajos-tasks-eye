@@ -1,12 +1,8 @@
-import {
-  FuzzySuggestModal,
-  PluginSettingTab,
-  Setting,
-} from "obsidian";
 import type { App } from "obsidian";
+import { FuzzySuggestModal, PluginSettingTab, Setting } from "obsidian";
+import type TheEyePlugin from "./main";
 import { collectDescendantFolders } from "./managedFolder";
 import { DEFAULT_MANAGED_FOLDER_PATH } from "./managedPath";
-import type TheEyePlugin from "./main";
 
 interface FolderOption {
   path: string;
@@ -54,7 +50,9 @@ export class TasksEyeSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Notes folder")
-      .setDesc("Tasks Eye reads Markdown notes in this folder and all subfolders.")
+      .setDesc(
+        "Tasks Eye reads Markdown notes in this folder and all subfolders.",
+      )
       .addButton((button) => {
         button
           .setButtonText(this.plugin.settings.notesFolderPath)
@@ -80,9 +78,9 @@ export class TasksEyeSettingTab extends PluginSettingTab {
     ];
 
     new ManagedFolderSuggestModal(this.app, options, (option) => {
-      void this.plugin.setNotesFolderPath(option.path).then(() =>
-        this.display()
-      );
+      void this.plugin
+        .setNotesFolderPath(option.path)
+        .then(() => this.display());
     }).open();
   }
 }

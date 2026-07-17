@@ -1,6 +1,6 @@
 import { expect } from "@wdio/globals";
-import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
+import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { fixture, note } from "../fixtures";
 
 const BILLING = "Approve the billing domain event contract";
@@ -17,15 +17,23 @@ export const { screenshotScenarios } = featureScenarios(
       tasks: [{ text: MENTORING, due: "2026-07-09" }],
     }),
   ]),
-  { screenshots: [{
-    screenshotSlug: "filtered-board",
-    async run({ save }) {
-      await tasksEyePage.openBoard("open", BILLING);
-      await tasksEyePage.setContextFilter("Mission/Platform");
-      const root = await tasksEyePage.plugin("Billing Platform Modernization");
-      await expect(root).toHaveText(expect.stringContaining("Mission/Platform"));
-      await expect(root).toHaveText(expect.not.stringContaining(MENTORING));
-      await save(root);
-    },
-  }] },
+  {
+    screenshots: [
+      {
+        screenshotSlug: "filtered-board",
+        async run({ save }) {
+          await tasksEyePage.openBoard("open", BILLING);
+          await tasksEyePage.setContextFilter("Mission/Platform");
+          const root = await tasksEyePage.plugin(
+            "Billing Platform Modernization",
+          );
+          await expect(root).toHaveText(
+            expect.stringContaining("Mission/Platform"),
+          );
+          await expect(root).toHaveText(expect.not.stringContaining(MENTORING));
+          await save(root);
+        },
+      },
+    ],
+  },
 );

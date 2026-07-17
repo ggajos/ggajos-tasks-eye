@@ -3,8 +3,8 @@ import { getContextFromPath } from "./context";
 import { formatYmd } from "./date";
 import { isPathInManagedFolder } from "./managedPath";
 import type { EyeFile, EyeTask } from "./types";
-import { vacationReasonForTs } from "./vacation";
 import type { VacationReason } from "./vacation";
+import { vacationReasonForTs } from "./vacation";
 
 export const VIOLATION_CODES = [
   "invalid-status",
@@ -31,9 +31,7 @@ interface ValidationContext {
   uncompletedTasks: EyeTask[];
 }
 
-type ValidationRule = (
-  context: ValidationContext,
-) => ValidationViolation[];
+type ValidationRule = (context: ValidationContext) => ValidationViolation[];
 
 export function statusValue(file: EyeFile): string {
   if (file.status === undefined || file.status === null || file.status === "") {
@@ -52,10 +50,8 @@ function singleViolation(
 const invalidStatus: ValidationRule = ({ file, status, hasExplicitStatus }) => {
   if (
     !hasExplicitStatus ||
-    (
-      typeof file.status === "string" &&
-      STATUSES.includes(status as (typeof STATUSES)[number])
-    )
+    (typeof file.status === "string" &&
+      STATUSES.includes(status as (typeof STATUSES)[number]))
   ) {
     return [];
   }
@@ -74,9 +70,10 @@ const noteInManagedRoot: ValidationRule = ({ file }) => {
   );
 };
 
-const closedWithUncheckedTasks: ValidationRule = (
-  { status, uncompletedTasks },
-) => {
+const closedWithUncheckedTasks: ValidationRule = ({
+  status,
+  uncompletedTasks,
+}) => {
   if (status !== "closed" || uncompletedTasks.length === 0) return [];
   return singleViolation(
     "closed-with-unchecked-tasks",
@@ -112,9 +109,8 @@ const tasksOnVacation: ValidationRule = ({ uncompletedTasks }) => {
     if (task.dueTs === null) continue;
     const vacationReason = vacationReasonForTs(task.dueTs, VACATION);
     if (!vacationReason) continue;
-    const reasonLabel = vacationReason === "custom"
-      ? "vacation"
-      : vacationReason;
+    const reasonLabel =
+      vacationReason === "custom" ? "vacation" : vacationReason;
     violations.push({
       code: "task-on-vacation",
       message:

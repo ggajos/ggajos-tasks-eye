@@ -1,5 +1,5 @@
-import { TFolder } from "obsidian";
 import type { App } from "obsidian";
+import { TFolder } from "obsidian";
 import { vaultFolderPath } from "./managedPath";
 
 export function findManagedFolder(

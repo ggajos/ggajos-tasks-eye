@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildEyeFileFromMarkdown } from "../src/indexer";
 import { isoToTs } from "../src/date";
+import { buildEyeFileFromMarkdown } from "../src/indexer";
+import type { RenderItem } from "../src/model";
 import {
   bucketForTs,
   buildBoardBuckets,
@@ -10,7 +11,6 @@ import {
   mergeItems,
   selectRows,
 } from "../src/model";
-import type { RenderItem } from "../src/model";
 import type { EyeFile, RowModel } from "../src/types";
 
 function fixture(name: string, path = `Mission/${name}`): EyeFile {
@@ -18,10 +18,7 @@ function fixture(name: string, path = `Mission/${name}`): EyeFile {
   return buildEyeFileFromMarkdown(path, markdown);
 }
 
-function file(
-  path: string,
-  markdown: string,
-): EyeFile {
+function file(path: string, markdown: string): EyeFile {
   return buildEyeFileFromMarkdown(path, markdown);
 }
 
@@ -31,7 +28,7 @@ function taskItems(rows: RowModel[]): RenderItem[] {
 
 function itemNames(items: RenderItem[]): string[] {
   return items.map((item) =>
-    item.kind === "task" ? item.model.file.basename : item.marker.label
+    item.kind === "task" ? item.model.file.basename : item.marker.label,
   );
 }
 
@@ -44,16 +41,18 @@ describe("row model", () => {
   });
 
   it("ignores completed tasks when selecting the next action", () => {
-    const row = buildRowModel(file(
-      "Mission/Done ignored.md",
-      `---
+    const row = buildRowModel(
+      file(
+        "Mission/Done ignored.md",
+        `---
 status: open
 ---
 
 - [x] completed earlier 📅 2000-01-01 ✅ 2000-01-01
 - [ ] open later 📅 2026-06-20
 `,
-    ));
+      ),
+    );
 
     expect(row.actionLabel).toBe("open later");
     expect(row.dateLabel).toBe("06-20");
@@ -74,62 +73,64 @@ describe("board grouping", () => {
   });
 
   it("puts no-due work in a separate first bucket", () => {
-    const rows = selectRows([
-      file(
-        "Mission/No due.md",
-        `---
+    const rows = selectRows(
+      [
+        file(
+          "Mission/No due.md",
+          `---
 status: open
 ---
 
 - [ ] no due task
 `,
-      ),
-      file(
-        "Mission/Today.md",
-        `---
+        ),
+        file(
+          "Mission/Today.md",
+          `---
 status: open
 ---
 
 - [ ] today task 📅 2026-07-07
 `,
-      ),
-    ], "open", "*");
-
-    const buckets = buildBoardBuckets(
-      taskItems(rows),
-      now,
+        ),
+      ],
+      "open",
+      "*",
     );
+
+    const buckets = buildBoardBuckets(taskItems(rows), now);
 
     expect(buckets.map((bucket) => bucket.key)).toEqual(["noDue", "today"]);
     expect(itemNames(buckets[0]!.days[0]!.items)).toEqual(["No due"]);
   });
 
   it("groups month buckets by exact day", () => {
-    const rows = selectRows([
-      file(
-        "Mission/Later.md",
-        `---
+    const rows = selectRows(
+      [
+        file(
+          "Mission/Later.md",
+          `---
 status: open
 ---
 
 - [ ] later task 📅 2026-07-20
 `,
-      ),
-      file(
-        "Mission/Sooner.md",
-        `---
+        ),
+        file(
+          "Mission/Sooner.md",
+          `---
 status: open
 ---
 
 - [ ] sooner task 📅 2026-07-13
 `,
-      ),
-    ], "open", "*");
-
-    const buckets = buildBoardBuckets(
-      taskItems(rows),
-      now,
+        ),
+      ],
+      "open",
+      "*",
     );
+
+    const buckets = buildBoardBuckets(taskItems(rows), now);
 
     expect(buckets).toHaveLength(1);
     expect(buckets[0]!.key).toBe("thisMonth");
@@ -140,40 +141,41 @@ status: open
   });
 
   it("preserves context and title ordering within a day", () => {
-    const rows = selectRows([
-      file(
-        "Mission/Mission B.md",
-        `---
+    const rows = selectRows(
+      [
+        file(
+          "Mission/Mission B.md",
+          `---
 status: open
 ---
 
 - [ ] mission b 📅 2026-07-13
 `,
-      ),
-      file(
-        "Mission/Mission A.md",
-        `---
+        ),
+        file(
+          "Mission/Mission A.md",
+          `---
 status: open
 ---
 
 - [ ] mission a 📅 2026-07-13
 `,
-      ),
-      file(
-        "Growth/Growth.md",
-        `---
+        ),
+        file(
+          "Growth/Growth.md",
+          `---
 status: open
 ---
 
 - [ ] growth 📅 2026-07-13
 `,
-      ),
-    ], "open", "*");
-
-    const buckets = buildBoardBuckets(
-      taskItems(rows),
-      now,
+        ),
+      ],
+      "open",
+      "*",
     );
+
+    const buckets = buildBoardBuckets(taskItems(rows), now);
 
     expect(itemNames(buckets[0]!.days[0]!.items)).toEqual([
       "Growth",
@@ -183,17 +185,21 @@ status: open
   });
 
   it("places vacation markers in their matching bucket days", () => {
-    const rows = selectRows([
-      file(
-        "Mission/Trip.md",
-        `---
+    const rows = selectRows(
+      [
+        file(
+          "Mission/Trip.md",
+          `---
 status: open
 ---
 
 - [ ] after vacation 📅 2026-07-20
 `,
-      ),
-    ], "open", "*");
+        ),
+      ],
+      "open",
+      "*",
+    );
     const marker = {
       ts: isoToTs("2026-07-13"),
       dateLabel: "07-13",

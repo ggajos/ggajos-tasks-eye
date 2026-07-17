@@ -1,9 +1,3 @@
-import {
-  Notice,
-  Plugin,
-  TFile,
-  TFolder,
-} from "obsidian";
 import type {
   Editor,
   MarkdownFileInfo,
@@ -11,10 +5,8 @@ import type {
   TAbstractFile,
   WorkspaceLeaf,
 } from "obsidian";
-import {
-  completeTaskInFile,
-  shiftTaskDueInFile,
-} from "./actions";
+import { Notice, Plugin, TFile, type TFolder } from "obsidian";
+import { completeTaskInFile, shiftTaskDueInFile } from "./actions";
 import {
   CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
@@ -22,17 +14,14 @@ import {
   STATUS_STEP_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "./commands";
+import type { EyeMode } from "./constants";
 import {
   fileNotFoundMessage,
   isEyeMode,
   TASKS_PLUGIN_REQUIRED_MESSAGE,
 } from "./constants";
-import type { EyeMode } from "./constants";
 import { todayIso } from "./date";
-import {
-  canUncheckSelectedTasks,
-  uncheckSelectedTasks,
-} from "./editorUncheck";
+import { canUncheckSelectedTasks, uncheckSelectedTasks } from "./editorUncheck";
 import { readEyeFiles } from "./indexer";
 import { findManagedFolder } from "./managedFolder";
 import {
@@ -43,11 +32,11 @@ import {
   normalizeManagedFolderPath,
 } from "./managedPath";
 import { openNewEyeNoteFlow } from "./newNote";
-import { stepNoteStatus } from "./noteStatus";
 import type { StatusStepDirection } from "./noteStatus";
+import { stepNoteStatus } from "./noteStatus";
 import { TasksEyeSettingTab } from "./settings";
-import { getTasksApi } from "./tasksApi";
 import type { TasksApiV1 } from "./tasksApi";
+import { getTasksApi } from "./tasksApi";
 import type { EyeFile, EyeSettings, RowModel } from "./types";
 import { EyeView, VIEW_TYPE } from "./view";
 
@@ -62,7 +51,7 @@ export default class TheEyePlugin extends Plugin {
   private refreshTimer: number | null = null;
 
   async onload(): Promise<void> {
-    const saved = await this.loadData() as Partial<EyeSettings> | null;
+    const saved = (await this.loadData()) as Partial<EyeSettings> | null;
     this.settings = {
       ...DEFAULT_SETTINGS,
       ...(saved ?? {}),
@@ -120,11 +109,9 @@ export default class TheEyePlugin extends Plugin {
         return true;
       },
     });
-    for (
-      const direction of Object.keys(
-        STATUS_STEP_COMMANDS,
-      ) as StatusStepDirection[]
-    ) {
+    for (const direction of Object.keys(
+      STATUS_STEP_COMMANDS,
+    ) as StatusStepDirection[]) {
       const command = STATUS_STEP_COMMANDS[direction];
       this.addCommand({
         id: command.id,
@@ -132,40 +119,47 @@ export default class TheEyePlugin extends Plugin {
         hotkeys: [command.hotkey],
         checkCallback: (checking) => {
           const file = this.app.workspace.getActiveFile();
-          if (!file || file.extension !== "md") return false;
+          if (file?.extension !== "md") return false;
           if (!checking) void this.stepStatus(file, direction);
           return true;
         },
       });
     }
 
-    this.registerEvent(this.app.metadataCache.on("changed", (file) => {
-      if (this.isRelevantFile(file)) this.queueRefresh();
-    }));
-    this.registerEvent(this.app.vault.on("create", (file) => {
-      if (this.isRelevantFile(file)) this.queueRefresh();
-    }));
-    this.registerEvent(this.app.vault.on("modify", (file) => {
-      if (this.isRelevantFile(file)) this.queueRefresh();
-    }));
-    this.registerEvent(this.app.vault.on("delete", (file) => {
-      if (
-        isPathRelatedToManagedFolder(
-          file.path,
-          this.settings.notesFolderPath,
-        )
-      ) {
-        this.queueRefresh();
-      }
-    }));
-    this.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
-      if (
-        this.isRelevantFile(file) ||
-        isPathRelatedToManagedFolder(oldPath, this.settings.notesFolderPath)
-      ) {
-        this.queueRefresh();
-      }
-    }));
+    this.registerEvent(
+      this.app.metadataCache.on("changed", (file) => {
+        if (this.isRelevantFile(file)) this.queueRefresh();
+      }),
+    );
+    this.registerEvent(
+      this.app.vault.on("create", (file) => {
+        if (this.isRelevantFile(file)) this.queueRefresh();
+      }),
+    );
+    this.registerEvent(
+      this.app.vault.on("modify", (file) => {
+        if (this.isRelevantFile(file)) this.queueRefresh();
+      }),
+    );
+    this.registerEvent(
+      this.app.vault.on("delete", (file) => {
+        if (
+          isPathRelatedToManagedFolder(file.path, this.settings.notesFolderPath)
+        ) {
+          this.queueRefresh();
+        }
+      }),
+    );
+    this.registerEvent(
+      this.app.vault.on("rename", (file, oldPath) => {
+        if (
+          this.isRelevantFile(file) ||
+          isPathRelatedToManagedFolder(oldPath, this.settings.notesFolderPath)
+        ) {
+          this.queueRefresh();
+        }
+      }),
+    );
     if (!this.tasksApiAvailable()) {
       new Notice(TASKS_PLUGIN_REQUIRED_MESSAGE);
     }
@@ -283,7 +277,12 @@ export default class TheEyePlugin extends Plugin {
     if (!model.earliestTask) return;
     const api = this.getTasksApi();
     if (!api) return;
-    await completeTaskInFile(this.app, api, model.file.path, model.earliestTask);
+    await completeTaskInFile(
+      this.app,
+      api,
+      model.file.path,
+      model.earliestTask,
+    );
     this.queueRefresh();
   }
 

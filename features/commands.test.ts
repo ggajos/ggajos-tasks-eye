@@ -22,9 +22,9 @@ describe("documented commands", () => {
   });
 
   it("includes note creation in the command reference", () => {
-    expect(
-      DOCUMENTED_COMMANDS.map((command) => command.id),
-    ).toContain(CREATE_NEW_NOTE_COMMAND.id);
+    expect(DOCUMENTED_COMMANDS.map((command) => command.id)).toContain(
+      CREATE_NEW_NOTE_COMMAND.id,
+    );
   });
 
   it("maps status stepping to Ctrl+Shift+1 and 2", () => {
@@ -54,12 +54,13 @@ describe("documented commands", () => {
       "Note lifecycle",
       "Task editing",
     ]);
-    expect(DOCUMENTED_COMMAND_GROUPS[1]?.commands.map((command) => command.id))
-      .toEqual([
-        CREATE_NEW_NOTE_COMMAND.id,
-        STATUS_STEP_COMMANDS.previous.id,
-        STATUS_STEP_COMMANDS.next.id,
-      ]);
+    expect(
+      DOCUMENTED_COMMAND_GROUPS[1]?.commands.map((command) => command.id),
+    ).toEqual([
+      CREATE_NEW_NOTE_COMMAND.id,
+      STATUS_STEP_COMMANDS.previous.id,
+      STATUS_STEP_COMMANDS.next.id,
+    ]);
   });
 
   it("registers bare names for Obsidian to prefix with Tasks Eye", () => {
@@ -89,7 +90,8 @@ describe("documented commands", () => {
   });
 
   it("documents the name shown after Obsidian adds the plugin prefix", () => {
-    expect(formatCommandName(MODE_COMMANDS.open.name))
-      .toBe("Tasks Eye: Show Open");
+    expect(formatCommandName(MODE_COMMANDS.open.name)).toBe(
+      "Tasks Eye: Show Open",
+    );
   });
 });

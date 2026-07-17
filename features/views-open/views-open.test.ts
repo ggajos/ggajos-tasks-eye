@@ -8,10 +8,14 @@ describe("Open view feature", () => {
   it("starts with only Today expanded in Open", () => {
     const state = new BoardCollapseState();
 
-    expect(Object.fromEntries(DUE_BUCKETS.map((bucket) => [
-      bucket.key,
-      state.isCollapsed("open", bucket.key),
-    ]))).toEqual({
+    expect(
+      Object.fromEntries(
+        DUE_BUCKETS.map((bucket) => [
+          bucket.key,
+          state.isCollapsed("open", bucket.key),
+        ]),
+      ),
+    ).toEqual({
       noDue: true,
       today: false,
       tomorrow: true,
@@ -36,26 +40,32 @@ describe("Open view feature", () => {
   });
 
   it("shows open notes and excludes hold notes", () => {
-    const rows = selectRows([
-      file("Growth/Open.md", "---\nstatus: open\n---\n\n- [ ] open"),
-      file("Growth/Default Open.md", "- [ ] default open"),
-      file("Growth/Hold.md", "---\nstatus: hold\n---\n\n- [ ] hold"),
-    ], "open", "*");
+    const rows = selectRows(
+      [
+        file("Growth/Open.md", "---\nstatus: open\n---\n\n- [ ] open"),
+        file("Growth/Default Open.md", "- [ ] default open"),
+        file("Growth/Hold.md", "---\nstatus: hold\n---\n\n- [ ] hold"),
+      ],
+      "open",
+      "*",
+    );
 
     expect(rowNames(rows)).toEqual(["Default Open", "Open"]);
   });
 
   it("uses the earliest unfinished due task as the row action", () => {
-    const row = buildRowModel(file(
-      "Growth/Plan.md",
-      `---
+    const row = buildRowModel(
+      file(
+        "Growth/Plan.md",
+        `---
 status: open
 ---
 
 - [ ] later 📅 2026-07-20
 - [ ] earlier 📅 2026-07-08
 `,
-    ));
+      ),
+    );
 
     expect(row.actionLabel).toBe("earlier");
     expect(row.dateLabel).toBe("07-08");

@@ -1,7 +1,7 @@
 import { buildEyeFileFromMarkdown } from "../src/indexer";
 import type { EyeFile, RowModel } from "../src/types";
-import { validateFile } from "../src/validation";
 import type { ViolationCode } from "../src/validation";
+import { validateFile } from "../src/validation";
 
 export function file(path: string, markdown: string): EyeFile {
   return buildEyeFileFromMarkdown(path, markdown);

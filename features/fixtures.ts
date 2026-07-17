@@ -116,15 +116,18 @@ export function violationFixture(
 export function isFeatureFixture(value: unknown): value is FeatureFixture {
   if (typeof value !== "object" || value === null) return false;
   const candidate = value as Partial<FeatureFixture>;
-  return Array.isArray(candidate.files) &&
-    candidate.files.every((file) =>
-      typeof file === "object" &&
-      file !== null &&
-      typeof (file as Partial<FixtureFile>).path === "string" &&
-      typeof (file as Partial<FixtureFile>).markdown === "string"
+  return (
+    Array.isArray(candidate.files) &&
+    candidate.files.every(
+      (file) =>
+        typeof file === "object" &&
+        file !== null &&
+        typeof (file as Partial<FixtureFile>).path === "string" &&
+        typeof (file as Partial<FixtureFile>).markdown === "string",
     ) &&
     typeof candidate.today === "string" &&
     typeof candidate.settings?.mode === "string" &&
     typeof candidate.settings?.contextFilter === "string" &&
-    typeof candidate.settings?.notesFolderPath === "string";
+    typeof candidate.settings?.notesFolderPath === "string"
+  );
 }

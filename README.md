@@ -30,3 +30,20 @@ Tasks Eye requires Obsidian 1.10 or newer and the
 4. Enable **Tasks Eye** in Community Plugins.
 
 BRAT will install Tasks Eye and keep it updated from this repository's releases.
+
+## Development
+
+Common commands:
+
+- `npm run build` formats, applies safe lint fixes, type-checks, and bundles
+  the plugin (via Biome + tsc + esbuild). Run `npx biome check --write .` on its
+  own to format and fix without bundling.
+- `npm test` runs the Vitest unit suite (the regular development feedback loop);
+  `npm run test:coverage` adds a coverage report.
+- `npm run test:visual` runs the WDIO behavioral and screenshot scenarios inside
+  the pinned Podman environment and writes an ignored HTML comparison report.
+  This is the only supported WDIO entry point.
+- `npm run docs` publishes accepted screenshots and rebuilds generated docs.
+- `npm run release` runs the beta release gates; `npm run release:public` also
+  runs the Podman WDIO gate.
+

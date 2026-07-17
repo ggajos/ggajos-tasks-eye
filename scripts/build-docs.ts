@@ -1,19 +1,19 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { DocumentedCommand } from "../features/commands";
 import {
   DOCUMENTED_COMMAND_GROUPS,
   formatCommandName,
   formatHotkey,
 } from "../features/commands";
-import type { DocumentedCommand } from "../features/commands";
 import { discoverFeatures } from "../features/discovery";
-import { DOCUMENTATION_VARIANTS } from "../features/visualVariants";
 import type {
   FeatureDefinition,
   FeatureScreenshot,
   LoadedFeature,
   LoadedFeatureDefinition,
 } from "../features/types";
+import { DOCUMENTATION_VARIANTS } from "../features/visualVariants";
 
 const DOCS_SRC_ROOT = path.resolve("docs-src");
 const CONTENT_ROOT = path.join(DOCS_SRC_ROOT, "src", "content", "docs");
@@ -23,9 +23,10 @@ const GENERATED_ROOT = path.join(DOCS_SRC_ROOT, "src", "generated");
 const TEMPLATE_ROOT = path.join(DOCS_SRC_ROOT, "templates");
 const SCREENSHOT_VARIANT_ORDER = ["dark-minimal", "dark", "light"];
 
-const screenshotVariants = [...DOCUMENTATION_VARIANTS].sort((a, b) =>
-  SCREENSHOT_VARIANT_ORDER.indexOf(a.key) -
-  SCREENSHOT_VARIANT_ORDER.indexOf(b.key)
+const screenshotVariants = [...DOCUMENTATION_VARIANTS].sort(
+  (a, b) =>
+    SCREENSHOT_VARIANT_ORDER.indexOf(a.key) -
+    SCREENSHOT_VARIANT_ORDER.indexOf(b.key),
 );
 
 interface FeatureGroup {
@@ -141,8 +142,14 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
     label: "More tools",
     items: [
       { slug: "availability-vacation-markers", label: "Plan around time away" },
-      { slug: "actions-markdown-rendering", label: "Use Markdown in board tasks" },
-      { slug: "actions-uncheck-selected-tasks", label: "Reopen completed tasks" },
+      {
+        slug: "actions-markdown-rendering",
+        label: "Use Markdown in board tasks",
+      },
+      {
+        slug: "actions-uncheck-selected-tasks",
+        label: "Reopen completed tasks",
+      },
     ],
   },
 ];
@@ -199,31 +206,41 @@ function renderCommandTable(
 ): string {
   const featureSlugs = new Set(features.map(({ feature }) => feature.slug));
   const renderRows = (commands: readonly DocumentedCommand[]) =>
-    commands.map((command) => {
-      const shortcut = escapeHtml(formatHotkey(command.hotkey));
-      const shortcutCell = command.hotkey
-        ? `<kbd>${shortcut}</kbd>`
-        : `<span class="shortcut-unassigned">${shortcut}</span>`;
-      if ((command.featureSlug === undefined) !== (command.featureTitle === undefined)) {
-        throw new Error(`Command ${command.id} must define both featureSlug and featureTitle`);
-      }
-      if (command.featureSlug && !featureSlugs.has(command.featureSlug)) {
-        throw new Error(`Command ${command.id} references unknown feature ${command.featureSlug}`);
-      }
-      const featureCell = command.featureSlug && command.featureTitle
-        ? `<a href="${featureLinkPrefix}features/${escapeHtml(command.featureSlug)}/">${escapeHtml(command.featureTitle)}</a>`
-        : "&mdash;";
+    commands
+      .map((command) => {
+        const shortcut = escapeHtml(formatHotkey(command.hotkey));
+        const shortcutCell = command.hotkey
+          ? `<kbd>${shortcut}</kbd>`
+          : `<span class="shortcut-unassigned">${shortcut}</span>`;
+        if (
+          (command.featureSlug === undefined) !==
+          (command.featureTitle === undefined)
+        ) {
+          throw new Error(
+            `Command ${command.id} must define both featureSlug and featureTitle`,
+          );
+        }
+        if (command.featureSlug && !featureSlugs.has(command.featureSlug)) {
+          throw new Error(
+            `Command ${command.id} references unknown feature ${command.featureSlug}`,
+          );
+        }
+        const featureCell =
+          command.featureSlug && command.featureTitle
+            ? `<a href="${featureLinkPrefix}features/${escapeHtml(command.featureSlug)}/">${escapeHtml(command.featureTitle)}</a>`
+            : "&mdash;";
 
-      return `<tr>
+        return `<tr>
   <td>${shortcutCell}</td>
   <td><code>${escapeHtml(formatCommandName(command.name))}</code></td>
   <td>${featureCell}</td>
   <td>${escapeHtml(command.explanation)}</td>
 </tr>`;
-    })
-    .join("\n");
+      })
+      .join("\n");
 
-  return DOCUMENTED_COMMAND_GROUPS.map((group) => `## ${escapeHtml(group.title)}
+  return DOCUMENTED_COMMAND_GROUPS.map(
+    (group) => `## ${escapeHtml(group.title)}
 
 <p class="command-group-description">${escapeHtml(group.description)}</p>
 <div class="command-group">
@@ -242,7 +259,8 @@ ${renderRows(group.commands)}
   </tbody>
 </table>
 </div>
-</div>`).join("\n\n");
+</div>`,
+  ).join("\n\n");
 }
 
 async function renderTemplate(
@@ -355,7 +373,9 @@ function renderSidebar(features: readonly LoadedFeature[]): string {
         throw new Error(`Sidebar references unknown feature ${item.slug}`);
       }
       if (linkedSlugs.has(item.slug)) {
-        throw new Error(`Sidebar references feature ${item.slug} more than once`);
+        throw new Error(
+          `Sidebar references feature ${item.slug} more than once`,
+        );
       }
       linkedSlugs.add(item.slug);
       return { label: item.label, link: featurePath(feature) };
@@ -405,7 +425,10 @@ async function build(): Promise<void> {
       COMMAND_TABLE: renderCommandTable(features, "../../"),
     }),
   );
-  await writeFile(path.join(GENERATED_ROOT, "sidebar.mjs"), renderSidebar(features));
+  await writeFile(
+    path.join(GENERATED_ROOT, "sidebar.mjs"),
+    renderSidebar(features),
+  );
 
   for (const [index, feature] of features.entries()) {
     await writeFile(

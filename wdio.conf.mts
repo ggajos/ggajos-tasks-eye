@@ -1,25 +1,21 @@
 import path from "node:path";
-import { parseObsidianVersions } from "wdio-obsidian-service";
 import type { PluginEntry, ThemeEntry } from "wdio-obsidian-service";
+import { parseObsidianVersions } from "wdio-obsidian-service";
 
 if (process.env.TASKS_EYE_WDIO_CONTAINER !== "1") {
-  throw new Error(
-    "WDIO tests only run in Podman. Use `npm run test:visual`.",
-  );
+  throw new Error("WDIO tests only run in Podman. Use `npm run test:visual`.");
 }
 
 const cacheDir = path.resolve(".obsidian-cache");
 const suite = process.env.TASKS_EYE_SUITE ?? "all";
 const visualSuite = suite === "visual" || suite === "all";
 const obsidianVersions = await parseObsidianVersions(
-  process.env.OBSIDIAN_VERSIONS ?? (
-    visualSuite ? "1.12.7/1.12.7" : "latest/latest"
-  ),
+  process.env.OBSIDIAN_VERSIONS ??
+    (visualSuite ? "1.12.7/1.12.7" : "latest/latest"),
   { cacheDir },
 );
-const tasksPluginVersion = process.env.TASKS_PLUGIN_VERSION ?? (
-  visualSuite ? "8.2.2" : "latest"
-);
+const tasksPluginVersion =
+  process.env.TASKS_PLUGIN_VERSION ?? (visualSuite ? "8.2.2" : "latest");
 const minimalThemeVersion = process.env.MINIMAL_THEME_VERSION ?? "8.2.1";
 const obsidianLanguage = "en-US";
 
@@ -33,23 +29,26 @@ const themes: ThemeEntry[] = visualSuite
 
 const services: WebdriverIO.Config["services"] = ["obsidian"];
 if (visualSuite) {
-  services.push(["visual", {
-    baselineFolder: path.resolve("acceptance", "snapshots", "docs"),
-    screenshotPath: path.resolve("acceptance", "artifacts", "visual"),
-    formatImageName: "{tag}",
-    clearRuntimeFolder: true,
-    autoSaveBaseline: false,
-    alwaysSaveActualImage: true,
-    disableBlinkingCursor: true,
-    disableCSSAnimation: true,
-    hideScrollBars: true,
-    waitForFontsLoaded: true,
-    compareOptions: {
-      ignoreAntialiasing: true,
-      rawMisMatchPercentage: true,
-      returnAllCompareData: true,
+  services.push([
+    "visual",
+    {
+      baselineFolder: path.resolve("acceptance", "snapshots", "docs"),
+      screenshotPath: path.resolve("acceptance", "artifacts", "visual"),
+      formatImageName: "{tag}",
+      clearRuntimeFolder: true,
+      autoSaveBaseline: false,
+      alwaysSaveActualImage: true,
+      disableBlinkingCursor: true,
+      disableCSSAnimation: true,
+      hideScrollBars: true,
+      waitForFontsLoaded: true,
+      compareOptions: {
+        ignoreAntialiasing: true,
+        rawMisMatchPercentage: true,
+        returnAllCompareData: true,
+      },
     },
-  }]);
+  ]);
 }
 
 export const config: WebdriverIO.Config = {
@@ -65,11 +64,11 @@ export const config: WebdriverIO.Config = {
         `--lang=${obsidianLanguage}`,
         ...(visualSuite
           ? [
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--force-device-scale-factor=1",
-            "--window-size=800,700",
-          ]
+              "--disable-dev-shm-usage",
+              "--disable-gpu",
+              "--force-device-scale-factor=1",
+              "--window-size=800,700",
+            ]
           : []),
       ],
     },

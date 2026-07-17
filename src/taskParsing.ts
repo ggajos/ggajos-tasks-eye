@@ -4,7 +4,10 @@ import type { EyeTask } from "./types";
 const TASK_LINE_RE = /^(\s*[-*+]\s+\[([^\]])\]\s*)(.*)$/;
 const DUE_RE = /(📅\s*)(\d{4}-\d{2}-\d{2})/;
 
-export function parseTaskLine(line: string, lineNumber: number): EyeTask | null {
+export function parseTaskLine(
+  line: string,
+  lineNumber: number,
+): EyeTask | null {
   const match = line.match(TASK_LINE_RE);
   if (!match) return null;
 
@@ -60,15 +63,12 @@ function findTaskLine(lines: string[], task: EyeTask): number {
   }
 
   const targetLine = lines[target];
-  if (
-    target >= 0 && target < lines.length && targetLine !== undefined &&
-    targetLine.includes(task.text)
-  ) {
+  if (target >= 0 && target < lines.length && targetLine?.includes(task.text)) {
     return target;
   }
 
-  return lines.findIndex((line) =>
-    TASK_LINE_RE.test(line) && line.includes(task.text)
+  return lines.findIndex(
+    (line) => TASK_LINE_RE.test(line) && line.includes(task.text),
   );
 }
 

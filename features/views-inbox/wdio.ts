@@ -1,6 +1,6 @@
 import { expect } from "@wdio/globals";
-import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
+import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { fixture, note } from "../fixtures";
 
 const OPEN_WITHOUT_TASK = "Plan the team offsite";
@@ -32,19 +32,23 @@ export const { screenshotScenarios } = featureScenarios(
       tasks: [{ text: "Clarify this captured idea", due: "2026-07-08" }],
     }),
   ]),
-  { screenshots: [{
-    screenshotSlug: "repair-queue",
-    async run({ save }) {
-      const root = await tasksEyePage.openBoard("inbox", OPEN_WITHOUT_TASK);
-      for (const title of [
-        OPEN_WITHOUT_DATE,
-        CLOSED_WITH_WORK,
-        INVALID_STATUS,
-        UNROUTED,
-      ]) {
-        await expect(root).toHaveText(expect.stringContaining(title));
-      }
-      await save(root);
-    },
-  }] },
+  {
+    screenshots: [
+      {
+        screenshotSlug: "repair-queue",
+        async run({ save }) {
+          const root = await tasksEyePage.openBoard("inbox", OPEN_WITHOUT_TASK);
+          for (const title of [
+            OPEN_WITHOUT_DATE,
+            CLOSED_WITH_WORK,
+            INVALID_STATUS,
+            UNROUTED,
+          ]) {
+            await expect(root).toHaveText(expect.stringContaining(title));
+          }
+          await save(root);
+        },
+      },
+    ],
+  },
 );

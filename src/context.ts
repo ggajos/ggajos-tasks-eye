@@ -74,7 +74,7 @@ export function discoverContexts(
 
 export function withVacationContext(contexts: readonly string[]): string[] {
   return Array.from(new Set([...contexts, VACATION_CONTEXT])).sort((a, b) =>
-    a.localeCompare(b)
+    a.localeCompare(b),
   );
 }
 

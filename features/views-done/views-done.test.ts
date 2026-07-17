@@ -8,23 +8,27 @@ import { file } from "../testSupport";
 
 describe("Done mode feature", () => {
   it("cleans completion dates and tags from task text", () => {
-    expect(cleanCompletedTaskText("Ship feature #work ✅ 2026-07-07"))
-      .toBe("Ship feature");
+    expect(cleanCompletedTaskText("Ship feature #work ✅ 2026-07-07")).toBe(
+      "Ship feature",
+    );
   });
 
   it("collects completed tasks for the selected date", () => {
-    const tasks = collectCompletedTasks([
-      file(
-        "Architecture/Architecture Governance.md",
-        `---
+    const tasks = collectCompletedTasks(
+      [
+        file(
+          "Architecture/Architecture Governance.md",
+          `---
 status: closed
 ---
 
 - [x] Approved ADR-042 for tenant isolation ✅ 2026-07-08
 - [x] Reviewed last quarter's platform roadmap ✅ 2026-07-07
 `,
-      ),
-    ], "2026-07-08");
+        ),
+      ],
+      "2026-07-08",
+    );
 
     expect(tasks.map((task) => task.text)).toEqual([
       "Approved ADR-042 for tenant isolation",
@@ -41,7 +45,8 @@ status: closed
       },
     ]);
 
-    expect(grouped.Architecture?.["Architecture Governance"]?.[0]?.text)
-      .toBe("Approved ADR-042");
+    expect(grouped.Architecture?.["Architecture Governance"]?.[0]?.text).toBe(
+      "Approved ADR-042",
+    );
   });
 });

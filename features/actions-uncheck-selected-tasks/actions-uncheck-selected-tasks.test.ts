@@ -8,7 +8,8 @@ describe("Uncheck selected tasks feature", () => {
   });
 
   it("removes Tasks completion dates while preserving other metadata", () => {
-    expect(uncheckTaskLine("- [x] done ✅ 2026-07-08 📅 2026-07-09"))
-      .toBe("- [ ] done 📅 2026-07-09");
+    expect(uncheckTaskLine("- [x] done ✅ 2026-07-08 📅 2026-07-09")).toBe(
+      "- [ ] done 📅 2026-07-09",
+    );
   });
 });

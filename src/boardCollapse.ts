@@ -1,5 +1,5 @@
-import { DUE_BUCKETS } from "./constants";
 import type { DueBucket, EyeMode } from "./constants";
+import { DUE_BUCKETS } from "./constants";
 
 function stateKey(mode: EyeMode, bucket: DueBucket): string {
   return `${mode}:${bucket}`;
@@ -7,9 +7,9 @@ function stateKey(mode: EyeMode, bucket: DueBucket): string {
 
 export class BoardCollapseState {
   private readonly collapsed = new Set<string>(
-    DUE_BUCKETS
-      .filter((bucket) => bucket.key !== "today")
-      .map((bucket) => stateKey("open", bucket.key)),
+    DUE_BUCKETS.filter((bucket) => bucket.key !== "today").map((bucket) =>
+      stateKey("open", bucket.key),
+    ),
   );
 
   isCollapsed(mode: EyeMode, bucket: DueBucket): boolean {
