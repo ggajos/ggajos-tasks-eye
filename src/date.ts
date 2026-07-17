@@ -17,13 +17,6 @@ function configuredToday(): string | null {
     return globalValue;
   }
 
-  if (typeof process !== "undefined") {
-    const envValue = process.env.TASKS_EYE_TODAY;
-    if (typeof envValue === "string" && ISO_DATE_RE.test(envValue)) {
-      return envValue;
-    }
-  }
-
   return null;
 }
 

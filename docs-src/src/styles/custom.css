@@ -460,3 +460,19 @@ starlight-tabs [role="tabpanel"] {
     padding: 0.5rem;
   }
 }
+
+.about-author {
+  margin-block: 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--eye-border);
+  border-radius: var(--eye-radius);
+  background: var(--eye-surface);
+}
+
+.about-author p {
+  margin-block-start: 0;
+}
+
+.about-author ul {
+  margin-block-end: 0;
+}

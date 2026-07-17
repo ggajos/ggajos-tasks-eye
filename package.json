@@ -2,6 +2,12 @@
   "name": "ggajos-tasks-eye",
   "version": "6.0.0",
   "description": "A note-centered task view for active work, workflow cleanup, backlog, and completed history.",
+  "author": {
+    "name": "Grzegorz Gajos",
+    "email": "grzegorz.gajos@opentangerine.com",
+    "url": "https://ggajos.com"
+  },
+  "homepage": "https://ggajos.com/ggajos-tasks-eye/",
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -20,7 +26,7 @@
     "tasks",
     "gtd"
   ],
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=22.13.0"
   },
