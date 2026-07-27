@@ -353,16 +353,48 @@
   margin-bottom: var(--size-4-4);
 }
 
+.eye-settings {
+  container-type: inline-size;
+}
+
 .eye-personal-entry .setting-item-control {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.eye-personal-entry .setting-item-name {
+  white-space: nowrap;
 }
 
 .eye-personal-date {
-  width: 9.5rem;
+  flex: 1 1 7.5rem;
+  min-width: 7.5rem;
+  width: 7.5rem;
 }
 
 .eye-personal-label {
-  width: 10rem;
+  flex: 1.25 1 8rem;
+  min-width: 7.5rem;
+  width: 8rem;
+}
+
+@container (max-width: 48rem) {
+  .eye-personal-entry {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--size-4-2);
+  }
+
+  .eye-personal-entry .setting-item-control,
+  .eye-personal-entry .setting-item-info {
+    width: 100%;
+  }
+}
+
+@container (max-width: 30rem) {
+  .eye-personal-entry .setting-item-control {
+    flex-wrap: wrap;
+  }
 }
 
 .eye-weekdays,

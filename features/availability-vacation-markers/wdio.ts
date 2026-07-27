@@ -98,6 +98,85 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             await expect(modal).toHaveText(
               expect.stringContaining("2026-07-13"),
             );
+
+            const label = await $(
+              '.eye-personal-entry input[aria-label="Label (optional)"]',
+            );
+            await label.setValue("Planning break");
+            const focusResult = await browser.executeObsidian(
+              async ({ app }) => {
+                const input = document.querySelector<HTMLInputElement>(
+                  '.eye-personal-entry input[aria-label="Label (optional)"]',
+                );
+                if (!input)
+                  throw new Error("Personal time off label is missing");
+                input.focus();
+
+                const plugin = (
+                  app as unknown as {
+                    plugins: {
+                      plugins: Record<
+                        string,
+                        {
+                          refreshHolidayCountries: () => Promise<void>;
+                          settings: {
+                            holidayCache: { countriesFetchedAt: string | null };
+                          };
+                        }
+                      >;
+                    };
+                  }
+                ).plugins.plugins["ggajos-tasks-eye"];
+                if (!plugin) throw new Error("Tasks Eye plugin is not loaded");
+                plugin.settings.holidayCache.countriesFetchedAt =
+                  new Date().toISOString();
+                await plugin.refreshHolidayCountries();
+
+                return {
+                  focused: document.activeElement === input,
+                  value: input.value,
+                };
+              },
+            );
+            expect(focusResult.focused).toBe(true);
+            expect(focusResult.value).toBe("Planning break");
+
+            const layout = await browser.execute(() => {
+              const entries = [
+                ...document.querySelectorAll<HTMLElement>(
+                  ".eye-personal-entry",
+                ),
+              ];
+              const entry = entries.find((candidate) =>
+                candidate
+                  .querySelector(".setting-item-name")
+                  ?.textContent?.includes("2026-07-18 — 2026-07-27"),
+              );
+              if (!entry) throw new Error("Ranged personal entry is missing");
+              const name =
+                entry.querySelector<HTMLElement>(".setting-item-name");
+              const controls = [
+                ...entry.querySelectorAll<HTMLElement>(
+                  ".eye-personal-date, .eye-personal-label",
+                ),
+              ];
+              if (!name || controls.length !== 3) {
+                throw new Error("Personal entry controls are incomplete");
+              }
+              const text = document.createRange();
+              text.selectNodeContents(name);
+              const tops = controls.map(
+                (control) => control.getBoundingClientRect().top,
+              );
+              return {
+                controlTopSpread: Math.max(...tops) - Math.min(...tops),
+                overflows: entry.scrollWidth > entry.clientWidth + 1,
+                summaryLines: text.getClientRects().length,
+              };
+            });
+            expect(layout.summaryLines).toBe(1);
+            expect(layout.controlTopSpread).toBeLessThan(5);
+            expect(layout.overflows).toBe(false);
           } finally {
             await browser.keys(["Escape"]);
           }

@@ -1,4 +1,4 @@
-import type { App, TextComponent } from "obsidian";
+import type { App, DropdownComponent, TextComponent } from "obsidian";
 import { FuzzySuggestModal, PluginSettingTab, Setting } from "obsidian";
 import { isIsoDate } from "./date";
 import type TheEyePlugin from "./main";
@@ -44,6 +44,8 @@ class ManagedFolderSuggestModal extends FuzzySuggestModal<FolderOption> {
 }
 
 export class TasksEyeSettingTab extends PluginSettingTab {
+  private holidayCountryDropdown: DropdownComponent | null = null;
+  private holidayStatusEl: HTMLElement | null = null;
   private requestedCountries = false;
   private visible = false;
 
@@ -56,9 +58,12 @@ export class TasksEyeSettingTab extends PluginSettingTab {
 
   display(): void {
     this.visible = true;
-    this.requestCountries();
     const { containerEl } = this;
     containerEl.empty();
+    containerEl.addClass("eye-settings");
+    this.holidayCountryDropdown = null;
+    this.holidayStatusEl = null;
+    this.requestCountries();
 
     new Setting(containerEl)
       .setName("Notes folder")
@@ -87,7 +92,11 @@ export class TasksEyeSettingTab extends PluginSettingTab {
   }
 
   refresh(): void {
-    if (this.visible) this.display();
+    if (!this.visible) return;
+    this.refreshHolidayCountryDropdown();
+    if (this.holidayStatusEl) {
+      this.holidayStatusEl.textContent = this.eyePlugin.holidaySyncStatus();
+    }
   }
 
   hide(): void {
@@ -104,26 +113,14 @@ export class TasksEyeSettingTab extends PluginSettingTab {
         "Nationwide public holidays come from Nager.Date and are cached locally.",
       )
       .addDropdown((dropdown) => {
-        dropdown.addOption("", "Not selected");
-        for (const country of this.eyePlugin.settings.holidayCache.countries) {
-          dropdown.addOption(country.countryCode, country.name);
-        }
-        const selected = this.eyePlugin.settings.availability.countryCode;
-        if (
-          selected &&
-          !this.eyePlugin.settings.holidayCache.countries.some(
-            (country) => country.countryCode === selected,
-          )
-        ) {
-          dropdown.addOption(selected, selected);
-        }
-        dropdown.setValue(selected).onChange(async (countryCode) => {
+        this.holidayCountryDropdown = dropdown;
+        this.refreshHolidayCountryDropdown();
+        dropdown.onChange(async (countryCode) => {
           await this.eyePlugin.setHolidayCountry(countryCode);
-          this.display();
         });
       });
 
-    containerEl.createDiv({
+    this.holidayStatusEl = containerEl.createDiv({
       cls: "setting-item-description eye-holiday-status",
       text: this.eyePlugin.holidaySyncStatus(),
     });
@@ -247,6 +244,27 @@ export class TasksEyeSettingTab extends PluginSettingTab {
     if (this.requestedCountries) return;
     this.requestedCountries = true;
     void this.eyePlugin.refreshHolidayCountries();
+  }
+
+  private refreshHolidayCountryDropdown(): void {
+    const dropdown = this.holidayCountryDropdown;
+    if (!dropdown) return;
+
+    dropdown.selectEl.replaceChildren();
+    dropdown.addOption("", "Not selected");
+    for (const country of this.eyePlugin.settings.holidayCache.countries) {
+      dropdown.addOption(country.countryCode, country.name);
+    }
+    const selected = this.eyePlugin.settings.availability.countryCode;
+    if (
+      selected &&
+      !this.eyePlugin.settings.holidayCache.countries.some(
+        (country) => country.countryCode === selected,
+      )
+    ) {
+      dropdown.addOption(selected, selected);
+    }
+    dropdown.setValue(selected);
   }
 
   private openFolderPicker(): void {
