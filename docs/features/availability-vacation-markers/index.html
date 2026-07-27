@@ -79,8 +79,8 @@
 scheduled work against the user’s weekly schedule, nationwide public holidays,
 and personal dates or ranges.</p>
 <p>Availability stays in plugin settings because it is compact operational
-configuration rather than note content. Open <strong>Settings → Tasks Eye →
-Availability</strong> to configure it; Tasks Eye does not create or parse a special
+configuration rather than note content. Open <strong>Settings → Tasks Eye</strong> and find
+the <strong>Availability</strong> section; Tasks Eye does not create or parse a special
 holiday note.</p>
 <div class="sl-heading-wrapper level-h3"><h3 id="public-holidays">Public holidays</h3><a class="sl-anchor-link" href="#public-holidays"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Public holidays”</span></a></div>
 <p>Choose a country to enable public holidays. There is no guessed default.
@@ -90,9 +90,10 @@ only nationwide public holidays in the selected country. Regional and
 subdivision holidays are not included.</p>
 <p>Tasks Eye downloads the current year, the next year, and any additional years
 needed by unchecked tasks. The result is cached in the plugin’s local data and
-refreshed automatically when stale. Use <strong>Refresh public holidays</strong> to request
-an immediate update. If the network or provider is unavailable, the last good
-cache remains active.</p>
+refreshed automatically when stale. If an update fails, Tasks Eye keeps the
+last good cache and retries in the background. No manual refresh is required.
+When no country is configured, the country catalog is fetched only when the
+settings tab is opened.</p>
 <div class="sl-heading-wrapper level-h3"><h3 id="weekly-non-working-days">Weekly non-working days</h3><a class="sl-anchor-link" href="#weekly-non-working-days"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “Weekly non-working days”</span></a></div>
 <p>Toggle any weekday that is normally unavailable. Saturday and Sunday are
 enabled for a new configuration, but both can be changed. Weekly days affect
@@ -111,7 +112,8 @@ a label appears as <code dir="auto">Vacation</code>.</li>
 when it no longer applies.</li>
 </ul>
 <p>Personal entries are stored with the rest of the plugin settings. They are not
-sent to Nager.Date.</p>
+sent to Nager.Date and remain until the user deletes them. Provider-downloaded
+years that are no longer needed are cleaned up automatically.</p>
 <div class="sl-heading-wrapper level-h3"><h3 id="what-changes-on-the-board">What changes on the board</h3><a class="sl-anchor-link" href="#what-changes-on-the-board"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “What changes on the board”</span></a></div>
 <p>The markers are visible in Open because that is where scheduling decisions are
 made. The dedicated <code dir="auto">OOO</code> filter isolates availability when the user wants a
@@ -120,7 +122,7 @@ marker retains all of them. A task due on any unavailable day is also sent to
 Inbox so it can be rescheduled.</p>
 <div class="sl-heading-wrapper level-h2"><h2 id="what-to-expect">What to expect</h2><a class="sl-anchor-link" href="#what-to-expect"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “What to expect”</span></a></div>
 <ul>
-<li>The declarative Availability settings page lets users choose a Nager.Date country, configure non-working weekdays, and add, edit, or delete personal dates and inclusive ranges.</li>
+<li>The Tasks Eye settings tab lets users choose a Nager.Date country, configure non-working weekdays, and add, edit, or delete personal dates and inclusive ranges.</li>
 <li>No public-holiday country is selected by default; choosing one caches named nationwide public holidays for the current, next, and task-relevant years.</li>
 <li>The last good public-holiday cache remains active when a refresh fails or the user is offline.</li>
 <li>Personal entries may have an optional label and otherwise appear as <code dir="auto">Vacation</code>.</li>

@@ -13,7 +13,7 @@ export default defineFeature({
     "The issue is visible in both Inbox and Open.",
   ],
   violation: {
-    code: "task-on-vacation",
+    code: "task-on-unavailable-day",
     appearsInOpen: true,
     fixture: violationFixture(
       note(

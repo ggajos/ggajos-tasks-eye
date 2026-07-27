@@ -5,8 +5,8 @@ scheduled work against the user's weekly schedule, nationwide public holidays,
 and personal dates or ranges.
 
 Availability stays in plugin settings because it is compact operational
-configuration rather than note content. Open **Settings → Tasks Eye →
-Availability** to configure it; Tasks Eye does not create or parse a special
+configuration rather than note content. Open **Settings → Tasks Eye** and find
+the **Availability** section; Tasks Eye does not create or parse a special
 holiday note.
 
 ### Public holidays
@@ -19,9 +19,10 @@ subdivision holidays are not included.
 
 Tasks Eye downloads the current year, the next year, and any additional years
 needed by unchecked tasks. The result is cached in the plugin's local data and
-refreshed automatically when stale. Use **Refresh public holidays** to request
-an immediate update. If the network or provider is unavailable, the last good
-cache remains active.
+refreshed automatically when stale. If an update fails, Tasks Eye keeps the
+last good cache and retries in the background. No manual refresh is required.
+When no country is configured, the country catalog is fetched only when the
+settings tab is opened.
 
 ### Weekly non-working days
 
@@ -44,7 +45,8 @@ or any other exception:
   when it no longer applies.
 
 Personal entries are stored with the rest of the plugin settings. They are not
-sent to Nager.Date.
+sent to Nager.Date and remain until the user deletes them. Provider-downloaded
+years that are no longer needed are cleaned up automatically.
 
 ### What changes on the board
 

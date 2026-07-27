@@ -69,25 +69,6 @@ async function openAvailabilitySettings() {
   await browser.waitUntil(
     async () =>
       await browser.execute(() => {
-        const rows = document.querySelectorAll<HTMLElement>(
-          ".modal.mod-settings .setting-item",
-        );
-        const availability = [...rows].find(
-          (row) =>
-            row.querySelector(".setting-item-name")?.textContent?.trim() ===
-            "Availability",
-        );
-        const control = availability?.querySelector<HTMLElement>(
-          ".setting-item-control button, .setting-item-control .clickable-icon",
-        );
-        (control ?? availability)?.click();
-        return availability !== undefined;
-      }),
-    { timeout: 10_000, timeoutMsg: "Availability settings page did not open" },
-  );
-  await browser.waitUntil(
-    async () =>
-      await browser.execute(() => {
         const text = document.querySelector<HTMLElement>(
           ".modal.mod-settings",
         )?.textContent;
@@ -97,7 +78,7 @@ async function openAvailabilitySettings() {
           text.includes("Personal time off")
         );
       }),
-    { timeout: 10_000, timeoutMsg: "Availability controls did not render" },
+    { timeout: 10_000, timeoutMsg: "Tasks Eye settings did not render" },
   );
   return await $(".modal.mod-settings");
 }
@@ -113,7 +94,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           try {
             const modal = await openAvailabilitySettings();
             await expect(modal).toHaveText(expect.stringContaining("Country"));
-            await expect(modal).toHaveText(expect.stringContaining("Saturday"));
+            await expect(modal).toHaveText(expect.stringContaining("Sat"));
             await expect(modal).toHaveText(
               expect.stringContaining("2026-07-13"),
             );
@@ -129,6 +110,12 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         async run({ save }) {
           try {
             const modal = await openAvailabilitySettings();
+            await browser.execute(() => {
+              const content = document.querySelector<HTMLElement>(
+                ".modal.mod-settings .vertical-tab-content",
+              );
+              content?.style.setProperty("zoom", "0.75");
+            });
             await expect(modal).toHaveText(expect.stringContaining("Poland"));
             await expect(modal).toHaveText(
               expect.stringContaining("Conference"),
@@ -149,7 +136,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           await tasksEyePage.setContextFilter("*");
           await tasksEyePage.expandBucketForText(WORK);
           await tasksEyePage.setContextFilter("ooo");
-          const root = await tasksEyePage.plugin("Vacation");
+          const root = await tasksEyePage.plugin("Conference");
           await expect(root).toHaveText(expect.stringContaining("OOO"));
           await expect(root).toHaveText(expect.not.stringContaining(WORK));
           await save(root);

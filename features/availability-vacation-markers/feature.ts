@@ -5,7 +5,7 @@ export default defineFeature({
   summary:
     "Tasks Eye combines configurable non-working weekdays, cached nationwide public holidays, and personal time off into one availability calendar.",
   acceptanceCriteria: [
-    "The declarative Availability settings page lets users choose a Nager.Date country, configure non-working weekdays, and add, edit, or delete personal dates and inclusive ranges.",
+    "The Tasks Eye settings tab lets users choose a Nager.Date country, configure non-working weekdays, and add, edit, or delete personal dates and inclusive ranges.",
     "No public-holiday country is selected by default; choosing one caches named nationwide public holidays for the current, next, and task-relevant years.",
     "The last good public-holiday cache remains active when a refresh fails or the user is offline.",
     "Personal entries may have an optional label and otherwise appear as `Vacation`.",

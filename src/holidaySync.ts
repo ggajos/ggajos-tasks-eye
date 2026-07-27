@@ -151,7 +151,12 @@ export async function syncNagerHolidayYears(
   cache: HolidayCache,
   countryCode: string,
   years: readonly number[],
-  options: { force?: boolean; now?: number; request?: JsonRequest } = {},
+  options: {
+    force?: boolean;
+    now?: number;
+    prune?: boolean;
+    request?: JsonRequest;
+  } = {},
 ): Promise<SyncResult> {
   if (!countryCode) return { cache, changed: false, errors: [] };
   const now = options.now ?? Date.now();
@@ -196,6 +201,15 @@ export async function syncNagerHolidayYears(
     };
     next.years[String(result.value.year)] = cachedYear;
     changed = true;
+  }
+
+  if (options.prune && errors.length === 0) {
+    const keep = new Set(requested.map(String));
+    for (const year of Object.keys(next.years)) {
+      if (keep.has(year)) continue;
+      delete next.years[year];
+      changed = true;
+    }
   }
 
   return { cache: changed ? next : cache, changed, errors };

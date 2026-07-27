@@ -347,6 +347,39 @@
   margin: 0 0 var(--size-4-4);
 }
 
+.eye-holiday-status,
+.eye-personal-empty,
+.eye-personal-help {
+  margin-bottom: var(--size-4-4);
+}
+
+.eye-personal-entry .setting-item-control {
+  flex-wrap: wrap;
+}
+
+.eye-personal-date {
+  width: 9.5rem;
+}
+
+.eye-personal-label {
+  width: 10rem;
+}
+
+.eye-weekdays,
+.eye-weekday {
+  align-items: center;
+  display: flex;
+}
+
+.eye-weekdays {
+  flex-wrap: wrap;
+  gap: var(--size-4-3);
+}
+
+.eye-weekday {
+  gap: var(--size-4-1);
+}
+
 .eye-row-main {
   display: flex;
   flex-direction: column;

@@ -54,6 +54,8 @@ import {
 } from "./vacation";
 import { EyeView, VIEW_TYPE } from "./view";
 
+const HOLIDAY_RETRY_MS = 60 * 60 * 1000;
+
 function defaultSettings(): EyeSettings {
   return {
     mode: "open",
@@ -101,6 +103,7 @@ export default class TheEyePlugin extends Plugin {
   private holidaySyncChain: Promise<void> = Promise.resolve();
   private holidaySyncCount = 0;
   private holidaySyncError: string | null = null;
+  private holidayRetryTimer: number | null = null;
   private personalSequence = 0;
   private refreshTimer: number | null = null;
 
@@ -213,14 +216,20 @@ export default class TheEyePlugin extends Plugin {
     if (!this.tasksApiAvailable()) {
       new Notice(TASKS_PLUGIN_REQUIRED_MESSAGE);
     }
-    void this.refreshHolidayCountries();
-    void this.refreshHolidayData();
+    if (this.settings.availability.countryCode) {
+      void this.refreshHolidayCountries();
+      void this.refreshHolidayData();
+    }
   }
 
   onunload(): void {
     if (this.refreshTimer !== null) {
       window.clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
+    }
+    if (this.holidayRetryTimer !== null) {
+      window.clearTimeout(this.holidayRetryTimer);
+      this.holidayRetryTimer = null;
     }
   }
 
@@ -238,7 +247,7 @@ export default class TheEyePlugin extends Plugin {
 
   async readFiles(): Promise<EyeFile[]> {
     const files = await readEyeFiles(this.app, this.settings.notesFolderPath);
-    void this.refreshHolidayData(false, files);
+    void this.refreshHolidayData(false, files, true);
     return files;
   }
 
@@ -250,17 +259,39 @@ export default class TheEyePlugin extends Plugin {
   }
 
   holidaySyncStatus(): string {
-    if (this.holidaySyncing) return "Refreshing cached public holidays…";
-    if (this.holidaySyncError) {
-      return `Last refresh failed: ${this.holidaySyncError}`;
-    }
     if (!this.settings.availability.countryCode) {
-      return "Choose a country to enable public holidays.";
+      if (this.holidaySyncing) return "Loading available countries…";
+      return this.holidaySyncError
+        ? "Countries are temporarily unavailable; retrying automatically."
+        : "Choose a country to enable public holidays.";
     }
-    const years = Object.keys(this.settings.holidayCache.years).sort();
-    return years.length > 0
-      ? `Cached years: ${years.join(", ")}. Data refreshes automatically.`
-      : "No cached public holidays yet.";
+    const cachedYears =
+      this.settings.holidayCache.countryCode ===
+      this.settings.availability.countryCode
+        ? Object.entries(this.settings.holidayCache.years).sort(([a], [b]) =>
+            a.localeCompare(b),
+          )
+        : [];
+    const latest = cachedYears
+      .map(([, cached]) => Date.parse(cached.fetchedAt))
+      .filter(Number.isFinite)
+      .sort((a, b) => b - a)[0];
+    const cacheStatus =
+      cachedYears.length === 0
+        ? "No cached public holidays yet."
+        : `Updated ${
+            latest
+              ? new Intl.DateTimeFormat(undefined, {
+                  dateStyle: "medium",
+                }).format(latest)
+              : "previously"
+          } · cached years ${cachedYears.map(([year]) => year).join(", ")}.`;
+    const status = this.holidaySyncing
+      ? `Updating automatically… ${cacheStatus}`
+      : cacheStatus;
+    return this.holidaySyncError
+      ? `${status} Could not update; using cached data.`
+      : status;
   }
 
   async refreshHolidayCountries(force = false): Promise<void> {
@@ -276,16 +307,20 @@ export default class TheEyePlugin extends Plugin {
         };
         await this.saveData(this.settings);
       }
-      this.recordHolidaySyncErrors(result.errors);
+      this.recordHolidaySyncErrors(
+        result.errors,
+        !this.settings.availability.countryCode,
+      );
     });
   }
 
   async refreshHolidayData(
     force = false,
     files: readonly EyeFile[] = [],
+    prune = false,
   ): Promise<void> {
     const countryCode = this.settings.availability.countryCode;
-    if (!countryCode) return;
+    if (!countryCode || (!force && this.holidayRetryTimer !== null)) return;
     const years = requiredHolidayYears(files);
     await this.enqueueHolidaySync(async () => {
       if (this.settings.availability.countryCode !== countryCode) return;
@@ -293,7 +328,7 @@ export default class TheEyePlugin extends Plugin {
         this.settings.holidayCache,
         countryCode,
         years,
-        { force },
+        { force, prune },
       );
       if (this.settings.availability.countryCode !== countryCode) return;
       if (result.changed) {
@@ -321,7 +356,7 @@ export default class TheEyePlugin extends Plugin {
     this.holidaySyncError = null;
     await this.saveData(this.settings);
     await this.refreshViews();
-    this.settingsTab?.update();
+    this.settingsTab?.refresh();
     if (normalized) await this.refreshHolidayData(true);
   }
 
@@ -505,7 +540,7 @@ export default class TheEyePlugin extends Plugin {
 
   private async enqueueHolidaySync(work: () => Promise<void>): Promise<void> {
     this.holidaySyncCount++;
-    this.settingsTab?.update();
+    this.settingsTab?.refresh();
     const run = this.holidaySyncChain.then(work, work);
     this.holidaySyncChain = run.catch(() => undefined);
     try {
@@ -516,12 +551,37 @@ export default class TheEyePlugin extends Plugin {
       console.error("Tasks Eye could not refresh public holidays.", error);
     } finally {
       this.holidaySyncCount--;
-      this.settingsTab?.update();
+      this.settingsTab?.refresh();
     }
   }
 
-  private recordHolidaySyncErrors(errors: readonly string[]): void {
-    this.holidaySyncError = errors.length > 0 ? errors.join("; ") : null;
+  private recordHolidaySyncErrors(
+    errors: readonly string[],
+    clearOnSuccess = true,
+  ): void {
+    if (errors.length > 0) {
+      this.holidaySyncError = errors.join("; ");
+      if (this.holidayRetryTimer === null) {
+        this.holidayRetryTimer = window.setTimeout(() => {
+          this.holidayRetryTimer = null;
+          void this.retryHolidaySync();
+        }, HOLIDAY_RETRY_MS);
+      }
+      return;
+    }
+    if (!clearOnSuccess) return;
+    this.holidaySyncError = null;
+    if (this.holidayRetryTimer !== null) {
+      window.clearTimeout(this.holidayRetryTimer);
+      this.holidayRetryTimer = null;
+    }
+  }
+
+  private async retryHolidaySync(): Promise<void> {
+    await this.refreshHolidayCountries();
+    if (this.settings.availability.countryCode) {
+      await this.refreshHolidayData();
+    }
   }
 
   private findLeaf(): WorkspaceLeaf | null {

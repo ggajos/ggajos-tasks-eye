@@ -34,7 +34,7 @@ status: open
       ),
     ).toMatchObject([
       {
-        code: "task-on-vacation",
+        code: "task-on-unavailable-day",
         message: "Task is due on an unavailable day: 2026-07-13 (Vacation).",
       },
     ]);

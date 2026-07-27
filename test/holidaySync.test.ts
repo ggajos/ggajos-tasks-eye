@@ -78,6 +78,25 @@ describe("Nager holiday sync", () => {
     expect(result.errors).toEqual(["2026: offline"]);
   });
 
+  it("prunes cached years that are no longer required", async () => {
+    const cache: HolidayCache = {
+      ...emptyCache(),
+      countryCode: "PL",
+      years: {
+        "2025": { fetchedAt: "2026-07-17T00:00:00.000Z", holidays: [] },
+        "2026": { fetchedAt: "2026-07-17T00:00:00.000Z", holidays: [] },
+        "2027": { fetchedAt: "2026-07-17T00:00:00.000Z", holidays: [] },
+      },
+    };
+
+    const result = await syncNagerHolidayYears(cache, "PL", [2026, 2027], {
+      now: Date.parse("2026-07-17T00:00:00.000Z"),
+      prune: true,
+    });
+
+    expect(Object.keys(result.cache.years)).toEqual(["2026", "2027"]);
+  });
+
   it("adds current, next, and unchecked task years to coverage", () => {
     (globalThis as { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY = "2026-07-17";
     const file = buildEyeFileFromMarkdown(

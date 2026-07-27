@@ -15,7 +15,7 @@ export const VIOLATION_CODES = [
   "closed-with-unchecked-tasks",
   "open-without-uncompleted-tasks",
   "open-without-due-date",
-  "task-on-vacation",
+  "task-on-unavailable-day",
 ] as const;
 
 export type ViolationCode = (typeof VIOLATION_CODES)[number];
@@ -107,7 +107,7 @@ const openWithoutDueDate: ValidationRule = ({ status, uncompletedTasks }) => {
   );
 };
 
-const tasksOnVacation: ValidationRule = ({
+const tasksOnUnavailableDays: ValidationRule = ({
   availability,
   uncompletedTasks,
 }) => {
@@ -123,7 +123,7 @@ const tasksOnVacation: ValidationRule = ({
       .map((reason) => reason.label)
       .join(", ");
     violations.push({
-      code: "task-on-vacation",
+      code: "task-on-unavailable-day",
       message:
         `Task is due on an unavailable day: ${formatYmd(task.dueTs)} ` +
         `(${reasonLabel}).`,
@@ -140,7 +140,7 @@ const VALIDATION_RULES: readonly ValidationRule[] = [
   closedWithUncheckedTasks,
   openWithoutTasks,
   openWithoutDueDate,
-  tasksOnVacation,
+  tasksOnUnavailableDays,
 ];
 
 export function validateFile(

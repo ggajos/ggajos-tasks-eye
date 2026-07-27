@@ -1,17 +1,14 @@
-import type {
-  SettingDefinition,
-  SettingDefinitionItem,
-  SettingDefinitionPage,
-} from "obsidian";
-import { PluginSettingTab } from "obsidian";
+import type { App, TextComponent } from "obsidian";
+import { FuzzySuggestModal, PluginSettingTab, Setting } from "obsidian";
 import { isIsoDate } from "./date";
 import type TheEyePlugin from "./main";
-import { findManagedFolder } from "./managedFolder";
-import {
-  missingManagedFolderMessage,
-  normalizeManagedFolderPath,
-} from "./managedPath";
+import { collectDescendantFolders } from "./managedFolder";
+import { DEFAULT_MANAGED_FOLDER_PATH } from "./managedPath";
 import type { PersonalTimeOff } from "./vacation";
+
+interface FolderOption {
+  path: string;
+}
 
 const WEEKDAYS = [
   { day: 1, label: "Monday" },
@@ -23,246 +20,247 @@ const WEEKDAYS = [
   { day: 0, label: "Sunday" },
 ] as const;
 
-const COUNTRY_KEY = "availability.countryCode";
-const WEEKDAY_PREFIX = "availability.weekday.";
-const PERSONAL_PREFIX = "availability.personal.";
+class ManagedFolderSuggestModal extends FuzzySuggestModal<FolderOption> {
+  constructor(
+    app: App,
+    private readonly options: FolderOption[],
+    private readonly onChoose: (option: FolderOption) => void,
+  ) {
+    super(app);
+    this.setPlaceholder("Choose a notes folder");
+  }
+
+  getItems(): FolderOption[] {
+    return this.options;
+  }
+
+  getItemText(item: FolderOption): string {
+    return item.path;
+  }
+
+  onChooseItem(item: FolderOption): void {
+    this.onChoose(item);
+  }
+}
 
 export class TasksEyeSettingTab extends PluginSettingTab {
-  private readonly eyePlugin: TheEyePlugin;
+  private requestedCountries = false;
+  private visible = false;
 
-  constructor(app: TheEyePlugin["app"], plugin: TheEyePlugin) {
-    super(app, plugin);
-    this.eyePlugin = plugin;
+  constructor(
+    app: App,
+    private readonly eyePlugin: TheEyePlugin,
+  ) {
+    super(app, eyePlugin);
   }
 
-  getSettingDefinitions(): SettingDefinitionItem[] {
-    return [
-      {
-        name: "Notes folder",
-        desc: "Tasks Eye reads Markdown notes in this folder and all subfolders.",
-        control: {
-          type: "folder",
-          key: "notesFolderPath",
-          includeRoot: true,
-          validate: (value) => {
-            const path = normalizeManagedFolderPath(value);
-            return findManagedFolder(this.app, path)
-              ? undefined
-              : missingManagedFolderMessage(path);
-          },
-        },
-      },
-      {
-        type: "page",
-        name: "Availability",
-        desc: this.availabilitySummary(),
-        items: [
-          {
-            type: "group",
-            heading: "Public holidays",
-            items: [
-              {
-                name: "Country",
-                desc: "Nationwide public holidays are downloaded from Nager.Date and cached locally.",
-                control: {
-                  type: "dropdown",
-                  key: COUNTRY_KEY,
-                  options: this.countryOptions(),
-                },
-              },
-              {
-                name: "Refresh public holidays",
-                desc: this.eyePlugin.holidaySyncStatus(),
-                action: () => {
-                  void this.eyePlugin.refreshHolidayData(true);
-                },
-                disabled: () =>
-                  !this.eyePlugin.settings.availability.countryCode ||
-                  this.eyePlugin.holidaySyncing,
-              },
-            ],
-          },
-          {
-            type: "group",
-            heading: "Non-working days",
-            items: WEEKDAYS.map(({ day, label }) => ({
-              name: label,
-              control: {
-                type: "toggle" as const,
-                key: `${WEEKDAY_PREFIX}${day}`,
-              },
-            })),
-          },
-          this.personalTimeOffList(),
-        ],
-      },
-    ];
-  }
+  display(): void {
+    this.visible = true;
+    this.requestCountries();
+    const { containerEl } = this;
+    containerEl.empty();
 
-  getControlValue(key: string): unknown {
-    if (key === "notesFolderPath") {
-      return this.eyePlugin.settings.notesFolderPath;
-    }
-    if (key === COUNTRY_KEY) {
-      return this.eyePlugin.settings.availability.countryCode;
-    }
-    if (key.startsWith(WEEKDAY_PREFIX)) {
-      const day = Number(key.slice(WEEKDAY_PREFIX.length));
-      return this.eyePlugin.settings.availability.nonWorkingWeekdays.includes(
-        day,
-      );
-    }
-    const personal = this.personalKey(key);
-    if (personal?.field === "label") {
-      return this.personalEntry(personal.id)?.label ?? "";
-    }
-    return super.getControlValue(key);
-  }
-
-  async setControlValue(key: string, value: unknown): Promise<void> {
-    if (key === "notesFolderPath" && typeof value === "string") {
-      await this.eyePlugin.setNotesFolderPath(value);
-      return;
-    }
-    if (key === COUNTRY_KEY && typeof value === "string") {
-      await this.eyePlugin.setHolidayCountry(value);
-      return;
-    }
-    if (key.startsWith(WEEKDAY_PREFIX) && typeof value === "boolean") {
-      await this.eyePlugin.setNonWorkingWeekday(
-        Number(key.slice(WEEKDAY_PREFIX.length)),
-        value,
-      );
-      return;
-    }
-    const personal = this.personalKey(key);
-    if (
-      personal?.field === "label" &&
-      typeof value === "string" &&
-      this.personalEntry(personal.id)
-    ) {
-      await this.eyePlugin.updatePersonalTimeOff(personal.id, {
-        label: value,
+    new Setting(containerEl)
+      .setName("Notes folder")
+      .setDesc(
+        "Tasks Eye reads Markdown notes in this folder and all subfolders.",
+      )
+      .addButton((button) => {
+        button
+          .setButtonText(this.eyePlugin.settings.notesFolderPath)
+          .setTooltip("Choose a notes folder")
+          .onClick(() => this.openFolderPicker());
       });
-      return;
+
+    const folderError = this.eyePlugin.managedFolderError();
+    if (folderError) {
+      containerEl.createDiv({
+        cls: "eye-setting-warning",
+        text: folderError,
+      });
     }
-    await super.setControlValue(key, value);
+
+    containerEl.createEl("h2", { text: "Availability" });
+    this.renderPublicHolidays();
+    this.renderWeekdays();
+    this.renderPersonalTimeOff();
   }
 
-  private availabilitySummary(): string {
-    const { availability, holidayCache } = this.eyePlugin.settings;
-    const selected = holidayCache.countries.find(
-      (country) => country.countryCode === availability.countryCode,
-    );
-    const country = selected?.name ?? availability.countryCode;
-    const publicLabel = country || "No public-holiday country";
-    const personalCount = availability.personalTimeOff.length;
-    return `${publicLabel}; ${personalCount} personal ${
-      personalCount === 1 ? "entry" : "entries"
-    }.`;
+  refresh(): void {
+    if (this.visible) this.display();
   }
 
-  private countryOptions(): Record<string, string> {
-    const options: Record<string, string> = { "": "Not selected" };
-    for (const country of this.eyePlugin.settings.holidayCache.countries) {
-      options[country.countryCode] = country.name;
-    }
-    const selected = this.eyePlugin.settings.availability.countryCode;
-    if (selected && !options[selected]) options[selected] = selected;
-    return options;
+  hide(): void {
+    this.visible = false;
   }
 
-  private personalTimeOffList(): SettingDefinitionItem {
-    const entries = this.eyePlugin.settings.availability.personalTimeOff;
-    return {
-      type: "list",
-      heading: "Personal time off",
-      emptyState: "No personal dates or ranges.",
-      items: entries.map((entry) => this.personalTimeOffPage(entry)),
-      onDelete: (index) => {
-        const entry = entries[index];
-        if (!entry) return;
-        void this.eyePlugin
-          .deletePersonalTimeOff(entry.id)
-          .then(() => this.update());
-      },
-      addItem: {
-        name: "Add personal time off",
-        action: () => {
-          void this.eyePlugin.addPersonalTimeOff().then(() => this.update());
-        },
-      },
-    };
-  }
+  private renderPublicHolidays(): void {
+    const { containerEl } = this;
+    containerEl.createEl("h3", { text: "Public holidays" });
 
-  private personalTimeOffPage(entry: PersonalTimeOff): SettingDefinitionPage {
-    return {
-      type: "page",
-      name: entry.to ? `${entry.from} — ${entry.to}` : entry.from,
-      desc: entry.label || "Vacation",
-      items: [
-        this.dateDefinition(entry, "from"),
-        this.dateDefinition(entry, "to"),
-        {
-          name: "Label",
-          desc: "Optional. Unlabeled entries appear as Vacation.",
-          control: {
-            type: "text",
-            key: `${PERSONAL_PREFIX}${entry.id}.label`,
-            placeholder: "Vacation",
-          },
-        },
-      ],
-    };
-  }
-
-  private dateDefinition(
-    entry: PersonalTimeOff,
-    field: "from" | "to",
-  ): SettingDefinition {
-    const isEnd = field === "to";
-    return {
-      name: isEnd ? "End date" : "Start date",
-      desc: isEnd ? "Optional; ranges include both dates." : undefined,
-      render: (setting) => {
-        setting.addText((component) => {
-          component.inputEl.type = "date";
-          component.setValue(entry[field] ?? "").onChange(async (value) => {
-            if ((!isEnd || value) && !isIsoDate(value)) {
-              setting.setErrorMessage(
-                isEnd ? "Choose a valid end date." : "Choose a start date.",
-              );
-              return;
-            }
-            const from = isEnd ? entry.from : value;
-            const to = isEnd ? value || null : entry.to;
-            if (to && to < from) {
-              setting.setErrorMessage("End date cannot be before start date.");
-              return;
-            }
-            setting.setErrorMessage(null);
-            await this.eyePlugin.updatePersonalTimeOff(entry.id, {
-              [field]: isEnd ? value || null : value,
-            });
-          });
+    new Setting(containerEl)
+      .setName("Country")
+      .setDesc(
+        "Nationwide public holidays come from Nager.Date and are cached locally.",
+      )
+      .addDropdown((dropdown) => {
+        dropdown.addOption("", "Not selected");
+        for (const country of this.eyePlugin.settings.holidayCache.countries) {
+          dropdown.addOption(country.countryCode, country.name);
+        }
+        const selected = this.eyePlugin.settings.availability.countryCode;
+        if (
+          selected &&
+          !this.eyePlugin.settings.holidayCache.countries.some(
+            (country) => country.countryCode === selected,
+          )
+        ) {
+          dropdown.addOption(selected, selected);
+        }
+        dropdown.setValue(selected).onChange(async (countryCode) => {
+          await this.eyePlugin.setHolidayCountry(countryCode);
+          this.display();
         });
-      },
-    };
+      });
+
+    containerEl.createDiv({
+      cls: "setting-item-description eye-holiday-status",
+      text: this.eyePlugin.holidaySyncStatus(),
+    });
   }
 
-  private personalKey(key: string): { id: string; field: "label" } | null {
-    if (!key.startsWith(PERSONAL_PREFIX) || !key.endsWith(".label")) {
-      return null;
+  private renderWeekdays(): void {
+    const { containerEl } = this;
+    containerEl.createEl("h3", { text: "Non-working days" });
+    const setting = new Setting(containerEl)
+      .setName("Every week")
+      .setDesc("Select days that are normally unavailable.");
+    setting.controlEl.addClass("eye-weekdays");
+    for (const { day, label } of WEEKDAYS) {
+      const option = setting.controlEl.createEl("label", {
+        cls: "eye-weekday",
+      });
+      const checkbox = option.createEl("input", { type: "checkbox" });
+      checkbox.checked =
+        this.eyePlugin.settings.availability.nonWorkingWeekdays.includes(day);
+      checkbox.ariaLabel = label;
+      checkbox.addEventListener("change", () => {
+        void this.eyePlugin.setNonWorkingWeekday(day, checkbox.checked);
+      });
+      option.createSpan({ text: label.slice(0, 3) });
     }
-    return {
-      id: key.slice(PERSONAL_PREFIX.length, -".label".length),
-      field: "label",
-    };
   }
 
-  private personalEntry(id: string): PersonalTimeOff | undefined {
-    return this.eyePlugin.settings.availability.personalTimeOff.find(
-      (entry) => entry.id === id,
-    );
+  private renderPersonalTimeOff(): void {
+    const { containerEl } = this;
+    containerEl.createEl("h3", { text: "Personal time off" });
+    containerEl.createDiv({
+      cls: "setting-item-description eye-personal-help",
+      text: "Leave the end date empty for a single day. Ranges include both dates.",
+    });
+
+    const entries = this.eyePlugin.settings.availability.personalTimeOff;
+    if (entries.length === 0) {
+      containerEl.createDiv({
+        cls: "setting-item-description eye-personal-empty",
+        text: "No personal dates or ranges.",
+      });
+    }
+
+    for (const entry of entries) this.renderPersonalEntry(entry);
+
+    new Setting(containerEl)
+      .setName("Add personal time off")
+      .addButton((button) => {
+        button
+          .setButtonText("Add")
+          .setCta()
+          .onClick(async () => {
+            await this.eyePlugin.addPersonalTimeOff();
+            this.display();
+          });
+      });
+  }
+
+  private renderPersonalEntry(entry: PersonalTimeOff): void {
+    const dateLabel = entry.to ? `${entry.from} — ${entry.to}` : entry.from;
+    const setting = new Setting(this.containerEl)
+      .setClass("eye-personal-entry")
+      .setName(dateLabel)
+      .setDesc(entry.label || "Vacation");
+
+    setting.addText((start) => {
+      this.dateInput(start, entry.from, "Start date");
+      start.onChange(async (value) => {
+        if (!isIsoDate(value) || (entry.to && entry.to < value)) {
+          start.setValue(entry.from);
+          return;
+        }
+        await this.eyePlugin.updatePersonalTimeOff(entry.id, { from: value });
+      });
+    });
+    setting.addText((end) => {
+      this.dateInput(end, entry.to ?? "", "End date (optional)");
+      end.onChange(async (value) => {
+        if ((value && !isIsoDate(value)) || (value && value < entry.from)) {
+          end.setValue(entry.to ?? "");
+          return;
+        }
+        await this.eyePlugin.updatePersonalTimeOff(entry.id, {
+          to: value || null,
+        });
+      });
+    });
+    setting.addText((label) => {
+      label
+        .setPlaceholder("Vacation")
+        .setValue(entry.label)
+        .onChange((value) =>
+          this.eyePlugin.updatePersonalTimeOff(entry.id, { label: value }),
+        );
+      label.inputEl.ariaLabel = "Label (optional)";
+      label.inputEl.addClass("eye-personal-label");
+    });
+    setting.addExtraButton((button) => {
+      button
+        .setIcon("trash")
+        .setTooltip("Delete personal time off")
+        .onClick(async () => {
+          await this.eyePlugin.deletePersonalTimeOff(entry.id);
+          this.display();
+        });
+    });
+  }
+
+  private dateInput(
+    component: TextComponent,
+    value: string,
+    label: string,
+  ): void {
+    component.inputEl.type = "date";
+    component.inputEl.ariaLabel = label;
+    component.inputEl.addClass("eye-personal-date");
+    component.setValue(value);
+  }
+
+  private requestCountries(): void {
+    if (this.requestedCountries) return;
+    this.requestedCountries = true;
+    void this.eyePlugin.refreshHolidayCountries();
+  }
+
+  private openFolderPicker(): void {
+    const options: FolderOption[] = [
+      { path: DEFAULT_MANAGED_FOLDER_PATH },
+      ...collectDescendantFolders(this.app.vault.getRoot())
+        .map((folder) => ({ path: folder.path }))
+        .sort((a, b) => a.path.localeCompare(b.path)),
+    ];
+
+    new ManagedFolderSuggestModal(this.app, options, (option) => {
+      void this.eyePlugin
+        .setNotesFolderPath(option.path)
+        .then(() => this.display());
+    }).open();
   }
 }

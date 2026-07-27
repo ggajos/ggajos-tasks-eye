@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { isoToTs } from "../../src/date";
 import { boardItemsForContext, selectRows } from "../../src/model";
 import type { AvailabilityConfig } from "../../src/vacation";
@@ -19,6 +19,14 @@ const config: AvailabilityConfig = {
 };
 
 describe("Vacation availability feature", () => {
+  beforeEach(() => {
+    (globalThis as { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY = "2026-07-17";
+  });
+
+  afterEach(() => {
+    delete (globalThis as { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY;
+  });
+
   it("recognizes configured and overlapping unavailable days", () => {
     expect(availabilityReasonsForTs(isoToTs("2026-07-18"), config)).toEqual([
       { kind: "personal", label: "Summer break" },

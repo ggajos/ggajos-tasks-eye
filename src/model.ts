@@ -76,7 +76,8 @@ export function rowErrors(
   const earliestDue = getEarliestDueDate(file.tasks);
   return validateFile(file, availability).filter(
     (violation) =>
-      violation.code !== "task-on-vacation" || violation.dueTs === earliestDue,
+      violation.code !== "task-on-unavailable-day" ||
+      violation.dueTs === earliestDue,
   );
 }
 

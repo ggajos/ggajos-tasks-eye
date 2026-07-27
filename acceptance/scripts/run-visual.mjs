@@ -77,9 +77,6 @@ try {
   console.log(
     "Running behavioral acceptance and canonical screenshots in the virtual Linux display...",
   );
-  const credentialEnvironment = ["OBSIDIAN_EMAIL", "OBSIDIAN_PASSWORD"].flatMap(
-    (name) => (process.env[name] ? ["--env", name] : []),
-  );
   const visual = tryRun(podman, [
     "run",
     "--rm",
@@ -88,7 +85,6 @@ try {
     "--userns=keep-id",
     "--env",
     "HOME=/tmp/tasks-eye-home",
-    ...credentialEnvironment,
     "--volume",
     `${cache}:/app/.obsidian-cache:rw`,
     "--volume",
