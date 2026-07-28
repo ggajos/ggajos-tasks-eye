@@ -1,4 +1,4 @@
-export const STATUSES = ["open", "hold", "closed", "archived"] as const;
+export const STATUSES = ["open", "hold", "closed"] as const;
 
 export const MODES = ["open", "inbox", "hold", "done"] as const;
 

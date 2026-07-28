@@ -46,7 +46,7 @@ features.
 - Hold keeps paused or backlog notes visible without mixing them into Open.
 - Done reviews tasks by their Tasks completion date.
 - Missing or blank note status is treated as `open`; supported explicit statuses
-  are `open`, `hold`, `closed`, and `archived`.
+  are `open`, `hold`, and `closed`.
 - An Open note needs an unchecked task and at least one unchecked dated task to
   avoid Inbox validation.
 - Notes left at the configured notes-folder root appear in Inbox until moved to
@@ -84,12 +84,12 @@ repaired promptly. Inbox is an asynchronous cleanup queue: it should be cleared 
 
 The recommended answer is to use the plugin's "create new note" action. This intentionally places the note in the managed root, which intentionally triggers a validation flag. During the asynchronous Inbox review, the user clarifies the "quick note" by moving it to the correct folder and ensuring it has a dated action.
 
-> When should `open`, `hold`, `closed`, and `archived` be used?
+> When should `open`, `hold`, and `closed` be used?
 
 The recommended answer:
 - **`open`:** For notes you are actively working on or tracking in your current workflow. They must be actionable (have an unchecked dated task).
 - **`hold`:** For valid commitments or backlog ideas that are paused or not actively being worked on. It prevents them from cluttering the Open view (even the "Future" bucket) while ensuring they aren't forgotten. Ideally, items on hold should still have a future review date.
-- **`closed` / `archived`:** For notes that are no longer active tasks. If a note is purely informational, completed, or abandoned, it should be closed or archived. Closed notes with unchecked tasks will trigger validation to prevent work from slipping through the cracks.
+- **`closed`:** For notes that are no longer active tasks. If a note is purely informational, completed, or abandoned, it should be closed. Closed notes with unchecked tasks will trigger validation to prevent work from slipping through the cracks.
 
 > What is the role and cadence of Hold and Done reviews?
 
@@ -102,7 +102,7 @@ The recommended answer:
 The following feedback points were raised during evaluation but represent intentional design choices, not gaps to be fixed:
 
 - **No strict deadlines or Gantt charts:** The system is explicitly for current workload and attention dates. It does not attempt to track ultimate hard deadlines, project management charts, or broad external timelines.
-- **Forced actionability (maintenance overhead):** An `open` note *must* be actionable (have a dated action). If a note is purely informational, it should be `closed` or `archived`. The "maintenance overhead" of dating tasks is a feature that enforces this rule.
+- **Forced actionability (maintenance overhead):** An `open` note *must* be actionable (have a dated action). If a note is purely informational, it should be `closed`. The "maintenance overhead" of dating tasks is a feature that enforces this rule.
 - **Configurable scoping:** The plugin processes all notes inside the configured managed directory. Vaults with daily notes, meeting templates, or scattered checklists that shouldn't participate must be placed outside the managed context folders.
 - **No behavioral coaching:** While "Today Zero" completion could theoretically mask endless deferral if a user only reschedules tasks, the plugin is a tool, not a coach. The system provides the mechanism for a clean daily state; the user provides the discipline.
 

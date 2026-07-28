@@ -62,7 +62,7 @@ const invalidStatus: ValidationRule = ({ file, status, hasExplicitStatus }) => {
   return singleViolation(
     "invalid-status",
     `Unsupported status "${String(file.status)}". ` +
-      "Use open, hold, closed, or archived.",
+      "Use open, hold, or closed.",
   );
 };
 

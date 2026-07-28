@@ -358,8 +358,10 @@
 }
 
 .eye-personal-entry .setting-item-control {
+  flex: 0 0 min(34rem, 64%);
   flex-wrap: nowrap;
   min-width: 0;
+  width: min(34rem, 64%);
 }
 
 .eye-personal-entry .setting-item-name {
@@ -388,6 +390,10 @@
   .eye-personal-entry .setting-item-control,
   .eye-personal-entry .setting-item-info {
     width: 100%;
+  }
+
+  .eye-personal-entry .setting-item-control {
+    flex-basis: auto;
   }
 }
 

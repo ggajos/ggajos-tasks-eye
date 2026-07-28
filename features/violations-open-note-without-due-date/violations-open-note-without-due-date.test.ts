@@ -49,19 +49,16 @@ describe("Open note without due date violation", () => {
     ).toContain(VIOLATION);
   });
 
-  it.each(["hold", "closed", "archived"])(
-    "does not apply to %s notes",
-    (status) => {
-      expect(
-        violationCodes(
-          file(
-            `Growth/${status}.md`,
-            `---\nstatus: ${status}\n---\n\n- [ ] choose next action`,
-          ),
+  it.each(["hold", "closed"])("does not apply to %s notes", (status) => {
+    expect(
+      violationCodes(
+        file(
+          `Growth/${status}.md`,
+          `---\nstatus: ${status}\n---\n\n- [ ] choose next action`,
         ),
-      ).not.toContain(VIOLATION);
-    },
-  );
+      ),
+    ).not.toContain(VIOLATION);
+  });
 
   it("keeps the existing empty-open-note violation separate", () => {
     const violations = violationCodes(

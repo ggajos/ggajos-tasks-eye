@@ -63,7 +63,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         { text: "Finish notes for the reading group", due: "2026-07-29" },
       ],
     }),
-    note("Personal/Tax Archive.md", {
+    note("Personal/Tax Records.md", {
       status: "open",
       tasks: [{ text: "Scan the 2025 tax documents", due: "2026-08-05" }],
     }),

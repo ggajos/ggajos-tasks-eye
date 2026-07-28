@@ -82,10 +82,10 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   {
     acceptance: [
       {
-        title: "steps forward through the chain and clamps at archived",
+        title: "steps forward through the chain and clamps at closed",
         async run() {
           await tasksEyePage.openPreview(MANAGED_FILE, HEADING);
-          for (const status of ["hold", "closed", "archived"] as const) {
+          for (const status of ["hold", "closed"] as const) {
             await stepStatus("next");
             const markdown = await waitForStatus(MANAGED_FILE, status);
             expect(markdown).toContain("owner: Platform");
@@ -93,8 +93,8 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             expect(markdown).toContain("- [ ] Publish the launch decision");
           }
           await stepStatus("next");
-          const clamped = await waitForStatus(MANAGED_FILE, "archived");
-          expect(clamped).toContain("status: archived");
+          const clamped = await waitForStatus(MANAGED_FILE, "closed");
+          expect(clamped).toContain("status: closed");
         },
       },
       {

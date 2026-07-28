@@ -39,13 +39,13 @@ describe("Step note status feature", () => {
     expect(frontmatter).toEqual({ owner: "Platform", status: "hold" });
   });
 
-  it("clamps forward at archived", async () => {
-    const frontmatter: Frontmatter = { status: "archived" };
+  it("clamps forward at closed", async () => {
+    const frontmatter: Frontmatter = { status: "closed" };
     const { app, file } = appFor(frontmatter);
 
     await stepNoteStatus(app, file, "next");
 
-    expect(frontmatter).toEqual({ status: "archived" });
+    expect(frontmatter).toEqual({ status: "closed" });
   });
 
   it("removes the status property when stepping back from open", async () => {
@@ -76,8 +76,30 @@ describe("Step note status feature", () => {
     expect(frontmatter).toEqual({ status: "open" });
   });
 
+  it("repairs the former archived status to open when stepping forward", async () => {
+    const frontmatter: Frontmatter = { status: "archived" };
+    const { app, file } = appFor(frontmatter);
+
+    await stepNoteStatus(app, file, "next");
+
+    expect(frontmatter).toEqual({ status: "open" });
+  });
+
   it("repairs an unsupported status by removing it when stepping back", async () => {
     const frontmatter: Frontmatter = { owner: "Platform", status: "foobar" };
+    const { app, file } = appFor(frontmatter);
+
+    await stepNoteStatus(app, file, "previous");
+
+    expect(frontmatter).toEqual({ owner: "Platform" });
+    expect("status" in frontmatter).toBe(false);
+  });
+
+  it("repairs the former archived status by removing it when stepping back", async () => {
+    const frontmatter: Frontmatter = {
+      owner: "Platform",
+      status: "archived",
+    };
     const { app, file } = appFor(frontmatter);
 
     await stepNoteStatus(app, file, "previous");

@@ -4,13 +4,13 @@ export default defineFeature({
   title: "Step note status",
   summary:
     "Two commands step the active Markdown note along the status chain " +
-    "none → open → hold → closed → archived by updating its frontmatter.",
+    "none → open → hold → closed by updating its frontmatter.",
   acceptanceCriteria: [
     "`Ctrl+Shift+2` moves the note one step forward and `Ctrl+Shift+1` one " +
-      "step back along `none → open → hold → closed → archived`.",
+      "step back along `none → open → hold → closed`.",
     "Stepping back from `open` removes the `status` property entirely; " +
       "stepping forward from no status sets `open`.",
-    "The ends clamp: forward from `archived` and back from no status do " +
+    "The ends clamp: forward from `closed` and back from no status do " +
       "nothing.",
     "An unsupported status value is repaired: forward sets `open` and back " +
       "removes the property.",
