@@ -68,6 +68,6 @@ status: open
     );
 
     expect(row.actionLabel).toBe("earlier");
-    expect(row.dateLabel).toBe("07-08");
+    expect(row.earliestTask?.dueIso).toBe("2026-07-08");
   });
 });

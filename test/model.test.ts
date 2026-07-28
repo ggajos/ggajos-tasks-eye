@@ -37,7 +37,7 @@ describe("row model", () => {
     const row = buildRowModel(fixture("no-due.md"));
 
     expect(row.actionLabel).toBe("first undated task");
-    expect(row.dateLabel).toBe("No Due Date");
+    expect(row.earliestDue).toBeNull();
   });
 
   it("ignores completed tasks when selecting the next action", () => {
@@ -55,7 +55,7 @@ status: open
     );
 
     expect(row.actionLabel).toBe("open later");
-    expect(row.dateLabel).toBe("06-20");
+    expect(row.earliestDue).toBe(isoToTs("2026-06-20"));
   });
 });
 

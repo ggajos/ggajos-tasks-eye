@@ -26,12 +26,7 @@ import {
 } from "./date";
 import type TheEyePlugin from "./main";
 import type { BoardBucket, BoardDayGroup, RenderItem } from "./model";
-import {
-  boardItemsForContext,
-  buildBoardBuckets,
-  rowStateClasses,
-  selectRows,
-} from "./model";
+import { boardItemsForContext, buildBoardBuckets, selectRows } from "./model";
 import type { EyeFile, RowModel } from "./types";
 import {
   button,
@@ -77,22 +72,6 @@ function dueShiftLabel(deltaDays: number): string {
 
 function headingId(prefix: string, key: string): string {
   return `eye-${prefix}-${key.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase()}`;
-}
-
-function isBoardMode(mode: EyeMode): boolean {
-  return mode === "open" || mode === "hold";
-}
-
-function appendMeta(
-  meta: HTMLElement,
-  model: RowModel,
-  includeDate: boolean,
-): void {
-  if (includeDate) {
-    meta.appendChild(pill(model.dateLabel));
-    if (model.yearLabel) meta.appendChild(pill(model.yearLabel));
-    if (model.dayLabel) meta.appendChild(pill(model.dayLabel));
-  }
 }
 
 interface ViewState {
@@ -257,31 +236,20 @@ export class EyeView extends ItemView {
       return;
     }
 
-    if (isBoardMode(this.state.mode)) {
-      const vacationSourceRows =
-        this.state.mode === "open"
-          ? selectRows(files, this.state.mode, "*", availability)
-          : rows;
-      const rendered = await this.renderBoard(
-        list,
-        rows,
-        vacationSourceRows,
-        contextFilter,
-        availability,
-      );
-      if (!rendered) {
-        list.appendChild(element("div", "eye-empty", this.emptyMessage()));
-      }
-      return;
-    }
-
-    if (rows.length === 0) {
+    const vacationSourceRows =
+      this.state.mode === "open"
+        ? selectRows(files, this.state.mode, "*", availability)
+        : rows;
+    const rendered = await this.renderBoard(
+      list,
+      rows,
+      vacationSourceRows,
+      contextFilter,
+      availability,
+    );
+    if (!rendered) {
       list.appendChild(element("div", "eye-empty", this.emptyMessage()));
-      return;
     }
-
-    list.classList.add("eye-flat-list");
-    for (const row of rows) await this.renderRow(list, row, false);
   }
 
   private emptyMessage(): string {
@@ -521,7 +489,7 @@ export class EyeView extends ItemView {
     );
     const focusItems = today?.days.flatMap((day) => day.items) ?? [];
 
-    for (const item of focusItems) await this.renderItem(list, item, true);
+    for (const item of focusItems) await this.renderItem(list, item);
     return focusItems.length > 0;
   }
 
@@ -586,7 +554,7 @@ export class EyeView extends ItemView {
     for (const day of bucket.days) {
       if (showDays) this.renderDayDivider(children, day);
       for (const item of day.items) {
-        await this.renderItem(children, item, true);
+        await this.renderItem(children, item);
       }
     }
 
@@ -624,13 +592,9 @@ export class EyeView extends ItemView {
     list.appendChild(divider);
   }
 
-  private async renderItem(
-    list: HTMLElement,
-    item: RenderItem,
-    taskFirst: boolean,
-  ): Promise<void> {
+  private async renderItem(list: HTMLElement, item: RenderItem): Promise<void> {
     if (item.kind === "task") {
-      await this.renderRow(list, item.model, taskFirst);
+      await this.renderRow(list, item.model);
     } else {
       this.renderMarker(list, item.marker);
     }
@@ -671,44 +635,17 @@ export class EyeView extends ItemView {
     return link;
   }
 
-  private async renderRow(
-    list: HTMLElement,
-    model: RowModel,
-    taskFirst: boolean,
-  ): Promise<void> {
-    const row = element(
-      "div",
-      ["eye-row", ...rowStateClasses(model)].join(" "),
-    );
+  private async renderRow(list: HTMLElement, model: RowModel): Promise<void> {
+    const row = element("div", `eye-row${model.isFuture ? " is-future" : ""}`);
     const main = element("div", "eye-row-main");
-    const meta = element("div", "eye-meta");
+    const action = element("div", "eye-task-title");
+    const note = element("div", "eye-note-line");
+    note.appendChild(this.renderNoteLink(model));
+    if (model.errors.length > 0) note.appendChild(attentionPill());
+    await this.renderActionMarkdown(action, model);
 
-    if (taskFirst) {
-      const action = element("div", "eye-task-title");
-      const note = element("div", "eye-note-line");
-      note.appendChild(this.renderNoteLink(model));
-      if (model.errors.length > 0) note.appendChild(attentionPill());
-      appendMeta(meta, model, false);
-      await this.renderActionMarkdown(action, model);
-
-      main.appendChild(action);
-      main.appendChild(note);
-    } else {
-      const title = element("div", "eye-row-title");
-      title.appendChild(this.renderNoteLink(model));
-      if (model.errors.length > 0) title.appendChild(attentionPill());
-
-      main.appendChild(title);
-
-      if (model.earliestTask) {
-        const action = element("div", "eye-action");
-        appendMeta(meta, model, true);
-        await this.renderActionMarkdown(action, model);
-        main.appendChild(action);
-      }
-    }
-
-    if (meta.childNodes.length > 0) main.appendChild(meta);
+    main.appendChild(action);
+    main.appendChild(note);
 
     if (model.errors.length > 0) {
       const errors = element("div", "eye-errors");

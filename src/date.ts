@@ -87,16 +87,6 @@ export function formatHumanDate(value: number | string): string {
     : `${dt.getFullYear()} ${label}`;
 }
 
-export function isToday(value: number | string): boolean {
-  const dt = toLocalDate(value);
-  const now = nowDate();
-  return (
-    dt.getFullYear() === now.getFullYear() &&
-    dt.getMonth() === now.getMonth() &&
-    dt.getDate() === now.getDate()
-  );
-}
-
 export function isAfterToday(value: number | string): boolean {
   const dt = toLocalDate(value);
   const now = nowDate();

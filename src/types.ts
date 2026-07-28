@@ -25,11 +25,7 @@ export interface RowModel {
   earliestDue: number | null;
   earliestTask: EyeTask | undefined;
   errors: ValidationViolation[];
-  isToday: boolean;
   isFuture: boolean;
-  dateLabel: string;
-  yearLabel: string;
-  dayLabel: string;
   actionLabel: string;
   contextKey: string;
   contextLabel: string;

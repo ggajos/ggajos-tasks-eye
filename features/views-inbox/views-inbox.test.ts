@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { BoardCollapseState } from "../../src/boardCollapse";
+import { DUE_BUCKETS } from "../../src/constants";
 import { selectRows } from "../../src/model";
 import { file, rowNames } from "../testSupport";
 
@@ -27,5 +29,13 @@ describe("Inbox view feature", () => {
       "ADR-042 Tenant Isolation",
       "Engineering Strategy Q3",
     ]);
+  });
+
+  it("starts with every repair bucket expanded", () => {
+    const state = new BoardCollapseState();
+
+    expect(
+      DUE_BUCKETS.every((bucket) => !state.isCollapsed("inbox", bucket.key)),
+    ).toBe(true);
   });
 });

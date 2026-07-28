@@ -7,15 +7,10 @@ import {
   VACATION_CONTEXT,
 } from "./context";
 import {
-  currentYear,
   formatHumanDate,
-  formatMonthDay,
-  formatWeekday,
-  formatYear,
   formatYmd,
   isAfterToday,
   isoToTs,
-  isToday,
   todayIso,
 } from "./date";
 import { stripDueDate } from "./taskParsing";
@@ -67,33 +62,19 @@ export function buildRowModel(
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
 ): RowModel {
   const earliestDue = getEarliestDueDate(file.tasks);
-  const year = earliestDue === null ? "" : formatYear(earliestDue);
   const earliestTask = findEarliestDueTask(file.tasks);
   return {
     file,
     earliestDue,
     earliestTask,
     errors: rowErrors(file, availability),
-    isToday: earliestDue !== null && isToday(earliestDue),
     isFuture: earliestDue !== null && isAfterToday(earliestDue),
-    dateLabel:
-      earliestDue === null ? "No Due Date" : formatMonthDay(earliestDue),
-    yearLabel: year === currentYear() ? "" : year,
-    dayLabel: earliestDue === null ? "" : formatWeekday(earliestDue),
     actionLabel: earliestTask
       ? stripDueDate(earliestTask.text)
       : "No unchecked tasks",
     contextKey: getTopLevelContext(file.path, file.managedFolderPath),
     contextLabel: getContextFromPath(file.path, file.managedFolderPath),
   };
-}
-
-export function rowStateClasses(model: RowModel): string[] {
-  const classes: string[] = [];
-  if (model.errors.length > 0) classes.push("is-violation");
-  if (model.isToday) classes.push("is-today");
-  if (model.isFuture) classes.push("is-future");
-  return classes;
 }
 
 function compareByContextTitle(a: EyeFile, b: EyeFile): number {

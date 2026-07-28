@@ -9,3 +9,8 @@ Inbox checks every workflow state. A closed note with unchecked work still
 needs a decision, and an unsupported status should not make a note silently
 disappear. Once the note is repaired, it returns to the view that matches its
 state.
+
+The repair queue uses the same task-first rows and due-date buckets as Open and
+Hold, so switching views does not introduce another row layout. Inbox keeps all
+of its buckets expanded by default and adds the validation message that explains
+what needs to be repaired.

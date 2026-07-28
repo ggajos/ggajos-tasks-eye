@@ -49,6 +49,22 @@ function resultCard(result) {
   </article>`;
 }
 
+const themeOrder = new Map([
+  ["light", 0],
+  ["dark", 1],
+  ["dark-minimal", 2],
+]);
+
+function themeFromResult(result) {
+  return result.key.split("/")[2] ?? "";
+}
+
+function byThemeThenKey(a, b) {
+  const themeA = themeOrder.get(themeFromResult(a)) ?? themeOrder.size;
+  const themeB = themeOrder.get(themeFromResult(b)) ?? themeOrder.size;
+  return themeA - themeB || a.key.localeCompare(b.key);
+}
+
 let manifest;
 try {
   manifest = JSON.parse(await readFile(manifestPath, "utf8"));
@@ -62,8 +78,12 @@ try {
   };
 }
 
-const changed = manifest.results.filter(({ status }) => status !== "matched");
-const matched = manifest.results.filter(({ status }) => status === "matched");
+const changed = manifest.results
+  .filter(({ status }) => status !== "matched")
+  .sort(byThemeThenKey);
+const matched = manifest.results
+  .filter(({ status }) => status === "matched")
+  .sort(byThemeThenKey);
 const stale = manifest.staleBaselines ?? [];
 const status = manifest.completed && changed.length === 0 && stale.length === 0
   ? "clean"
@@ -122,4 +142,3 @@ const html = `<!doctype html>
 await mkdir(reportRoot, { recursive: true });
 await writeFile(reportPath, html);
 console.log(`Visual report written to ${reportPath}`);
-
