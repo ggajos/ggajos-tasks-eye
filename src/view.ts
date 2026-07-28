@@ -243,6 +243,20 @@ export class EyeView extends ItemView {
     const list = element("div", "eye-list");
     root.appendChild(list);
 
+    if (this.state.mode === "focus") {
+      const rendered = await this.renderFocus(
+        list,
+        rows,
+        selectRows(files, "open", "*", availability),
+        contextFilter,
+        availability,
+      );
+      if (!rendered) {
+        list.appendChild(element("div", "eye-empty", this.emptyMessage()));
+      }
+      return;
+    }
+
     if (isBoardMode(this.state.mode)) {
       const vacationSourceRows =
         this.state.mode === "open"
@@ -271,12 +285,13 @@ export class EyeView extends ItemView {
   }
 
   private emptyMessage(): string {
+    if (this.state.mode === "focus") return "No open work due today.";
     if (this.state.mode === "inbox") return "No notes need attention.";
     return `No notes in ${MODE_LABELS[this.state.mode]}.`;
   }
 
   private contextsForMode(contexts: string[]): string[] {
-    return this.state.mode === "open"
+    return this.state.mode === "focus" || this.state.mode === "open"
       ? withVacationContext(contexts)
       : contexts;
   }
@@ -486,6 +501,28 @@ export class EyeView extends ItemView {
 
     for (const bucket of buckets) await this.renderBucket(list, bucket);
     return buckets.length > 0;
+  }
+
+  private async renderFocus(
+    list: HTMLElement,
+    rows: RowModel[],
+    vacationSourceRows: RowModel[],
+    contextFilter: string,
+    availability: AvailabilityConfig,
+  ): Promise<boolean> {
+    const items = boardItemsForContext(
+      rows,
+      vacationSourceRows,
+      contextFilter,
+      availability,
+    );
+    const today = buildBoardBuckets(items, nowDate()).find(
+      (bucket) => bucket.key === "today",
+    );
+    const focusItems = today?.days.flatMap((day) => day.items) ?? [];
+
+    for (const item of focusItems) await this.renderItem(list, item, true);
+    return focusItems.length > 0;
   }
 
   private async renderBucket(

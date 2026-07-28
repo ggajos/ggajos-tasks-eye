@@ -1,6 +1,6 @@
 export const DEFAULT_FIXTURE_TODAY = "2026-07-08";
 
-export type FixtureMode = "open" | "inbox" | "hold";
+export type FixtureMode = "focus" | "open" | "inbox" | "hold";
 
 export interface FixtureFile {
   path: string;

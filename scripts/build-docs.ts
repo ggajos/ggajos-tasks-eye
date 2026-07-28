@@ -93,9 +93,10 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
   {
     label: "Everyday workflow",
     items: [
+      { slug: "views-focus", label: "Handle today's work" },
       { slug: "views-open", label: "Choose what to do next" },
       { slug: "actions-board-task-controls", label: "Complete or reschedule" },
-      { slug: "filters-context-filtering", label: "Focus on a context" },
+      { slug: "filters-context-filtering", label: "Narrow by context" },
       { slug: "views-inbox", label: "Repair notes in Inbox" },
       { slug: "views-hold", label: "Pause work in Hold" },
       { slug: "views-done", label: "Review completed work" },
@@ -112,6 +113,10 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
   {
     label: "Workflow checks",
     items: [
+      {
+        slug: "violations-open-task-overdue",
+        label: "Reschedule overdue work",
+      },
       {
         slug: "violations-open-note-without-due-date",
         label: "Add a dated next action",

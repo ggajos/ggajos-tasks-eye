@@ -9,7 +9,7 @@ export default defineFeature({
     "No public-holiday country is selected by default; choosing one caches named nationwide public holidays for the current, next, and task-relevant years.",
     "The last good public-holiday cache remains active when a refresh fails or the user is offline.",
     "Personal entries may have an optional label and otherwise appear as `Vacation`.",
-    "Open boards interleave named holiday and vacation markers with dated work, combining every reason when dates overlap without adding ordinary weekend markers.",
+    "Focus and Open interleave named holiday and vacation markers with dated work, combining every reason when dates overlap without adding ordinary weekend markers.",
     "The `OOO` filter shows only availability markers.",
     "Normal context filters suppress availability markers.",
   ],

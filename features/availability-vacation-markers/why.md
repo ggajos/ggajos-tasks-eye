@@ -50,8 +50,8 @@ years that are no longer needed are cleaned up automatically.
 
 ### What changes on the board
 
-The markers are visible in Open because that is where scheduling decisions are
-made. The dedicated `OOO` filter isolates availability when the user wants a
-calendar-like review. When public, personal, and weekend reasons overlap, one
-marker retains all of them. A task due on any unavailable day is also sent to
-Inbox so it can be rescheduled.
+The markers are visible in Focus and Open because that is where daily and
+planning decisions are made. The dedicated `OOO` filter isolates availability
+when the user wants a calendar-like review. When public, personal, and weekend
+reasons overlap, one marker retains all of them. A task due on any unavailable
+day is also sent to Inbox so it can be rescheduled.

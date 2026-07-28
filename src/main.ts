@@ -16,6 +16,7 @@ import {
 } from "./commands";
 import type { EyeMode } from "./constants";
 import {
+  DEFAULT_MODE,
   fileNotFoundMessage,
   isEyeMode,
   TASKS_PLUGIN_REQUIRED_MESSAGE,
@@ -58,7 +59,7 @@ const HOLIDAY_RETRY_MS = 60 * 60 * 1000;
 
 function defaultSettings(): EyeSettings {
   return {
-    mode: "open",
+    mode: DEFAULT_MODE,
     contextFilter: "*",
     notesFolderPath: DEFAULT_MANAGED_FOLDER_PATH,
     availability: {

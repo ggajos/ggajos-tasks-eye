@@ -32,8 +32,14 @@ const statusStepCommand = (
 export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
   {
     title: "View navigation",
-    description: "Move between the four Tasks Eye views.",
+    description: "Move between the five Tasks Eye views.",
     commands: [
+      {
+        ...MODE_COMMANDS.focus,
+        featureSlug: "views-focus",
+        featureTitle: "Focus view",
+        explanation: "Show open work due today or overdue.",
+      },
       {
         ...MODE_COMMANDS.open,
         featureSlug: "views-open",

@@ -15,7 +15,7 @@ sidebar:
 Tasks Eye turns those notes into one daily control panel. Each row represents a
 note, its earliest unchecked dated task becomes the visible next action, and its
 folder tells you the context. When you are unsure what to do next, press
-<kbd>Ctrl+1</kbd> and start with **Open**.
+<kbd>Ctrl+1</kbd> and start with **Focus**.
 
 Your Markdown remains the source of truth. Tasks Eye reads and updates the same
 checkboxes and dates you already use with the Obsidian Tasks plugin; it does not
@@ -24,27 +24,27 @@ create a second task database.
 ## See the work, not the task database
 
 <figure class="overview-shot overview-shot--hero">
-  <img src="assets/features/views-open/dark-minimal/board.png" alt="A mature Tasks Eye Open view with realistic notes spread across due-date sections" />
+  <img src="assets/features/views-focus/dark-minimal/board.png" alt="Tasks Eye Focus view showing today's work and an overdue next-action warning" />
   <figcaption>
-    A lived-in Open view. Several sections are expanded here for explanation;
-    in everyday use, Today is the only section expanded when a new pane opens.
+    Focus keeps work due today and anything overdue in one flat daily list.
+    Overdue actions carry the same repair message in Focus, Open, and Inbox.
   </figcaption>
 </figure>
 
-### How to read Open
+### How to read Focus
 
 <ol class="overview-anatomy">
   <li>
-    <strong>Begin with Today.</strong>
-    <span>It contains work due today and anything overdue, so it is the shortest path to a deliberate next decision.</span>
+    <strong>Begin with the first row.</strong>
+    <span>Focus contains only work due today and anything overdue, ordered from the oldest attention date forward.</span>
   </li>
   <li>
     <strong>Read one row as one note.</strong>
     <span>The bold line is the earliest unchecked dated task; the note title underneath opens the surrounding context.</span>
   </li>
   <li>
-    <strong>Let sections hide the horizon.</strong>
-    <span>Tomorrow, This Month, Next Month, and Future keep later work visible without letting it compete with today.</span>
+    <strong>Use Open for the horizon.</strong>
+    <span>Open groups undated and later work into due-date sections without letting it compete in the daily Focus list.</span>
   </li>
   <li>
     <strong>Use folders as contexts.</strong>
@@ -70,7 +70,7 @@ create a second task database.
 <div class="workflow-map" role="group" aria-label="Tasks Eye daily workflow">
   <div class="workflow-map__start">
     <span class="workflow-map__eyebrow">When you need direction</span>
-    <strong><kbd>Ctrl+1</kbd> → Open → Today</strong>
+    <strong><kbd>Ctrl+1</kbd> → Focus</strong>
     <span>Choose the first note that needs a decision.</span>
   </div>
   <div class="workflow-map__routes" role="group" aria-label="Three ways to handle an item">
@@ -88,12 +88,12 @@ create a second task database.
     </div>
   </div>
   <div class="workflow-map__return">
-    <strong>Return to Today until every item has been handled.</strong>
+    <strong>Return to Focus until every item has been handled.</strong>
     <span>Later work stays in Open, paused work waits in Hold, and completed tasks can be reviewed in Done.</span>
   </div>
   <div class="workflow-map__trust">
     <span class="workflow-map__eyebrow">The trust loop</span>
-    <strong><kbd>Ctrl+2</kbd> → Inbox → repair</strong>
+    <strong><kbd>Ctrl+3</kbd> → Inbox → repair</strong>
     <span>Give malformed or unrouted notes a next action, a date, a context, or the right status.</span>
   </div>
 </div>
@@ -109,11 +109,11 @@ create a second task database.
 </figure>
 
 If the next action is already clear, complete or reschedule it without leaving
-Open. If you need the decision history, meeting notes, links, or supporting
+Focus. If you need the decision history, meeting notes, links, or supporting
 material, open the note and work with the task in its full context. The board is
 a fast point of contact, not a replacement for the note.
 
-## Inbox keeps Open believable
+## Inbox keeps Focus and Open believable
 
 <figure class="overview-shot overview-shot--inbox">
   <img src="assets/features/views-inbox/dark-minimal/repair-queue.png" alt="Tasks Eye Inbox showing several realistic notes and the specific workflow issue to repair in each one" loading="lazy" />
@@ -123,18 +123,20 @@ a fast point of contact, not a replacement for the note.
   </figcaption>
 </figure>
 
-Open is useful only when every active note has a clear next action. Inbox finds
-the exceptions: a missing task date, an open note with nothing left to do, an
-unsupported status, or a note that still needs a context folder. Repair these
-items until Inbox is empty, and Open stays dependable.
+Focus and Open are useful only when every active note has a clear next action.
+Inbox finds the exceptions: an overdue or missing task date, an open note with
+nothing left to do, an unsupported status, or a note that still needs a context
+folder. Repair these items until Inbox is empty, and both work views stay
+dependable.
 
 ## A useful everyday rhythm
 
-1. Press <kbd>Ctrl+1</kbd> and handle **Today** toward zero: complete, reschedule, pause, or close each item.
-2. Press <kbd>Ctrl+2</kbd> and repair **Inbox** toward zero so tomorrow's Open view remains trustworthy.
-3. Check **Hold** when you are ready to reactivate paused work, and use **Done** when you want to look back at what was completed.
+1. Press <kbd>Ctrl+1</kbd> and handle **Focus** toward zero: complete, reschedule, pause, or close each item.
+2. Press <kbd>Ctrl+3</kbd> and repair **Inbox** toward zero so tomorrow's Focus and Open views remain trustworthy.
+3. Use **Open** to plan ahead, check **Hold** when you are ready to reactivate paused work, and use **Done** when you want to look back.
 
-The deeper reference explains [how Open behaves](features/views-open/),
+The deeper reference explains [how Focus behaves](features/views-focus/),
+[how Open supports planning](features/views-open/),
 [how notes participate in the workflow](features/data-vault-conventions/), and
 [all commands and shortcuts](reference/commands/).
 
@@ -151,4 +153,3 @@ The deeper reference explains [how Open behaves](features/views-open/),
     <li>Contact: <a href="mailto:grzegorz.gajos@opentangerine.com">grzegorz.gajos@opentangerine.com</a></li>
   </ul>
 </div>
-

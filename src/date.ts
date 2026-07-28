@@ -105,6 +105,14 @@ export function isAfterToday(value: number | string): boolean {
   return day.getTime() > today.getTime();
 }
 
+export function isBeforeToday(value: number | string): boolean {
+  const dt = toLocalDate(value);
+  const now = nowDate();
+  const day = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return day.getTime() < today.getTime();
+}
+
 export function currentYear(): string {
   return String(nowDate().getFullYear());
 }

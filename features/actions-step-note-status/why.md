@@ -7,8 +7,8 @@ along the lifecycle.
 
 Two stepping commands keep that transition fast and predictable. `Ctrl+Shift+2`
 advances the note and `Ctrl+Shift+1` moves it back along the ordered chain
-`none → open → hold → closed`, while leaving the existing `Ctrl+1`
-through `Ctrl+4` view shortcuts unchanged. Stepping back from `open` clears the
+`none → open → hold → closed`, while leaving the `Ctrl+1` through `Ctrl+5`
+view shortcuts available. Stepping back from `open` clears the
 property entirely, and the ends clamp so the note never wraps around. They use
 Obsidian's frontmatter writer so other properties and note content remain
 intact.

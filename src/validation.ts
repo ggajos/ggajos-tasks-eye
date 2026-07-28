@@ -1,7 +1,8 @@
 import { STATUSES } from "./constants";
 import { getContextFromPath } from "./context";
-import { formatYmd } from "./date";
+import { formatYmd, isBeforeToday } from "./date";
 import { isPathInManagedFolder } from "./managedPath";
+import { getEarliestDueDate } from "./taskSelection";
 import type { EyeFile, EyeTask } from "./types";
 import type { AvailabilityConfig, AvailabilityReason } from "./vacation";
 import {
@@ -15,6 +16,7 @@ export const VIOLATION_CODES = [
   "closed-with-unchecked-tasks",
   "open-without-uncompleted-tasks",
   "open-without-due-date",
+  "open-task-overdue",
   "task-on-unavailable-day",
 ] as const;
 
@@ -107,6 +109,19 @@ const openWithoutDueDate: ValidationRule = ({ status, uncompletedTasks }) => {
   );
 };
 
+const openTaskOverdue: ValidationRule = ({ status, uncompletedTasks }) => {
+  if (status !== "open") return [];
+  const earliestDue = getEarliestDueDate(uncompletedTasks);
+  if (earliestDue === null || !isBeforeToday(earliestDue)) return [];
+  return [
+    {
+      code: "open-task-overdue",
+      message: `Task is overdue: ${formatYmd(earliestDue)}.`,
+      dueTs: earliestDue,
+    },
+  ];
+};
+
 const tasksOnUnavailableDays: ValidationRule = ({
   availability,
   uncompletedTasks,
@@ -140,6 +155,7 @@ const VALIDATION_RULES: readonly ValidationRule[] = [
   closedWithUncheckedTasks,
   openWithoutTasks,
   openWithoutDueDate,
+  openTaskOverdue,
   tasksOnUnavailableDays,
 ];
 

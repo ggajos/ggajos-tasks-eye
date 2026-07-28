@@ -15,20 +15,25 @@ export const MODE_COMMANDS: Record<
   Exclude<EyeMode, "done">,
   CommandWithHotkeyDefinition
 > = {
+  focus: {
+    id: "open-focus",
+    name: "Show Focus",
+    hotkey: { modifiers: ["Ctrl"], key: "1" },
+  },
   open: {
     id: "open-open",
     name: "Show Open",
-    hotkey: { modifiers: ["Ctrl"], key: "1" },
+    hotkey: { modifiers: ["Ctrl"], key: "2" },
   },
   inbox: {
     id: "open-inbox",
     name: "Show Inbox",
-    hotkey: { modifiers: ["Ctrl"], key: "2" },
+    hotkey: { modifiers: ["Ctrl"], key: "3" },
   },
   hold: {
     id: "open-hold",
     name: "Show Hold",
-    hotkey: { modifiers: ["Ctrl"], key: "3" },
+    hotkey: { modifiers: ["Ctrl"], key: "4" },
   },
 };
 
@@ -41,7 +46,7 @@ export const CREATE_NEW_NOTE_COMMAND: CommandWithHotkeyDefinition = {
 export const OPEN_COMPLETED_COMMAND: CommandWithHotkeyDefinition = {
   id: "open-completed-tasks",
   name: "Show Done",
-  hotkey: { modifiers: ["Ctrl"], key: "4" },
+  hotkey: { modifiers: ["Ctrl"], key: "5" },
 };
 
 export const UNCHECK_SELECTED_COMMAND: CommandWithHotkeyDefinition = {

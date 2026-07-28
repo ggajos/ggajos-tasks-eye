@@ -32,7 +32,7 @@ Validation and row selection live primarily in `src/model.ts`.
 
 - `validateFile()` owns note-level validation messages.
 - `rowErrors()` filters validation messages shown on a board row.
-- `rowMatchesMode()` controls which rows appear in Open, Inbox, and Hold.
+- `rowMatchesMode()` controls which rows appear in Focus, Open, Inbox, and Hold.
 - `buildRowModel()` controls row labels, next-action selection, and row state.
 
 Inbox is the repair queue: a row appears there when its model has validation

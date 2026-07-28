@@ -61,10 +61,20 @@ describe("documented commands", () => {
       STATUS_STEP_COMMANDS.previous.id,
       STATUS_STEP_COMMANDS.next.id,
     ]);
+    expect(
+      DOCUMENTED_COMMAND_GROUPS[0]?.commands.map((command) => command.id),
+    ).toEqual([
+      MODE_COMMANDS.focus.id,
+      MODE_COMMANDS.open.id,
+      MODE_COMMANDS.inbox.id,
+      MODE_COMMANDS.hold.id,
+      OPEN_COMPLETED_COMMAND.id,
+    ]);
   });
 
   it("registers bare names for Obsidian to prefix with Tasks Eye", () => {
     expect([
+      MODE_COMMANDS.focus.name,
       MODE_COMMANDS.open.name,
       MODE_COMMANDS.inbox.name,
       MODE_COMMANDS.hold.name,
@@ -74,6 +84,7 @@ describe("documented commands", () => {
       STATUS_STEP_COMMANDS.previous.name,
       STATUS_STEP_COMMANDS.next.name,
     ]).toEqual([
+      "Show Focus",
       "Show Open",
       "Show Inbox",
       "Show Hold",
@@ -90,8 +101,23 @@ describe("documented commands", () => {
   });
 
   it("documents the name shown after Obsidian adds the plugin prefix", () => {
-    expect(formatCommandName(MODE_COMMANDS.open.name)).toBe(
-      "Tasks Eye: Show Open",
+    expect(formatCommandName(MODE_COMMANDS.focus.name)).toBe(
+      "Tasks Eye: Show Focus",
+    );
+  });
+
+  it("maps views left-to-right to Ctrl+1 through Ctrl+5", () => {
+    expect([
+      MODE_COMMANDS.focus.hotkey,
+      MODE_COMMANDS.open.hotkey,
+      MODE_COMMANDS.inbox.hotkey,
+      MODE_COMMANDS.hold.hotkey,
+      OPEN_COMPLETED_COMMAND.hotkey,
+    ]).toEqual(
+      ["1", "2", "3", "4", "5"].map((key) => ({
+        modifiers: ["Ctrl"],
+        key,
+      })),
     );
   });
 });

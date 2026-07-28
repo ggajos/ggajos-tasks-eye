@@ -5,7 +5,7 @@ export default defineFeature({
   summary:
     "Done collects tasks completed on a selected date and groups them by context and note.",
   acceptanceCriteria: [
-    "Done is the fourth view in Tasks Eye navigation.",
+    "Done is the fifth view in Tasks Eye navigation.",
     "Completed tasks are selected by Tasks completion date.",
     "Tasks are grouped by folder-derived context and note name.",
     "The date picker and previous/next/today controls change the reviewed date.",

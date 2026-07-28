@@ -1,8 +1,9 @@
 export const STATUSES = ["open", "hold", "closed"] as const;
 
-export const MODES = ["open", "inbox", "hold", "done"] as const;
+export const MODES = ["focus", "open", "inbox", "hold", "done"] as const;
 
 export const MODE_LABELS: Record<EyeMode, string> = {
+  focus: "Focus",
   open: "Open",
   inbox: "Inbox",
   hold: "Hold",
@@ -11,6 +12,8 @@ export const MODE_LABELS: Record<EyeMode, string> = {
 
 export type EyeStatus = (typeof STATUSES)[number];
 export type EyeMode = (typeof MODES)[number];
+
+export const DEFAULT_MODE: EyeMode = "focus";
 
 export function isEyeMode(value: unknown): value is EyeMode {
   return (

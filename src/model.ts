@@ -19,7 +19,8 @@ import {
   todayIso,
 } from "./date";
 import { stripDueDate } from "./taskParsing";
-import type { EyeFile, EyeTask, RowModel } from "./types";
+import { findEarliestDueTask, getEarliestDueDate } from "./taskSelection";
+import type { EyeFile, RowModel } from "./types";
 import type { AvailabilityConfig, VacationMarker } from "./vacation";
 import { EMPTY_AVAILABILITY_CONFIG, vacationMarkers } from "./vacation";
 import type { ValidationViolation } from "./validation";
@@ -47,27 +48,7 @@ interface MutableBoardBucket extends BoardBucket {
   dayMap: Map<string, BoardDayGroup>;
 }
 
-function getUncompletedTasksWithDue(tasks: EyeTask[]): EyeTask[] {
-  return tasks.filter((task) => !task.completed && task.dueTs !== null);
-}
-
-export function getEarliestDueDate(tasks: EyeTask[]): number | null {
-  const dated = getUncompletedTasksWithDue(tasks);
-  if (dated.length === 0) return null;
-  return Math.min(...dated.map((task) => task.dueTs as number));
-}
-
-function findEarliestDueTask(tasks: EyeTask[]): EyeTask | undefined {
-  const uncompleted = tasks.filter((task) => !task.completed);
-  if (uncompleted.length === 0) return undefined;
-
-  const dated = uncompleted.filter((task) => task.dueTs !== null);
-  if (dated.length === 0) return uncompleted[0];
-
-  return [...dated].sort(
-    (a, b) => (a.dueTs as number) - (b.dueTs as number),
-  )[0];
-}
+export { getEarliestDueDate } from "./taskSelection";
 
 export function rowErrors(
   file: EyeFile,
@@ -135,6 +116,9 @@ export function compareRowModels(a: RowModel, b: RowModel): number {
 
 export function rowMatchesMode(model: RowModel, mode: EyeMode): boolean {
   const status = statusValue(model.file);
+  if (mode === "focus") {
+    return status === "open" && model.earliestDue !== null && !model.isFuture;
+  }
   if (mode === "open") return status === "open";
   if (mode === "inbox") return model.errors.length > 0;
   if (mode === "hold") return status === "hold";
