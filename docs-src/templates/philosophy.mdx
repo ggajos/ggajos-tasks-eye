@@ -1,0 +1,101 @@
+---
+title: "Philosophy & Workflow"
+description: "The mental model and recommended way of working with Tasks Eye."
+sidebar:
+  label: "Philosophy & Workflow"
+  order: 1
+---
+
+<p class="overview-lede">
+  Tasks Eye provides one low-friction point of contact for task work. When you
+  do not know what to do next, you press <kbd>Ctrl+1</kbd> and look at Focus or
+  Open.
+</p>
+
+Obsidian Tasks provides excellent task primitives, but Tasks Eye provides the
+workflow for managing the *notes* that contain those tasks. The goal is to minimize friction between asking “what should I do next?” and reaching the relevant task and its surrounding note context.
+
+## The Note-Centered Model
+
+In many task systems, the task is the atomic unit. In Tasks Eye, **the note is the atomic unit of work**.
+
+Any note containing tasks may participate in the workflow—you do not need to prescribe notes as formal "projects" or "outcomes." A board row simply represents a note and surfaces its earliest unchecked dated task as the visible next action.
+
+### The Meaning of a Due Date
+Treat a due date as the **next attention date**—the date on which an action should surface again for your attention—not necessarily as a hard external deadline. If today is not the right moment for a task, moving the date to tomorrow is a valid decision, not a failure.
+
+## The Two Zeros
+
+The primary operating goal of Tasks Eye is to empty two buckets every day.
+
+### 1. Today Zero (Focus)
+Your daily work lives in Focus. "Today Zero" means every overdue or due-today action has been deliberately handled.
+
+<figure class="overview-shot overview-shot--hero">
+  <img src="../assets/features/views-focus/dark-minimal/board.png" alt="Tasks Eye Focus view showing today's work and an overdue next-action warning" />
+  <figcaption>
+    Focus keeps work due today and anything overdue in one flat daily list. Every item here must be handled before the day is over.
+  </figcaption>
+</figure>
+
+Handling does not necessarily mean *finishing* all possible work. It means you made a decision:
+- **Do it:** You completed the task.
+- **Move it:** You rescheduled its next attention date.
+- **Change state:** You moved the note to Hold or closed it entirely.
+
+### 2. Inbox Zero (The Repair Queue)
+Focus and Open are only trustworthy when every active note has a clear next action. Inbox is your **status-independent repair queue**.
+
+<figure class="overview-shot overview-shot--inbox">
+  <img src="../assets/features/views-inbox/dark-minimal/repair-queue.png" alt="Tasks Eye Inbox showing several realistic notes and the specific workflow issue to repair in each one" loading="lazy" />
+  <figcaption>
+    Inbox explains why each note needs attention so you can fix it.
+  </figcaption>
+</figure>
+
+It catches malformed or unrouted notes: missing task dates, notes without unchecked tasks, unsupported statuses, or notes left in the root folder.
+This is an asynchronous cleanup queue. You should clear it during the day or at the end of the day so it never blocks your immediate execution in Open or Focus.
+
+#### The Capture-and-Clarify Path
+When you create a "quick note" using the plugin's new note action, it intentionally drops the note in the managed root. This triggers an Inbox validation flag. Later, during your Inbox review, you clarify this captured note by giving it a dated action and moving it to the correct context folder.
+
+## Note Statuses
+
+Tasks Eye respects the lifecycle of your notes using three explicit statuses:
+
+- **`open`:** For notes you are actively working on. They *must* be actionable (i.e., have an unchecked dated task). The system forces this actionability so nothing slips through the cracks.
+- **`hold`:** An idea container and incubator. Use this for non-urgent big projects you aren't sure how to split up yet, flat lists of ideas, or links to view later—essentially anything that cannot be injected into the main actionable flow right now. **Note:** While tasks inside `hold` notes can have dates (which helps organize them within the Hold view), they will *never* surface in Focus or Open. They are completely isolated from your daily workload.
+- **`closed`:** For notes that are no longer active tasks. If a note is purely informational, completed, or abandoned, it should be closed. Closed notes with unchecked tasks will trigger an Inbox validation.
+
+*Note: Missing or blank note statuses are treated as `open`.*
+
+## Hold and Done Reviews
+- **Hold** captures unstructured ideas and un-splittable projects to be processed later. This list should ideally be kept very small. The goal is to eventually empty it by organizing these ideas and breaking them down into actionable `open` notes.
+- **Done** is strictly for reviewing history, with no required cadence.
+
+## Anti-Patterns
+
+To keep your system fast and trustworthy, avoid these common pitfalls:
+
+- **Treating the Inbox as a To-Do List:** Inbox is for fixing broken note metadata, not for executing work. Clear the metadata errors, then execute the work from Focus or Open.
+- **Using Notes as Undated Checklists:** The workflow requires *attention dates*. An `open` note must have at least one dated task to tell the system when it matters.
+- **Hoarding in Hold:** Don't let Hold become an infinite graveyard. Keep this list small. When you figure out how to action a big project, extract the steps into `open` notes and close the `hold` container.
+- **Stressing over External Deadlines:** Tasks Eye does not attempt to track ultimate hard deadlines or Gantt charts. The system is explicitly designed for managing your current workload and attention dates.
+
+## A Day in the Life
+
+A typical day using Tasks Eye looks like this:
+
+1. **Morning:** You press <kbd>Ctrl+1</kbd> to open Focus. You see 4 notes demanding attention today.
+
+<figure class="overview-shot overview-shot--controls">
+  <img src="../assets/features/actions-board-task-controls/dark-minimal/controls.png" alt="A Tasks Eye row with controls for completing a task or moving its date" loading="lazy" />
+  <figcaption>
+    Complete or reschedule the task right from the board, or open the note for full context.
+  </figcaption>
+</figure>
+
+2. **Execution:** You complete the task in the first note. For the second, you realize you need input from a colleague, so you add a new task "Wait for reply" and date it for tomorrow.
+3. **Capture:** A random idea strikes. You create a quick note and jot down a task. It lands in the root folder.
+4. **Afternoon Repair:** You press <kbd>Ctrl+3</kbd> to open Inbox. You see your quick note flagged because it's not in a context folder. You move it to your `Work/Ideas` folder and date the task for next week.
+5. **Closing out:** You finish the remaining items in Focus. Both Focus and Inbox are now empty. You trust the system is ready for tomorrow.
