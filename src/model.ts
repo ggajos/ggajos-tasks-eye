@@ -102,7 +102,6 @@ export function rowMatchesMode(model: RowModel, mode: EyeMode): boolean {
   }
   if (mode === "open") return status === "open";
   if (mode === "inbox") return model.errors.length > 0;
-  if (mode === "hold") return status === "hold";
   return false;
 }
 

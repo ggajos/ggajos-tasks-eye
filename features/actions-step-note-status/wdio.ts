@@ -85,13 +85,11 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         title: "steps forward through the chain and clamps at closed",
         async run() {
           await tasksEyePage.openPreview(MANAGED_FILE, HEADING);
-          for (const status of ["hold", "closed"] as const) {
-            await stepStatus("next");
-            const markdown = await waitForStatus(MANAGED_FILE, status);
-            expect(markdown).toContain("owner: Platform");
-            expect(markdown).toContain(`# ${HEADING}`);
-            expect(markdown).toContain("- [ ] Publish the launch decision");
-          }
+          await stepStatus("next");
+          const markdown = await waitForStatus(MANAGED_FILE, "closed");
+          expect(markdown).toContain("owner: Platform");
+          expect(markdown).toContain(`# ${HEADING}`);
+          expect(markdown).toContain("- [ ] Publish the launch decision");
           await stepStatus("next");
           const clamped = await waitForStatus(MANAGED_FILE, "closed");
           expect(clamped).toContain("status: closed");
@@ -102,7 +100,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         async run() {
           await tasksEyePage.openPreview(MANAGED_FILE, HEADING);
           await stepStatus("next");
-          await waitForStatus(MANAGED_FILE, "hold");
+          await waitForStatus(MANAGED_FILE, "closed");
           await stepStatus("previous");
           await waitForStatus(MANAGED_FILE, "open");
           await stepStatus("previous");
@@ -153,7 +151,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         async run({ save }) {
           const preview = await tasksEyePage.openPreview(MANAGED_FILE, HEADING);
           await stepStatus("next");
-          await waitForStatus(MANAGED_FILE, "hold");
+          await waitForStatus(MANAGED_FILE, "closed");
           await save(preview);
         },
       },

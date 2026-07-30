@@ -3,8 +3,7 @@ import { defineFeature } from "../types";
 
 export default defineFeature({
   title: "Unsupported status",
-  summary:
-    "A note needs `open`, `hold`, or `closed` when it declares a status.",
+  summary: "A note needs `open` or `closed` when it declares a status.",
   acceptanceCriteria: [
     "Explicit unsupported status values are reported in Inbox.",
     "Non-string status values are reported in Inbox.",

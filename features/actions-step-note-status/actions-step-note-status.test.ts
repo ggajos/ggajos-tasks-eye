@@ -30,13 +30,13 @@ describe("Step note status feature", () => {
     expect(frontmatter).toEqual({ owner: "Platform", status: "open" });
   });
 
-  it("advances open to hold and preserves other properties", async () => {
+  it("advances open to closed and preserves other properties", async () => {
     const frontmatter: Frontmatter = { owner: "Platform", status: "open" };
     const { app, file } = appFor(frontmatter);
 
     await stepNoteStatus(app, file, "next");
 
-    expect(frontmatter).toEqual({ owner: "Platform", status: "hold" });
+    expect(frontmatter).toEqual({ owner: "Platform", status: "closed" });
   });
 
   it("clamps forward at closed", async () => {

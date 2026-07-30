@@ -20,8 +20,8 @@ describe("Focus view feature", () => {
         ),
         file("Work/Undated.md", "- [ ] undated"),
         file(
-          "Work/Hold.md",
-          "---\nstatus: hold\n---\n\n- [ ] held today 📅 2026-07-08",
+          "Work/Reviewing.md",
+          "---\nstatus: reviewing\n---\n\n- [ ] review today 📅 2026-07-08",
         ),
         file(
           "Work/Closed.md",

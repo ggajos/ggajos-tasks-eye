@@ -8,7 +8,7 @@ const RENDERED_ACTION =
 
 const markdownFixture = fixture([
   note("Architecture/Technology Radar.md", {
-    status: "hold",
+    status: "open",
     tasks: [
       {
         text: "Review [[ADR-042 Tenant Isolation|ADR-042]] with **Security Architecture** and record the decision in `architecture/tenant-isolation`",
@@ -23,7 +23,7 @@ const markdownFixture = fixture([
 ]);
 
 async function openMarkdownActionBoard() {
-  await tasksEyePage.openBoard("hold", "Technology Radar");
+  await tasksEyePage.openBoard("open", "Technology Radar");
   await tasksEyePage.setContextFilter("Architecture");
   return await tasksEyePage.plugin(RENDERED_ACTION);
 }

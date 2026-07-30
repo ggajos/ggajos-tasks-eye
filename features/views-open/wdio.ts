@@ -5,7 +5,6 @@ import { fixture, note } from "../fixtures";
 
 const TODAY_ANCHOR = "Send the revised homepage copy to Marta";
 const TOMORROW_ANCHOR = "Review Q3 priorities with the team";
-const HOLD_FUTURE = "Revisit the camper van route";
 
 const DEFAULT_BUCKETS = [
   ["noDue", false],
@@ -71,10 +70,6 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
       status: "open",
       tasks: [{ text: "Order spring seed trays", due: "2026-09-01" }],
     }),
-    note("Travel/Camper Van Trip.md", {
-      status: "hold",
-      tasks: [{ text: HOLD_FUTURE, due: "2026-09-01" }],
-    }),
   ]),
   {
     acceptance: [
@@ -90,8 +85,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           await tasksEyePage.expectBucketExpanded("tomorrow", true);
           await tasksEyePage.expectBucketExpanded("today", false);
 
-          await tasksEyePage.openBoard("hold", HOLD_FUTURE);
-          await tasksEyePage.expectBucketExpanded("future", true);
+          await tasksEyePage.openBoard("focus", TODAY_ANCHOR);
           await tasksEyePage.openBoard("open", TOMORROW_ANCHOR);
           await tasksEyePage.expectBucketExpanded("tomorrow", true);
           await tasksEyePage.expectBucketExpanded("today", false);

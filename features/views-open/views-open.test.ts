@@ -25,26 +25,29 @@ describe("Open view feature", () => {
     });
   });
 
-  it("keeps manual choices in one pane, leaves Hold expanded, and resets a new pane", () => {
+  it("keeps manual choices per mode in one pane and resets a new pane", () => {
     const state = new BoardCollapseState();
 
     expect(state.toggle("open", "tomorrow")).toBe(false);
     expect(state.toggle("open", "today")).toBe(true);
     expect(state.isCollapsed("open", "tomorrow")).toBe(false);
     expect(state.isCollapsed("open", "today")).toBe(true);
-    expect(state.isCollapsed("hold", "tomorrow")).toBe(false);
+    expect(state.isCollapsed("inbox", "tomorrow")).toBe(false);
 
     const replacementPane = new BoardCollapseState();
     expect(replacementPane.isCollapsed("open", "tomorrow")).toBe(true);
     expect(replacementPane.isCollapsed("open", "today")).toBe(false);
   });
 
-  it("shows open notes and excludes hold notes", () => {
+  it("shows open notes and excludes unsupported statuses", () => {
     const rows = selectRows(
       [
         file("Growth/Open.md", "---\nstatus: open\n---\n\n- [ ] open"),
         file("Growth/Default Open.md", "- [ ] default open"),
-        file("Growth/Hold.md", "---\nstatus: hold\n---\n\n- [ ] hold"),
+        file(
+          "Growth/Reviewing.md",
+          "---\nstatus: reviewing\n---\n\n- [ ] reviewing",
+        ),
       ],
       "open",
       "*",

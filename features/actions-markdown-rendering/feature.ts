@@ -14,7 +14,7 @@ export default defineFeature({
     {
       slug: "formatted-action",
       title: "Markdown-formatted architecture task",
-      alt: "Architecture task in Hold with an internal link, bold emphasis, and inline code",
+      alt: "Architecture task in Open with an internal link, bold emphasis, and inline code",
     },
   ],
 });

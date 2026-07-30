@@ -9,6 +9,7 @@ const snapshotFeaturesRoot = join(
   "features",
 );
 const docsFeaturesRoot = join("docs-src", "public", "assets", "features");
+const featureDefinitionsRoot = "features";
 if (!existsSync(snapshotFeaturesRoot)) {
   console.warn(`No documentation screenshots found: ${snapshotFeaturesRoot}`);
   process.exit(0);
@@ -16,10 +17,20 @@ if (!existsSync(snapshotFeaturesRoot)) {
 
 await rm(docsFeaturesRoot, { recursive: true, force: true });
 
+const activeFeatures = new Set(
+  (await readdir(featureDefinitionsRoot, { withFileTypes: true }))
+    .filter(
+      (entry) =>
+        entry.isDirectory() &&
+        existsSync(join(featureDefinitionsRoot, entry.name, "feature.ts")),
+    )
+    .map((entry) => entry.name),
+);
+
 for (const feature of await readdir(snapshotFeaturesRoot, {
   withFileTypes: true,
 })) {
-  if (!feature.isDirectory()) continue;
+  if (!feature.isDirectory() || !activeFeatures.has(feature.name)) continue;
 
   const source = join(snapshotFeaturesRoot, feature.name);
   const target = join(docsFeaturesRoot, feature.name);
@@ -28,5 +39,5 @@ for (const feature of await readdir(snapshotFeaturesRoot, {
 }
 
 console.log(
-  `Published all documentation screenshot themes from ${snapshotFeaturesRoot}`,
+  `Published current feature screenshots from ${snapshotFeaturesRoot}`,
 );

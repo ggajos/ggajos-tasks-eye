@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_MODE, DUE_BUCKETS, isEyeMode, MODES } from "../src/constants";
+import {
+  DEFAULT_MODE,
+  DUE_BUCKETS,
+  isEyeMode,
+  MODES,
+  STATUSES,
+} from "../src/constants";
 
 describe("Tasks Eye modes", () => {
   it("orders Focus first and Done last in unified navigation", () => {
-    expect(MODES).toEqual(["focus", "open", "inbox", "hold", "done"]);
+    expect(MODES).toEqual(["focus", "open", "inbox", "done"]);
+    expect(STATUSES).toEqual(["open", "closed"]);
     expect(DEFAULT_MODE).toBe("focus");
     expect(isEyeMode("focus")).toBe(true);
     expect(isEyeMode("done")).toBe(true);

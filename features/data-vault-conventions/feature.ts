@@ -8,7 +8,7 @@ export default defineFeature({
     "The notes folder is configurable and defaults to the vault root (`/`).",
     "Tasks Eye reads Markdown notes directly inside the configured folder and all descendants.",
     "A missing configured folder produces an explicit configuration error.",
-    "Supported note statuses are `open`, `hold`, and `closed`.",
+    "Supported note statuses are `open` and `closed`.",
     "Missing or blank status is treated as `open`.",
     "Tasks due dates and completion dates are read from Obsidian Tasks emoji metadata.",
   ],

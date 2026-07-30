@@ -4,10 +4,10 @@ export default defineFeature({
   title: "Step note status",
   summary:
     "Two commands step the active Markdown note along the status chain " +
-    "none → open → hold → closed by updating its frontmatter.",
+    "none → open → closed by updating its frontmatter.",
   acceptanceCriteria: [
     "`Ctrl+Shift+2` moves the note one step forward and `Ctrl+Shift+1` one " +
-      "step back along `none → open → hold → closed`.",
+      "step back along `none → open → closed`.",
     "Stepping back from `open` removes the `status` property entirely; " +
       "stepping forward from no status sets `open`.",
     "The ends clamp: forward from `closed` and back from no status do " +
@@ -23,9 +23,9 @@ export default defineFeature({
   screenshots: [
     {
       slug: "stepped-note",
-      title: "Step the active note forward to Hold",
+      title: "Step the active note forward to Closed",
       alt:
-        "Obsidian note showing a project whose status property is hold " +
+        "Obsidian note showing a project whose status property is closed " +
         "after stepping forward from open",
     },
   ],

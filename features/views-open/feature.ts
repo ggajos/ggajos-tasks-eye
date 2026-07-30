@@ -6,7 +6,7 @@ export default defineFeature({
     "Open turns active notes into a dated view of their next actions, so you can see what needs attention now without losing the surrounding note context.",
   acceptanceCriteria: [
     "Notes with missing, blank, or explicit `status: open` appear in Open.",
-    "Hold notes do not appear in Open.",
+    "Closed notes and notes with unsupported statuses do not appear in Open.",
     "Rows use the earliest unchecked due task as the next action.",
     "Rows are grouped into No Due Date, Today, Tomorrow, This Month, Next Month, and Future buckets.",
     "A new Open pane starts with Today expanded and every other due-date bucket collapsed.",

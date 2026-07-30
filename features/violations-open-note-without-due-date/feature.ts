@@ -10,7 +10,7 @@ export default defineFeature({
     "Missing or blank status is treated as Open for this rule.",
     "One unchecked task with a due date is enough to satisfy the rule, even when other unchecked tasks are undated.",
     "Completed tasks with due dates do not satisfy the rule.",
-    "Hold and closed notes do not trigger this issue.",
+    "Closed notes and notes with unsupported statuses do not trigger this issue.",
     "The issue is visible in both Inbox and Open.",
   ],
   violation: {

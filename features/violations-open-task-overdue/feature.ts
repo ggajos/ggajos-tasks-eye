@@ -9,7 +9,7 @@ export default defineFeature({
     "The earliest unchecked task dated before today produces one overdue violation.",
     "The issue text is `Task is overdue: YYYY-MM-DD.` using the task's due date.",
     "Tasks due today or later and completed tasks do not trigger the issue.",
-    "Hold and closed notes do not trigger the issue.",
+    "Closed notes and notes with unsupported statuses do not trigger the issue.",
     "The issue is rendered by the same row validation UI in Focus, Open, and Inbox.",
   ],
   violation: {

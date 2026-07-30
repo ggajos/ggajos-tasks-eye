@@ -13,7 +13,7 @@ describe("Invalid status violation", () => {
       violationMessages(
         file("Growth/Reviewing.md", "---\nstatus: reviewing\n---\n"),
       ),
-    ).toContain('Unsupported status "reviewing". Use open, hold, or closed.');
+    ).toContain('Unsupported status "reviewing". Use open or closed.');
   });
 
   it("reports the former archived status as unsupported", () => {
@@ -21,6 +21,6 @@ describe("Invalid status violation", () => {
       violationMessages(
         file("Growth/Archived.md", "---\nstatus: archived\n---\n"),
       ),
-    ).toContain('Unsupported status "archived". Use open, hold, or closed.');
+    ).toContain('Unsupported status "archived". Use open or closed.');
   });
 });

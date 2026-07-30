@@ -98,7 +98,6 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
       { slug: "actions-board-task-controls", label: "Complete or reschedule" },
       { slug: "filters-context-filtering", label: "Narrow by context" },
       { slug: "views-inbox", label: "Repair notes in Inbox" },
-      { slug: "views-hold", label: "Pause work in Hold" },
       { slug: "views-done", label: "Review completed work" },
     ],
   },

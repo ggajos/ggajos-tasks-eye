@@ -49,7 +49,7 @@ describe("Open note without due date violation", () => {
     ).toContain(VIOLATION);
   });
 
-  it.each(["hold", "closed"])("does not apply to %s notes", (status) => {
+  it.each(["reviewing", "closed"])("does not apply to %s notes", (status) => {
     expect(
       violationCodes(
         file(

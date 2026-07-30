@@ -53,7 +53,7 @@ status: open
     ).not.toContain(VIOLATION);
   });
 
-  it.each(["hold", "closed"])("does not apply to %s notes", (status) => {
+  it.each(["reviewing", "closed"])("does not apply to %s notes", (status) => {
     expect(
       violationCodes(
         file(

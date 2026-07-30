@@ -1,12 +1,11 @@
-export const STATUSES = ["open", "hold", "closed"] as const;
+export const STATUSES = ["open", "closed"] as const;
 
-export const MODES = ["focus", "open", "inbox", "hold", "done"] as const;
+export const MODES = ["focus", "open", "inbox", "done"] as const;
 
 export const MODE_LABELS: Record<EyeMode, string> = {
   focus: "Focus",
   open: "Open",
   inbox: "Inbox",
-  hold: "Hold",
   done: "Done",
 };
 

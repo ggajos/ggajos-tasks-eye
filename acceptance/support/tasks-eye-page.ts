@@ -1,7 +1,7 @@
 import { $, browser } from "@wdio/globals";
 import type { DueBucket } from "../../src/constants";
 
-export type EyeMode = "focus" | "open" | "inbox" | "hold";
+export type EyeMode = "focus" | "open" | "inbox";
 export type WdioElement = WebdriverIO.Element;
 
 const PLUGIN = ".workspace-leaf.mod-active .eye-plugin";

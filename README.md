@@ -2,8 +2,8 @@
 
 Tasks Eye turns Markdown notes and Tasks checkboxes into note-centered work
 views. Focus surfaces work due today or overdue, Open keeps the planning horizon
-visible, Inbox collects notes that need cleanup, Hold keeps paused work visible,
-and Done reviews completed tasks by date.
+visible, Inbox collects notes that need cleanup, and Done reviews completed
+tasks by date.
 
 [Explore the full documentation](https://ggajos.com/ggajos-tasks-eye/)
 
@@ -17,7 +17,7 @@ and Done reviews completed tasks by date.
 - Work from a flat daily Focus list without losing the broader Open plan.
 - Find notes that need workflow cleanup in a dedicated Inbox.
 - Complete and reschedule tasks directly from the board.
-- Review focused, planned, paused, and completed work in one view.
+- Review focused, planned, and completed work in one view.
 
 ## Install with BRAT
 

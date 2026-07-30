@@ -32,7 +32,7 @@ const statusStepCommand = (
 export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
   {
     title: "View navigation",
-    description: "Move between the five Tasks Eye views.",
+    description: "Move between the four Tasks Eye views.",
     commands: [
       {
         ...MODE_COMMANDS.focus,
@@ -51,12 +51,6 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
         featureSlug: "views-inbox",
         featureTitle: "Inbox view",
         explanation: "Show notes that need workflow cleanup.",
-      },
-      {
-        ...MODE_COMMANDS.hold,
-        featureSlug: "views-hold",
-        featureTitle: "Hold view",
-        explanation: "Show backlog and paused notes.",
       },
       {
         ...OPEN_COMPLETED_COMMAND,

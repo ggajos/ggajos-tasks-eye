@@ -14,7 +14,10 @@ describe("Vault conventions feature", () => {
       [
         file("Growth/Missing.md", "- [ ] missing status"),
         file("Growth/Blank.md", "---\nstatus:\n---\n\n- [ ] blank status"),
-        file("Growth/Hold.md", "---\nstatus: hold\n---\n\n- [ ] hold"),
+        file(
+          "Growth/Reviewing.md",
+          "---\nstatus: reviewing\n---\n\n- [ ] reviewing",
+        ),
       ],
       "open",
       "*",

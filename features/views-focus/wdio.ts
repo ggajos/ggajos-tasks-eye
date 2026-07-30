@@ -7,7 +7,7 @@ const OVERDUE = "Send the revised project brief";
 const TODAY = "Review today's launch checklist";
 const FUTURE = "Prepare tomorrow's stakeholder update";
 const UNDATED = "Clarify a date for the follow-up";
-const HELD = "Revisit the paused migration";
+const UNSUPPORTED = "Revisit the paused migration";
 const OOO = "Planning day";
 
 const focusFixture = fixture(
@@ -29,8 +29,8 @@ const focusFixture = fixture(
       tasks: [{ text: UNDATED }],
     }),
     note("Work/Paused Migration.md", {
-      status: "hold",
-      tasks: [{ text: HELD, due: "2026-07-08" }],
+      status: "reviewing",
+      tasks: [{ text: UNSUPPORTED, due: "2026-07-08" }],
     }),
   ],
   {
@@ -85,7 +85,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             !state.text.includes(OOO) ||
             state.text.includes(FUTURE) ||
             state.text.includes(UNDATED) ||
-            state.text.includes(HELD) ||
+            state.text.includes(UNSUPPORTED) ||
             !state.violations.includes("open-task-overdue")
           ) {
             throw new Error(`Unexpected Focus state: ${JSON.stringify(state)}`);

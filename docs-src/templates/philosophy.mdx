@@ -41,7 +41,7 @@ Your daily work lives in Focus. "Today Zero" means every overdue or due-today ac
 Handling does not necessarily mean *finishing* all possible work. It means you made a decision:
 - **Do it:** You completed the task.
 - **Move it:** You rescheduled its next attention date.
-- **Change state:** You moved the note to Hold or closed it entirely.
+- **Change state:** You closed the note because it no longer needs attention.
 
 ### 2. Inbox Zero (The Repair Queue)
 Focus and Open are only trustworthy when every active note has a clear next action. Inbox is your **status-independent repair queue**.
@@ -61,17 +61,16 @@ When you create a "quick note" using the plugin's new note action, it intentiona
 
 ## Note Statuses
 
-Tasks Eye respects the lifecycle of your notes using three explicit statuses:
+Tasks Eye respects the lifecycle of your notes using two explicit statuses:
 
 - **`open`:** For notes you are actively working on. They *must* be actionable (i.e., have an unchecked dated task). The system forces this actionability so nothing slips through the cracks.
-- **`hold`:** An idea container and incubator. Use this for non-urgent big projects you aren't sure how to split up yet, flat lists of ideas, or links to view later—essentially anything that cannot be injected into the main actionable flow right now. **Note:** While tasks inside `hold` notes can have dates (which helps organize them within the Hold view), they will *never* surface in Focus or Open. They are completely isolated from your daily workload.
 - **`closed`:** For notes that are no longer active tasks. If a note is purely informational, completed, or abandoned, it should be closed. Closed notes with unchecked tasks will trigger an Inbox validation.
 
 *Note: Missing or blank note statuses are treated as `open`.*
 
-## Hold and Done Reviews
-- **Hold** captures unstructured ideas and un-splittable projects to be processed later. This list should ideally be kept very small. The goal is to eventually empty it by organizing these ideas and breaking them down into actionable `open` notes.
-- **Done** is strictly for reviewing history, with no required cadence.
+An open note that does not need attention yet remains open with its next
+unchecked task dated for the day it should surface. **Done** is strictly for
+reviewing history, with no required cadence.
 
 ## Anti-Patterns
 
@@ -79,7 +78,7 @@ To keep your system fast and trustworthy, avoid these common pitfalls:
 
 - **Treating the Inbox as a To-Do List:** Inbox is for fixing broken note metadata, not for executing work. Clear the metadata errors, then execute the work from Focus or Open.
 - **Using Notes as Undated Checklists:** The workflow requires *attention dates*. An `open` note must have at least one dated task to tell the system when it matters.
-- **Hoarding in Hold:** Don't let Hold become an infinite graveyard. Keep this list small. When you figure out how to action a big project, extract the steps into `open` notes and close the `hold` container.
+- **Hiding deferred work in another state:** Keep the note `open` and move its attention date forward so it returns when you need to decide again.
 - **Stressing over External Deadlines:** Tasks Eye does not attempt to track ultimate hard deadlines or Gantt charts. The system is explicitly designed for managing your current workload and attention dates.
 
 ## A Day in the Life

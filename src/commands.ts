@@ -30,11 +30,6 @@ export const MODE_COMMANDS: Record<
     name: "Show Inbox",
     hotkey: { modifiers: ["Ctrl"], key: "3" },
   },
-  hold: {
-    id: "open-hold",
-    name: "Show Hold",
-    hotkey: { modifiers: ["Ctrl"], key: "4" },
-  },
 };
 
 export const CREATE_NEW_NOTE_COMMAND: CommandWithHotkeyDefinition = {
@@ -46,7 +41,7 @@ export const CREATE_NEW_NOTE_COMMAND: CommandWithHotkeyDefinition = {
 export const OPEN_COMPLETED_COMMAND: CommandWithHotkeyDefinition = {
   id: "open-completed-tasks",
   name: "Show Done",
-  hotkey: { modifiers: ["Ctrl"], key: "5" },
+  hotkey: { modifiers: ["Ctrl"], key: "4" },
 };
 
 export const UNCHECK_SELECTED_COMMAND: CommandWithHotkeyDefinition = {

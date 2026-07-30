@@ -22,7 +22,7 @@ const doneFixture = fixture([
     ],
   }),
   note("Architecture/Technology Radar.md", {
-    status: "hold",
+    status: "open",
     tasks: [{ text: "Review platform isolation", due: "2026-07-08" }],
   }),
 ]);
@@ -113,7 +113,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             },
           );
 
-          await clickMode("Show Hold");
+          await clickMode("Show Open");
           await tasksEyePage.plugin("Technology Radar");
           await clickMode("Show Done");
           await tasksEyePage.plugin("No completed tasks for");
