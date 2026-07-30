@@ -489,17 +489,24 @@
 .eye-actions {
   align-content: start;
   align-items: center;
+  background: var(
+    --nav-item-background-hover,
+    var(--background-modifier-hover)
+  );
+  border-radius: var(--radius-s, 4px);
   display: flex;
   flex-wrap: nowrap;
   gap: 2px;
   justify-content: end;
   opacity: 0;
+  padding: 2px;
   pointer-events: none;
   position: absolute;
   right: 6px;
   top: 50%;
   transform: translateY(-50%);
   transition: opacity 120ms ease;
+  width: max-content;
   z-index: 2;
 }
 
@@ -521,6 +528,16 @@
   min-height: 22px;
   min-width: 22px;
   padding: 0 5px;
+}
+
+.eye-actions > button.eye-icon-button:hover,
+.eye-actions > button.eye-icon-button:focus-visible,
+.eye-actions > button.eye-shift-button:hover,
+.eye-actions > button.eye-shift-button:focus-visible {
+  background: var(
+    --background-modifier-border-hover,
+    var(--background-modifier-border)
+  );
 }
 
 .eye-icon-button svg {
@@ -633,6 +650,7 @@
 @media (hover: none) {
   .eye-actions {
     grid-column: 1 / -1;
+    justify-self: start;
     justify-content: start;
     margin-top: 2px;
     opacity: 1;

@@ -691,7 +691,7 @@ export class EyeView extends ItemView {
     actions.appendChild(done);
 
     if (model.earliestDue !== null) {
-      for (const delta of [1, -1, 7, -7]) {
+      for (const delta of [-1, 1, 7]) {
         actions.appendChild(
           button(
             "eye-shift-button",

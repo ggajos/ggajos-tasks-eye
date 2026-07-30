@@ -6,7 +6,7 @@ export default defineFeature({
     "Board rows can mark the next task done or move its due date without opening the note.",
   acceptanceCriteria: [
     "Rows with an unchecked task show a mark-done button.",
-    "Rows with a due date show `+1`, `-1`, `+7`, and `-7` due-date controls.",
+    "Rows with a due date show `-1`, `+1`, and `+7` due-date controls in that order.",
     "Moving a due date updates the matching Tasks due marker in the note.",
     "Marking a task done delegates to the Tasks API and refreshes the board.",
   ],
