@@ -1,0 +1,384 @@
+---
+title: "GTD Quickstart"
+description: "Translate a familiar GTD practice into a note-centered Tasks Eye workflow."
+sidebar:
+  label: "GTD Quickstart"
+  order: 2
+---
+
+import Mermaid from '../../components/Mermaid.astro';
+
+export const gtdLoop = `flowchart LR
+  Capture["Capture<br/>Create a note"]
+  Clarify["Clarify<br/>Choose the outcome and next action"]
+  Organize["Organize<br/>Route it and set an attention date"]
+  Reflect["Reflect<br/>Clear Inbox and review Open"]
+  Engage["Engage<br/>Handle Focus to zero"]
+
+  Capture --> Clarify --> Organize --> Reflect --> Engage --> Capture`;
+
+export const processingTree = `flowchart TD
+  Captured["Captured note"] --> Actionable{"Is it actionable?"}
+
+  Actionable -- "No" --> Keep{"Keep it?"}
+  Keep -- "No value" --> Trash["Delete it"]
+  Keep -- "Reference" --> Reference["Move outside Tasks<br/>or close it"]
+  Keep -- "Someday / Maybe" --> Someday["Add it to a periodically<br/>reviewed Someday / Maybe note"]
+
+  Actionable -- "Yes" --> Quick{"Under two minutes?"}
+  Quick -- "Yes" --> DoNow["Do it now<br/>Record it only if useful"]
+  Quick -- "No" --> Project{"More than one action?"}
+  Project -- "Yes" --> Outcome["Name the desired outcome<br/>in a note"]
+  Project -- "No" --> Next["Define the next<br/>physical action"]
+  Outcome --> Next
+
+  Next --> Owner{"Who acts next?"}
+  Owner -- "Someone else" --> Waiting["Create a dated<br/>follow-up action"]
+  Owner -- "Me" --> Attention["Give the action its next<br/>attention date"]
+  Waiting --> Route["Route the note to<br/>a minimal context"]
+  Attention --> Route
+  Route --> Open["Keep the note open"]`;
+
+<div class="overview-lede">
+  If you already understand Getting Things Done, you do not need a new
+  productivity vocabulary. You need to know where the familiar pieces went.
+  Tasks Eye keeps the GTD loop, but organizes attention around Markdown notes
+  instead of maintaining separate project and next-action databases.
+</div>
+
+<Mermaid
+  chart={gtdLoop}
+  label="GTD workflow mapped to Tasks Eye from capture through engagement"
+>
+  The familiar GTD loop remains intact. Tasks Eye changes the containers and
+  gives every active note a date on which it should return to your attention.
+</Mermaid>
+
+## The translation in one minute
+
+| In GTD | In Tasks Eye |
+| --- | --- |
+| Inbox | A capture area plus an Inbox **repair queue** |
+| Project | One possible use of a note; notes are broader work containers |
+| Next Action | The earliest unchecked task with an attention date |
+| Context | The note's folder relative to the configured notes folder |
+| Projects list | Open, where every active note previews its next action |
+| Next Actions lists | Focus for work needing attention now; Open for the full horizon |
+| Waiting For | A dated action for when you will follow up |
+| Someday / Maybe | A periodically reviewed note containing ideas or links |
+| Tickler file | Attention dates and recurring Tasks spread across relevant notes |
+| Calendar | Still your calendar; Tasks Eye does not replace the hard landscape |
+| Reference | Outside the managed folder, or a closed note with no unchecked tasks |
+| Trash | Delete it |
+
+The key translation is simple:
+
+<aside class="attention-date">
+  <strong>A Tasks <code>📅 due</code> date is the next attention date.</strong>
+  It answers “when should this note surface again?” It is not necessarily the
+  real-world deadline.
+</aside>
+
+## Set up the smallest useful system
+
+Create a dedicated folder and choose it under **Tasks Eye → Notes folder**:
+
+```text
+Tasks/
+├── Work/
+└── Private/
+```
+
+`Tasks/` is the temporary capture area. `Work/` and `Private/` are deliberately
+broad, non-overlapping contexts. Add another context only when it creates a
+useful boundary while choosing work.
+
+Tasks Eye reads every Markdown note below the configured folder. Keeping
+ordinary vault notes outside it prevents reference material from accidentally
+joining the task workflow.
+
+## Capture without breaking concentration
+
+Use **Create new note** (<kbd>Ctrl+Shift+N</kbd>). Its folder popup supports two
+capture paths:
+
+- When the context is obvious, choose `Work/` or `Private/` immediately.
+- When routing would interrupt you, accept the `Tasks/` root and decide later.
+
+A root note is intentionally reported in Inbox until it is moved into a context
+folder. A note captured directly in a context can still appear in Inbox when it
+needs a next action, attention date, or valid state.
+
+## Clarify and organize
+
+Process a capture until it is deleted, retained as non-actionable material, or
+made trustworthy as an open note.
+
+<Mermaid
+  chart={processingTree}
+  label="Decision tree for clarifying and organizing a captured note"
+>
+  Processing ends with a deliberate destination. An active note is open,
+  routed to a context, and anchored by a dated unchecked next action.
+</Mermaid>
+
+### Make the next action physical
+
+A note is the atomic unit of attention, not automatically a GTD project. It may
+represent a multi-step outcome, a standalone action, a waiting item, or a
+recurring responsibility. For a project, name the desired outcome in the note
+title and date only the current next action by default:
+
+```md
+---
+status: open
+---
+
+# Renew passport
+
+Keep the application guidance and useful links here.
+
+- [ ] Find the required documents 📅 2026-08-03
+- [ ] Take a compliant photo
+- [ ] Submit the application
+```
+
+Tasks Eye can read tasks anywhere in the note, regardless of headings or prose.
+It displays the earliest unchecked dated task. When the dated action above is
+completed, Inbox reports that the remaining open work has no dated action. That
+is the prompt to choose the *actual* next step instead of blindly advancing a
+plan.
+
+Dating several independent actions is valid when useful. The single-dated-action
+pattern is a recommendation, not a Markdown restriction.
+
+### Separate attention from a hard deadline
+
+Keep a real deadline in the task text, note body, or calendar, then date the
+task for the next moment you want to make a decision:
+
+```md
+- [ ] Draft the tax return — filing deadline: 30 April 📅 2026-04-20
+```
+
+Here 20 April is the attention date. The filing deadline remains 30 April. If
+20 April arrives and this is not today's work, moving the attention date is a
+valid decision—as long as you deliberately choose when it should return.
+
+## Engage from Focus
+
+Open **Focus** with <kbd>Ctrl+1</kbd>. It contains open notes whose earliest
+unchecked dated action is due today or overdue.
+
+Focus is a trusted shortlist, not an automatic priority engine. Use the context
+filter when useful, then apply your own judgment about available time, energy,
+and importance. Handle every row in one of three ways:
+
+- **Do it:** complete the visible next action.
+- **Move it:** assign a new attention date.
+- **Change state:** close the note when it no longer needs attention.
+
+The goal is **Focus Zero**: every item asking for attention today has received a
+decision. It does not mean completing every possible piece of work or following
+the rows blindly from top to bottom.
+
+Use **Open** for the wider horizon. It lists all active notes and previews each
+note's earliest dated action, grouped by date. In GTD terms, it combines an
+active-outcome inventory with next-action previews over the same source notes.
+
+## Keep the system trusted with Inbox
+
+Tasks Eye's Inbox is broader than a classic GTD capture inbox. Treat it as a
+**repair queue** for every managed note that breaks the workflow contract,
+regardless of its folder or status.
+
+A capture is fully processed when it becomes one of these:
+
+- An open note in a context folder with an unchecked dated next action.
+- Closed history or reference in a context folder with no unchecked tasks.
+- Deleted trash.
+
+Clear Inbox daily after handling Focus. Each repair rule has a detailed
+documentation page:
+
+- [Move a root capture into a context](../features/violations-note-in-managed-root/)
+- [Add an unchecked action to an open note](../features/violations-open-note-without-uncompleted-tasks/)
+- [Add an attention date](../features/violations-open-note-without-due-date/)
+- [Handle an overdue action](../features/violations-open-task-overdue/)
+- [Resolve unchecked work in a closed note](../features/violations-closed-note-with-unchecked-tasks/)
+- [Repair an unsupported status](../features/violations-invalid-status/)
+- [Move work off an unavailable day](../features/violations-task-scheduled-on-vacation/)
+
+## Reflect daily and weekly
+
+The daily loop is operational:
+
+1. Handle Focus to zero.
+2. Repair Inbox to zero.
+3. Use Open when planning beyond today.
+
+For GTD's broader Reflect step, one simple approach is an open **Weekly
+Review** note. Date the first step so the review returns to your attention:
+
+```md
+# Weekly Review
+
+- [ ] Process loose captures and clear Tasks Eye Inbox 📅 2026-08-07
+- [ ] Review the past and upcoming calendar
+- [ ] Scan Open in each context
+- [ ] Confirm every active outcome has the right next action and attention date
+- [ ] Check waiting-for follow-ups
+- [ ] Review Someday / Maybe
+- [ ] Optionally inspect Done for work that needs recording or follow-up
+- [ ] Schedule the next review session
+```
+
+To reuse the note, select its completed checklist and press
+<kbd>Ctrl+Shift+D</kbd>. Tasks Eye
+[reopens the selected tasks](../features/actions-uncheck-selected-tasks/) and
+removes their completion dates. Then move the first item's attention date to
+the next session.
+
+This is only one pattern. If the completed checklist is useful history, keep
+the dated review note and copy its checklist into a new note for the next
+session instead.
+
+## Familiar GTD patterns
+
+### Waiting For
+
+There is no special Waiting status or list. Complete the delegation action and
+create a dated follow-up for the earliest moment *you* want the item back:
+
+```md
+# Confirm launch budget
+
+- [x] Ask Alex to approve the revised budget ✅ 2026-08-03
+- [ ] Follow up with Alex if no reply 📅 2026-08-06
+```
+
+The note remains open in `Work/`. If the reply arrives early, complete or
+replace the follow-up action.
+
+### Someday / Maybe
+
+Keep inactive possibilities as plain bullets or links in one periodically
+reviewed note:
+
+```md
+---
+status: open
+---
+
+# Someday / Maybe
+
+- Learn bookbinding
+- Explore a month in Japan
+- [[Possible studio renovation]]
+
+- [ ] Review this list 🔁 every month 📅 2026-09-01
+```
+
+A larger possibility can live in a separate closed note linked from this list.
+Promoting it means opening that note and giving it a dated next action.
+
+### Calendar
+
+Keep appointments, fixed events, and day-specific commitments in the calendar.
+Use Tasks Eye for preparation and follow-up:
+
+```md
+# Quarterly planning meeting
+
+Calendar: 12 August, 10:00
+
+- [ ] Prepare the decision brief 📅 2026-08-10
+- [ ] Send decisions and owners 📅 2026-08-13
+```
+
+The meeting is part of the hard landscape. The Tasks Eye dates say when its
+surrounding work needs attention.
+
+### Two-Minute Rule
+
+If an action takes under two minutes and has no future value, do it immediately
+and record nothing. When its history matters, do it and record a completed task
+with a Tasks completion date so it appears in Done:
+
+```md
+- [x] Confirm the domain renewal ✅ 2026-08-03
+```
+
+When work will continue—or you must switch contexts—capture enough state for
+your future self, then add the next physical action and attention date. The aim
+is not to document everything; it is to make resuming important work cheap.
+
+### Tickler File
+
+Attention dates replace the retrieval date of a 43-folder tickler system, while
+the material remains in the note where it belongs:
+
+- **One-off resurfacing:** add a dated action to the relevant note.
+- **Recurring reminder:** use an Obsidian Tasks recurring checkbox.
+- **Seasonal plan:** keep several dated actions under headings in one
+  maintenance note.
+
+For physical material, record its location:
+
+```md
+- [ ] Reconsider the conference proposal — paper form in desk drawer 📅 2026-10-01
+```
+
+No dedicated Tickler folder is required.
+
+### Contexts
+
+Tasks Eye derives one context from the note's folder relative to `Tasks/`.
+Prefer the smallest practical set—often only `Work` and `Private`—and avoid
+overlapping meanings.
+
+Because the context belongs to the note rather than each task, actions inside a
+note share it. When an outcome genuinely crosses contexts and context filtering
+matters, split it into linked notes. Task-level `@tags` can still serve other
+Obsidian workflows, but Tasks Eye does not use them as its context filter.
+
+### Reference, project support, and trash
+
+General reference belongs outside `Tasks/`. Reference deliberately retained
+inside the managed workflow should remain in a context folder with
+`status: closed` and no unchecked tasks.
+
+Keep project support—plans, links, decisions, and attachments—in the body of
+the active note or in linked reference notes. Tasks Eye surfaces the next
+action without replacing that supporting context.
+
+Delete material with no future value. `closed` means intentionally retained
+history or reference; it is not a synonym for trash.
+
+### Higher-Level Horizons of Focus
+
+Keep horizon content as prose or linked notes. Give its review process a
+recurring attention date without pretending that every horizon is an ordinary
+project:
+
+```md
+# Areas and goals
+
+- [[Work responsibilities]]
+- [[Health and relationships]]
+- [[Three-year direction]]
+
+- [ ] Review whether current projects support these horizons 🔁 every month 📅 2026-09-01
+```
+
+Tasks Eye imposes no hierarchy here. It simply makes the chosen reflection
+cadence resurface.
+
+## The operating rule
+
+When you do not know what to do next, open Focus. When Focus is handled, repair
+Inbox. During the weekly review, inspect Open and the commitments surrounding
+it.
+
+That is the complete translation: capture freely, make every active note
+actionable, and use attention dates to ensure nothing quietly disappears.

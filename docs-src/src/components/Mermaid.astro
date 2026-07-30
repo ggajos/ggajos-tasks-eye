@@ -1,0 +1,77 @@
+---
+interface Props {
+  chart: string;
+  label: string;
+}
+
+const { chart, label } = Astro.props;
+---
+
+<figure class="mermaid-diagram">
+  <div class="mermaid-diagram__canvas" role="img" aria-label={label}>
+    <pre class="mermaid" data-mermaid-source={chart}>{chart}</pre>
+  </div>
+  <figcaption><slot /></figcaption>
+</figure>
+
+<script>
+  import mermaid from "mermaid";
+
+  const selector = ".mermaid[data-mermaid-source]";
+  let renderSequence = Promise.resolve();
+
+  function activeTheme(): "default" | "dark" {
+    return document.documentElement.dataset.theme === "light"
+      ? "default"
+      : "dark";
+  }
+
+  async function renderDiagrams(): Promise<void> {
+    const diagrams = Array.from(
+      document.querySelectorAll<HTMLElement>(selector),
+    );
+    if (diagrams.length === 0) return;
+
+    for (const diagram of diagrams) {
+      const source = diagram.dataset.mermaidSource;
+      if (!source) continue;
+      diagram.removeAttribute("data-processed");
+      diagram.textContent = source;
+    }
+
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "strict",
+      theme: activeTheme(),
+      fontFamily: "var(--sl-font-system)",
+      flowchart: {
+        curve: "basis",
+        htmlLabels: false,
+        useMaxWidth: true,
+      },
+    });
+
+    await mermaid.run({ nodes: diagrams });
+  }
+
+  function queueRender(): void {
+    renderSequence = renderSequence.then(renderDiagrams, renderDiagrams);
+  }
+
+  if ("fonts" in document) {
+    void document.fonts.ready.then(queueRender);
+  } else {
+    queueRender();
+  }
+
+  const themeObserver = new MutationObserver((changes) => {
+    if (changes.some((change) => change.attributeName === "data-theme")) {
+      queueRender();
+    }
+  });
+
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+</script>

@@ -44,6 +44,7 @@
     "@wdio/visual-service": "10.1.0",
     "astro": "^7.0.7",
     "esbuild": "0.25.12",
+    "mermaid": "^11.16.0",
     "mocha": "^10.8.2",
     "obsidian": "1.13.1",
     "obsidian-launcher": "^3.1.1",

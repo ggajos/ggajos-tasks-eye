@@ -208,147 +208,49 @@ body {
   background: var(--eye-accent-faint);
 }
 
-.workflow-map {
-  display: grid;
-  gap: 1.75rem;
+.mermaid-diagram {
+  overflow: hidden;
+  max-width: 100%;
   margin-block: 1.5rem;
-}
-
-.workflow-map :is(strong, span) {
-  display: block;
-}
-
-.workflow-map__start,
-.workflow-map__return,
-.workflow-map__trust,
-.workflow-map__route {
   border: 1px solid var(--eye-border);
   border-radius: var(--eye-radius);
   background: var(--eye-surface);
 }
 
-.workflow-map__start {
-  position: relative;
-  width: min(100%, 25rem);
-  margin-inline: auto;
-  padding: 1rem 1.15rem;
-  border-color: var(--sl-color-accent);
-  background: var(--eye-accent-faint);
-  text-align: center;
+.mermaid-diagram__canvas {
+  overflow-x: auto;
+  padding: 1rem;
 }
 
-.workflow-map__start::after {
-  position: absolute;
-  top: calc(100% + 0.25rem);
-  left: 50%;
-  color: var(--sl-color-accent);
-  content: "↓";
-  font-size: 1.25rem;
-  transform: translateX(-50%);
+.mermaid-diagram .mermaid {
+  display: grid;
+  min-width: 34rem;
+  min-height: 10rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  place-items: center;
+  white-space: pre;
 }
 
-.workflow-map__eyebrow {
-  margin-bottom: 0.25rem;
-  color: var(--sl-color-gray-2);
-  font-size: var(--sl-text-xs);
-  font-weight: 650;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.mermaid-diagram .mermaid svg {
+  display: block;
+  max-width: none;
+  height: auto;
 }
 
-.workflow-map__start > span:last-child,
-.workflow-map__route span,
-.workflow-map__return span,
-.workflow-map__trust > span:last-child {
-  margin-top: 0.25rem;
+.mermaid-diagram figcaption {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--eye-border);
   color: var(--sl-color-gray-2);
   font-size: var(--sl-text-sm);
-  line-height: 1.45;
-}
-
-.workflow-map__routes {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  padding-top: 0.75rem;
-}
-
-.workflow-map__routes::before {
-  position: absolute;
-  top: 0;
-  right: 16.666%;
-  left: 16.666%;
-  border-top: 1px solid var(--eye-border);
-  content: "";
-}
-
-.workflow-map__route {
-  position: relative;
-  padding: 0.85rem;
-  text-align: center;
-}
-
-.workflow-map__route::before {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  height: 0.75rem;
-  border-left: 1px solid var(--eye-border);
-  content: "";
-}
-
-.workflow-map__return,
-.workflow-map__trust {
-  padding: 0.9rem 1rem;
-}
-
-.workflow-map__return {
-  position: relative;
-  width: min(100%, 36rem);
-  margin-inline: auto;
-  border-style: dashed;
-  text-align: center;
-}
-
-.workflow-map__return::before {
-  position: absolute;
-  right: 50%;
-  bottom: 100%;
-  height: 1.75rem;
-  border-right: 1px solid var(--eye-border);
-  content: "";
-}
-
-.workflow-map__trust {
-  border-inline-start: 3px solid var(--sl-color-accent);
+  line-height: 1.5;
 }
 
 @media (max-width: 42rem) {
-  .overview-anatomy,
-  .workflow-map__routes {
+  .overview-anatomy {
     grid-template-columns: 1fr;
-  }
-
-  .workflow-map__routes {
-    gap: 1.25rem;
-    padding-top: 0;
-  }
-
-  .workflow-map__routes::before,
-  .workflow-map__route::before,
-  .workflow-map__return::before {
-    display: none;
-  }
-
-  .workflow-map__route:not(:first-child)::before {
-    display: block;
-    bottom: calc(100% + 0.1rem);
-    height: auto;
-    border: 0;
-    color: var(--sl-color-gray-3);
-    content: "↓";
-    transform: translateX(-50%);
   }
 }
 

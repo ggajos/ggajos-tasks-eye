@@ -396,6 +396,7 @@ function renderSidebar(features: readonly LoadedFeature[]): string {
   const sidebar = [
     { label: "Overview", link: "/" },
     { label: "Philosophy & Workflow", link: "/philosophy/" },
+    { label: "GTD Quickstart", link: "/gtd-quickstart/" },
     ...featureSections,
     {
       label: "Reference",
@@ -427,6 +428,10 @@ async function build(): Promise<void> {
   await writeFile(
     path.join(CONTENT_ROOT, "philosophy.mdx"),
     await renderTemplate("philosophy.mdx"),
+  );
+  await writeFile(
+    path.join(CONTENT_ROOT, "gtd-quickstart.mdx"),
+    await renderTemplate("gtd-quickstart.mdx"),
   );
   await writeFile(
     path.join(REFERENCE_CONTENT_ROOT, "commands.mdx"),

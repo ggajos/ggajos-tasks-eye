@@ -6,11 +6,31 @@ sidebar:
   order: 1
 ---
 
-<p class="overview-lede">
+import Mermaid from '../../components/Mermaid.astro';
+
+export const twoZeros = `flowchart LR
+  Focus["Focus<br/>Work due for attention"]
+  FocusCheck{"Every row handled?"}
+  FocusZero["Focus Zero"]
+  Inbox["Inbox<br/>Workflow repair queue"]
+  InboxCheck{"Every issue repaired?"}
+  InboxZero["Inbox Zero"]
+  Trusted["A trusted system<br/>ready for tomorrow"]
+
+  Focus --> FocusCheck
+  FocusCheck -- "No" --> Focus
+  FocusCheck -- "Yes" --> FocusZero
+  FocusZero --> Inbox
+  Inbox --> InboxCheck
+  InboxCheck -- "No" --> Inbox
+  InboxCheck -- "Yes" --> InboxZero
+  InboxZero --> Trusted`;
+
+<div class="overview-lede">
   Tasks Eye provides one low-friction point of contact for task work. When you
   do not know what to do next, you press <kbd>Ctrl+1</kbd> and look at Focus or
   Open.
-</p>
+</div>
 
 Obsidian Tasks provides excellent task primitives, but Tasks Eye provides the
 workflow for managing the *notes* that contain those tasks. The goal is to minimize friction between asking “what should I do next?” and reaching the relevant task and its surrounding note context.
@@ -27,6 +47,14 @@ Treat a due date as the **next attention date**—the date on which an action sh
 ## The Two Zeros
 
 The primary operating goal of Tasks Eye is to empty two buckets every day.
+
+<Mermaid
+  chart={twoZeros}
+  label="Tasks Eye trust loop from Focus Zero through Inbox Zero"
+>
+  Focus Zero resolves today's demands on your attention. Inbox Zero repairs the
+  system that will surface the next demands.
+</Mermaid>
 
 ### 1. Today Zero (Focus)
 Your daily work lives in Focus. "Today Zero" means every overdue or due-today action has been deliberately handled.

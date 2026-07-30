@@ -6,11 +6,34 @@ sidebar:
   order: 0
 ---
 
-<p class="overview-lede">
+import Mermaid from '../../components/Mermaid.astro';
+
+export const dailyLoop = `flowchart TD
+  Focus["Ctrl+1 → Focus<br/>Choose a note that needs attention"]
+  Decision{"Handle the visible next action"}
+  Do["Do it<br/>Complete the task"]
+  Move["Move it<br/>Set a new attention date"]
+  State["Change state<br/>Close the note"]
+  Return["Return to Focus"]
+  Empty{"Focus empty?"}
+  Inbox["Ctrl+3 → Inbox<br/>Repair workflow issues"]
+
+  Focus --> Decision
+  Decision --> Do
+  Decision --> Move
+  Decision --> State
+  Do --> Return
+  Move --> Return
+  State --> Return
+  Return --> Empty
+  Empty -- "No" --> Focus
+  Empty -- "Yes" --> Inbox`;
+
+<div class="overview-lede">
   You already know how to put tasks in Obsidian. The harder part comes later:
   returning to a vault full of notes and knowing which one deserves your
   attention now.
-</p>
+</div>
 
 Tasks Eye turns those notes into one daily control panel. Each row represents a
 note, its earliest unchecked dated task becomes the visible next action, and its
@@ -67,36 +90,14 @@ create a second task database.
   again tomorrow.
 </p>
 
-<div class="workflow-map" role="group" aria-label="Tasks Eye daily workflow">
-  <div class="workflow-map__start">
-    <span class="workflow-map__eyebrow">When you need direction</span>
-    <strong><kbd>Ctrl+1</kbd> → Focus</strong>
-    <span>Choose the first note that needs a decision.</span>
-  </div>
-  <div class="workflow-map__routes" role="group" aria-label="Three ways to handle an item">
-    <div class="workflow-map__route">
-      <strong>Do it</strong>
-      <span>Complete the visible next task.</span>
-    </div>
-    <div class="workflow-map__route">
-      <strong>Move it</strong>
-      <span>Give it a new attention date.</span>
-    </div>
-    <div class="workflow-map__route">
-      <strong>Change its state</strong>
-      <span>Close the note when it no longer needs attention.</span>
-    </div>
-  </div>
-  <div class="workflow-map__return">
-    <strong>Return to Focus until every item has been handled.</strong>
-    <span>Later work stays in Open until its attention date, and completed tasks can be reviewed in Done.</span>
-  </div>
-  <div class="workflow-map__trust">
-    <span class="workflow-map__eyebrow">The trust loop</span>
-    <strong><kbd>Ctrl+3</kbd> → Inbox → repair</strong>
-    <span>Give malformed or unrouted notes a next action, a date, a context, or the right status.</span>
-  </div>
-</div>
+<Mermaid
+  chart={dailyLoop}
+  label="Tasks Eye daily workflow from Focus decisions to Inbox repair"
+>
+  Complete, reschedule, or close each item until Focus is empty. Later work
+  remains in Open, completed work appears in Done, and Inbox protects the trust
+  loop.
+</Mermaid>
 
 ## Act from the board—or open the note
 
