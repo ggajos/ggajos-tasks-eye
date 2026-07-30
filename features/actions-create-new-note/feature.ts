@@ -5,7 +5,7 @@ export default defineFeature({
   summary:
     "The creation command chooses a location in the notes folder, creates an open Untitled note, and opens it for editing.",
   acceptanceCriteria: [
-    "The command has a default `Ctrl+Shift+N` hotkey on every platform.",
+    "The command is registered without a default hotkey.",
     "The folder picker offers the notes folder root and its descendants, but nothing outside the configured folder.",
     "The notes folder root is the default choice.",
     "Selecting a folder immediately creates `Untitled.md`; collisions receive numeric suffixes such as `Untitled 1.md`.",

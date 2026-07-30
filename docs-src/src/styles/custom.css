@@ -289,6 +289,14 @@ body {
   border-bottom: 0;
 }
 
+.shortcut-table tr[id] {
+  scroll-margin-top: 5rem;
+}
+
+.shortcut-table tr[id]:target {
+  background: var(--sl-color-accent-low);
+}
+
 .shortcut-table th {
   background: var(--eye-surface-raised);
   color: var(--sl-color-white);
@@ -296,12 +304,6 @@ body {
 }
 
 .shortcut-table kbd {
-  white-space: nowrap;
-}
-
-.shortcut-unassigned {
-  color: var(--sl-color-gray-2);
-  font-style: italic;
   white-space: nowrap;
 }
 

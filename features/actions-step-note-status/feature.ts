@@ -6,8 +6,9 @@ export default defineFeature({
     "Two commands step the active Markdown note along the status chain " +
     "none → open → closed by updating its frontmatter.",
   acceptanceCriteria: [
-    "`Ctrl+Shift+2` moves the note one step forward and `Ctrl+Shift+1` one " +
-      "step back along `none → open → closed`.",
+    "The previous and next status commands are registered without default hotkeys.",
+    "The next command moves the note one step forward and the previous command " +
+      "moves it one step back along `none → open → closed`.",
     "Stepping back from `open` removes the `status` property entirely; " +
       "stepping forward from no status sets `open`.",
     "The ends clamp: forward from `closed` and back from no status do " +

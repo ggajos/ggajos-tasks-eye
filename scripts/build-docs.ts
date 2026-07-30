@@ -4,7 +4,7 @@ import type { DocumentedCommand } from "../features/commands";
 import {
   DOCUMENTED_COMMAND_GROUPS,
   formatCommandName,
-  formatHotkey,
+  formatRecommendedHotkey,
 } from "../features/commands";
 import { discoverFeatures } from "../features/discovery";
 import type {
@@ -212,10 +212,9 @@ function renderCommandTable(
   const renderRows = (commands: readonly DocumentedCommand[]) =>
     commands
       .map((command) => {
-        const shortcut = escapeHtml(formatHotkey(command.hotkey));
-        const shortcutCell = command.hotkey
-          ? `<kbd>${shortcut}</kbd>`
-          : `<span class="shortcut-unassigned">${shortcut}</span>`;
+        const shortcut = escapeHtml(
+          formatRecommendedHotkey(command.recommendedHotkey),
+        );
         if (
           (command.featureSlug === undefined) !==
           (command.featureTitle === undefined)
@@ -234,8 +233,8 @@ function renderCommandTable(
             ? `<a href="${featureLinkPrefix}features/${escapeHtml(command.featureSlug)}/">${escapeHtml(command.featureTitle)}</a>`
             : "&mdash;";
 
-        return `<tr>
-  <td>${shortcutCell}</td>
+        return `<tr id="${escapeHtml(command.id)}">
+  <td><kbd>${shortcut}</kbd></td>
   <td><code>${escapeHtml(formatCommandName(command.name))}</code></td>
   <td>${featureCell}</td>
   <td>${escapeHtml(command.explanation)}</td>
@@ -252,7 +251,7 @@ function renderCommandTable(
 <table class="shortcut-table">
   <thead>
     <tr>
-      <th>Default shortcut</th>
+      <th>Recommended hotkey</th>
       <th>Command</th>
       <th>Learn more</th>
       <th>Purpose</th>
@@ -402,7 +401,10 @@ function renderSidebar(features: readonly LoadedFeature[]): string {
       label: "Reference",
       collapsed: true,
       items: [
-        { label: "Commands and shortcuts", link: "/reference/commands/" },
+        {
+          label: "Commands and recommended hotkeys",
+          link: "/reference/commands/",
+        },
       ],
     },
   ];

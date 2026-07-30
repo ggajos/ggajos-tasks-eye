@@ -15,9 +15,10 @@ Tasks/
 └── Private/
 ```
 
-Use **Create new note** (<kbd>Ctrl+Shift+N</kbd>) to capture into the right
-context. When choosing a context would interrupt you, leave the note in
-`Tasks/` and route it later from Inbox.
+Run
+[**Tasks Eye: Create note**](https://ggajos.com/ggajos-tasks-eye/reference/commands/#create-new-note)
+to capture into the right context. When choosing a context would interrupt you,
+leave the note in `Tasks/` and route it later from Inbox.
 
 An active note needs an unchecked next action with a Tasks due date:
 
@@ -35,8 +36,9 @@ unchecked dated task while keeping the plan, links, and history in the note.
 
 ## Work Focus to zero
 
-Open **Focus** with <kbd>Ctrl+1</kbd>. It shows open notes whose next action is
-due today or overdue.
+Run
+[**Tasks Eye: Show Focus**](https://ggajos.com/ggajos-tasks-eye/reference/commands/#open-focus)
+to see open notes whose next action is due today or overdue.
 
 ![Tasks Eye Focus view](docs/assets/features/views-focus/dark-minimal/board.png)
 
@@ -83,16 +85,15 @@ mapping. The
 [feature documentation](https://ggajos.com/ggajos-tasks-eye/) explains every
 view, command, and Inbox validation rule.
 
-## Install with BRAT
+## Requirements
 
 Tasks Eye requires Obsidian 1.12.7 or newer and the
 [Tasks](https://obsidian.md/plugins?id=obsidian-tasks-plugin) community plugin.
 
-1. Install and enable **Tasks** from Obsidian's Community Plugins.
-2. Install and enable
-   [BRAT](https://obsidian.md/plugins?id=obsidian42-brat).
-3. In BRAT settings, choose **Add Beta Plugin** and enter
-   `https://github.com/ggajos/ggajos-tasks-eye`.
-4. Enable **Tasks Eye** in Community Plugins.
+## Network use
 
-BRAT will install Tasks Eye and keep it updated from this repository's releases.
+Public-holiday support optionally connects to the
+[Nager.Date API](https://date.nager.at/) to request its supported country list
+and, after you select a country, nationwide holiday dates for the relevant
+years. Tasks Eye does not send note or vault content. Downloaded holiday data
+is cached locally in the plugin settings.

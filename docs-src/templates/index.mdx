@@ -9,14 +9,14 @@ sidebar:
 import Mermaid from '../../components/Mermaid.astro';
 
 export const dailyLoop = `flowchart TD
-  Focus["Ctrl+1 → Focus<br/>Choose a note that needs attention"]
+  Focus["Show Focus<br/>Choose a note that needs attention"]
   Decision{"Handle the visible next action"}
   Do["Do it<br/>Complete the task"]
   Move["Move it<br/>Set a new attention date"]
   State["Change state<br/>Close the note"]
   Return["Return to Focus"]
   Empty{"Focus empty?"}
-  Inbox["Ctrl+3 → Inbox<br/>Repair workflow issues"]
+  Inbox["Show Inbox<br/>Repair workflow issues"]
 
   Focus --> Decision
   Decision --> Do
@@ -37,8 +37,8 @@ export const dailyLoop = `flowchart TD
 
 Tasks Eye turns those notes into one daily control panel. Each row represents a
 note, its earliest unchecked dated task becomes the visible next action, and its
-folder tells you the context. When you are unsure what to do next, press
-<kbd>Ctrl+1</kbd> and start with **Focus**.
+folder tells you the context. When you are unsure what to do next, run
+[**Tasks Eye: Show Focus**](reference/commands/#open-focus).
 
 Your Markdown remains the source of truth. Tasks Eye reads and updates the same
 checkboxes and dates you already use with the Obsidian Tasks plugin; it does not
@@ -132,14 +132,14 @@ dependable.
 
 ## A useful everyday rhythm
 
-1. Press <kbd>Ctrl+1</kbd> and handle **Focus** toward zero: complete, reschedule, or close each item.
-2. Press <kbd>Ctrl+3</kbd> and repair **Inbox** toward zero so tomorrow's Focus and Open views remain trustworthy.
+1. Run [**Tasks Eye: Show Focus**](reference/commands/#open-focus) and handle Focus toward zero: complete, reschedule, or close each item.
+2. Run [**Tasks Eye: Show Inbox**](reference/commands/#open-inbox) and repair Inbox toward zero so tomorrow's Focus and Open views remain trustworthy.
 3. Use **Open** to plan ahead and **Done** when you want to look back.
 
 The deeper reference explains [how Focus behaves](features/views-focus/),
 [how Open supports planning](features/views-open/),
 [how notes participate in the workflow](features/data-vault-conventions/), and
-[all commands and shortcuts](reference/commands/).
+[all commands and recommended hotkeys](reference/commands/).
 
 ## About and contact
 

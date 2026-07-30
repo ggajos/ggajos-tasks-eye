@@ -36,7 +36,7 @@ async function uniquePath(app: App, folderPath: string): Promise<string> {
     folderPath ? `${folderPath}/${name}` : name;
   let candidate = inFolder("Untitled.md");
   let suffix = 1;
-  while (await app.vault.adapter.exists(candidate)) {
+  while (app.vault.getAbstractFileByPath(candidate) !== null) {
     candidate = inFolder(`Untitled ${suffix}.md`);
     suffix++;
   }

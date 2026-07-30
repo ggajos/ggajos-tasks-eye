@@ -1,3 +1,5 @@
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   CREATE_NEW_NOTE_COMMAND,
@@ -10,42 +12,94 @@ import {
   DOCUMENTED_COMMAND_GROUPS,
   DOCUMENTED_COMMANDS,
   formatCommandName,
-  formatHotkey,
+  formatRecommendedHotkey,
 } from "./commands";
 
+const projectRoot = process.cwd();
+
+async function filesBelow(
+  directory: string,
+  include: (file: string) => boolean,
+): Promise<string[]> {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(
+    entries.map(async (entry) => {
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) return filesBelow(file, include);
+      return include(file) ? [file] : [];
+    }),
+  );
+  return nested.flat();
+}
+
+async function publicDocumentationSources(): Promise<string[]> {
+  const templates = await filesBelow(
+    path.join(projectRoot, "docs-src", "templates"),
+    (file) => file.endsWith(".mdx"),
+  );
+  const featureDocs = await filesBelow(
+    path.join(projectRoot, "features"),
+    (file) => file.endsWith(`${path.sep}feature.ts`) || file.endsWith("why.md"),
+  );
+  return [path.join(projectRoot, "README.md"), ...templates, ...featureDocs];
+}
+
+function expectedCommandReferencePrefix(file: string): string {
+  const relative = path.relative(projectRoot, file);
+  if (relative === "README.md") {
+    return "https://ggajos.com/ggajos-tasks-eye/reference/commands/";
+  }
+  if (relative === path.join("docs-src", "templates", "index.mdx")) {
+    return "reference/commands/";
+  }
+  if (relative.startsWith(path.join("docs-src", "templates"))) {
+    return "../reference/commands/";
+  }
+  return "../../reference/commands/";
+}
+
 describe("documented commands", () => {
-  it("assigns Ctrl+Shift+N to Tasks Eye note creation", () => {
-    expect(CREATE_NEW_NOTE_COMMAND.hotkey).toEqual({
-      modifiers: ["Ctrl", "Shift"],
-      key: "N",
-    });
+  it("keeps runtime commands free of default hotkeys", () => {
+    const runtimeCommands = [
+      ...Object.values(MODE_COMMANDS),
+      OPEN_COMPLETED_COMMAND,
+      CREATE_NEW_NOTE_COMMAND,
+      UNCHECK_SELECTED_COMMAND,
+      ...Object.values(STATUS_STEP_COMMANDS),
+    ];
+
+    expect(runtimeCommands.every((command) => !("hotkey" in command))).toBe(
+      true,
+    );
+  });
+
+  it("publishes the former defaults as documentation-only recommendations", () => {
+    expect(
+      DOCUMENTED_COMMANDS.map((command) => [
+        command.id,
+        formatRecommendedHotkey(command.recommendedHotkey),
+      ]),
+    ).toEqual([
+      ["open-focus", "Ctrl+1"],
+      ["open-open", "Ctrl+2"],
+      ["open-inbox", "Ctrl+3"],
+      ["open-completed-tasks", "Ctrl+4"],
+      ["create-new-note", "Ctrl+Shift+N"],
+      ["set-note-status-previous", "Ctrl+Shift+1"],
+      ["set-note-status-next", "Ctrl+Shift+2"],
+      ["uncheck-selected-tasks", "Ctrl+Shift+D"],
+    ]);
+  });
+
+  it("uses unique command ids as stable documentation anchors", () => {
+    const ids = DOCUMENTED_COMMANDS.map((command) => command.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("includes note creation in the command reference", () => {
     expect(DOCUMENTED_COMMANDS.map((command) => command.id)).toContain(
       CREATE_NEW_NOTE_COMMAND.id,
     );
-  });
-
-  it("maps status stepping to Ctrl+Shift+1 and 2", () => {
-    expect(
-      Object.entries(STATUS_STEP_COMMANDS).map(([direction, command]) => ({
-        direction,
-        id: command.id,
-        hotkey: command.hotkey,
-      })),
-    ).toEqual([
-      {
-        direction: "previous",
-        id: "set-note-status-previous",
-        hotkey: { modifiers: ["Ctrl", "Shift"], key: "1" },
-      },
-      {
-        direction: "next",
-        id: "set-note-status-next",
-        hotkey: { modifiers: ["Ctrl", "Shift"], key: "2" },
-      },
-    ]);
   });
 
   it("orders documented commands by view, note lifecycle, and task editing", () => {
@@ -93,27 +147,54 @@ describe("documented commands", () => {
     ]);
   });
 
-  it("labels commands without a default shortcut", () => {
-    expect(formatHotkey(undefined)).toBe("Not assigned");
-  });
-
   it("documents the name shown after Obsidian adds the plugin prefix", () => {
     expect(formatCommandName(MODE_COMMANDS.focus.name)).toBe(
       "Tasks Eye: Show Focus",
     );
   });
 
-  it("maps views left-to-right to Ctrl+1 through Ctrl+4", () => {
-    expect([
-      MODE_COMMANDS.focus.hotkey,
-      MODE_COMMANDS.open.hotkey,
-      MODE_COMMANDS.inbox.hotkey,
-      OPEN_COMPLETED_COMMAND.hotkey,
-    ]).toEqual(
-      ["1", "2", "3", "4"].map((key) => ({
-        modifiers: ["Ctrl"],
-        key,
-      })),
-    );
+  it("keeps literal hotkey combinations out of non-canonical documentation", async () => {
+    const violations: string[] = [];
+    const hotkeyPattern =
+      /\b(?:Ctrl|Cmd|Alt|Shift)(?:\+(?:Ctrl|Cmd|Alt|Shift|[A-Za-z0-9]+))+\b/g;
+
+    for (const file of await publicDocumentationSources()) {
+      const contents = await readFile(file, "utf8");
+      const matches = contents.match(hotkeyPattern) ?? [];
+      violations.push(
+        ...matches.map(
+          (match) => `${path.relative(projectRoot, file)}: ${match}`,
+        ),
+      );
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it("links documentation only to known command anchors", async () => {
+    const knownIds = new Set(DOCUMENTED_COMMANDS.map((command) => command.id));
+    const invalidLinks: string[] = [];
+    let linkCount = 0;
+
+    for (const file of await publicDocumentationSources()) {
+      const contents = await readFile(file, "utf8");
+      for (const match of contents.matchAll(
+        /\(([^)\s]*reference\/commands\/#([a-z0-9-]+))\)/g,
+      )) {
+        linkCount++;
+        const href = match[1]!;
+        const id = match[2]!;
+        const relative = path.relative(projectRoot, file);
+        if (
+          !knownIds.has(id) ||
+          !href.startsWith(expectedCommandReferencePrefix(file))
+        ) {
+          invalidLinks.push(`${relative}: ${href}`);
+        }
+      }
+    }
+
+    expect(linkCount).toBeGreaterThan(0);
+    expect(invalidLinks).toEqual([]);
   });
 });

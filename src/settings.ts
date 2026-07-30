@@ -85,7 +85,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
       });
     }
 
-    containerEl.createEl("h2", { text: "Availability" });
+    new Setting(containerEl).setName("Availability").setHeading();
     this.renderPublicHolidays();
     this.renderWeekdays();
     this.renderPersonalTimeOff();
@@ -105,7 +105,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
 
   private renderPublicHolidays(): void {
     const { containerEl } = this;
-    containerEl.createEl("h3", { text: "Public holidays" });
+    new Setting(containerEl).setName("Public holidays").setHeading();
 
     new Setting(containerEl)
       .setName("Country")
@@ -128,7 +128,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
 
   private renderWeekdays(): void {
     const { containerEl } = this;
-    containerEl.createEl("h3", { text: "Non-working days" });
+    new Setting(containerEl).setName("Non-working days").setHeading();
     const setting = new Setting(containerEl)
       .setName("Every week")
       .setDesc("Select days that are normally unavailable.");
@@ -150,7 +150,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
 
   private renderPersonalTimeOff(): void {
     const { containerEl } = this;
-    containerEl.createEl("h3", { text: "Personal time off" });
+    new Setting(containerEl).setName("Personal time off").setHeading();
     containerEl.createDiv({
       cls: "setting-item-description eye-personal-help",
       text: "Leave the end date empty for a single day. Ranges include both dates.",

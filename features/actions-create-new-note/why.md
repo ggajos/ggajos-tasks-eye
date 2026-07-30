@@ -8,6 +8,7 @@ Folder selection is the only prompt because the note title can be decided while
 editing. Tasks Eye generates `Untitled.md`, adds a numeric suffix when needed,
 initializes the note as open, and opens it immediately. The notes folder root is
 the default capture location; notes left there are reported in Inbox until they
-are moved into a context folder. The default
-`Ctrl+Shift+N` shortcut parallels new-note creation while remaining distinct
-from Obsidian's standard command.
+are moved into a context folder. Users who want faster capture can assign the
+recommended hotkey to
+[**Tasks Eye: Create note**](../../reference/commands/#create-new-note) in
+Obsidian's Hotkeys settings.

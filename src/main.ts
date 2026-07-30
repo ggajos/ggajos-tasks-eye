@@ -130,7 +130,6 @@ export default class TheEyePlugin extends Plugin {
       this.addCommand({
         id: command.id,
         name: command.name,
-        hotkeys: [command.hotkey],
         callback: () => {
           void this.openEye(mode);
         },
@@ -140,7 +139,6 @@ export default class TheEyePlugin extends Plugin {
     this.addCommand({
       id: CREATE_NEW_NOTE_COMMAND.id,
       name: CREATE_NEW_NOTE_COMMAND.name,
-      hotkeys: [CREATE_NEW_NOTE_COMMAND.hotkey],
       callback: () => {
         openNewEyeNoteFlow(this.app, this.settings.notesFolderPath);
       },
@@ -148,7 +146,6 @@ export default class TheEyePlugin extends Plugin {
     this.addCommand({
       id: OPEN_COMPLETED_COMMAND.id,
       name: OPEN_COMPLETED_COMMAND.name,
-      hotkeys: [OPEN_COMPLETED_COMMAND.hotkey],
       callback: () => {
         void this.openCompletedTasks();
       },
@@ -156,7 +153,6 @@ export default class TheEyePlugin extends Plugin {
     this.addCommand({
       id: UNCHECK_SELECTED_COMMAND.id,
       name: UNCHECK_SELECTED_COMMAND.name,
-      hotkeys: [UNCHECK_SELECTED_COMMAND.hotkey],
       editorCheckCallback: (checking, editor, ctx) => {
         if (!canUncheckSelectedTasks(editor)) return false;
         if (!checking) this.uncheckSelectedTasksInEditor(editor, ctx);
@@ -170,7 +166,6 @@ export default class TheEyePlugin extends Plugin {
       this.addCommand({
         id: command.id,
         name: command.name,
-        hotkeys: [command.hotkey],
         checkCallback: (checking) => {
           const file = this.app.workspace.getActiveFile();
           if (file?.extension !== "md") return false;

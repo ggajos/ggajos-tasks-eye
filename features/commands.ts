@@ -1,3 +1,4 @@
+import type { Hotkey } from "obsidian";
 import type { CommandDefinition } from "../src/commands";
 import {
   CREATE_NEW_NOTE_COMMAND,
@@ -11,6 +12,7 @@ export interface DocumentedCommand extends CommandDefinition {
   featureSlug?: string;
   featureTitle?: string;
   explanation: string;
+  recommendedHotkey: Hotkey;
 }
 
 export interface DocumentedCommandGroup {
@@ -22,11 +24,13 @@ export interface DocumentedCommandGroup {
 const statusStepCommand = (
   direction: keyof typeof STATUS_STEP_COMMANDS,
   explanation: string,
+  recommendedHotkey: Hotkey,
 ): DocumentedCommand => ({
   ...STATUS_STEP_COMMANDS[direction],
   featureSlug: "actions-step-note-status",
   featureTitle: "Step note status",
   explanation,
+  recommendedHotkey,
 });
 
 export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
@@ -39,24 +43,28 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
         featureSlug: "views-focus",
         featureTitle: "Focus view",
         explanation: "Show open work due today or overdue.",
+        recommendedHotkey: { modifiers: ["Ctrl"], key: "1" },
       },
       {
         ...MODE_COMMANDS.open,
         featureSlug: "views-open",
         featureTitle: "Open view",
         explanation: "Show active notes grouped by due date.",
+        recommendedHotkey: { modifiers: ["Ctrl"], key: "2" },
       },
       {
         ...MODE_COMMANDS.inbox,
         featureSlug: "views-inbox",
         featureTitle: "Inbox view",
         explanation: "Show notes that need workflow cleanup.",
+        recommendedHotkey: { modifiers: ["Ctrl"], key: "3" },
       },
       {
         ...OPEN_COMPLETED_COMMAND,
         featureSlug: "views-done",
         featureTitle: "Done view",
         explanation: "Show the Done view for today.",
+        recommendedHotkey: { modifiers: ["Ctrl"], key: "4" },
       },
     ],
   },
@@ -69,14 +77,17 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
         featureSlug: "actions-create-new-note",
         featureTitle: "Create a note",
         explanation: "Create an open note in the notes folder.",
+        recommendedHotkey: { modifiers: ["Ctrl", "Shift"], key: "N" },
       },
       statusStepCommand(
         "previous",
         "Move the active note one step back in its status chain.",
+        { modifiers: ["Ctrl", "Shift"], key: "1" },
       ),
       statusStepCommand(
         "next",
         "Move the active note one step forward in its status chain.",
+        { modifiers: ["Ctrl", "Shift"], key: "2" },
       ),
     ],
   },
@@ -89,6 +100,7 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
         featureSlug: "actions-uncheck-selected-tasks",
         featureTitle: "Reopen selected tasks",
         explanation: "Turn selected completed tasks back into unchecked tasks.",
+        recommendedHotkey: { modifiers: ["Ctrl", "Shift"], key: "D" },
       },
     ],
   },
@@ -97,8 +109,7 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
 export const DOCUMENTED_COMMANDS: readonly DocumentedCommand[] =
   DOCUMENTED_COMMAND_GROUPS.flatMap((group) => group.commands);
 
-export function formatHotkey(hotkey: CommandDefinition["hotkey"]): string {
-  if (!hotkey) return "Not assigned";
+export function formatRecommendedHotkey(hotkey: Hotkey): string {
   return [...hotkey.modifiers, hotkey.key].join("+");
 }
 
