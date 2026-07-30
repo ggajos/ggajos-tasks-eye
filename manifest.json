@@ -1,7 +1,7 @@
 {
   "id": "ggajos-tasks-eye",
   "name": "Tasks Eye",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "minAppVersion": "1.12.7",
   "description": "Attention is a currency. Less is more. Tasks Eye saves your attention and reduces friction by returning dated tasks when they need a decision, while your projects, plans, and history stay in Markdown.",
   "author": "Grzegorz Gajos",
