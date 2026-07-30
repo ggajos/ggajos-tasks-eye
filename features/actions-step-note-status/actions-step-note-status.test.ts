@@ -117,6 +117,22 @@ describe("Step note status feature", () => {
     expect(frontmatter).toEqual({ status: "open" });
   });
 
+  it("ignores an unexpected non-object frontmatter value", async () => {
+    const file = {} as TFile;
+    const app = {
+      fileManager: {
+        processFrontMatter: vi.fn(
+          async (receivedFile: TFile, update: (value: unknown) => void) => {
+            expect(receivedFile).toBe(file);
+            update(null);
+          },
+        ),
+      },
+    } as unknown as App;
+
+    await expect(stepNoteStatus(app, file, "next")).resolves.toBeUndefined();
+  });
+
   it("surfaces frontmatter processing failures", async () => {
     const failure = new Error("Invalid YAML");
     const app = {

@@ -6,7 +6,6 @@ import {
   formatCommandName,
   formatRecommendedHotkey,
 } from "../features/commands";
-import { discoverFeatures } from "../features/discovery";
 import type {
   FeatureDefinition,
   FeatureScreenshot,
@@ -14,6 +13,7 @@ import type {
   LoadedFeatureDefinition,
 } from "../features/types";
 import { DOCUMENTATION_VARIANTS } from "../features/visualVariants";
+import { discoverFeatures } from "./feature-discovery";
 
 const DOCS_SRC_ROOT = path.resolve("docs-src");
 const CONTENT_ROOT = path.join(DOCS_SRC_ROOT, "src", "content", "docs");

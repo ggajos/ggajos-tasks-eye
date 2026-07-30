@@ -20,11 +20,12 @@ const config: AvailabilityConfig = {
 
 describe("Vacation availability feature", () => {
   beforeEach(() => {
-    (globalThis as { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY = "2026-07-17";
+    (window as Window & { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY =
+      "2026-07-17";
   });
 
   afterEach(() => {
-    delete (globalThis as { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY;
+    delete (window as Window & { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY;
   });
 
   it("recognizes configured and overlapping unavailable days", () => {

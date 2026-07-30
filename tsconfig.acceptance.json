@@ -12,10 +12,10 @@
   "include": [
     "acceptance/**/*.ts",
     "features/**/wdio.ts",
-    "features/discovery.ts",
     "features/types.ts",
     "features/visualVariants.ts",
     "features/*/feature.ts",
+    "scripts/feature-discovery.ts",
     "wdio.conf.mts"
   ]
 }

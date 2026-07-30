@@ -1,12 +1,12 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { VIOLATION_CODES } from "../src/validation";
 import type {
   FeatureDefinition,
   LoadedFeature,
   LoadedFeatureDefinition,
-} from "./types";
+} from "../features/types";
+import { VIOLATION_CODES } from "../src/validation";
 
 export const FEATURES_ROOT = path.resolve("features");
 

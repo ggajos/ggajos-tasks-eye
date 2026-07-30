@@ -98,14 +98,15 @@ describe("Nager holiday sync", () => {
   });
 
   it("adds current, next, and unchecked task years to coverage", () => {
-    (globalThis as { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY = "2026-07-17";
+    (window as Window & { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY =
+      "2026-07-17";
     const file = buildEyeFileFromMarkdown(
       "Planning/Roadmap.md",
       "- [ ] future 📅 2029-03-01\n- [x] done 📅 2035-01-01",
     );
 
     expect(requiredHolidayYears([file])).toEqual([2026, 2027, 2029]);
-    delete (globalThis as { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY;
+    delete (window as Window & { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY;
   });
 });
 

@@ -14,6 +14,21 @@ export class Notice {
 }
 
 export class TFile {
-  path = "";
-  extension = "md";
+  path: string;
+  extension: string;
+
+  constructor(path = "") {
+    this.path = path;
+    this.extension = path.includes(".") ? (path.split(".").pop() ?? "") : "md";
+  }
+}
+
+export class TFolder {
+  path: string;
+  children: Array<TFile | TFolder>;
+
+  constructor(path = "", children: Array<TFile | TFolder> = []) {
+    this.path = path;
+    this.children = children;
+  }
 }

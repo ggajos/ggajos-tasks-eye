@@ -6,10 +6,7 @@ export function element<K extends keyof HTMLElementTagNameMap>(
   className?: string,
   text?: string,
 ): HTMLElementTagNameMap[K] {
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  if (text !== undefined) el.textContent = text;
-  return el;
+  return createEl(tag, { cls: className, text });
 }
 
 export function button(

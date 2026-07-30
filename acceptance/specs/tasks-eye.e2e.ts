@@ -1,4 +1,4 @@
-import { discoverFeatures } from "../../features/discovery";
+import { discoverFeatures } from "../../scripts/feature-discovery";
 import {
   VISUAL_VARIANTS,
   applyVisualVariant,

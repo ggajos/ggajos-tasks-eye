@@ -483,7 +483,7 @@ export async function resetFixtureVault(value: FeatureFixture): Promise<void> {
 
   const today = process.env.TASKS_EYE_TODAY ?? value.today;
   await browser.executeObsidian(async ({ app }, fixtureState) => {
-    (globalThis as { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY =
+    (window as Window & { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY =
       fixtureState.today;
     const plugin = (app as unknown as {
       plugins: {

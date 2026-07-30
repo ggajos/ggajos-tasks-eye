@@ -1,7 +1,10 @@
-import type { App, TFile } from "obsidian";
+import type { App } from "obsidian";
+import {
+  collectDescendantMarkdownFiles,
+  findManagedFolder,
+} from "./managedFolder";
 import {
   DEFAULT_MANAGED_FOLDER_PATH,
-  isPathInManagedFolder,
   normalizeManagedFolderPath,
 } from "./managedPath";
 import { parseTasksFromMarkdown } from "./taskParsing";
@@ -165,20 +168,14 @@ export function buildEyeFileFromMarkdown(
   };
 }
 
-function isManagedMarkdown(file: TFile, managedFolderPath: string): boolean {
-  return (
-    file.extension === "md" &&
-    isPathInManagedFolder(file.path, managedFolderPath)
-  );
-}
-
 export async function readEyeFiles(
   app: App,
   managedFolderPath: string,
 ): Promise<EyeFile[]> {
-  const files = app.vault
-    .getMarkdownFiles()
-    .filter((file) => isManagedMarkdown(file, managedFolderPath));
+  const managedFolder = findManagedFolder(app, managedFolderPath);
+  if (!managedFolder) return [];
+
+  const files = collectDescendantMarkdownFiles(managedFolder);
   const result: EyeFile[] = [];
 
   for (const file of files) {

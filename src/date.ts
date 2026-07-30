@@ -11,8 +11,10 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const pad = (n: number): string => String(n).padStart(2, "0");
 
 function configuredToday(): string | null {
-  const globalValue = (globalThis as { TASKS_EYE_TODAY?: unknown })
-    .TASKS_EYE_TODAY;
+  const globalValue =
+    typeof window === "undefined"
+      ? undefined
+      : (window as Window & { TASKS_EYE_TODAY?: unknown }).TASKS_EYE_TODAY;
   if (typeof globalValue === "string" && ISO_DATE_RE.test(globalValue)) {
     return globalValue;
   }

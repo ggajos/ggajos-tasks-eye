@@ -20,6 +20,11 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 - `npm run release` runs unit, build, and docs gates for beta releases;
   `npm run release:public` additionally runs the Podman WDIO gate.
 
+Create stable releases only with `npm run release:public`. Let the release
+automation bump version files, create and push the release commit and tag, and
+publish the GitHub assets. Do not edit release versions manually, rewrite tags,
+replace published releases, or invoke internal release helpers directly.
+
 Use focused commands first when changing a narrow rule, then broaden only when
 the change touches integration behavior or generated docs.
 
