@@ -14,6 +14,12 @@ const report = path.resolve(
   "report",
   "index.html",
 );
+const showcase = path.resolve(
+  root,
+  "acceptance",
+  "artifacts",
+  "community-submission",
+);
 
 function tryRun(command, args, options = {}) {
   return spawnSync(command, args, {
@@ -94,6 +100,9 @@ try {
 
   if (existsSync(report)) {
     console.log(`Visual report: ${report}`);
+    if (existsSync(showcase)) {
+      console.log(`Community-submission screenshots: ${showcase}`);
+    }
     if (visual.status !== 0) {
       console.log(
         "Inspect the WDIO output and report; approve only intentional screenshot changes with: npm run test:visual:approve",

@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -8,6 +8,12 @@ const visualRoot = path.resolve(root, "acceptance", "artifacts", "visual");
 const reportRoot = path.join(visualRoot, "report");
 const manifestPath = path.join(visualRoot, "manifest.json");
 const reportPath = path.join(reportRoot, "index.html");
+const showcaseRoot = path.resolve(
+  root,
+  "acceptance",
+  "artifacts",
+  "community-submission",
+);
 
 function escapeHtml(value) {
   return String(value)
@@ -94,6 +100,17 @@ const reportError = manifest.reportError
 const staleHtml = stale.length === 0
   ? ""
   : `<section><h2>Stale baselines</h2><ul>${stale.map((file) => `<li><code>${escapeHtml(file)}</code></li>`).join("")}</ul></section>`;
+const showcaseImages = (await readdir(showcaseRoot).catch(() => []))
+  .filter((file) => file.endsWith(".png"))
+  .sort();
+const showcaseHtml = showcaseImages.length === 0
+  ? `<section class="showcase"><h2>Community-submission screenshots</h2><p>Not generated because the required visual captures were incomplete.</p></section>`
+  : `<section class="showcase"><h2>Community-submission screenshots</h2><p>Regenerated from this run's dark-theme captures.</p><div class="showcase-grid">${
+    showcaseImages.map((file) => {
+      const href = hrefFor(path.join(showcaseRoot, file));
+      return `<figure><figcaption>${escapeHtml(file)}</figcaption><a href="${escapeHtml(href)}"><img src="${escapeHtml(href)}" alt="${escapeHtml(file)}" loading="lazy"></a></figure>`;
+    }).join("")
+  }</div></section>`;
 
 const html = `<!doctype html>
 <html lang="en">
@@ -122,6 +139,12 @@ const html = `<!doctype html>
     .pane figcaption { color: #b7becd; font-weight: 700; margin-bottom: 10px; }
     .pane img { background: #20242d; display: block; height: auto; max-width: 100%; }
     .pane.missing div { align-items: center; background: #20242d; color: #8f97a8; display: flex; min-height: 160px; justify-content: center; }
+    .showcase { margin: 28px 0; }
+    .showcase > p { color: #b7becd; }
+    .showcase-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+    .showcase-grid figure { background: #1b1f28; border: 1px solid #303644; border-radius: 10px; margin: 0; overflow: hidden; }
+    .showcase-grid figcaption { color: #b7becd; font-weight: 700; padding: 12px 16px; }
+    .showcase-grid img { display: block; height: auto; width: 100%; }
     code { overflow-wrap: anywhere; }
     a { color: inherit; }
   </style>
@@ -134,6 +157,7 @@ const html = `<!doctype html>
   </section>
   ${reportError}
   ${staleHtml}
+  ${showcaseHtml}
   <details open><summary>Differences (${changed.length})</summary>${changed.length === 0 ? "<p>No visual differences.</p>" : changed.map(resultCard).join("")}</details>
   <details><summary>Unchanged (${matched.length})</summary>${matched.map(resultCard).join("")}</details>
 </body>

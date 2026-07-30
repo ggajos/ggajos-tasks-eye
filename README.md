@@ -97,3 +97,19 @@ Public-holiday support optionally connects to the
 and, after you select a country, nationwide holiday dates for the relevant
 years. Tasks Eye does not send note or vault content. Downloaded holiday data
 is cached locally in the plugin settings.
+
+## Development
+
+- `npm test` runs the Vitest unit suite.
+- `npm run build` type-checks and bundles the plugin.
+- `npm run test:visual` runs behavioral and screenshot scenarios in the pinned
+  Podman environment. It rebuilds the comparison report at
+  `acceptance/artifacts/visual/report/index.html` and regenerates five
+  1200×800 PNG showcase cards in
+  `acceptance/artifacts/community-submission/` from that run's dark-theme
+  captures.
+- After reviewing every visual difference, run
+  `npm run test:visual:approve` to promote the complete run and rebuild the
+  generated documentation.
+- `npm run release` publishes a beta after the unit, build, and documentation
+  gates. `npm run release:public` additionally requires a clean visual run.

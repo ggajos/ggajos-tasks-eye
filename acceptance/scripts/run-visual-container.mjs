@@ -11,10 +11,16 @@ function run(command, args) {
   });
 }
 
-await rm(path.resolve("acceptance", "artifacts", "visual"), {
-  recursive: true,
-  force: true,
-});
+await Promise.all([
+  rm(path.resolve("acceptance", "artifacts", "visual"), {
+    recursive: true,
+    force: true,
+  }),
+  rm(path.resolve("acceptance", "artifacts", "community-submission"), {
+    recursive: true,
+    force: true,
+  }),
+]);
 
 let exitCode = 1;
 try {
@@ -27,7 +33,11 @@ try {
   console.error(error instanceof Error ? error.message : error);
 }
 
+const showcaseExitCode = await run(process.execPath, [
+  "acceptance/scripts/generate-showcase.mjs",
+]);
 const reportExitCode = await run(process.execPath, [
   "acceptance/scripts/build-visual-report.mjs",
 ]);
-process.exitCode = exitCode === 0 ? reportExitCode : exitCode;
+process.exitCode =
+  [exitCode, showcaseExitCode, reportExitCode].find((code) => code !== 0) ?? 0;
