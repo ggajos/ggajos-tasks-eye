@@ -13,12 +13,15 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
   feedback loop.
 - `npm run test:visual` runs all behavioral and screenshot WDIO scenarios only
   inside the pinned Podman Linux/Xvfb environment and writes an ignored HTML
-  comparison report.
+  comparison report. It also regenerates five 1200×800 PNG showcase cards in
+  `acceptance/artifacts/community-submission/` from the run's dark-theme
+  captures.
 - `npm run test:visual:approve` promotes a complete reviewed visual run and
   rebuilds generated docs. Visual runs never update baselines implicitly.
 - `npm run docs` publishes accepted screenshots and rebuilds generated docs.
-- `npm run release` runs unit, build, and docs gates for beta releases;
-  `npm run release:public` additionally runs the Podman WDIO gate.
+- `npm run release` publishes a beta after the unit, build, and docs gates.
+- `npm run release:public` publishes a stable release and additionally requires
+  the Podman WDIO gate to pass without visual differences.
 
 Create stable releases only with `npm run release:public`. Let the release
 automation bump version files, create and push the release commit and tag, and
@@ -78,9 +81,30 @@ review it and run the approval command themselves.
 
 ## Developer Documentation
 
-Keep developer setup, testing, visual-review, and release instructions in
-`README.md`. Update it when commands or workflows change instead of adding a
-separate developer guide.
+Keep developer setup, testing, visual-review, release, and contributor workflow
+instructions in `AGENTS.md`. Update this file when commands or workflows
+change. Keep `README.md` focused on public, user-facing product documentation;
+do not add a separate developer guide.
+
+## Intentionally Unresolved Obsidian Review Findings
+
+The following review findings are known and deliberately remain unresolved.
+Do not silence or work around them without revisiting the stated constraint:
+
+- **Missing GitHub artifact attestations for `main.js` and `styles.css`:**
+  releases are intentionally built and published by the local release
+  automation. GitHub Actions is not the authoritative builder, so adding a
+  post-hoc attestation would misrepresent provenance. Reproducible build
+  verification remains the integrity check.
+- **No declarative settings definitions and deprecated `display()`:** the
+  `getSettingDefinitions()` API requires Obsidian 1.13, which is not yet
+  available in the development runtime. Tasks Eye continues to support
+  Obsidian 1.12.7 and keeps the tested imperative settings implementation until
+  a dual-path migration can be exercised against 1.13.
+- **Unknown `starlight-tabs` CSS type selector:** these selectors live in the
+  documentation stylesheet and target a real custom element defined by
+  `@astrojs/starlight`; they are not plugin runtime CSS. The generic CSS review
+  warning is a false positive, so the valid selectors remain unchanged.
 
 ## Fixtures
 
