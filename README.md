@@ -30,7 +30,7 @@ Tasks Eye gives you three main views to manage your work:
 
 ## Requirements
 
-Tasks Eye requires Obsidian 1.12.7 or newer and the
+Tasks Eye requires Obsidian 1.13.4 or newer and the
 [Tasks](https://obsidian.md/plugins?id=obsidian-tasks-plugin) community plugin.
 
 ## Documentation and Workflows

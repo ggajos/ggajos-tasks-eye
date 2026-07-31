@@ -51,7 +51,26 @@ const availabilityFixture = fixture(
 );
 
 async function openAvailabilitySettings() {
+  const mainWindow = await browser.getWindowHandle();
+  const existingWindows = new Set(await browser.getWindowHandles());
   await browser.executeObsidianCommand("app:open-settings");
+
+  let settingsWindow: string | undefined;
+  await browser.waitUntil(
+    async () => {
+      settingsWindow = (await browser.getWindowHandles()).find(
+        (windowHandle) => !existingWindows.has(windowHandle),
+      );
+      return settingsWindow !== undefined;
+    },
+    {
+      timeout: 10_000,
+      timeoutMsg: "Obsidian settings window did not open",
+    },
+  );
+  if (!settingsWindow) throw new Error("Obsidian settings window is missing");
+  await browser.switchToWindow(settingsWindow);
+
   await browser.waitUntil(
     async () =>
       await browser.execute(() => {
@@ -80,7 +99,12 @@ async function openAvailabilitySettings() {
       }),
     { timeout: 10_000, timeoutMsg: "Tasks Eye settings did not render" },
   );
-  return await $(".modal.mod-settings");
+  return { mainWindow, modal: await $(".modal.mod-settings") };
+}
+
+async function closeAvailabilitySettings(mainWindow: string) {
+  await browser.closeWindow();
+  await browser.switchToWindow(mainWindow);
 }
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
@@ -91,55 +115,20 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         title:
           "configures public, weekly, and personal availability in settings",
         async run() {
+          const { mainWindow, modal } = await openAvailabilitySettings();
           try {
-            const modal = await openAvailabilitySettings();
             await expect(modal).toHaveText(expect.stringContaining("Country"));
-            await expect(modal).toHaveText(expect.stringContaining("Sat"));
             await expect(modal).toHaveText(
               expect.stringContaining("2026-07-13"),
             );
+            const weekdays = await $('input[placeholder="Sat, Sun"]');
+            await expect(weekdays).toHaveValue("Sat, Sun");
 
             const label = await $(
               '.eye-personal-entry input[aria-label="Label (optional)"]',
             );
             await label.setValue("Planning break");
-            const focusResult = await browser.executeObsidian(
-              async ({ app }) => {
-                const input = document.querySelector<HTMLInputElement>(
-                  '.eye-personal-entry input[aria-label="Label (optional)"]',
-                );
-                if (!input)
-                  throw new Error("Personal time off label is missing");
-                input.focus();
-
-                const plugin = (
-                  app as unknown as {
-                    plugins: {
-                      plugins: Record<
-                        string,
-                        {
-                          refreshHolidayCountries: () => Promise<void>;
-                          settings: {
-                            holidayCache: { countriesFetchedAt: string | null };
-                          };
-                        }
-                      >;
-                    };
-                  }
-                ).plugins.plugins["ggajos-tasks-eye"];
-                if (!plugin) throw new Error("Tasks Eye plugin is not loaded");
-                plugin.settings.holidayCache.countriesFetchedAt =
-                  new Date().toISOString();
-                await plugin.refreshHolidayCountries();
-
-                return {
-                  focused: document.activeElement === input,
-                  value: input.value,
-                };
-              },
-            );
-            expect(focusResult.focused).toBe(true);
-            expect(focusResult.value).toBe("Planning break");
+            await expect(label).toHaveValue("Planning break");
 
             const layout = await browser.execute(() => {
               const entries = [
@@ -178,7 +167,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             expect(layout.controlTopSpread).toBeLessThan(5);
             expect(layout.overflows).toBe(false);
           } finally {
-            await browser.keys(["Escape"]);
+            await closeAvailabilitySettings(mainWindow);
           }
         },
       },
@@ -187,13 +176,16 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
       {
         screenshotSlug: "settings",
         async run({ save }) {
+          const { mainWindow, modal } = await openAvailabilitySettings();
           try {
-            const modal = await openAvailabilitySettings();
             await browser.execute(() => {
               const content = document.querySelector<HTMLElement>(
                 ".modal.mod-settings .vertical-tab-content",
               );
-              content?.style.setProperty("zoom", "0.75");
+              if (!content) {
+                throw new Error("Tasks Eye settings content is missing");
+              }
+              content.style.setProperty("zoom", "0.75");
             });
             await expect(modal).toHaveText(expect.stringContaining("Poland"));
             await expect(modal).toHaveText(
@@ -204,7 +196,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             );
             await save(modal);
           } finally {
-            await browser.keys(["Escape"]);
+            await closeAvailabilitySettings(mainWindow);
           }
         },
       },

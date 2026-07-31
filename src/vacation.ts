@@ -71,6 +71,46 @@ export const DEFAULT_AVAILABILITY_SETTINGS: Readonly<AvailabilitySettings> = {
   personalTimeOff: [],
 };
 
+const WEEKDAY_BY_ABBREVIATION = new Map<string, number>([
+  ["mon", 1],
+  ["tue", 2],
+  ["wed", 3],
+  ["thu", 4],
+  ["fri", 5],
+  ["sat", 6],
+  ["sun", 0],
+]);
+
+export const NON_WORKING_WEEKDAY_ABBREVIATIONS = [
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+  "Sun",
+] as const;
+
+export function formatNonWorkingWeekdays(days: readonly number[]): string {
+  const selected = new Set(days);
+  return NON_WORKING_WEEKDAY_ABBREVIATIONS.filter((abbreviation) => {
+    const day = WEEKDAY_BY_ABBREVIATION.get(abbreviation.toLowerCase());
+    return day !== undefined && selected.has(day);
+  }).join(", ");
+}
+
+export function parseNonWorkingWeekdays(value: string): number[] | null {
+  if (!value.trim()) return [];
+
+  const days = new Set<number>();
+  for (const token of value.split(",")) {
+    const day = WEEKDAY_BY_ABBREVIATION.get(token.trim().toLowerCase());
+    if (day === undefined) return null;
+    days.add(day);
+  }
+  return [...days].sort((a, b) => a - b);
+}
+
 export const EMPTY_HOLIDAY_CACHE: Readonly<HolidayCache> = {
   countryCode: "",
   years: {},

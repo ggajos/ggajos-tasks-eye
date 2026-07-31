@@ -96,11 +96,6 @@ Do not silence or work around them without revisiting the stated constraint:
   automation. GitHub Actions is not the authoritative builder, so adding a
   post-hoc attestation would misrepresent provenance. Reproducible build
   verification remains the integrity check.
-- **No declarative settings definitions and deprecated `display()`:** the
-  `getSettingDefinitions()` API requires Obsidian 1.13, which is not yet
-  available in the development runtime. Tasks Eye continues to support
-  Obsidian 1.12.7 and keeps the tested imperative settings implementation until
-  a dual-path migration can be exercised against 1.13.
 - **Unknown `starlight-tabs` CSS type selector:** these selectors live in the
   documentation stylesheet and target a real custom element defined by
   `@astrojs/starlight`; they are not plugin runtime CSS. The generic CSS review

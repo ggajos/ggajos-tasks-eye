@@ -5,7 +5,7 @@ import type {
   TAbstractFile,
   WorkspaceLeaf,
 } from "obsidian";
-import { Notice, Plugin, TFile, type TFolder } from "obsidian";
+import { Notice, Plugin, TFile } from "obsidian";
 import { completeTaskInFile, shiftTaskDueInFile } from "./actions";
 import {
   CREATE_NEW_NOTE_COMMAND,
@@ -352,18 +352,26 @@ export default class TheEyePlugin extends Plugin {
     this.holidaySyncError = null;
     await this.saveData(this.settings);
     await this.refreshViews();
-    this.settingsTab?.refresh();
+    this.settingsTab?.update();
     if (normalized) await this.refreshHolidayData(true);
   }
 
-  async setNonWorkingWeekday(day: number, enabled: boolean): Promise<void> {
-    if (!Number.isInteger(day) || day < 0 || day > 6) return;
-    const days = new Set(this.settings.availability.nonWorkingWeekdays);
-    if (enabled) days.add(day);
-    else days.delete(day);
-    this.settings.availability.nonWorkingWeekdays = [...days].sort(
-      (a, b) => a - b,
-    );
+  async setNonWorkingWeekdays(days: readonly number[]): Promise<void> {
+    if (days.some((day) => !Number.isInteger(day) || day < 0 || day > 6)) {
+      throw new Error("Non-working weekdays must be integers from 0 to 6.");
+    }
+    const normalized = [...new Set(days)].sort((a, b) => a - b);
+    if (
+      normalized.length ===
+        this.settings.availability.nonWorkingWeekdays.length &&
+      normalized.every(
+        (day, index) =>
+          day === this.settings.availability.nonWorkingWeekdays[index],
+      )
+    ) {
+      return;
+    }
+    this.settings.availability.nonWorkingWeekdays = normalized;
     await this.saveData(this.settings);
     await this.refreshViews();
   }
@@ -408,8 +416,13 @@ export default class TheEyePlugin extends Plugin {
   }
 
   managedFolderError(): string | null {
-    return this.managedFolder() === null
-      ? missingManagedFolderMessage(this.settings.notesFolderPath)
+    return this.managedFolderErrorFor(this.settings.notesFolderPath);
+  }
+
+  managedFolderErrorFor(notesFolderPath: string): string | null {
+    const normalized = normalizeManagedFolderPath(notesFolderPath);
+    return findManagedFolder(this.app, normalized) === null
+      ? missingManagedFolderMessage(normalized)
       : null;
   }
 
@@ -536,7 +549,7 @@ export default class TheEyePlugin extends Plugin {
 
   private async enqueueHolidaySync(work: () => Promise<void>): Promise<void> {
     this.holidaySyncCount++;
-    this.settingsTab?.refresh();
+    this.settingsTab?.update();
     const run = this.holidaySyncChain.then(work, work);
     this.holidaySyncChain = run.catch(() => undefined);
     try {
@@ -547,7 +560,7 @@ export default class TheEyePlugin extends Plugin {
       console.error("Tasks Eye could not refresh public holidays.", error);
     } finally {
       this.holidaySyncCount--;
-      this.settingsTab?.refresh();
+      this.settingsTab?.update();
     }
   }
 
@@ -582,10 +595,6 @@ export default class TheEyePlugin extends Plugin {
 
   private findLeaf(): WorkspaceLeaf | null {
     return this.app.workspace.getLeavesOfType(VIEW_TYPE)[0] ?? null;
-  }
-
-  private managedFolder(): TFolder | null {
-    return findManagedFolder(this.app, this.settings.notesFolderPath);
   }
 
   private isRelevantFile(file: TAbstractFile): boolean {

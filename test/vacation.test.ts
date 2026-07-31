@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { isoToTs } from "../src/date";
 import type { AvailabilityConfig } from "../src/vacation";
-import { availabilityReasonsForTs, vacationMarkers } from "../src/vacation";
+import {
+  availabilityReasonsForTs,
+  formatNonWorkingWeekdays,
+  parseNonWorkingWeekdays,
+  vacationMarkers,
+} from "../src/vacation";
 
 const config: AvailabilityConfig = {
   nonWorkingWeekdays: [0, 6],
@@ -69,5 +74,25 @@ describe("vacation helpers", () => {
         reasons: ["personal", "holiday"],
       },
     ]);
+  });
+});
+
+describe("non-working weekday text", () => {
+  it("formats the default weekend in weekday order", () => {
+    expect(formatNonWorkingWeekdays([0, 6])).toBe("Sat, Sun");
+  });
+
+  it("parses comma-separated abbreviations case-insensitively", () => {
+    expect(parseNonWorkingWeekdays("sun, Mon, SAT")).toEqual([0, 1, 6]);
+  });
+
+  it("allows an empty value for no non-working weekdays", () => {
+    expect(parseNonWorkingWeekdays("")).toEqual([]);
+  });
+
+  it("rejects invalid weekday text", () => {
+    expect(parseNonWorkingWeekdays("Saturday")).toBeNull();
+    expect(parseNonWorkingWeekdays("Sat Sun")).toBeNull();
+    expect(parseNonWorkingWeekdays("Sat,")).toBeNull();
   });
 });
