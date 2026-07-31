@@ -1,7 +1,7 @@
 {
   "name": "ggajos-tasks-eye",
   "version": "10.0.0",
-  "description": "Tasks Eye turns your notes into an organized task board. It reads your Obsidian Tasks checkboxes and surfaces the next actionable, dated task for each of your active notes.",
+  "description": "Turns your notes into an organized task board by reading your Tasks checkboxes and surfacing the next actionable, dated task for each of your active notes.",
   "author": {
     "name": "Grzegorz Gajos",
     "email": "grzegorz.gajos@opentangerine.com",
@@ -57,5 +57,5 @@
     "wdio-obsidian-service": "^3.1.1",
     "webdriverio": "^9.29.1"
   },
-  "longDescription": "Tasks Eye is an Obsidian plugin that helps you track what to do next across your notes. Instead of a raw list of tasks, Tasks Eye treats your notes as projects and surfaces the next actionable task for each one based on scheduled or due dates. It provides three main views: Focus (for tasks due today or overdue), Open (for all upcoming active notes), and Inbox (to highlight notes with missing metadata). By reading your existing Markdown and Obsidian Tasks checkboxes, Tasks Eye minimizes friction between asking 'what should I do next?' and reaching the relevant task with its full context, keeping your notes as the ultimate source of truth."
+  "longDescription": "Track what to do next across your notes. Instead of a raw list of tasks, this plugin treats your notes as projects and surfaces the next actionable task for each one based on scheduled or due dates. It provides three main views: Focus (for tasks due today or overdue), Open (for all upcoming active notes), and Inbox (to highlight notes with missing metadata). By reading your existing Markdown and Tasks checkboxes, it minimizes friction between asking 'what should I do next?' and reaching the relevant task with its full context, keeping your notes as the ultimate source of truth."
 }
