@@ -1,26 +1,22 @@
 # Tasks Eye
 
-Tasks Eye brings a familiar GTD loop to Markdown notes in Obsidian. Capture an
-idea, give the note a physical next action and an attention date, then trust
-Focus to show what needs a decision today. Your notes and Obsidian Tasks
-checkboxes remain the source of truth.
+Tasks Eye is an Obsidian plugin that helps you track what to do next across your notes. 
+Instead of a giant list of tasks, Tasks Eye treats your notes as projects or work items, and surfaces the next actionable task for each one. 
 
-## A small, trusted system
+Your Markdown notes and Obsidian Tasks checkboxes remain the source of truth.
 
-Start with one managed folder and a few broad, non-overlapping contexts:
+## Core Features
 
-```text
-Tasks/
-├── Work/
-└── Private/
-```
+Tasks Eye gives you three main views to manage your work:
 
-Run
-[**Tasks Eye: Create note**](https://ggajos.com/ggajos-tasks-eye/reference/commands/#create-new-note)
-to capture into the right context. When choosing a context would interrupt you,
-leave the note in `Tasks/` and route it later from Inbox.
+- **Focus**: Shows tasks due today or overdue. This is your daily dashboard for tasks that need immediate attention.
+- **Open**: Shows all your active notes and their next tasks grouped by due date, helping you plan ahead.
+- **Inbox**: Highlights notes that are missing metadata (e.g. not in a context folder, missing a due date, or having no unchecked tasks) so you can fix them.
 
-An active note needs an unchecked next action with a Tasks due date:
+## How it works
+
+1. **Create a note** using the **Tasks Eye: Create note** command and put it in a context folder (e.g., `Tasks/Work/` or `Tasks/Private/`).
+2. **Add a task** to the note using the Obsidian Tasks format with a scheduled or due date:
 
 ```md
 # Renew passport
@@ -30,65 +26,16 @@ An active note needs an unchecked next action with a Tasks due date:
 - [ ] Submit the application
 ```
 
-Treat `📅` as the **next attention date**: when the note should return to you,
-not necessarily its external deadline. Tasks Eye surfaces the earliest
-unchecked dated task while keeping the plan, links, and history in the note.
-
-## Work Focus to zero
-
-Run
-[**Tasks Eye: Show Focus**](https://ggajos.com/ggajos-tasks-eye/reference/commands/#open-focus)
-to see open notes whose next action is due today or overdue.
-
-![Tasks Eye Focus view](docs/assets/features/views-focus/dark-minimal/board.png)
-
-Handle every row deliberately:
-
-- Complete the visible next action.
-- Move its attention date.
-- Close the note when it no longer needs attention.
-
-Focus Zero means every item asking for attention today received a decision. It
-does not mean finishing every possible task.
-
-## Repair Inbox to zero
-
-Tasks Eye's Inbox is a GTD-style capture aid and a broader **repair queue**. It
-finds notes that still need a context, an unchecked next action, an attention
-date, or a valid state.
-
-![Tasks Eye Inbox repair queue](docs/assets/features/views-inbox/dark-minimal/repair-queue.png)
-
-The everyday rhythm is:
-
-1. Handle Focus to zero.
-2. Repair Inbox to zero.
-3. Use Open to review active outcomes and future attention dates.
-4. Run a regular review to confirm that the system still represents reality.
-
-## GTD concepts in Tasks Eye
-
-- A **note** is a broad work container: it may be a project, standalone action,
-  waiting item, or recurring responsibility.
-- **Open** is the inventory of active notes with their next-action previews.
-- **Folders** provide deliberately minimal contexts such as Work and Private.
-- **Waiting For** becomes a dated follow-up action in the relevant note.
-- **Someday / Maybe** can be one periodically reviewed note containing ideas
-  and links.
-- Fixed appointments and day-specific commitments stay in your **calendar**.
-- Reference material stays outside the managed folder or in a closed note.
-
-Read the
-[complete GTD quickstart](https://ggajos.com/ggajos-tasks-eye/gtd-quickstart/)
-for processing decisions, review patterns, examples, and the full concept
-mapping. The
-[feature documentation](https://ggajos.com/ggajos-tasks-eye/) explains every
-view, command, and Inbox validation rule.
+3. Tasks Eye will automatically surface the **first unchecked dated task** from that note in your Focus or Open views, depending on the date.
 
 ## Requirements
 
 Tasks Eye requires Obsidian 1.12.7 or newer and the
 [Tasks](https://obsidian.md/plugins?id=obsidian-tasks-plugin) community plugin.
+
+## Documentation and Workflows
+
+For full feature documentation, commands, and optional workflow guides (such as using Tasks Eye for GTD), visit the [Tasks Eye Documentation](https://ggajos.com/ggajos-tasks-eye/).
 
 ## Network use
 

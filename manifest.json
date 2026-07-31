@@ -3,7 +3,7 @@
   "name": "Tasks Eye",
   "version": "9.0.0",
   "minAppVersion": "1.12.7",
-  "description": "Attention is a currency. Less is more. Tasks Eye saves your attention and reduces friction by returning dated tasks when they need a decision, while your projects, plans, and history stay in Markdown.",
+  "description": "Tasks Eye turns your notes into an organized task board. It reads your Obsidian Tasks checkboxes and surfaces the next actionable, dated task for each of your active notes.",
   "author": "Grzegorz Gajos",
   "authorUrl": "https://ggajos.com",
   "isDesktopOnly": false

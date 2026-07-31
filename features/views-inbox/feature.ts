@@ -15,7 +15,7 @@ export default defineFeature({
   screenshots: [
     {
       slug: "repair-queue",
-      title: "A repair queue with clear next steps",
+      title: "An issue list with clear next steps",
       alt: "Inbox board grouping realistic workflow issues into expanded due-date buckets",
     },
   ],

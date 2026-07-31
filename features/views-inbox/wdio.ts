@@ -83,7 +83,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   {
     acceptance: [
       {
-        title: "reuses expanded task-first board rows for the repair queue",
+        title: "reuses expanded task-first board rows for the issue list",
         async run() {
           await tasksEyePage.openBoard("inbox", OPEN_WITHOUT_TASK);
           await tasksEyePage.expectBucketExpanded("noDue", true);

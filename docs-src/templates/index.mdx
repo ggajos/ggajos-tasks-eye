@@ -1,56 +1,30 @@
 ---
 title: "Tasks Eye"
-description: "A note-centered way to decide what to work on next in Obsidian."
+description: "A practical way to track what to work on next across your Obsidian notes."
 sidebar:
   label: "Overview"
   order: 0
 ---
 
-import Mermaid from '../../components/Mermaid.astro';
-
-export const dailyLoop = `flowchart TD
-  Focus["Show Focus<br/>Choose a note that needs attention"]
-  Decision{"Handle the visible next action"}
-  Do["Do it<br/>Complete the task"]
-  Move["Move it<br/>Set a new attention date"]
-  State["Change state<br/>Close the note"]
-  Return["Return to Focus"]
-  Empty{"Focus empty?"}
-  Inbox["Show Inbox<br/>Repair workflow issues"]
-
-  Focus --> Decision
-  Decision --> Do
-  Decision --> Move
-  Decision --> State
-  Do --> Return
-  Move --> Return
-  State --> Return
-  Return --> Empty
-  Empty -- "No" --> Focus
-  Empty -- "Yes" --> Inbox`;
-
 <div class="overview-lede">
-  You already know how to put tasks in Obsidian. The harder part comes later:
-  returning to a vault full of notes and knowing which one deserves your
-  attention now.
+  You already know how to put tasks in Obsidian. The harder part is returning
+  to a vault full of notes and knowing which ones need your attention right now.
 </div>
 
-Tasks Eye turns those notes into one daily control panel. Each row represents a
-note, its earliest unchecked dated task becomes the visible next action, and its
-folder tells you the context. When you are unsure what to do next, run
+Tasks Eye turns your notes into an organized, daily task board. Each row represents a
+note, and the earliest unchecked task becomes the visible next action. The note's folder tells you the context. When you are unsure what to do next, run
 [**Tasks Eye: Show Focus**](reference/commands/#open-focus).
 
 Your Markdown remains the source of truth. Tasks Eye reads and updates the same
 checkboxes and dates you already use with the Obsidian Tasks plugin; it does not
-create a second task database.
+create a separate task database.
 
-## See the work, not the task database
+## See the work, not a raw list
 
 <figure class="overview-shot overview-shot--hero">
-  <img src="assets/features/views-focus/dark-minimal/board.png" alt="Tasks Eye Focus view showing today's work and an overdue next-action warning" />
+  <img src="assets/features/views-focus/dark-minimal/board.png" alt="Tasks Eye Focus view showing today's work" />
   <figcaption>
-    Focus keeps work due today and anything overdue in one flat daily list.
-    Overdue actions carry the same repair message in Focus, Open, and Inbox.
+    Focus keeps tasks due today and anything overdue in one clear list.
   </figcaption>
 </figure>
 
@@ -58,82 +32,54 @@ create a second task database.
 
 <ol class="overview-anatomy">
   <li>
-    <strong>Begin with the first row.</strong>
-    <span>Focus contains only work due today and anything overdue, ordered from the oldest attention date forward.</span>
+    <strong>Start with the top row.</strong>
+    <span>Focus only shows work due today or overdue, ordered by date.</span>
   </li>
   <li>
     <strong>Read one row as one note.</strong>
-    <span>The bold line is the earliest unchecked dated task; the note title underneath opens the surrounding context.</span>
+    <span>The bold text is the earliest unchecked task; the note title underneath opens the surrounding document.</span>
   </li>
   <li>
-    <strong>Use Open for the horizon.</strong>
-    <span>Open groups undated and later work into due-date sections without letting it compete in the daily Focus list.</span>
+    <strong>Use Open for future work.</strong>
+    <span>The Open view groups all upcoming tasks by due date, keeping them out of your immediate Focus list.</span>
   </li>
   <li>
     <strong>Use folders as contexts.</strong>
-    <span>The label on the right comes from the note's folder. Use the filter at the top when you want to focus on one part of life or work.</span>
+    <span>The label on the right comes from the note's folder. Filter by these folders when you want to focus on a specific project or area.</span>
   </li>
 </ol>
-
-<aside class="attention-date">
-  <strong>Think “next attention date,” not only “deadline.”</strong>
-  A task date answers “when should this note surface again?” If today is not the
-  right moment, moving the date is a valid decision—not a failure to finish the
-  task.
-</aside>
-
-## The daily loop
-
-<p>
-  The goal is not to finish every possible task. It is to handle every item that
-  asks for attention today, then keep the system trustworthy enough to use
-  again tomorrow.
-</p>
-
-<Mermaid
-  chart={dailyLoop}
-  label="Tasks Eye daily workflow from Focus decisions to Inbox repair"
->
-  Complete, reschedule, or close each item until Focus is empty. Later work
-  remains in Open, completed work appears in Done, and Inbox protects the trust
-  loop.
-</Mermaid>
 
 ## Act from the board—or open the note
 
 <figure class="overview-shot overview-shot--controls">
   <img src="assets/features/actions-board-task-controls/dark-minimal/controls.png" alt="A Tasks Eye row with controls for completing a task or moving its date" loading="lazy" />
   <figcaption>
-    Focus a row to reveal the checkmark and ±1/±7 day controls. Every change is
+    Hover or focus a row to reveal the checkmark and ±1/±7 day rescheduling controls. Every change is
     written back to the original Tasks checkbox.
   </figcaption>
 </figure>
 
-If the next action is already clear, complete or reschedule it without leaving
-Focus. If you need the decision history, meeting notes, links, or supporting
-material, open the note and work with the task in its full context. The board is
-a fast point of contact, not a replacement for the note.
+If the next action is simple, complete or reschedule it without leaving
+Focus. If you need more context, meeting notes, or links, click the note title to open it and work with the task in its full environment.
 
-## Inbox keeps Focus and Open believable
+## Inbox catches metadata issues
 
 <figure class="overview-shot overview-shot--inbox">
-  <img src="assets/features/views-inbox/dark-minimal/repair-queue.png" alt="Tasks Eye Inbox showing several realistic notes and the specific workflow issue to repair in each one" loading="lazy" />
+  <img src="assets/features/views-inbox/dark-minimal/repair-queue.png" alt="Tasks Eye Inbox showing several realistic notes with missing metadata" loading="lazy" />
   <figcaption>
-    Inbox explains why each note needs attention. It is a repair queue, not
-    another place to choose today's work.
+    Inbox highlights notes missing required metadata so you can fix them.
   </figcaption>
 </figure>
 
-Focus and Open are useful only when every active note has a clear next action.
+Focus and Open rely on your notes having clear dates and tasks.
 Inbox finds the exceptions: an overdue or missing task date, an open note with
-nothing left to do, an unsupported status, or a note that still needs a context
-folder. Repair these items until Inbox is empty, and both work views stay
-dependable.
+no unchecked tasks, an unsupported status, or a note that still needs a context
+folder. Clear these validation issues to ensure your work views stay accurate.
 
-## A useful everyday rhythm
+## A simple daily workflow
 
-1. Run [**Tasks Eye: Show Focus**](reference/commands/#open-focus) and handle Focus toward zero: complete, reschedule, or close each item.
-2. Run [**Tasks Eye: Show Inbox**](reference/commands/#open-inbox) and repair Inbox toward zero so tomorrow's Focus and Open views remain trustworthy.
+1. Run [**Tasks Eye: Show Focus**](reference/commands/#open-focus) and manage today's tasks: complete, reschedule, or close them.
+2. Run [**Tasks Eye: Show Inbox**](reference/commands/#open-inbox) to fix any missing dates or missing folders.
 3. Use **Open** to plan ahead and **Done** when you want to look back.
 
 The deeper reference explains [how Focus behaves](features/views-focus/),
