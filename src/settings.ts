@@ -204,14 +204,14 @@ export class TasksEyeSettingTab extends PluginSettingTab {
       });
     });
     setting.addText((label) => {
-      label
-        .setPlaceholder("Vacation")
-        .setValue(entry.label)
-        .onChange((value) =>
-          this.eyePlugin.updatePersonalTimeOff(entry.id, { label: value }),
-        );
+      label.setPlaceholder("Vacation").setValue(entry.label);
       label.inputEl.ariaLabel = "Label (optional)";
       label.inputEl.addClass("eye-personal-label");
+      label.inputEl.addEventListener("change", () => {
+        void this.eyePlugin.updatePersonalTimeOff(entry.id, {
+          label: label.getValue(),
+        });
+      });
     });
   }
 

@@ -171,6 +171,43 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           }
         },
       },
+      {
+        title: "keeps focus on the label input while typing",
+        async run() {
+          const { mainWindow } = await openAvailabilitySettings();
+          try {
+            const labelSelector =
+              '.eye-personal-entry input[aria-label="Label (optional)"]';
+            await browser.execute((selector) => {
+              const input = document.querySelector<HTMLInputElement>(selector);
+              if (!input) throw new Error("Personal label input is missing");
+              input.value = "";
+              input.focus();
+            }, labelSelector);
+
+            const typed = "Retro";
+            for (const character of typed) {
+              await browser.keys(character);
+              const stillFocused = await browser.execute((selector) => {
+                const input =
+                  document.querySelector<HTMLInputElement>(selector);
+                return input !== null && document.activeElement === input;
+              }, labelSelector);
+              expect(stillFocused).toBe(true);
+            }
+
+            const finalValue = await browser.execute((selector) => {
+              return (
+                document.querySelector<HTMLInputElement>(selector)?.value ??
+                null
+              );
+            }, labelSelector);
+            expect(finalValue).toBe(typed);
+          } finally {
+            await closeAvailabilitySettings(mainWindow);
+          }
+        },
+      },
     ],
     screenshots: [
       {
