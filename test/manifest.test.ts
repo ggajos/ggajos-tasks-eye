@@ -30,12 +30,9 @@ describe("Obsidian plugin description rules", () => {
     },
   );
 
-  it.each(fields)(
-    "%s does not start with the plugin name",
-    (_label, value) => {
-      expect(value.trimStart().toLowerCase()).not.toMatch(
-        new RegExp(`^${pluginName.toLowerCase()}\\b`),
-      );
-    },
-  );
+  it.each(fields)("%s does not start with the plugin name", (_label, value) => {
+    expect(value.trimStart().toLowerCase()).not.toMatch(
+      new RegExp(`^${pluginName.toLowerCase()}\\b`),
+    );
+  });
 });

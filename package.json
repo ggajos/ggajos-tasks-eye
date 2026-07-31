@@ -1,6 +1,6 @@
 {
   "name": "ggajos-tasks-eye",
-  "version": "10.0.0",
+  "version": "11.0.0",
   "description": "Turns your notes into an organized task board by reading your Tasks checkboxes and surfacing the next actionable, dated task for each of your active notes.",
   "author": {
     "name": "Grzegorz Gajos",
