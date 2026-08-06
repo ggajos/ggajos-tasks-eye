@@ -23,11 +23,6 @@ export const MODE_COMMANDS: Record<
   },
 };
 
-export const CREATE_NEW_NOTE_COMMAND: CommandDefinition = {
-  id: "create-new-note",
-  name: "Create note",
-};
-
 export const OPEN_COMPLETED_COMMAND: CommandDefinition = {
   id: "open-completed-tasks",
   name: "Show Done",

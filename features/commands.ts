@@ -1,7 +1,6 @@
 import type { Hotkey } from "obsidian";
 import type { CommandDefinition } from "../src/commands";
 import {
-  CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
   STATUS_STEP_COMMANDS,
@@ -70,15 +69,8 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
   },
   {
     title: "Note lifecycle",
-    description: "Create notes and move them through workflow states.",
+    description: "Move notes through workflow states.",
     commands: [
-      {
-        ...CREATE_NEW_NOTE_COMMAND,
-        featureSlug: "actions-create-new-note",
-        featureTitle: "Create a note",
-        explanation: "Create an open note in the notes folder.",
-        recommendedHotkey: { modifiers: ["Ctrl", "Shift"], key: "N" },
-      },
       statusStepCommand(
         "previous",
         "Move the active note one step back in its status chain.",

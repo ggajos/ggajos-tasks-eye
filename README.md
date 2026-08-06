@@ -15,7 +15,7 @@ Tasks Eye gives you three main views to manage your work:
 
 ## How it works
 
-1. **Create a note** using the **Tasks Eye: Create note** command and put it in a context folder (e.g., `Tasks/Work/` or `Tasks/Private/`).
+1. **Create or move a note**: Put an ordinary Markdown note in your configured Tasks Eye notes folder, inside a context folder (e.g., `Tasks/Work/` or `Tasks/Private/`).
 2. **Add a task** to the note using the Obsidian Tasks format with a scheduled or due date:
 
 ```md

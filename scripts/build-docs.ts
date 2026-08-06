@@ -104,7 +104,6 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
   {
     label: "Notes in the workflow",
     items: [
-      { slug: "actions-create-new-note", label: "Create a note" },
       { slug: "actions-step-note-status", label: "Step a note through states" },
       { slug: "data-vault-conventions", label: "Organize notes and tasks" },
     ],

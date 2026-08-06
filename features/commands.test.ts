@@ -2,7 +2,6 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
   STATUS_STEP_COMMANDS,
@@ -63,7 +62,6 @@ describe("documented commands", () => {
     const runtimeCommands = [
       ...Object.values(MODE_COMMANDS),
       OPEN_COMPLETED_COMMAND,
-      CREATE_NEW_NOTE_COMMAND,
       UNCHECK_SELECTED_COMMAND,
       ...Object.values(STATUS_STEP_COMMANDS),
     ];
@@ -84,7 +82,6 @@ describe("documented commands", () => {
       ["open-open", "Ctrl+2"],
       ["open-inbox", "Ctrl+3"],
       ["open-completed-tasks", "Ctrl+4"],
-      ["create-new-note", "Ctrl+Shift+N"],
       ["set-note-status-previous", "Ctrl+Shift+1"],
       ["set-note-status-next", "Ctrl+Shift+2"],
       ["uncheck-selected-tasks", "Ctrl+Shift+D"],
@@ -96,12 +93,6 @@ describe("documented commands", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("includes note creation in the command reference", () => {
-    expect(DOCUMENTED_COMMANDS.map((command) => command.id)).toContain(
-      CREATE_NEW_NOTE_COMMAND.id,
-    );
-  });
-
   it("orders documented commands by view, note lifecycle, and task editing", () => {
     expect(DOCUMENTED_COMMAND_GROUPS.map((group) => group.title)).toEqual([
       "View navigation",
@@ -110,11 +101,7 @@ describe("documented commands", () => {
     ]);
     expect(
       DOCUMENTED_COMMAND_GROUPS[1]?.commands.map((command) => command.id),
-    ).toEqual([
-      CREATE_NEW_NOTE_COMMAND.id,
-      STATUS_STEP_COMMANDS.previous.id,
-      STATUS_STEP_COMMANDS.next.id,
-    ]);
+    ).toEqual([STATUS_STEP_COMMANDS.previous.id, STATUS_STEP_COMMANDS.next.id]);
     expect(
       DOCUMENTED_COMMAND_GROUPS[0]?.commands.map((command) => command.id),
     ).toEqual([
@@ -131,7 +118,6 @@ describe("documented commands", () => {
       MODE_COMMANDS.open.name,
       MODE_COMMANDS.inbox.name,
       OPEN_COMPLETED_COMMAND.name,
-      CREATE_NEW_NOTE_COMMAND.name,
       UNCHECK_SELECTED_COMMAND.name,
       STATUS_STEP_COMMANDS.previous.name,
       STATUS_STEP_COMMANDS.next.name,
@@ -140,7 +126,6 @@ describe("documented commands", () => {
       "Show Open",
       "Show Inbox",
       "Show Done",
-      "Create note",
       "Reopen selected tasks",
       "Set note status: Previous",
       "Set note status: Next",

@@ -8,7 +8,6 @@ import type {
 import { Notice, Plugin, TFile } from "obsidian";
 import { completeTaskInFile, shiftTaskDueInFile } from "./actions";
 import {
-  CREATE_NEW_NOTE_COMMAND,
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
   STATUS_STEP_COMMANDS,
@@ -40,7 +39,6 @@ import {
   missingManagedFolderMessage,
   normalizeManagedFolderPath,
 } from "./managedPath";
-import { openNewEyeNoteFlow } from "./newNote";
 import type { StatusStepDirection } from "./noteStatus";
 import { stepNoteStatus } from "./noteStatus";
 import { TasksEyeSettingTab } from "./settings";
@@ -136,13 +134,6 @@ export default class TheEyePlugin extends Plugin {
       });
     }
 
-    this.addCommand({
-      id: CREATE_NEW_NOTE_COMMAND.id,
-      name: CREATE_NEW_NOTE_COMMAND.name,
-      callback: () => {
-        openNewEyeNoteFlow(this.app, this.settings.notesFolderPath);
-      },
-    });
     this.addCommand({
       id: OPEN_COMPLETED_COMMAND.id,
       name: OPEN_COMPLETED_COMMAND.name,

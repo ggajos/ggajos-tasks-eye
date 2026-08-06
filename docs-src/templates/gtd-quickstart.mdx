@@ -99,11 +99,11 @@ joining the task workflow.
 
 ## Capture without breaking concentration
 
-Run [**Tasks Eye: Create note**](../reference/commands/#create-new-note). Its
-folder popup supports two capture paths:
+Create an ordinary Markdown note in the configured notes folder, or move an
+existing note there. Choose its destination based on what you already know:
 
-- When the context is obvious, choose `Work/` or `Private/` immediately.
-- When routing would interrupt you, accept the `Tasks/` root and decide later.
+- When the context is obvious, put it in `Work/` or `Private/` immediately.
+- When routing would interrupt you, put it in the `Tasks/` root and decide later.
 
 A root note is intentionally reported in Inbox until it is moved into a context
 folder. A note captured directly in a context can still appear in Inbox when it
@@ -130,10 +130,6 @@ recurring responsibility. For a project, name the desired outcome in the note
 title and date only the current next action by default:
 
 ```md
----
-status: open
----
-
 # Renew passport
 
 Keep the application guidance and useful links here.
@@ -265,10 +261,6 @@ Keep inactive possibilities as plain bullets or links in one periodically
 reviewed note:
 
 ```md
----
-status: open
----
-
 # Someday / Maybe
 
 - Learn bookbinding
