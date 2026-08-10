@@ -64,17 +64,40 @@ describe("board grouping", () => {
 
   it("assigns due dates to visible board buckets", () => {
     expect(bucketForTs(null, now)).toBe("noDue");
-    expect(bucketForTs(isoToTs("2026-07-06"), now)).toBe("today");
+    expect(bucketForTs(isoToTs("2026-07-06"), now)).toBe("overdue");
     expect(bucketForTs(isoToTs("2026-07-07"), now)).toBe("today");
     expect(bucketForTs(isoToTs("2026-07-08"), now)).toBe("tomorrow");
+    expect(bucketForTs(isoToTs("2026-07-09"), now)).toBe("thisWeek");
+    expect(bucketForTs(isoToTs("2026-07-12"), now)).toBe("thisWeek");
+    expect(bucketForTs(isoToTs("2026-07-13"), now)).toBe("nextWeek");
+    expect(bucketForTs(isoToTs("2026-07-19"), now)).toBe("nextWeek");
     expect(bucketForTs(isoToTs("2026-07-20"), now)).toBe("thisMonth");
     expect(bucketForTs(isoToTs("2026-08-01"), now)).toBe("nextMonth");
     expect(bucketForTs(isoToTs("2026-09-01"), now)).toBe("future");
   });
 
-  it("puts no-due work in a separate first bucket", () => {
+  it("lets week buckets take precedence across a month boundary", () => {
+    const monthEnd = new Date(2026, 6, 30);
+
+    expect(bucketForTs(isoToTs("2026-07-31"), monthEnd)).toBe("tomorrow");
+    expect(bucketForTs(isoToTs("2026-08-01"), monthEnd)).toBe("thisWeek");
+    expect(bucketForTs(isoToTs("2026-08-03"), monthEnd)).toBe("nextWeek");
+    expect(bucketForTs(isoToTs("2026-08-09"), monthEnd)).toBe("nextWeek");
+    expect(bucketForTs(isoToTs("2026-08-10"), monthEnd)).toBe("nextMonth");
+  });
+
+  it("orders overdue and no-due work before today", () => {
     const rows = selectRows(
       [
+        file(
+          "Mission/Overdue.md",
+          `---
+status: open
+---
+
+- [ ] overdue task 📅 2026-07-06
+`,
+        ),
         file(
           "Mission/No due.md",
           `---
@@ -100,8 +123,12 @@ status: open
 
     const buckets = buildBoardBuckets(taskItems(rows), now);
 
-    expect(buckets.map((bucket) => bucket.key)).toEqual(["noDue", "today"]);
-    expect(itemNames(buckets[0]!.days[0]!.items)).toEqual(["No due"]);
+    expect(buckets.map((bucket) => bucket.key)).toEqual([
+      "overdue",
+      "noDue",
+      "today",
+    ]);
+    expect(itemNames(buckets[1]!.days[0]!.items)).toEqual(["No due"]);
   });
 
   it("groups month buckets by exact day", () => {
@@ -113,7 +140,7 @@ status: open
 status: open
 ---
 
-- [ ] later task 📅 2026-07-20
+- [ ] later task 📅 2026-07-27
 `,
         ),
         file(
@@ -122,7 +149,7 @@ status: open
 status: open
 ---
 
-- [ ] sooner task 📅 2026-07-13
+- [ ] sooner task 📅 2026-07-20
 `,
         ),
       ],
@@ -135,8 +162,8 @@ status: open
     expect(buckets).toHaveLength(1);
     expect(buckets[0]!.key).toBe("thisMonth");
     expect(buckets[0]!.days.map((day) => day.label)).toEqual([
-      "July 13 - Monday",
       "July 20 - Monday",
+      "July 27 - Monday",
     ]);
   });
 
@@ -193,7 +220,7 @@ status: open
 status: open
 ---
 
-- [ ] after vacation 📅 2026-07-20
+- [ ] after vacation 📅 2026-07-27
 `,
         ),
       ],
@@ -201,8 +228,8 @@ status: open
       "*",
     );
     const marker = {
-      ts: isoToTs("2026-07-13"),
-      dateLabel: "07-13",
+      ts: isoToTs("2026-07-20"),
+      dateLabel: "07-20",
       yearLabel: "",
       dayLabel: "Mon",
       reasons: [{ kind: "personal" as const, label: "Vacation" }],
@@ -213,8 +240,8 @@ status: open
 
     expect(buckets[0]!.key).toBe("thisMonth");
     expect(buckets[0]!.days.map((day) => day.key)).toEqual([
-      "2026-07-13",
       "2026-07-20",
+      "2026-07-27",
     ]);
     expect(itemNames(buckets[0]!.days[0]!.items)).toEqual(["Vacation"]);
     expect(itemNames(buckets[0]!.days[1]!.items)).toEqual(["Trip"]);

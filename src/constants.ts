@@ -21,17 +21,23 @@ export function isEyeMode(value: unknown): value is EyeMode {
 }
 
 export type DueBucket =
+  | "overdue"
   | "noDue"
   | "today"
   | "tomorrow"
+  | "thisWeek"
+  | "nextWeek"
   | "thisMonth"
   | "nextMonth"
   | "future";
 
 export const DUE_BUCKETS: ReadonlyArray<{ key: DueBucket; label: string }> = [
+  { key: "overdue", label: "Overdue" },
   { key: "noDue", label: "No Due Date" },
   { key: "today", label: "Today" },
   { key: "tomorrow", label: "Tomorrow" },
+  { key: "thisWeek", label: "This Week" },
+  { key: "nextWeek", label: "Next Week" },
   { key: "thisMonth", label: "This Month" },
   { key: "nextMonth", label: "Next Month" },
   { key: "future", label: "Future" },

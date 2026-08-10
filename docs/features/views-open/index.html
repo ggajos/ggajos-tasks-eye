@@ -79,9 +79,11 @@
 what deserves attention now. Open narrows that decision. It shows each active
 note through its next dated task and groups those notes by when they should
 surface.</p>
-<p>Today opens first. Later sections stay collapsed until you want to look ahead,
-so tomorrow’s work does not compete with today’s. You can expand those sections
-for planning, and your choices remain in place while the pane is open.</p>
+<p>Today opens first. Every other section stays collapsed until you want to inspect
+it. Overdue and undated work remain visible ahead of Today, while Tomorrow and
+Monday-to-Sunday week buckets keep near-term work from competing with the rest
+of the month. Each note appears only in the earliest matching section, and your
+expanded choices remain in place while the pane is open.</p>
 <p>Scheduling stays in the Tasks due markers inside your Markdown. Moving work to
 another day changes the original task rather than creating a separate copy.</p>
 <div class="sl-heading-wrapper level-h2"><h2 id="what-to-expect">What to expect</h2><a class="sl-anchor-link" href="#what-to-expect"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “What to expect”</span></a></div>
@@ -89,7 +91,8 @@ another day changes the original task rather than creating a separate copy.</p>
 <li>Notes with missing, blank, or explicit <code dir="auto">status: open</code> appear in Open.</li>
 <li>Closed notes and notes with unsupported statuses do not appear in Open.</li>
 <li>Rows use the earliest unchecked due task as the next action.</li>
-<li>Rows are grouped into No Due Date, Today, Tomorrow, This Month, Next Month, and Future buckets.</li>
+<li>Rows use the first matching Overdue, No Due Date, Today, Tomorrow, This Week, Next Week, This Month, Next Month, or Future bucket.</li>
+<li>Weeks run Monday through Sunday and take precedence over overlapping month buckets.</li>
 <li>A new Open pane starts with Today expanded and every other due-date bucket collapsed.</li>
 <li>Manual bucket choices survive rerenders and tab switches until the pane is closed.</li>
 </ul>

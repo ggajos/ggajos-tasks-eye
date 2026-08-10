@@ -16,14 +16,7 @@ import {
   normalizeContextFilter,
   withVacationContext,
 } from "./context";
-import {
-  formatHumanDate,
-  formatYmd,
-  nowDate,
-  nowTs,
-  shiftIsoDate,
-  todayIso,
-} from "./date";
+import { formatHumanDate, nowDate, shiftIsoDate, todayIso } from "./date";
 import type TheEyePlugin from "./main";
 import type { BoardBucket, BoardDayGroup, RenderItem } from "./model";
 import { boardItemsForContext, buildBoardBuckets, selectRows } from "./model";
@@ -484,10 +477,10 @@ export class EyeView extends ItemView {
       contextFilter,
       availability,
     );
-    const today = buildBoardBuckets(items, nowDate()).find(
-      (bucket) => bucket.key === "today",
-    );
-    const focusItems = today?.days.flatMap((day) => day.items) ?? [];
+    const focusItems = buildBoardBuckets(items, nowDate())
+      .filter((bucket) => bucket.key === "overdue" || bucket.key === "today")
+      .flatMap((bucket) => bucket.days)
+      .flatMap((day) => day.items);
 
     for (const item of focusItems) await this.renderItem(list, item);
     return focusItems.length > 0;
@@ -570,6 +563,8 @@ export class EyeView extends ItemView {
   private shouldShowDayDividers(bucket: BoardBucket): boolean {
     if (bucket.key === "noDue") return false;
     if (
+      bucket.key === "thisWeek" ||
+      bucket.key === "nextWeek" ||
       bucket.key === "thisMonth" ||
       bucket.key === "nextMonth" ||
       bucket.key === "future"
@@ -577,9 +572,6 @@ export class EyeView extends ItemView {
       return true;
     }
     if (bucket.days.length > 1) return true;
-    if (bucket.key === "today") {
-      return bucket.days.some((day) => day.key !== formatYmd(nowTs()));
-    }
     return false;
   }
 

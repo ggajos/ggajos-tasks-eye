@@ -244,6 +244,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           await tasksEyePage.setContextFilter("*");
           await tasksEyePage.expandBucketForText(WORK);
           await tasksEyePage.setContextFilter("ooo");
+          await tasksEyePage.expandBucketForText("Conference");
           const root = await tasksEyePage.plugin("Conference");
           await expect(root).toHaveText(expect.stringContaining("OOO"));
           await expect(root).toHaveText(expect.not.stringContaining(WORK));

@@ -216,7 +216,8 @@ export function bucketForTs(due: number | null, now: Date): DueBucket {
   if (due === null) return "noDue";
 
   const day = startOfDay(due);
-  if (day.getTime() <= today.getTime()) return "today";
+  if (day.getTime() < today.getTime()) return "overdue";
+  if (day.getTime() === today.getTime()) return "today";
 
   const tomorrow = new Date(
     today.getFullYear(),
@@ -224,6 +225,26 @@ export function bucketForTs(due: number | null, now: Date): DueBucket {
     today.getDate() + 1,
   );
   if (day.getTime() === tomorrow.getTime()) return "tomorrow";
+
+  const mondayOffset = (today.getDay() + 6) % 7;
+  const thisWeekEnd = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - mondayOffset + 6,
+  );
+  if (day.getTime() <= thisWeekEnd.getTime()) return "thisWeek";
+
+  const nextWeekStart = new Date(
+    thisWeekEnd.getFullYear(),
+    thisWeekEnd.getMonth(),
+    thisWeekEnd.getDate() + 1,
+  );
+  const nextWeekEnd = new Date(
+    nextWeekStart.getFullYear(),
+    nextWeekStart.getMonth(),
+    nextWeekStart.getDate() + 6,
+  );
+  if (day.getTime() <= nextWeekEnd.getTime()) return "nextWeek";
 
   if (
     day.getFullYear() === today.getFullYear() &&

@@ -7,9 +7,12 @@ const TODAY_ANCHOR = "Send the revised homepage copy to Marta";
 const TOMORROW_ANCHOR = "Review Q3 priorities with the team";
 
 const DEFAULT_BUCKETS = [
+  ["overdue", false],
   ["noDue", false],
   ["today", true],
   ["tomorrow", false],
+  ["thisWeek", false],
+  ["nextWeek", false],
   ["thisMonth", false],
   ["nextMonth", false],
   ["future", false],
@@ -23,6 +26,10 @@ async function expectDefaultOpenBuckets(): Promise<void> {
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   fixture([
+    note("Work/Overdue Proposal.md", {
+      status: "open",
+      tasks: [{ text: "Send the overdue proposal", due: "2026-07-07" }],
+    }),
     note("Ideas/Neighborhood Dinner.md", {
       status: "open",
       tasks: [{ text: "Choose a date for the neighborhood dinner" }],
@@ -51,6 +58,14 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     note("Health/Annual Checkups.md", {
       status: "open",
       tasks: [{ text: "Confirm the dentist appointment", due: "2026-07-09" }],
+    }),
+    note("Work/Release Notes.md", {
+      status: "open",
+      tasks: [{ text: "Draft the release notes", due: "2026-07-10" }],
+    }),
+    note("Family/Weekend Plans.md", {
+      status: "open",
+      tasks: [{ text: "Confirm next weekend plans", due: "2026-07-13" }],
     }),
     note("Home/Insurance Renewal.md", {
       status: "open",

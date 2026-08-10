@@ -16,9 +16,12 @@ describe("Open view feature", () => {
         ]),
       ),
     ).toEqual({
+      overdue: true,
       noDue: true,
       today: false,
       tomorrow: true,
+      thisWeek: true,
+      nextWeek: true,
       thisMonth: true,
       nextMonth: true,
       future: true,

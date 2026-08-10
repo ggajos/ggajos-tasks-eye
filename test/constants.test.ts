@@ -18,9 +18,12 @@ describe("Tasks Eye modes", () => {
 
   it("uses accurate sentence-case due bucket labels", () => {
     expect(DUE_BUCKETS.map((bucket) => bucket.label)).toEqual([
+      "Overdue",
       "No Due Date",
       "Today",
       "Tomorrow",
+      "This Week",
+      "Next Week",
       "This Month",
       "Next Month",
       "Future",
