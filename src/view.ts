@@ -636,16 +636,20 @@ export class EyeView extends ItemView {
   }
 
   private async renderRow(list: HTMLElement, model: RowModel): Promise<void> {
-    const row = element("div", `eye-row${model.isFuture ? " is-future" : ""}`);
+    const row = element("div", "eye-row eye-task-row");
     const main = element("div", "eye-row-main");
+    const description = element("div", "eye-row-description");
+    const separator = element("span", "eye-row-separator", "→");
+    const actionCell = element("div", "eye-action-cell");
     const action = element("div", "eye-task-title");
-    const note = element("div", "eye-note-line");
-    note.appendChild(this.renderNoteLink(model));
-    if (model.errors.length > 0) note.appendChild(attentionPill());
     await this.renderActionMarkdown(action, model);
 
-    main.appendChild(action);
-    main.appendChild(note);
+    actionCell.appendChild(action);
+    if (model.errors.length > 0) actionCell.appendChild(attentionPill());
+    description.appendChild(this.renderNoteLink(model));
+    description.appendChild(separator);
+    description.appendChild(actionCell);
+    main.appendChild(description);
 
     if (model.errors.length > 0) {
       const errors = element("div", "eye-errors");

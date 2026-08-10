@@ -8,7 +8,7 @@ export default defineFeature({
     "Focus is the first navigation tab and the default for fresh or invalid settings.",
     "Open notes whose earliest unchecked dated task is due today or overdue appear in Focus.",
     "Undated, future, closed, and unsupported-status notes do not appear in Focus.",
-    "Focus uses the same task-first rows, actions, context filtering, availability markers, and validation messages as Open.",
+    "Focus uses the same note-first rows, actions, context filtering, availability markers, and validation messages as Open.",
     "Focus has no due-date bucket headers or day dividers.",
     "An empty Focus view says `No open work due today.`",
   ],

@@ -7,7 +7,7 @@ export default defineFeature({
   acceptanceCriteria: [
     "Inbox shows notes with validation issues.",
     "Inbox includes notes with issues whether their status is open, closed, or unsupported.",
-    "Inbox reuses the task-first board rows and due-date buckets from Open.",
+    "Inbox reuses the note-first board rows and due-date buckets from Open.",
     "Every Inbox bucket starts expanded so validation issues are immediately visible.",
     "Inbox rows keep their validation messages, note links, context badges, and row actions.",
     "Inbox displays an all-clear empty state when no notes need attention.",

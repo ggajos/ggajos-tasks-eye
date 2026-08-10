@@ -287,12 +287,9 @@
   background: var(--nav-item-background-hover, var(--background-modifier-hover));
 }
 
-.eye-row.is-future {
-  background: transparent;
-}
-
-.eye-row.is-future .eye-task-title {
-  color: var(--text-muted);
+.eye-task-row {
+  font-size: var(--font-ui-medium, 15px);
+  grid-template-columns: minmax(0, 1fr) fit-content(33.333%);
 }
 
 .eye-context-badge {
@@ -403,6 +400,14 @@
   min-width: 0;
 }
 
+.eye-row-description {
+  align-items: start;
+  display: grid;
+  grid-template-columns: fit-content(40%) auto minmax(0, 1fr);
+  line-height: var(--line-height-tight, 1.3);
+  min-width: 0;
+}
+
 .eye-row-title {
   align-items: center;
   display: flex;
@@ -414,7 +419,8 @@
 .eye-note-link {
   color: var(--nav-item-color, var(--text-muted));
   cursor: pointer;
-  font-weight: 500;
+  font-weight: var(--font-medium, 500);
+  overflow-wrap: anywhere;
   text-decoration: none;
 }
 
@@ -425,8 +431,9 @@
 
 .eye-task-title {
   color: var(--text-normal);
-  font-weight: 600;
-  line-height: 1.35;
+  display: inline;
+  font-weight: var(--font-normal, 400);
+  line-height: inherit;
   overflow-wrap: anywhere;
 }
 
@@ -435,18 +442,42 @@
   margin: 0;
 }
 
-.eye-note-line {
-  align-items: center;
+.eye-row-separator {
   color: var(--text-faint);
-  display: flex;
-  flex-wrap: wrap;
-  font-size: 0.88em;
-  gap: 6px;
-  line-height: 1.3;
-  margin-top: 0;
+  padding: 0 0.35em;
+}
+
+.eye-action-cell {
+  color: var(--text-normal);
+  display: block;
+  line-height: inherit;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.eye-action-cell .eye-pill {
+  margin-left: 0.35em;
+}
+
+.eye-task-row .eye-context-badge {
+  align-items: start;
+  display: block;
+  font-size: inherit;
+  font-weight: var(--font-normal, 400);
+  height: auto;
+  line-height: var(--line-height-tight, 1.3);
+  max-width: none;
+  min-height: 20px;
+  min-width: 0;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  padding-left: 8px;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .eye-pill {
+  align-items: center;
   background: var(--background-modifier-border);
   border-radius: var(--radius-s, 4px);
   color: var(--text-muted);
@@ -459,7 +490,7 @@
   color: rgb(var(--eye-red-rgb));
   display: flex;
   flex-direction: column;
-  font-size: 0.88em;
+  font-size: inherit;
   gap: 2px;
   margin-top: 5px;
 }
