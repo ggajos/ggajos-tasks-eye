@@ -8,6 +8,7 @@
 
   background: var(--background-primary);
   color: var(--text-normal);
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   font-family: var(--font-interface, inherit);
@@ -288,8 +289,13 @@
 }
 
 .eye-task-row {
+  column-gap: 12px;
   font-size: var(--font-ui-medium, 15px);
-  grid-template-columns: minmax(0, 1fr) fit-content(33.333%);
+  grid-template-columns:
+    minmax(9rem, min(17rem, 30%))
+    minmax(0, 1fr)
+    minmax(6rem, min(12rem, 20%));
+  row-gap: 4px;
 }
 
 .eye-context-badge {
@@ -393,18 +399,18 @@
   }
 }
 
+.eye-row-description {
+  align-self: start;
+  display: block;
+  line-height: var(--line-height-tight, 1.3);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .eye-row-main {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 0;
-}
-
-.eye-row-description {
-  align-items: start;
-  display: grid;
-  grid-template-columns: fit-content(40%) auto minmax(0, 1fr);
-  line-height: var(--line-height-tight, 1.3);
   min-width: 0;
 }
 
@@ -417,9 +423,10 @@
 }
 
 .eye-note-link {
-  color: var(--nav-item-color, var(--text-muted));
+  color: var(--text-normal);
   cursor: pointer;
   font-weight: var(--font-medium, 500);
+  display: block;
   overflow-wrap: anywhere;
   text-decoration: none;
 }
@@ -442,12 +449,8 @@
   margin: 0;
 }
 
-.eye-row-separator {
-  color: var(--text-faint);
-  padding: 0 0.35em;
-}
-
 .eye-action-cell {
+  align-self: start;
   color: var(--text-normal);
   display: block;
   line-height: inherit;
@@ -460,11 +463,12 @@
 }
 
 .eye-task-row .eye-context-badge {
-  align-items: start;
+  align-self: start;
   display: block;
   font-size: inherit;
   font-weight: var(--font-normal, 400);
   height: auto;
+  justify-self: end;
   line-height: var(--line-height-tight, 1.3);
   max-width: none;
   min-height: 20px;
@@ -472,8 +476,10 @@
   overflow: visible;
   overflow-wrap: anywhere;
   padding-left: 8px;
+  text-align: right;
   text-overflow: clip;
   white-space: normal;
+  width: 100%;
 }
 
 .eye-pill {
@@ -492,6 +498,7 @@
   flex-direction: column;
   font-size: inherit;
   gap: 2px;
+  grid-column: 1 / -1;
   margin-top: 5px;
 }
 
@@ -643,16 +650,42 @@
 }
 
 @media (max-width: 640px) {
-  .eye-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
   .eye-actions {
     justify-content: start;
   }
 
   .eye-context-badge {
     max-width: 72px;
+  }
+}
+
+@container (max-width: 36rem) {
+  .eye-task-row {
+    column-gap: 0;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 3px;
+  }
+
+  .eye-task-row .eye-context-badge {
+    max-width: 12rem;
+    padding-left: 0;
+    width: min(100%, 12rem);
+  }
+
+  .eye-task-row .eye-actions {
+    display: none;
+  }
+
+  .eye-task-row:hover .eye-actions,
+  .eye-task-row:focus-within .eye-actions {
+    display: flex;
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-top: 2px;
+    opacity: 1;
+    pointer-events: auto;
+    position: static;
+    transform: none;
   }
 }
 
@@ -666,5 +699,9 @@
     pointer-events: auto;
     position: static;
     transform: none;
+  }
+
+  .eye-task-row .eye-actions {
+    display: flex;
   }
 }

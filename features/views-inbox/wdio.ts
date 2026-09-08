@@ -82,6 +82,7 @@ async function narrowRowShape(): Promise<{
   contextIsRightAligned: boolean;
   contextUsesAtMostOneThird: boolean;
   contextWraps: boolean;
+  stackedColumns: boolean;
 }> {
   return await browser.execute((contextLabel) => {
     const row = [
@@ -95,11 +96,18 @@ async function narrowRowShape(): Promise<{
         contextIsRightAligned: false,
         contextUsesAtMostOneThird: false,
         contextWraps: false,
+        stackedColumns: false,
       };
     }
 
-    row.style.boxSizing = "border-box";
-    row.style.width = "300px";
+    const root = row.closest<HTMLElement>(".eye-plugin");
+    const previousWidth = root?.style.width ?? "";
+    const previousMaxWidth = root?.style.maxWidth ?? "";
+    if (root) {
+      root.style.maxWidth = "300px";
+      root.style.width = "300px";
+    }
+
     const action = row.querySelector<HTMLElement>(".eye-task-title");
     const context = row.querySelector<HTMLElement>(".eye-context-badge");
     const rowRect = row.getBoundingClientRect();
@@ -108,8 +116,10 @@ async function narrowRowShape(): Promise<{
     const lineHeight = Number.parseFloat(
       getComputedStyle(context ?? row).lineHeight,
     );
-
-    return {
+    const stackedColumns =
+      getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length ===
+      1;
+    const result = {
       actionHasHangingWrap:
         actionRects.length > 1 &&
         actionRects.every(
@@ -121,7 +131,15 @@ async function narrowRowShape(): Promise<{
       contextUsesAtMostOneThird:
         contextRect !== undefined && contextRect.width <= rowRect.width / 3 + 1,
       contextWraps: context !== null && context.scrollHeight > lineHeight * 1.5,
+      stackedColumns,
     };
+
+    if (root) {
+      root.style.width = previousWidth;
+      root.style.maxWidth = previousMaxWidth;
+    }
+
+    return result;
   }, LONG_CONTEXT);
 }
 
@@ -141,7 +159,12 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     }),
     note(`${LONG_CONTEXT}/${INVALID_STATUS}.md`, {
       status: "reviewing",
-      tasks: [{ text: "Choose the next book", due: "2026-07-08" }],
+      tasks: [
+        {
+          text: "Choose the next book for the next reading group",
+          due: "2026-07-08",
+        },
+      ],
     }),
     note(`${UNROUTED}.md`, {
       status: "open",
@@ -165,7 +188,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             markerCount: 0,
             noTaskAction: "No unchecked tasks",
             noTaskNote: OPEN_WITHOUT_TASK,
-            noTaskSeparator: "→",
+            noTaskSeparator: null,
             rowsWithTrailingAttention: 5,
             rowsWithErrors: 5,
           });
@@ -180,8 +203,9 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           expect(await narrowRowShape()).toEqual({
             actionHasHangingWrap: true,
             contextIsRightAligned: true,
-            contextUsesAtMostOneThird: true,
+            contextUsesAtMostOneThird: false,
             contextWraps: true,
+            stackedColumns: true,
           });
         },
       },

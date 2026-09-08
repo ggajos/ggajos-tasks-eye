@@ -629,9 +629,7 @@ export class EyeView extends ItemView {
 
   private async renderRow(list: HTMLElement, model: RowModel): Promise<void> {
     const row = element("div", "eye-row eye-task-row");
-    const main = element("div", "eye-row-main");
-    const description = element("div", "eye-row-description");
-    const separator = element("span", "eye-row-separator", "→");
+    const description = element("div", "eye-row-description eye-note-cell");
     const actionCell = element("div", "eye-action-cell");
     const action = element("div", "eye-task-title");
     await this.renderActionMarkdown(action, model);
@@ -639,22 +637,21 @@ export class EyeView extends ItemView {
     actionCell.appendChild(action);
     if (model.errors.length > 0) actionCell.appendChild(attentionPill());
     description.appendChild(this.renderNoteLink(model));
-    description.appendChild(separator);
-    description.appendChild(actionCell);
-    main.appendChild(description);
 
-    if (model.errors.length > 0) {
-      const errors = element("div", "eye-errors");
+    const errors =
+      model.errors.length > 0 ? element("div", "eye-errors") : null;
+    if (errors) {
       for (const violation of model.errors) {
         const error = element("div", undefined, violation.message);
         error.dataset.eyeViolation = violation.code;
         errors.appendChild(error);
       }
-      main.appendChild(errors);
     }
 
-    row.appendChild(main);
+    row.appendChild(description);
+    row.appendChild(actionCell);
     row.appendChild(this.renderContextBadge(model));
+    if (errors) row.appendChild(errors);
     row.appendChild(this.renderActions(model));
     list.appendChild(row);
   }
