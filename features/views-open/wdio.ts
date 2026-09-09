@@ -95,7 +95,9 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           await expectDefaultOpenBuckets();
 
           await tasksEyePage.toggleBucket("tomorrow");
+          await tasksEyePage.expectBucketExpanded("tomorrow", true);
           await tasksEyePage.toggleBucket("today");
+          await tasksEyePage.expectBucketExpanded("today", false);
           await tasksEyePage.requestRender();
           await tasksEyePage.expectBucketExpanded("tomorrow", true);
           await tasksEyePage.expectBucketExpanded("today", false);
@@ -108,6 +110,18 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           await tasksEyePage.closePane();
           await tasksEyePage.openBoard("open", TODAY_ANCHOR);
           await expectDefaultOpenBuckets();
+        },
+      },
+      {
+        title: "hides and reveals group contents with Enter and Space",
+        async run() {
+          await tasksEyePage.openBoard("open", TODAY_ANCHOR);
+          for (const key of ["Enter", "Space"] as const) {
+            await tasksEyePage.toggleBucketWithKey("today", key);
+            await tasksEyePage.expectBucketExpanded("today", false);
+            await tasksEyePage.toggleBucketWithKey("today", key);
+            await tasksEyePage.expectBucketExpanded("today", true);
+          }
         },
       },
     ],

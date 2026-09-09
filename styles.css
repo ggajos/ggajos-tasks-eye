@@ -217,6 +217,10 @@
   padding-left: 10px;
 }
 
+.eye-bucket-children[hidden] {
+  display: none;
+}
+
 .eye-bucket-count {
   background: var(--background-modifier-border);
   border-radius: 999px;

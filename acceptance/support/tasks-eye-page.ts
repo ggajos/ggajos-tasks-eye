@@ -55,7 +55,17 @@ async function bucketExpanded(bucket: DueBucket): Promise<boolean | null> {
     );
     const value = group?.querySelector(".eye-bucket-header")
       ?.getAttribute("aria-expanded");
-    return value === null || value === undefined ? null : value === "true";
+    const children = group?.querySelector<HTMLElement>(".eye-bucket-children");
+    if (value == null || !children) return null;
+    const expanded = value === "true";
+    // Check browser layout, not just attributes: author CSS can override hidden.
+    const contents = [children, ...children.querySelectorAll<HTMLElement>(".eye-row")];
+    const visibilityMatches = contents.every((element) => {
+      const rendered = element.getClientRects().length > 0 &&
+        getComputedStyle(element).visibility === "visible";
+      return rendered === expanded;
+    });
+    return visibilityMatches ? expanded : null;
   }, bucket);
 }
 
@@ -135,7 +145,7 @@ export const tasksEyePage = {
     await browser.waitUntil(async () =>
       await bucketExpanded(bucket) === expanded, {
       timeout: 10_000,
-      timeoutMsg: `Expected ${bucket} bucket to be ${expanded ? "expanded" : "collapsed"}`,
+      timeoutMsg: `Expected ${bucket} bucket ARIA state and rendered contents to be ${expanded ? "expanded and visible" : "collapsed and hidden"}`,
     });
   },
 
@@ -148,6 +158,15 @@ export const tasksEyePage = {
       return header !== null;
     }, bucket);
     if (!toggled) throw new Error(`Missing ${bucket} bucket`);
+  },
+
+  async toggleBucketWithKey(bucket: DueBucket, key: "Enter" | "Space"): Promise<void> {
+    const header = await $(
+      `${PLUGIN} .eye-bucket[data-eye-bucket="${bucket}"] .eye-bucket-header`,
+    );
+    await header.waitForDisplayed();
+    await browser.execute((element) => element.focus(), header);
+    await browser.keys(key);
   },
 
   async expandBucketForText(text: string): Promise<void> {

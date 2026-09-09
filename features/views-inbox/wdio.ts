@@ -223,6 +223,19 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   {
     acceptance: [
       {
+        title:
+          "hides collapsed issue groups and reveals them when expanded again",
+        async run() {
+          await tasksEyePage.openBoard("inbox", OPEN_WITHOUT_TASK);
+          await tasksEyePage.expectBucketExpanded("noDue", true);
+          await tasksEyePage.toggleBucket("noDue");
+          await tasksEyePage.expectBucketExpanded("noDue", false);
+          await tasksEyePage.expectBucketExpanded("today", true);
+          await tasksEyePage.toggleBucket("noDue");
+          await tasksEyePage.expectBucketExpanded("noDue", true);
+        },
+      },
+      {
         title: "reuses expanded note-first board rows for the issue list",
         async run() {
           await tasksEyePage.openBoard("inbox", OPEN_WITHOUT_TASK);
