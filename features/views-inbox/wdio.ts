@@ -11,10 +11,14 @@ const LONG_CONTEXT = "Personal Planning and Development";
 const UNROUTED = "Quick Capture";
 
 async function inboxBoardShape(): Promise<{
+  actionLineCount: number;
+  actionsFollowNotes: boolean;
   buckets: string[];
   equalRowFontSizes: boolean;
-  inlineRowCount: number;
-  legacyTwoLineRowCount: number;
+  noteColorsMatchTheme: boolean;
+  noteContextLineCount: number;
+  noteContextsRightAligned: boolean;
+  noteLineCount: number;
   markerCount: number;
   noTaskAction: string | null;
   noTaskNote: string | null;
@@ -32,8 +36,27 @@ async function inboxBoardShape(): Promise<{
     const noTaskRow = rows.find((row) =>
       row.textContent?.includes(noTaskTitle),
     );
+    const noteColorProbe = document.createElement("span");
+    noteColorProbe.style.color = "var(--nav-item-color, var(--text-muted))";
+    noteColorProbe.style.position = "absolute";
+    noteColorProbe.style.visibility = "hidden";
+    root?.appendChild(noteColorProbe);
+    const themeAwareNoteColor = getComputedStyle(noteColorProbe).color;
+    noteColorProbe.remove();
 
     return {
+      actionLineCount: rows.filter(
+        (row) => row.querySelector(".eye-action-line") !== null,
+      ).length,
+      actionsFollowNotes: rows.every((row) => {
+        const noteLine = row.querySelector<HTMLElement>(".eye-note-line");
+        const actionLine = row.querySelector<HTMLElement>(".eye-action-line");
+        if (!noteLine || !actionLine) return false;
+        return (
+          actionLine.getBoundingClientRect().top >=
+          noteLine.getBoundingClientRect().bottom - 1
+        );
+      }),
       buckets: [
         ...(root?.querySelectorAll<HTMLElement>(".eye-bucket") ?? []),
       ].map((bucket) => bucket.dataset.eyeBucket ?? ""),
@@ -49,10 +72,27 @@ async function inboxBoardShape(): Promise<{
           .map((candidate) => getComputedStyle(candidate).fontSize);
         return new Set(sizes).size === 1;
       }),
-      inlineRowCount: rows.filter(
-        (row) => row.querySelector(".eye-row-description") !== null,
+      noteColorsMatchTheme: rows.every((row) => {
+        const note = row.querySelector<HTMLElement>(".eye-note-link");
+        return (
+          note !== null && getComputedStyle(note).color === themeAwareNoteColor
+        );
+      }),
+      noteContextLineCount: rows.filter(
+        (row) =>
+          row.querySelector(".eye-note-line .eye-context-badge") !== null,
       ).length,
-      legacyTwoLineRowCount: rows.filter(
+      noteContextsRightAligned: rows.every((row) => {
+        const line = row.querySelector<HTMLElement>(".eye-note-line");
+        const context = row.querySelector<HTMLElement>(
+          ".eye-note-line .eye-context-badge",
+        );
+        if (!line || !context) return false;
+        const lineRect = line.getBoundingClientRect();
+        const contextRect = context.getBoundingClientRect();
+        return Math.abs(contextRect.right - lineRect.right) < 1;
+      }),
+      noteLineCount: rows.filter(
         (row) => row.querySelector(".eye-note-line") !== null,
       ).length,
       markerCount: root?.querySelectorAll(".eye-marker").length ?? 0,
@@ -79,10 +119,10 @@ async function inboxBoardShape(): Promise<{
 
 async function narrowRowShape(): Promise<{
   actionHasHangingWrap: boolean;
+  actionStartsBelowNote: boolean;
   contextIsRightAligned: boolean;
-  contextUsesAtMostOneThird: boolean;
   contextWraps: boolean;
-  stackedColumns: boolean;
+  stackedRows: boolean;
 }> {
   return await browser.execute((contextLabel) => {
     const row = [
@@ -93,10 +133,10 @@ async function narrowRowShape(): Promise<{
     if (!row) {
       return {
         actionHasHangingWrap: false,
+        actionStartsBelowNote: false,
         contextIsRightAligned: false,
-        contextUsesAtMostOneThird: false,
         contextWraps: false,
-        stackedColumns: false,
+        stackedRows: false,
       };
     }
 
@@ -109,29 +149,38 @@ async function narrowRowShape(): Promise<{
     }
 
     const action = row.querySelector<HTMLElement>(".eye-task-title");
+    const noteLine = row.querySelector<HTMLElement>(".eye-note-line");
+    const actionLine = row.querySelector<HTMLElement>(".eye-action-line");
     const context = row.querySelector<HTMLElement>(".eye-context-badge");
-    const rowRect = row.getBoundingClientRect();
-    const contextRect = context?.getBoundingClientRect();
+    const noteLineRect = noteLine?.getBoundingClientRect();
+    const actionLineRect = actionLine?.getBoundingClientRect();
     const actionRects = [...(action?.getClientRects() ?? [])];
+    const contextLineRect = noteLine?.getBoundingClientRect();
+    const contextRect = context?.getBoundingClientRect();
     const lineHeight = Number.parseFloat(
       getComputedStyle(context ?? row).lineHeight,
     );
-    const stackedColumns =
-      getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length ===
-      1;
     const result = {
       actionHasHangingWrap:
         actionRects.length > 1 &&
         actionRects.every(
           (rect) => Math.abs(rect.left - actionRects[0].left) < 1,
         ),
+      actionStartsBelowNote:
+        noteLineRect !== undefined &&
+        actionLineRect !== undefined &&
+        actionLineRect.top >= noteLineRect.bottom - 1,
       contextIsRightAligned:
+        contextLineRect !== undefined &&
         contextRect !== undefined &&
-        Math.abs(contextRect.right - (rowRect.right - 6)) < 1,
-      contextUsesAtMostOneThird:
-        contextRect !== undefined && contextRect.width <= rowRect.width / 3 + 1,
+        Math.abs(contextRect.right - contextLineRect.right) < 1,
       contextWraps: context !== null && context.scrollHeight > lineHeight * 1.5,
-      stackedColumns,
+      stackedRows:
+        getComputedStyle(row).display === "flex" &&
+        getComputedStyle(row).flexDirection === "column" &&
+        noteLineRect !== undefined &&
+        actionLineRect !== undefined &&
+        actionLineRect.top >= noteLineRect.bottom - 1,
     };
 
     if (root) {
@@ -181,14 +230,18 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           await tasksEyePage.expectBucketExpanded("today", true);
 
           expect(await inboxBoardShape()).toEqual({
+            actionLineCount: 5,
+            actionsFollowNotes: true,
             buckets: ["noDue", "today"],
             equalRowFontSizes: true,
-            inlineRowCount: 5,
-            legacyTwoLineRowCount: 0,
+            noteColorsMatchTheme: true,
+            noteContextLineCount: 5,
+            noteContextsRightAligned: true,
+            noteLineCount: 5,
             markerCount: 0,
             noTaskAction: "No unchecked tasks",
             noTaskNote: OPEN_WITHOUT_TASK,
-            noTaskSeparator: null,
+            noTaskSeparator: "→",
             rowsWithTrailingAttention: 5,
             rowsWithErrors: 5,
           });
@@ -202,10 +255,10 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
 
           expect(await narrowRowShape()).toEqual({
             actionHasHangingWrap: true,
+            actionStartsBelowNote: true,
             contextIsRightAligned: true,
-            contextUsesAtMostOneThird: false,
             contextWraps: true,
-            stackedColumns: true,
+            stackedRows: true,
           });
         },
       },
