@@ -80,15 +80,16 @@ focused view where the user can review a day, switch dates, and see the work
 grouped by the same contexts used on the boards without opening another view.</p>
 <p>The view reads completion dates from Tasks metadata so it does not need a
 separate history log. A “Show Future” toggle extends the day’s history with any
-unfinished tasks that carry a future due date, so the view doubles as an
-overview of what happened and what is coming. Subtask nesting is reproduced
-using Tasks’ emoji format, so completed subtasks stay under their parent instead
-of collapsing into a flat list.</p>
+unfinished tasks that carry a future due date, but only inside notes that also
+completed a task on the selected day, so the view stays a focused overview of
+what happened and what is coming next for the notes you touched. Subtask nesting
+is reproduced using Tasks’ emoji format, so completed subtasks stay under their
+parent instead of collapsing into a flat list.</p>
 <div class="sl-heading-wrapper level-h2"><h2 id="what-to-expect">What to expect</h2><a class="sl-anchor-link" href="#what-to-expect"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"></path></svg></span><span class="sr-only" data-pagefind-ignore>Section titled “What to expect”</span></a></div>
 <ul>
 <li>Done is the fifth view in Tasks Eye navigation.</li>
 <li>Completed tasks are selected by Tasks completion date.</li>
-<li>A ‘Show Future’ toggle adds all unfinished tasks with a future due date.</li>
+<li>A ‘Show Future’ toggle adds upcoming unfinished tasks, but only inside notes that also have a task completed on the selected day.</li>
 <li>Subtask nesting is preserved; ancestors of a matching task appear as muted context rows without a completion check.</li>
 <li>Tasks are grouped by folder-derived context and note name.</li>
 <li>The date picker and previous/next/today controls change the reviewed date.</li>
