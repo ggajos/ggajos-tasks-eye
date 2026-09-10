@@ -45,11 +45,12 @@ status: closed
     expect(groups[0]!.matchedCount).toBe(1);
   });
 
-  it("includes future unfinished tasks only when showFuture is on", () => {
+  it("shows future tasks only in notes with a same-day completion when showFuture is on", () => {
     const markdown = `---
 status: open
 ---
 
+- [x] Shipped today ✅ 2026-07-08
 - [ ] Plan next quarter 📅 ${FUTURE}
 `;
     const on = groupsFor(markdown, { showFuture: true });
@@ -57,9 +58,33 @@ status: open
     expect(future?.matched).toBe(true);
     expect(future?.future).toBe(true);
     expect(future?.completed).toBe(false);
+    expect(on[0]!.matchedCount).toBe(2);
 
     const off = groupsFor(markdown, { showFuture: false });
-    expect(off).toHaveLength(0);
+    expect(flatten(off[0]!.nodes).some((n) => n.text.includes("Plan"))).toBe(
+      false,
+    );
+    expect(off[0]!.matchedCount).toBe(1);
+  });
+
+  it("hides future tasks in notes without a same-day completion", () => {
+    const grouped = collectStatusGroups(
+      [
+        file(
+          "Architecture/Upcoming Only.md",
+          `---
+status: open
+---
+
+- [ ] Plan next quarter 📅 ${FUTURE}
+`,
+        ),
+      ],
+      DATE,
+      true,
+    );
+
+    expect(Object.keys(grouped)).toHaveLength(0);
   });
 
   it("shows an ancestor of a completed subtask as a context row without a check", () => {

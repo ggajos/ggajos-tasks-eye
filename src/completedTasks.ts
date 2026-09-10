@@ -104,8 +104,13 @@ export function collectStatusGroups(
   const grouped: Record<string, StatusNoteGroup[]> = {};
 
   for (const file of files) {
+    const hasCompletionOnDate = file.tasks.some((task) =>
+      isCompletedOnDate(task, date),
+    );
+    const futureAllowed = showFuture && hasCompletionOnDate;
+
     const nodes = buildForest(file.tasks)
-      .map((node) => pruneNode(node, date, showFuture))
+      .map((node) => pruneNode(node, date, futureAllowed))
       .filter((node): node is StatusTaskNode => node !== null);
 
     const matchedCount = countMatched(nodes);
