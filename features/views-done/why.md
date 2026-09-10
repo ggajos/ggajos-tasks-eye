@@ -5,7 +5,7 @@ focused view where the user can review a day, switch dates, and see the work
 grouped by the same contexts used on the boards without opening another view.
 
 The view reads completion dates from Tasks metadata so it does not need a
-separate history log. A "Show Future" toggle extends the day's history with any
+separate history log. A "Future" toggle extends the day's history with any
 unfinished tasks that carry a future due date, but only inside notes that also
 completed a task on the selected day, so the view stays a focused overview of
 what happened and what is coming next for the notes you touched. Subtask nesting

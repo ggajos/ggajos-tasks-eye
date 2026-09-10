@@ -677,24 +677,6 @@
   color: var(--text-accent);
 }
 
-.eye-show-future {
-  align-items: center;
-  cursor: pointer;
-  display: inline-flex;
-  gap: 5px;
-  white-space: nowrap;
-}
-
-.eye-show-future-input {
-  cursor: pointer;
-  margin: 0;
-}
-
-.eye-show-future-label {
-  color: var(--text-muted);
-  font-size: var(--font-ui-small);
-}
-
 .eye-marker {
   color: var(--text-muted);
 }

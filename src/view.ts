@@ -310,18 +310,15 @@ export class EyeView extends ItemView {
   }
 
   private renderShowFutureToggle(): HTMLElement {
-    const wrap = element("label", "eye-show-future");
-    wrap.title = "Show upcoming unfinished tasks";
-    const input = element("input", "eye-show-future-input");
-    input.type = "checkbox";
-    input.checked = this.state.showFuture;
-    input.setAttribute("aria-label", "Show Future");
-    input.addEventListener("change", () => {
-      void this.setShowFuture(input.checked);
-    });
-    wrap.appendChild(input);
-    wrap.appendChild(element("span", "eye-show-future-label", "Show Future"));
-    return wrap;
+    const active = this.state.showFuture;
+    const btn = button(
+      `eye-mode-button${active ? " is-active" : ""}`,
+      "Show upcoming unfinished tasks",
+      () => void this.setShowFuture(!active),
+      "Future",
+    );
+    btn.setAttribute("aria-pressed", `${active}`);
+    return btn;
   }
 
   private renderDateNav(): HTMLElement {
@@ -343,15 +340,6 @@ export class EyeView extends ItemView {
       void this.setDate(input.value);
     });
     nav.appendChild(input);
-
-    nav.appendChild(
-      button(
-        "eye-mode-button",
-        "Show today",
-        () => void this.setDate(todayIso()),
-        "Today",
-      ),
-    );
 
     const next = button(
       "eye-icon-button",
