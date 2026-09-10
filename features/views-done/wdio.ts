@@ -1,6 +1,9 @@
 import { browser, expect } from "@wdio/globals";
 import { featureScenarios } from "../../acceptance/support/tasks-eye";
-import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
+import {
+  tasksEyePage,
+  type WdioElement,
+} from "../../acceptance/support/tasks-eye-page";
 import { fixture, note } from "../fixtures";
 
 const VIEW_TYPE = "ggajos-tasks-eye-view";
@@ -63,9 +66,8 @@ async function clickMode(ariaLabel: string): Promise<void> {
   }, ariaLabel);
 }
 
-export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
-  doneFixture,
-  {
+export const { acceptanceScenarios, screenshotScenarios: baseScreenshots } =
+  featureScenarios(doneFixture, {
     acceptance: [
       {
         title: "uses one native view for work and completed tasks",
@@ -147,5 +149,56 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         },
       },
     ],
+  });
+
+const futureNestingFixture = fixture([
+  note(
+    "Architecture/Platform Rollout.md",
+    `---
+status: open
+---
+
+- [ ] Cutover milestone
+    - [x] Freeze legacy writes ✅ 2026-07-08
+    - [ ] Enable dual-read 📅 2026-07-20
+    - [ ] Draft comms plan
+- [x] Sign-off recorded ⏫ ✅ 2026-07-08
+    - [x] Security review ✅ 2026-07-08
+    - [x] Data review ✅ 2026-07-08
+`,
+  ),
+  note(
+    "Architecture/Data Mesh.md",
+    `---
+status: open
+---
+
+- [ ] Domain onboarding
+    - [ ] Payments squad
+        - [x] Contract approved ✅ 2026-07-08
+- [x] Retire ETL job ✅ 2026-07-08
+    - [ ] Decommission runner
+- [ ] Roadmap review 📅 2026-07-25
+    - [x] Pre-read circulated ✅ 2026-07-08
+    - [ ] Collect feedback 📅 2026-07-30
+`,
+  ),
+]);
+
+export const screenshotScenarios = [
+  ...baseScreenshots,
+  {
+    screenshotSlug: "done-future-nesting",
+    fixture: futureNestingFixture,
+    async run({ save }: { save: (element: WdioElement) => Promise<void> }) {
+      const root = await tasksEyePage.openDone("Freeze legacy writes");
+      await expect(root).toHaveText(
+        expect.stringContaining("Enable dual-read"),
+      );
+      await expect(root).toHaveText(
+        expect.stringContaining("Contract approved"),
+      );
+      await save(root);
+    },
   },
-);
+];

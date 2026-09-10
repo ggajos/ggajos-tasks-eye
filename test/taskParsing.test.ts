@@ -19,6 +19,18 @@ describe("task parsing", () => {
     });
   });
 
+  it("parses task priority and indentation", () => {
+    expect(parseTaskLine("    - [ ] ⏫ Indented task", 0)).toMatchObject({
+      priority: 1,
+      indent: 4,
+      text: "⏫ Indented task",
+    });
+    expect(parseTaskLine("- [ ] Plain task", 0)).toMatchObject({
+      priority: 3,
+      indent: 0,
+    });
+  });
+
   it("treats any non-space checkbox marker as completed", () => {
     const task = parseTaskLine("- [x] Done ✅ 2026-07-01", 0);
 
@@ -34,6 +46,7 @@ describe("task parsing", () => {
 
   it("strips due date markers from display labels", () => {
     expect(stripDueDate("Review 📅 2026-07-08")).toBe("Review");
+    expect(stripDueDate("Review ⏫ 📅 2026-07-08")).toBe("Review");
     expect(stripDueDate("Review ðŸ“… 2026-07-08")).toBe("Review");
     expect(stripDueDate("Review ð")).toBe("Review");
     expect(stripDueDate("Review 2026-07-08")).toBe("Review");

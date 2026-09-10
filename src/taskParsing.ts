@@ -1,7 +1,8 @@
 import { isoToTs, shiftIsoDate } from "./date";
+import { parsePriority, stripPrioritySignifier } from "./priority";
 import type { EyeTask } from "./types";
 
-const TASK_LINE_RE = /^(\s*[-*+]\s+\[([^\]])\]\s*)(.*)$/;
+const TASK_LINE_RE = /^(\s*)([-*+]\s+\[([^\]])\]\s*)(.*)$/;
 const DUE_RE = /(📅\s*)(\d{4}-\d{2}-\d{2})/;
 
 export function parseTaskLine(
@@ -11,14 +12,16 @@ export function parseTaskLine(
   const match = line.match(TASK_LINE_RE);
   if (!match) return null;
 
-  const marker = match[2] ?? "";
-  const text = match[3] ?? "";
+  const marker = match[3] ?? "";
+  const text = match[4] ?? "";
   const due = text.match(DUE_RE);
   const dueIso = due?.[2] ?? null;
 
   return {
     completed: marker !== " ",
     text,
+    priority: parsePriority(text),
+    indent: (match[1] ?? "").length,
     dueTs: dueIso ? isoToTs(dueIso) : null,
     dueIso,
     line: lineNumber,
@@ -43,13 +46,15 @@ export function shiftDueDateInText(text: string, deltaDays: number): string {
 }
 
 export function stripDueDate(text: string): string {
-  return text
-    .replace(/📅\s*\d{4}-\d{2}-\d{2}/g, "")
-    .replace(/ðŸ\S*\s*\d{4}-\d{2}-\d{2}/g, "")
-    .replace(/ð\S*/g, "")
-    .replace(/\s+\d{4}-\d{2}-\d{2}$/g, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
+  return stripPrioritySignifier(
+    text
+      .replace(/📅\s*\d{4}-\d{2}-\d{2}/g, "")
+      .replace(/ðŸ\S*\s*\d{4}-\d{2}-\d{2}/g, "")
+      .replace(/ð\S*/g, "")
+      .replace(/\s+\d{4}-\d{2}-\d{2}$/g, "")
+      .replace(/\s{2,}/g, " ")
+      .trim(),
+  );
 }
 
 function replacementLines(replacement: string): string[] {

@@ -1,8 +1,8 @@
 import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { ItemView, MarkdownRenderer, setIcon } from "obsidian";
 import { BoardCollapseState } from "./boardCollapse";
-import type { CompletedTask } from "./completedTasks";
-import { collectCompletedTasks, groupCompletedTasks } from "./completedTasks";
+import type { StatusNoteGroup, StatusTaskNode } from "./completedTasks";
+import { collectStatusGroups, groupMatchedCount } from "./completedTasks";
 import type { EyeMode } from "./constants";
 import {
   BOARD_RENDER_FAILED_MESSAGE,
@@ -37,10 +37,6 @@ function isIsoDate(value: unknown): value is string {
   return typeof value === "string" && DATE_RE.test(value);
 }
 
-function fileTaskCount(files: Record<string, CompletedTask[]>): number {
-  return Object.values(files).reduce((sum, tasks) => sum + tasks.length, 0);
-}
-
 function completedContextId(context: string): string {
   return `eye-completed-${context
     .replace(/[^a-z0-9_-]+/gi, "-")
@@ -70,6 +66,7 @@ function headingId(prefix: string, key: string): string {
 interface ViewState {
   mode: EyeMode;
   date: string;
+  showFuture: boolean;
 }
 
 function readViewState(state: unknown, current: ViewState): ViewState {
@@ -78,6 +75,10 @@ function readViewState(state: unknown, current: ViewState): ViewState {
   return {
     mode: isEyeMode(record.mode) ? record.mode : current.mode,
     date: isIsoDate(record.date) ? record.date : current.date,
+    showFuture:
+      typeof record.showFuture === "boolean"
+        ? record.showFuture
+        : current.showFuture,
   };
 }
 
@@ -90,7 +91,11 @@ export class EyeView extends ItemView {
   constructor(leaf: WorkspaceLeaf, plugin: TheEyePlugin) {
     super(leaf);
     this.plugin = plugin;
-    this.state = { mode: plugin.settings.mode, date: todayIso() };
+    this.state = {
+      mode: plugin.settings.mode,
+      date: todayIso(),
+      showFuture: true,
+    };
     this.navigation = true;
   }
 
@@ -113,6 +118,7 @@ export class EyeView extends ItemView {
       ...super.getState(),
       mode: this.state.mode,
       date: this.state.date,
+      showFuture: this.state.showFuture,
     };
   }
 
@@ -133,8 +139,15 @@ export class EyeView extends ItemView {
     this.state = {
       mode,
       date: date !== undefined && isIsoDate(date) ? date : this.state.date,
+      showFuture: this.state.showFuture,
     };
     await this.requestRender();
+  }
+
+  async setShowFuture(value: boolean): Promise<void> {
+    if (value === this.state.showFuture) return;
+    this.state = { ...this.state, showFuture: value };
+    if (this.state.mode === "done") await this.requestRender();
   }
 
   async setDate(date: string): Promise<void> {
@@ -279,7 +292,10 @@ export class EyeView extends ItemView {
     }
 
     toolbar.appendChild(nav);
-    if (this.state.mode === "done") toolbar.appendChild(this.renderDateNav());
+    if (this.state.mode === "done") {
+      toolbar.appendChild(this.renderDateNav());
+      toolbar.appendChild(this.renderShowFutureToggle());
+    }
     toolbar.appendChild(element("div", "eye-toolbar-spacer"));
 
     toolbar.appendChild(
@@ -291,6 +307,21 @@ export class EyeView extends ItemView {
     );
 
     root.appendChild(toolbar);
+  }
+
+  private renderShowFutureToggle(): HTMLElement {
+    const wrap = element("label", "eye-show-future");
+    wrap.title = "Show upcoming unfinished tasks";
+    const input = element("input", "eye-show-future-input");
+    input.type = "checkbox";
+    input.checked = this.state.showFuture;
+    input.setAttribute("aria-label", "Show Future");
+    input.addEventListener("change", () => {
+      void this.setShowFuture(input.checked);
+    });
+    wrap.appendChild(input);
+    wrap.appendChild(element("span", "eye-show-future-label", "Show Future"));
+    return wrap;
   }
 
   private renderDateNav(): HTMLElement {
@@ -338,16 +369,22 @@ export class EyeView extends ItemView {
     files: EyeFile[],
     contextFilter: string,
   ): Promise<void> {
-    const tasks = collectCompletedTasks(files, this.state.date).filter(
-      (task) =>
-        !contextFilter ||
-        contextFilter === "*" ||
-        task.context === contextFilter,
+    const grouped = collectStatusGroups(
+      files,
+      this.state.date,
+      this.state.showFuture,
     );
+    const contexts = Object.keys(grouped)
+      .filter(
+        (context) =>
+          !contextFilter || contextFilter === "*" || context === contextFilter,
+      )
+      .sort();
+
     const list = element("div", "eye-list eye-completed-list");
     root.appendChild(list);
 
-    if (tasks.length === 0) {
+    if (contexts.length === 0) {
       list.appendChild(
         element(
           "div",
@@ -358,47 +395,41 @@ export class EyeView extends ItemView {
       return;
     }
 
-    await this.renderCompletedGroups(list, tasks);
-  }
-
-  private async renderCompletedGroups(
-    list: HTMLElement,
-    tasks: CompletedTask[],
-  ): Promise<void> {
-    const grouped = groupCompletedTasks(tasks);
-
-    for (const context of Object.keys(grouped).sort()) {
-      const files = grouped[context] ?? {};
+    for (const context of contexts) {
+      const groups = [...(grouped[context] ?? [])].sort((a, b) =>
+        a.fileName.localeCompare(b.fileName),
+      );
       const header = element("div", "eye-bucket-header eye-completed-header");
       header.appendChild(
-        element("span", "eye-bucket-count", `${fileTaskCount(files)}`),
+        element("span", "eye-bucket-count", `${groupMatchedCount(groups)}`),
       );
       const label = element("h2", "eye-bucket-label", context);
       label.id = completedContextId(context);
       header.appendChild(label);
       list.appendChild(header);
 
-      for (const [fileName, fileTasks] of Object.entries(files).sort()) {
-        await this.renderCompletedFileGroup(list, fileName, fileTasks);
-      }
+      for (const group of groups) await this.renderStatusNote(list, group);
     }
   }
 
-  private async renderCompletedFileGroup(
+  private async renderStatusNote(
     list: HTMLElement,
-    fileName: string,
-    tasks: CompletedTask[],
+    group: StatusNoteGroup,
   ): Promise<void> {
     const row = element("div", "eye-completed-file");
     const header = element("div", "eye-completed-file-header");
     header.appendChild(
-      this.renderCompletedNoteLink(fileName, tasks[0]?.filePath ?? ""),
+      this.renderCompletedNoteLink(group.fileName, group.filePath),
     );
-    header.appendChild(element("span", "eye-day-count", `${tasks.length}`));
+    header.appendChild(
+      element("span", "eye-day-count", `${group.matchedCount}`),
+    );
     row.appendChild(header);
 
     const taskList = element("div", "eye-completed-tasks");
-    for (const task of tasks) await this.renderCompletedTask(taskList, task);
+    for (const node of group.nodes) {
+      await this.renderStatusNode(taskList, node, group.filePath);
+    }
     row.appendChild(taskList);
 
     list.appendChild(row);
@@ -417,27 +448,37 @@ export class EyeView extends ItemView {
     return link;
   }
 
-  private async renderCompletedTask(
+  private async renderStatusNode(
     list: HTMLElement,
-    task: CompletedTask,
+    node: StatusTaskNode,
+    filePath: string,
   ): Promise<void> {
-    const row = element("div", "eye-completed-task");
+    const modifier = node.matched
+      ? node.future
+        ? " eye-status-future"
+        : ""
+      : " eye-status-context";
+    const row = element("div", `eye-completed-task${modifier}`);
+
     const icon = element("span", "eye-completed-check");
-    setIcon(icon, "check");
+    if (node.completed) setIcon(icon, "check");
+    else if (node.future) setIcon(icon, "clock");
     row.appendChild(icon);
 
     const body = element("div", "eye-completed-task-text");
-    await MarkdownRenderer.render(
-      this.app,
-      task.text,
-      body,
-      task.filePath,
-      this,
-    );
+    await MarkdownRenderer.render(this.app, node.text, body, filePath, this);
     unwrapSingleParagraph(body);
     row.appendChild(body);
 
     list.appendChild(row);
+
+    if (node.children.length > 0) {
+      const children = element("div", "eye-completed-children");
+      for (const child of node.children) {
+        await this.renderStatusNode(children, child, filePath);
+      }
+      list.appendChild(children);
+    }
   }
 
   private async renderBoard(

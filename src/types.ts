@@ -5,6 +5,8 @@ import type { ValidationViolation } from "./validation";
 export interface EyeTask {
   completed: boolean;
   text: string;
+  priority: number;
+  indent: number;
   dueTs: number | null;
   dueIso: string | null;
   line: number;

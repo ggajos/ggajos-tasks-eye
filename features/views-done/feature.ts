@@ -3,10 +3,12 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Done view",
   summary:
-    "Done collects tasks completed on a selected date and groups them by context and note.",
+    "Done shows the day's completed tasks alongside upcoming unfinished tasks, preserving subtask nesting and grouping by context and note.",
   acceptanceCriteria: [
     "Done is the fifth view in Tasks Eye navigation.",
     "Completed tasks are selected by Tasks completion date.",
+    "A 'Show Future' toggle adds all unfinished tasks with a future due date.",
+    "Subtask nesting is preserved; ancestors of a matching task appear as muted context rows without a completion check.",
     "Tasks are grouped by folder-derived context and note name.",
     "The date picker and previous/next/today controls change the reviewed date.",
     "The context filter narrows completed tasks the same way it narrows board rows.",
@@ -16,6 +18,11 @@ export default defineFeature({
       slug: "done-view",
       title: "Done view",
       alt: "Tasks Eye Done view showing completed architecture decisions grouped by context and note",
+    },
+    {
+      slug: "done-future-nesting",
+      title: "Done with future tasks and nesting",
+      alt: "Tasks Eye Done view with Show Future enabled, showing completed and upcoming tasks nested under their parent tasks",
     },
   ],
 });

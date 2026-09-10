@@ -8,6 +8,7 @@ import {
   bucketForTs,
   buildBoardBuckets,
   buildRowModel,
+  compareRowModels,
   mergeItems,
   selectRows,
 } from "../src/model";
@@ -33,6 +34,35 @@ function itemNames(items: RenderItem[]): string[] {
 }
 
 describe("row model", () => {
+  it("orders equal due dates by task priority before title", () => {
+    const rows = [
+      buildRowModel(
+        buildEyeFileFromMarkdown(
+          "Mission/Alpha.md",
+          `---
+status: open
+---
+
+- [ ] lower priority ⏬ 📅 2026-07-08
+`,
+        ),
+      ),
+      buildRowModel(
+        buildEyeFileFromMarkdown(
+          "Mission/Zulu.md",
+          `---
+status: open
+---
+
+- [ ] higher priority 🔺 📅 2026-07-08
+`,
+        ),
+      ),
+    ].sort(compareRowModels);
+
+    expect(rows.map((row) => row.file.basename)).toEqual(["Zulu", "Alpha"]);
+  });
+
   it("falls back to the first uncompleted task when no due dates exist", () => {
     const row = buildRowModel(fixture("no-due.md"));
 

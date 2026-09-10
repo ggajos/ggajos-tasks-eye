@@ -13,6 +13,7 @@ import {
   isoToTs,
   todayIso,
 } from "./date";
+import { NORMAL_PRIORITY } from "./priority";
 import { stripDueDate } from "./taskParsing";
 import { findEarliestDueTask, getEarliestDueDate } from "./taskSelection";
 import type { EyeFile, RowModel } from "./types";
@@ -92,6 +93,11 @@ export function compareRowModels(a: RowModel, b: RowModel): number {
     if (b.earliestDue === null) return 1;
     return a.earliestDue - b.earliestDue;
   }
+
+  const priorityA = a.earliestTask?.priority ?? NORMAL_PRIORITY;
+  const priorityB = b.earliestTask?.priority ?? NORMAL_PRIORITY;
+  if (priorityA !== priorityB) return priorityA - priorityB;
+
   return compareByContextTitle(a.file, b.file);
 }
 
