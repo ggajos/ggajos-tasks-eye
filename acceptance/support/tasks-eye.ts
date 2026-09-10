@@ -39,7 +39,12 @@ export interface VisualVariant {
 export interface FeatureScreenshotScenario {
   screenshotSlug: string;
   fixture: FeatureFixture;
-  run: (context: { save: (element: WdioElement) => Promise<void> }) => Promise<void>;
+  run: (context: {
+    save: (
+      element: WdioElement,
+      options?: { preserveHover?: boolean },
+    ) => Promise<void>;
+  }) => Promise<void>;
 }
 
 export interface FeatureAcceptanceScenario {
@@ -391,7 +396,15 @@ async function recordVisualResult(result: VisualRunResult): Promise<void> {
   await writeVisualManifest();
 }
 
-async function prepareStableCapture(): Promise<void> {
+async function prepareStableCapture(preserveHover = false): Promise<void> {
+  if (preserveHover) {
+    // Hover scenarios establish the pointer position and wait for controls first.
+    // Disabling pointer events here would hide the state being documented.
+    await browser.execute(async () => {
+      await document.fonts.ready;
+    });
+    return;
+  }
   await browser.execute(async () => {
     const style = document.createElement("style");
     style.id = "tasks-eye-visual-capture";
@@ -515,6 +528,7 @@ export async function checkFeatureDocSnapshot(
   variant: VisualVariant,
   screenshotSlug: string,
   element: WdioElement,
+  options: { preserveHover?: boolean } = {},
 ): Promise<void> {
   const key = portablePath(snapshotPathFor(
     featureSlug,
@@ -527,7 +541,7 @@ export async function checkFeatureDocSnapshot(
   const baselineExists = await exists(baseline);
   let comparison: Awaited<ReturnType<typeof browser.checkElement>>;
 
-  await prepareStableCapture();
+  await prepareStableCapture(options.preserveHover);
   try {
     comparison = await compareElementWithRetry(element, screenshotSlug, {
       baselineFolder: path.dirname(baseline),

@@ -57,6 +57,8 @@ async function rowControlsState(rowText: string) {
     ].map((button) => button.textContent?.trim() ?? "");
 
     return {
+      rowBounds: row?.getBoundingClientRect().toJSON(),
+      actionBounds: actions?.getBoundingClientRect().toJSON(),
       backgroundColor: actions ? getComputedStyle(actions).backgroundColor : "",
       shifts,
     };
@@ -71,11 +73,26 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         title: "shows the compact due-date controls on an opaque strip",
         async run() {
           await tasksEyePage.openBoard("open", ACTION);
-          await tasksEyePage.focusRowAction(
+          const before = await rowControlsState(ACTION);
+          await tasksEyePage.hoverRowAction(
             ACTION,
             "Move due date 1 day earlier",
           );
           const state = await rowControlsState(ACTION);
+          expect(state.rowBounds).toEqual(before.rowBounds);
+          expect(
+            Math.abs(
+              state.actionBounds.y +
+                state.actionBounds.height / 2 -
+                (state.rowBounds.y + state.rowBounds.height / 2),
+            ),
+          ).toBeLessThanOrEqual(1);
+          expect(
+            state.rowBounds.right - state.actionBounds.right,
+          ).toBeLessThanOrEqual(8);
+          expect(state.actionBounds.right).toBeLessThanOrEqual(
+            state.rowBounds.right,
+          );
           expect(state.shifts).toEqual(["-1", "+1", "+7"]);
           expect(state.backgroundColor).not.toBe("");
           expect(state.backgroundColor).not.toBe("transparent");
@@ -107,11 +124,11 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         screenshotSlug: "controls",
         async run({ save }) {
           const root = await tasksEyePage.openBoard("open", ACTION);
-          await tasksEyePage.focusRowAction(
+          await tasksEyePage.hoverRowAction(
             ACTION,
             "Move due date 1 day earlier",
           );
-          await save(root);
+          await save(root, { preserveHover: true });
         },
       },
     ],

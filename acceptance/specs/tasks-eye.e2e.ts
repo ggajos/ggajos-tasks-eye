@@ -51,11 +51,12 @@ describe("Tasks Eye acceptance", () => {
             await resetFixtureVault(scenario.fixture);
             await applyVisualVariant(variant);
             await scenario.run({
-              save: (element) => checkFeatureDocSnapshot(
+              save: (element, options) => checkFeatureDocSnapshot(
                 feature.feature.slug,
                 variant,
                 scenario.screenshotSlug,
                 element,
+                options,
               ),
             });
           },

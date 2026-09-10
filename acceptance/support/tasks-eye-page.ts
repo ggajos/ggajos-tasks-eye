@@ -1,4 +1,4 @@
-import { $, browser } from "@wdio/globals";
+import { $, $$, browser } from "@wdio/globals";
 import type { DueBucket } from "../../src/constants";
 
 export type EyeMode = "focus" | "open" | "inbox";
@@ -221,8 +221,14 @@ export const tasksEyePage = {
     }
   },
 
-  async focusRowAction(rowText: string, ariaLabel: string): Promise<void> {
+  async hoverRowAction(rowText: string, ariaLabel: string): Promise<void> {
     await this.expectRowAction(rowText, ariaLabel);
+    for (const row of await $$(`${PLUGIN} .eye-row`)) {
+      if ((await row.getText()).includes(rowText)) {
+        await row.moveTo();
+        break;
+      }
+    }
     await browser.waitUntil(async () => await browser.execute((text, label) => {
       const rows = document.querySelectorAll<HTMLElement>(
         ".workspace-leaf.mod-active .eye-plugin .eye-row",
@@ -232,14 +238,13 @@ export const tasksEyePage = {
       );
       const button = [...row?.querySelectorAll<HTMLButtonElement>("button") ?? []]
         .find((candidate) => candidate.getAttribute("aria-label") === label);
-      button?.focus();
-      return button !== undefined && document.activeElement === button &&
+      return button !== undefined && row?.matches(":hover") &&
         getComputedStyle(
           row?.querySelector<HTMLElement>(".eye-actions") ?? document.body,
         ).opacity === "1";
     }, rowText, ariaLabel), {
       timeout: 10_000,
-      timeoutMsg: `Expected row "${rowText}" to focus action "${ariaLabel}"`,
+      timeoutMsg: `Expected row "${rowText}" to show action "${ariaLabel}" on hover`,
     });
   },
 

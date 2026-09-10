@@ -533,30 +533,31 @@
 .eye-actions {
   align-content: start;
   align-items: center;
-  background: var(
-    --nav-item-background-hover,
-    var(--background-modifier-hover)
+  background-color: var(--background-primary);
+  background-image: linear-gradient(
+    var(--nav-item-background-hover, var(--background-modifier-hover)),
+    var(--nav-item-background-hover, var(--background-modifier-hover))
   );
   border-radius: var(--radius-s, 4px);
   display: flex;
   flex-wrap: nowrap;
   gap: 2px;
   justify-content: end;
-  max-height: 0;
   overflow: hidden;
   opacity: 0;
-  padding: 0;
+  padding: 2px;
   pointer-events: none;
-  transition: max-height 120ms ease, opacity 120ms ease, padding 120ms ease;
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: opacity 120ms ease;
   width: max-content;
-  align-self: end;
+  z-index: 1;
 }
 
-.eye-row:hover .eye-actions,
-.eye-row:focus-within .eye-actions {
-  max-height: 28px;
+.eye-row:hover .eye-actions {
   opacity: 1;
-  padding: 2px;
   pointer-events: auto;
 }
 
@@ -696,11 +697,6 @@
 }
 
 @media (max-width: 640px) {
-  .eye-actions {
-    justify-content: start;
-    align-self: start;
-  }
-
   .eye-context-badge {
     max-width: 72px;
   }
@@ -708,13 +704,8 @@
 
 @media (hover: none) {
   .eye-actions {
-    justify-self: start;
-    justify-content: start;
-    align-self: start;
-    max-height: 28px;
     opacity: 1;
     overflow: visible;
     pointer-events: auto;
-    padding: 2px;
   }
 }
