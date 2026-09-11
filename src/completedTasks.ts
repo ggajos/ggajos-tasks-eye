@@ -1,5 +1,4 @@
 import { getContextFromPath } from "./context";
-import { isAfterToday } from "./date";
 import { stripPrioritySignifier } from "./priority";
 import type { EyeFile, EyeTask } from "./types";
 
@@ -34,8 +33,8 @@ function isCompletedOnDate(task: EyeTask, date: string): boolean {
   return task.completed && task.text.includes(`✅ ${date}`);
 }
 
-function isFutureUnfinished(task: EyeTask): boolean {
-  return !task.completed && task.dueTs !== null && isAfterToday(task.dueTs);
+function isUnfinishedWithDueDate(task: EyeTask): boolean {
+  return !task.completed && task.dueTs !== null;
 }
 
 interface RawNode {
@@ -74,7 +73,7 @@ function pruneNode(
     .filter((child): child is StatusTaskNode => child !== null);
 
   const completed = isCompletedOnDate(node.task, date);
-  const future = showFuture && isFutureUnfinished(node.task);
+  const future = showFuture && isUnfinishedWithDueDate(node.task);
   const matched = completed || future;
 
   if (!matched && children.length === 0) return null;

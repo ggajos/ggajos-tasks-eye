@@ -41,6 +41,9 @@ async function unifiedViewState() {
         doneRibbonCount: document.querySelectorAll(
           '[aria-label="Open Tasks Eye Done"]',
         ).length,
+        unfinishedToggleCount: document.querySelectorAll(
+          '[aria-label="Show unfinished tasks with a due date"]',
+        ).length,
         eyeRibbonCount: document.querySelectorAll(
           '[aria-label="Open Tasks Eye"]',
         ).length,
@@ -87,7 +90,8 @@ export const { acceptanceScenarios, screenshotScenarios: baseScreenshots } =
             state.icon !== "eye" ||
             state.title !== "Tasks Eye: Done — 2026-07-08" ||
             state.eyeRibbonCount !== 1 ||
-            state.doneRibbonCount !== 0
+            state.doneRibbonCount !== 0 ||
+            state.unfinishedToggleCount !== 1
           ) {
             throw new Error(
               `Unexpected unified Done state: ${JSON.stringify(state)}`,
@@ -160,6 +164,8 @@ status: open
 
 - [ ] Cutover milestone
     - [x] Freeze legacy writes ✅ 2026-07-08
+    - [ ] Review yesterday's rollout notes 📅 2026-07-07
+    - [ ] Confirm today's rollout status 📅 2026-07-08
     - [ ] Enable dual-read 📅 2026-07-20
     - [ ] Draft comms plan
 - [x] Sign-off recorded ⏫ ✅ 2026-07-08
@@ -194,6 +200,12 @@ export const screenshotScenarios = [
       const root = await tasksEyePage.openDone("Freeze legacy writes");
       await expect(root).toHaveText(
         expect.stringContaining("Enable dual-read"),
+      );
+      await expect(root).toHaveText(
+        expect.stringContaining("Review yesterday's rollout notes"),
+      );
+      await expect(root).toHaveText(
+        expect.stringContaining("Confirm today's rollout status"),
       );
       await expect(root).toHaveText(
         expect.stringContaining("Contract approved"),

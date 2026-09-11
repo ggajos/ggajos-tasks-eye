@@ -313,9 +313,9 @@ export class EyeView extends ItemView {
     const active = this.state.showFuture;
     const btn = button(
       `eye-mode-button${active ? " is-active" : ""}`,
-      "Show upcoming unfinished tasks",
+      "Show unfinished tasks with a due date",
       () => void this.setShowFuture(!active),
-      "Future",
+      "Unfinished",
     );
     btn.setAttribute("aria-pressed", `${active}`);
     return btn;

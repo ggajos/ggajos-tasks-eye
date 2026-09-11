@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { StatusNoteGroup, StatusTaskNode } from "../../src/completedTasks";
 import {
   cleanCompletedTaskText,
@@ -7,6 +7,7 @@ import {
 import { file } from "../testSupport";
 
 const DATE = "2026-07-08";
+const PAST = "2026-07-07";
 const FUTURE = "2099-01-01";
 
 function groupsFor(
@@ -45,29 +46,54 @@ status: closed
     expect(groups[0]!.matchedCount).toBe(1);
   });
 
-  it("shows future tasks only in notes with a same-day completion when showFuture is on", () => {
-    const markdown = `---
+  it("shows unfinished tasks with past, present, and future due dates when enabled", () => {
+    const configuredToday = (window as Window & { TASKS_EYE_TODAY?: string })
+      .TASKS_EYE_TODAY;
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 6, 8, 12));
+    delete (window as Window & { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY;
+
+    try {
+      const markdown = `---
 status: open
 ---
 
 - [x] Shipped today ✅ 2026-07-08
+- [ ] Catch up on yesterday's work 📅 ${PAST}
+- [ ] Handle today's follow-up 📅 ${DATE}
 - [ ] Plan next quarter 📅 ${FUTURE}
+- [ ] Capture an undated thought
 `;
-    const on = groupsFor(markdown, { showFuture: true });
-    const future = flatten(on[0]!.nodes).find((n) => n.text.includes("Plan"));
-    expect(future?.matched).toBe(true);
-    expect(future?.future).toBe(true);
-    expect(future?.completed).toBe(false);
-    expect(on[0]!.matchedCount).toBe(2);
+      const on = groupsFor(markdown, { showFuture: true });
+      const matched = flatten(on[0]!.nodes).filter((n) => n.matched);
+      expect(matched.map((n) => n.text)).toEqual([
+        "Shipped today",
+        `Catch up on yesterday's work 📅 ${PAST}`,
+        `Handle today's follow-up 📅 ${DATE}`,
+        `Plan next quarter 📅 ${FUTURE}`,
+      ]);
+      expect(matched.slice(1).every((n) => n.future)).toBe(true);
+      expect(matched.slice(1).every((n) => !n.completed)).toBe(true);
+      expect(on[0]!.matchedCount).toBe(4);
 
-    const off = groupsFor(markdown, { showFuture: false });
-    expect(flatten(off[0]!.nodes).some((n) => n.text.includes("Plan"))).toBe(
-      false,
-    );
-    expect(off[0]!.matchedCount).toBe(1);
+      const off = groupsFor(markdown, { showFuture: false });
+      expect(flatten(off[0]!.nodes).map((n) => n.text)).toEqual([
+        "Shipped today",
+      ]);
+      expect(off[0]!.matchedCount).toBe(1);
+    } finally {
+      if (configuredToday === undefined) {
+        delete (window as Window & { TASKS_EYE_TODAY?: string })
+          .TASKS_EYE_TODAY;
+      } else {
+        (window as Window & { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY =
+          configuredToday;
+      }
+      vi.useRealTimers();
+    }
   });
 
-  it("hides future tasks in notes without a same-day completion", () => {
+  it("hides unfinished due-dated tasks in notes without a same-day completion", () => {
     const grouped = collectStatusGroups(
       [
         file(
@@ -130,7 +156,7 @@ status: open
     expect(groups[0]!.matchedCount).toBe(2);
   });
 
-  it("does not pull in unfinished, non-future descendants of a completed parent", () => {
+  it("does not pull in unfinished, undated descendants of a completed parent", () => {
     const groups = groupsFor(
       `---
 status: open
@@ -147,7 +173,7 @@ status: open
     expect(groups[0]!.matchedCount).toBe(1);
   });
 
-  it("mixes a completed task and a future task within one note tree", () => {
+  it("mixes a completed task and an unfinished due-dated task within one note tree", () => {
     const groups = groupsFor(
       `---
 status: open
@@ -161,9 +187,9 @@ status: open
 
     const parent = groups[0]!.nodes[0]!;
     expect(parent.matched).toBe(false);
-    const [done, upcoming] = parent.children;
+    const [done, unfinished] = parent.children;
     expect(done!.completed).toBe(true);
-    expect(upcoming!.future).toBe(true);
+    expect(unfinished!.future).toBe(true);
     expect(groups[0]!.matchedCount).toBe(2);
   });
 
