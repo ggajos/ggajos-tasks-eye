@@ -173,8 +173,10 @@ export function buildEyeFileFromMarkdown(
 }
 
 export function wikilinkTarget(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const match = value.trim().match(/^\[\[([^|\]]+)(?:\|[^\]]*)?\]\]$/);
+  const normalized =
+    Array.isArray(value) && value.length === 1 ? value[0] : value;
+  if (typeof normalized !== "string") return null;
+  const match = normalized.trim().match(/^\[\[([^|\]]+)(?:\|[^\]]*)?\]\]$/);
   return match?.[1]?.trim() || null;
 }
 

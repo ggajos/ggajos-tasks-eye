@@ -27,6 +27,38 @@ function resolveLiveUpTarget(app: App, file: EyeFile): string | undefined {
   return getFirstLinkpathDest.call(app.metadataCache, target, file.path)?.path;
 }
 
+function rawUpValue(value: unknown): string {
+  return JSON.stringify(value) ?? String(value);
+}
+
+function logLiveUpResolution(
+  file: EyeFile,
+  targetPath: string | undefined,
+  indexedPaths: ReadonlySet<string>,
+): void {
+  if (
+    Object.getOwnPropertyDescriptor(file, "up") === undefined ||
+    file.up === "-"
+  ) {
+    return;
+  }
+
+  const raw = rawUpValue(file.up);
+  if (!targetPath) {
+    console.debug(
+      `Tasks Eye: up unresolved/missing path=${file.path} raw=${raw}`,
+    );
+    return;
+  }
+
+  const outcome = indexedPaths.has(targetPath)
+    ? "resolved-in-index"
+    : "resolved-but-outside-index";
+  console.debug(
+    `Tasks Eye: up ${outcome} path=${file.path} raw=${raw} target=${targetPath}`,
+  );
+}
+
 export async function readEyeFiles(
   app: App,
   managedFolderPath: string,
@@ -52,9 +84,11 @@ export async function readEyeFiles(
     );
   }
 
+  const indexedPaths = new Set(result.map((file) => file.path));
   for (const file of result) {
     const target = resolveLiveUpTarget(app, file);
-    if (target) file.upTargetPath = target;
+    file.upTargetPath = target;
+    logLiveUpResolution(file, target, indexedPaths);
   }
 
   return result.sort((a, b) => a.path.localeCompare(b.path));

@@ -8,6 +8,11 @@ export interface ContextFile {
   upTargetPath?: string;
 }
 
+export type UpTargetResolution =
+  | { kind: "indexed"; file: ContextFile }
+  | { kind: "resolved-but-unindexed"; path: string }
+  | { kind: "missing" };
+
 export interface UpChainResolution {
   root: ContextFile | null;
   contextNode: ContextFile | null;
@@ -27,8 +32,10 @@ export function isRootFile(file: ContextFile): boolean {
 }
 
 export function upTargetBasename(file: ContextFile): string | null {
-  if (typeof file.up !== "string") return null;
-  const match = file.up.trim().match(WIKILINK_RE);
+  const value =
+    Array.isArray(file.up) && file.up.length === 1 ? file.up[0] : file.up;
+  if (typeof value !== "string") return null;
+  const match = value.trim().match(WIKILINK_RE);
   return match ? targetBasename(match[1]!.trim()) : null;
 }
 
@@ -49,16 +56,22 @@ function filesByBasename(
 export function resolveUpTarget(
   file: ContextFile,
   files: readonly ContextFile[],
-): ContextFile | null {
-  const target = upTargetBasename(file);
-  if (!target) return null;
+): UpTargetResolution {
+  if (Object.getOwnPropertyDescriptor(file, "upTargetPath") !== undefined) {
+    const targetPath = file.upTargetPath;
+    if (!targetPath) return { kind: "missing" };
 
-  const byPath = filesByPath(files);
-  if (file.upTargetPath) {
-    return byPath.get(file.upTargetPath) ?? null;
+    const indexed = filesByPath(files).get(targetPath);
+    return indexed
+      ? { kind: "indexed", file: indexed }
+      : { kind: "resolved-but-unindexed", path: targetPath };
   }
 
-  return filesByBasename(files).get(target) ?? null;
+  const target = upTargetBasename(file);
+  if (!target) return { kind: "missing" };
+
+  const indexed = filesByBasename(files).get(target);
+  return indexed ? { kind: "indexed", file: indexed } : { kind: "missing" };
 }
 
 export function resolveUpChain(
@@ -108,8 +121,8 @@ export function resolveUpChain(
       };
     }
 
-    const parent = resolveUpTarget(current, indexedFiles);
-    if (!parent) {
+    const resolution = resolveUpTarget(current, indexedFiles);
+    if (resolution.kind === "missing") {
       return {
         root: null,
         contextNode: null,
@@ -118,6 +131,20 @@ export function resolveUpChain(
       };
     }
 
+    if (resolution.kind === "resolved-but-unindexed") {
+      return {
+        root: {
+          path: resolution.path,
+          basename: targetBasename(resolution.path),
+          up: "-",
+        },
+        contextNode,
+        targetMissing: false,
+        cycle: false,
+      };
+    }
+
+    const parent = resolution.file;
     if (isRootFile(parent)) {
       return {
         root: parent,

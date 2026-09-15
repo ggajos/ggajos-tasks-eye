@@ -86,7 +86,7 @@ const upTargetMissing: ValidationRule = ({ file, indexedFiles }) => {
   ) {
     return [];
   }
-  if (resolveUpTarget(file, indexedFiles)) return [];
+  if (resolveUpTarget(file, indexedFiles).kind !== "missing") return [];
   return singleViolation(
     "up-target-missing",
     "`up` link points to a note that doesn't exist.",

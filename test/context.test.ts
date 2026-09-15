@@ -75,6 +75,72 @@ describe("link-based context helpers", () => {
     expect(resolveUpChain(invoice, files).root?.basename).toBe("Root");
   });
 
+  it("keeps the first-level context when the root is outside the index", () => {
+    const files = buildEyeFilesFromMarkdown(
+      [
+        {
+          path: "Areas/Horizon.md",
+          markdown: "---\nup: -\n---\n",
+        },
+        {
+          path: "Managed/Branch.md",
+          markdown: "---\nup: [[Horizon]]\n---\n",
+        },
+        {
+          path: "Managed/notes/Deep.md",
+          markdown: "---\nup: [[Branch]]\n---\n",
+        },
+      ],
+      "Managed",
+    );
+    const indexedFiles = files.filter((file) =>
+      file.path.startsWith("Managed/"),
+    );
+    const branch = files.find((file) => file.basename === "Branch")!;
+    const deep = files.find((file) => file.basename === "Deep")!;
+
+    expect(resolveUpChain(branch, indexedFiles)).toMatchObject({
+      root: { path: "Areas/Horizon.md" },
+      contextNode: branch,
+      targetMissing: false,
+      cycle: false,
+    });
+    expect(getContextForFile(branch, indexedFiles)).toBe("Branch");
+    expect(getContextForFile(deep, indexedFiles)).toBe("Branch");
+    expect(resolveUpChain(deep, indexedFiles).targetMissing).toBe(false);
+  });
+
+  it("resolves a single-item up list like the string form", () => {
+    const files = tree([
+      {
+        path: "Root.md",
+        markdown: "---\nup: -\n---\n",
+      },
+      {
+        path: "String.md",
+        markdown: '---\nup: "[[Root]]"\n---\n',
+      },
+      {
+        path: "List.md",
+        markdown: '---\nup:\n  - "[[Root]]"\n---\n',
+      },
+    ]);
+    const stringFile = files.find((file) => file.basename === "String")!;
+    const listFile = files.find((file) => file.basename === "List")!;
+
+    expect(listFile.upTargetPath).toBe(stringFile.upTargetPath);
+    expect(resolveUpChain(listFile, files)).toMatchObject({
+      root: { path: "Root.md" },
+      targetMissing: false,
+      cycle: false,
+    });
+    expect(resolveUpChain(stringFile, files)).toMatchObject({
+      root: { path: "Root.md" },
+      targetMissing: false,
+      cycle: false,
+    });
+  });
+
   it("does not treat missing up as a root", () => {
     const files = tree([
       {

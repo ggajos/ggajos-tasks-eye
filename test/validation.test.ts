@@ -57,6 +57,35 @@ describe("up-tree validation", () => {
     expect(validateFile(nested, undefined, files)).toEqual([]);
   });
 
+  it("accepts a target resolved outside the managed folder", () => {
+    const files = buildEyeFilesFromMarkdown(
+      [
+        {
+          path: "Areas/Horizon.md",
+          markdown: "---\nup: -\n---\n",
+        },
+        {
+          path: "Managed/Branch.md",
+          markdown: `---
+status: closed
+up: [[Horizon]]
+---
+
+${completedTask}
+`,
+        },
+      ],
+      "Managed",
+    );
+    const indexedFiles = files.filter((file) =>
+      file.path.startsWith("Managed/"),
+    );
+    const branch = files.find((file) => file.basename === "Branch")!;
+
+    expect(branch.upTargetPath).toBe("Areas/Horizon.md");
+    expect(validateFile(branch, undefined, indexedFiles)).toEqual([]);
+  });
+
   it("reports a broken parent's missing up only on that parent", () => {
     const files = indexed([
       { path: "Root.md", up: "-" },

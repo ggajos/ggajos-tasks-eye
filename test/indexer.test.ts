@@ -1,12 +1,14 @@
 import type { App } from "obsidian";
 import { TFile, TFolder } from "obsidian";
 import { describe, expect, it, vi } from "vitest";
+import { getContextForFile } from "../src/context";
 import {
   buildEyeFileFromMarkdown,
   buildEyeFilesFromMarkdown,
   parseFrontmatter,
   readEyeFiles,
 } from "../src/indexer";
+import { validateFile } from "../src/validation";
 
 function file(path: string): TFile {
   const extension = path.includes(".") ? (path.split(".").pop() ?? "") : "";
@@ -109,6 +111,11 @@ describe("frontmatter parsing", () => {
     expect(
       buildEyeFileFromMarkdown("Child.md", "---\nup: [[Parent]]\n---\n").up,
     ).toBe("[[Parent]]");
+    expect(parseFrontmatter('---\nup:\n  - "[[Parent]]"\n---\n')).toMatchObject(
+      {
+        up: ["[[Parent]]"],
+      },
+    );
   });
 
   it("resolves pure-model up links by indexed basename", () => {
@@ -266,5 +273,35 @@ describe("managed note discovery", () => {
     expect(
       files.find((value) => value.basename === "Child")?.upTargetPath,
     ).toBe("Work/tree/Root.md");
+  });
+
+  it("trusts metadata cache links resolved outside the managed folder", async () => {
+    const outsideRoot = file("Areas/Horizon.md");
+    const childFile = file("Work/Child.md");
+    const root = folder("Work", [childFile]);
+    const cachedRead = vi.fn(async (value: TFile) => {
+      if (value.path === "Work/Child.md") {
+        return "---\nstatus: closed\nup: [[Horizon]]\n---\n\n- [x] done ✅ 2026-07-08";
+      }
+      return "";
+    });
+    const app = {
+      metadataCache: {
+        getFileCache: vi.fn(() => null),
+        getFirstLinkpathDest: vi.fn(() => outsideRoot),
+      },
+      vault: {
+        cachedRead,
+        getAbstractFileByPath: vi.fn(() => root),
+        getRoot: vi.fn(() => root),
+      },
+    } as unknown as App;
+
+    const files = await readEyeFiles(app, "Work");
+    const child = files.find((value) => value.basename === "Child")!;
+
+    expect(child.upTargetPath).toBe("Areas/Horizon.md");
+    expect(validateFile(child, undefined, files)).toEqual([]);
+    expect(getContextForFile(child, files)).toBe("Child");
   });
 });
