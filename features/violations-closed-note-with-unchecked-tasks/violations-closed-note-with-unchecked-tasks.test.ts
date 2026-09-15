@@ -7,7 +7,7 @@ describe("Closed note with unchecked tasks violation", () => {
       violationCodes(
         file(
           "Growth/Closed.md",
-          "---\nstatus: closed\n---\n\n- [x] done ✅ 2026-07-08",
+          "---\nstatus: closed\nup: -\n---\n\n- [x] done ✅ 2026-07-08",
         ),
       ),
     ).not.toContain("closed-with-unchecked-tasks");
@@ -16,7 +16,10 @@ describe("Closed note with unchecked tasks violation", () => {
   it("describes the remaining work", () => {
     expect(
       violationMessages(
-        file("Growth/Closed.md", "---\nstatus: closed\n---\n\n- [ ] follow up"),
+        file(
+          "Growth/Closed.md",
+          "---\nstatus: closed\nup: -\n---\n\n- [ ] follow up",
+        ),
       ),
     ).toContain("Closed note still has unchecked tasks.");
   });

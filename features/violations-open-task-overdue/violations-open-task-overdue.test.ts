@@ -5,8 +5,8 @@ const VIOLATION = "open-task-overdue";
 
 describe("Open task overdue violation", () => {
   it.each([
-    ["missing", "- [ ] overdue 📅 2026-07-07"],
-    ["blank", "---\nstatus:\n---\n\n- [ ] overdue 📅 2026-07-07"],
+    ["missing", "---\nup: -\n---\n\n- [ ] overdue 📅 2026-07-07"],
+    ["blank", "---\nstatus:\nup: -\n---\n\n- [ ] overdue 📅 2026-07-07"],
   ])("treats %s status as open", (_label, markdown) => {
     expect(violationCodes(file("Work/Default Open.md", markdown))).toContain(
       VIOLATION,
@@ -18,6 +18,7 @@ describe("Open task overdue violation", () => {
       "Work/Overdue.md",
       `---
 status: open
+up: -
 ---
 
 - [ ] later overdue 📅 2026-07-07
@@ -37,7 +38,9 @@ status: open
     "does not report an unchecked task due %s",
     (due) => {
       expect(
-        violationCodes(file("Work/Current.md", `- [ ] current 📅 ${due}`)),
+        violationCodes(
+          file("Work/Current.md", `---\nup: -\n---\n\n- [ ] current 📅 ${due}`),
+        ),
       ).not.toContain(VIOLATION);
     },
   );
@@ -47,7 +50,7 @@ status: open
       violationCodes(
         file(
           "Work/Completed.md",
-          "- [x] completed 📅 2026-07-07 ✅ 2026-07-07",
+          "---\nup: -\n---\n\n- [x] completed 📅 2026-07-07 ✅ 2026-07-07",
         ),
       ),
     ).not.toContain(VIOLATION);
@@ -58,7 +61,7 @@ status: open
       violationCodes(
         file(
           `Work/${status}.md`,
-          `---\nstatus: ${status}\n---\n\n- [ ] overdue 📅 2026-07-07`,
+          `---\nstatus: ${status}\nup: -\n---\n\n- [ ] overdue 📅 2026-07-07`,
         ),
       ),
     ).not.toContain(VIOLATION);

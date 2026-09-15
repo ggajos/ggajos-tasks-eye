@@ -1,5 +1,6 @@
 ---
 status: open
+up: -
 ---
 
 - [ ] later 📅 2026-06-20

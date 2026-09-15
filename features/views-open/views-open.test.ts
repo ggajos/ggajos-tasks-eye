@@ -45,11 +45,11 @@ describe("Open view feature", () => {
   it("shows open notes and excludes unsupported statuses", () => {
     const rows = selectRows(
       [
-        file("Growth/Open.md", "---\nstatus: open\n---\n\n- [ ] open"),
-        file("Growth/Default Open.md", "- [ ] default open"),
+        file("Growth/Open.md", "---\nstatus: open\nup: -\n---\n\n- [ ] open"),
+        file("Growth/Default Open.md", "---\nup: -\n---\n\n- [ ] default open"),
         file(
           "Growth/Reviewing.md",
-          "---\nstatus: reviewing\n---\n\n- [ ] reviewing",
+          "---\nstatus: reviewing\nup: -\n---\n\n- [ ] reviewing",
         ),
       ],
       "open",
@@ -65,6 +65,7 @@ describe("Open view feature", () => {
         "Growth/Plan.md",
         `---
 status: open
+up: -
 ---
 
 - [ ] later 📅 2026-07-20

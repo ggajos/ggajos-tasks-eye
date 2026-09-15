@@ -24,6 +24,7 @@ describe("Task scheduled on vacation violation", () => {
           "Architecture/Architecture Offsite.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] first 📅 2026-07-13

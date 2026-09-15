@@ -9,8 +9,14 @@ const ACTION =
   "Send the revised homepage copy and annotated mobile mockups to Marta";
 
 const boardFixture = fixture([
+  note("Tree Root.md", {
+    status: "closed",
+    up: "-",
+    tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+  }),
   note(FILE, {
     status: "open",
+    up: "[[Tree Root]]",
     tasks: [
       { text: ACTION, due: "2026-07-08" },
       { text: "Review the launch checklist", due: "2026-07-15" },
@@ -18,6 +24,7 @@ const boardFixture = fixture([
   }),
   note("Home/Kitchen Renovation.md", {
     status: "open",
+    up: "[[Tree Root]]",
     tasks: [
       {
         text: "Call the electrician about the updated quote",
@@ -27,6 +34,7 @@ const boardFixture = fixture([
   }),
   note("Family/Summer Trip.md", {
     status: "open",
+    up: "[[Tree Root]]",
     tasks: [{ text: "Book train tickets to Gdańsk", due: "2026-07-08" }],
   }),
 ]);

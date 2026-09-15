@@ -19,6 +19,8 @@ export interface EyeFile {
   basename: string;
   managedFolderPath: string;
   status?: unknown;
+  up?: unknown;
+  upTargetPath?: string;
   tasks: EyeTask[];
 }
 

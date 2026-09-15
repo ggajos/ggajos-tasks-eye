@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import {
   access,
   mkdir,
@@ -5,8 +6,8 @@ import {
   rm,
   writeFile,
 } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 import { $, browser } from "@wdio/globals";
 import { obsidianPage } from "wdio-obsidian-service";
 import {
@@ -18,7 +19,11 @@ import {
   type FeatureFixture,
 } from "../../features/fixtures";
 import type { LoadedFeature } from "../../features/types";
-import { getContextFromPath } from "../../src/context";
+import {
+  getContextForFile,
+  getGlobalContext,
+} from "../../src/context";
+import { buildEyeFilesFromMarkdown } from "../../src/eyeFile";
 import { tasksEyePage, type WdioElement } from "./tasks-eye-page";
 
 export const SNAPSHOT_ROOT = path.resolve("acceptance", "snapshots", "docs");
@@ -130,12 +135,16 @@ async function exists(filePath: string): Promise<boolean> {
   }
 }
 
-async function loadWdioModule(
+// Synchronous CJS require used by the WDIO spec, which must register mocha
+// tests without top-level await. tsx's require hook resolves the .ts modules.
+const requireModule = createRequire(import.meta.url);
+
+function loadWdioModuleSync(
   feature: LoadedFeature,
-): Promise<FeatureWdioModule | undefined> {
+): FeatureWdioModule | undefined {
   const wdioPath = path.join(feature.rootDir, "wdio.ts");
-  if (!await exists(wdioPath)) return undefined;
-  return await import(pathToFileURL(wdioPath).href) as FeatureWdioModule;
+  if (!existsSync(wdioPath)) return undefined;
+  return requireModule(wdioPath) as FeatureWdioModule;
 }
 
 function isScreenshotScenario(value: unknown): value is FeatureScreenshotScenario {
@@ -177,7 +186,16 @@ function defaultViolationScreenshotScenarios(
       if (mode === "open") {
         await tasksEyePage.expandBucketForText(expectedTitle);
       }
-      await tasksEyePage.setContextFilter(getContextFromPath(subject.path));
+      const indexedFiles = buildEyeFilesFromMarkdown(violation.fixture.files);
+      const subjectFile = indexedFiles.find(
+        (file) => file.path === subject.path,
+      );
+      const context = subjectFile
+        ? getContextForFile(subjectFile, indexedFiles)
+        : "-";
+      await tasksEyePage.setContextFilter(
+        context === "-" ? getGlobalContext(indexedFiles) : context,
+      );
       const root = await tasksEyePage.plugin(expectedTitle);
       await tasksEyePage.expectSingleViolation(violation.code);
       await save(root);
@@ -185,19 +203,19 @@ function defaultViolationScreenshotScenarios(
   }));
 }
 
-export async function discoverFeatureAcceptanceScenarios(
+export function discoverFeatureAcceptanceScenarios(
   features: readonly LoadedFeature[],
-): Promise<Array<{
+): Array<{
   feature: LoadedFeature;
   scenario: FeatureAcceptanceScenario;
-}>> {
+}> {
   const discovered: Array<{
     feature: LoadedFeature;
     scenario: FeatureAcceptanceScenario;
   }> = [];
 
   for (const feature of features) {
-    const module = await loadWdioModule(feature);
+    const module = loadWdioModuleSync(feature);
     if (module?.acceptanceScenarios === undefined) continue;
     if (!Array.isArray(module.acceptanceScenarios)) {
       throw new Error(
@@ -215,13 +233,13 @@ export async function discoverFeatureAcceptanceScenarios(
   return discovered;
 }
 
-export async function discoverFeatureScreenshotScenarios(
+export function discoverFeatureScreenshotScenarios(
   features: readonly LoadedFeature[],
-): Promise<DiscoveredFeatureScreenshotScenario[]> {
+): DiscoveredFeatureScreenshotScenario[] {
   const discovered: DiscoveredFeatureScreenshotScenario[] = [];
 
   for (const feature of features) {
-    const module = await loadWdioModule(feature);
+    const module = loadWdioModuleSync(feature);
     const explicit = module?.screenshotScenarios ?? [];
     if (!Array.isArray(explicit)) {
       throw new Error(

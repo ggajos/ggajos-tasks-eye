@@ -21,6 +21,11 @@ In many task systems, the task is the atomic unit. In Tasks Eye, **the note is t
 
 Any note containing tasks may participate in the workflow—you do not need to prescribe notes as formal "projects" or "outcomes." A board row simply represents a note and surfaces its earliest unchecked dated task as the visible next action.
 
+Inside the configured indexing boundary, notes declare their place in one
+explicit tree: the root uses `up: "-"`, and every other note links to its
+parent with a single wikilink. A note's context is the first-level branch in
+that tree; folders only decide which notes are indexed.
+
 ### The Meaning of a Due Date
 Treat a scheduled or due date as the **next due date**—the date on which an action should surface again for your attention—not necessarily as a hard external deadline. If today is not the right moment for a task, rescheduling it to tomorrow is a valid decision, not a failure.
 
@@ -60,6 +65,6 @@ A typical day using Tasks Eye looks like this:
 </figure>
 
 2. **Execution:** You complete the task in the first note. For the second, you realize you need input from a colleague, so you add a new task "Wait for reply" and date it for tomorrow.
-3. **Capture:** A random idea strikes. You create a quick note and jot down a task. It lands in the root folder.
-4. **Afternoon Repair:** You run [**Tasks Eye: Show Inbox**](../reference/commands/#open-inbox). You see your quick note flagged because it's not in a context folder. You move it to your `Work/Ideas` folder and date the task for next week.
+3. **Capture:** A random idea strikes. You create a quick note and jot down a task. It lands anywhere inside the indexed boundary.
+4. **Afternoon Repair:** You run [**Tasks Eye: Show Inbox**](../reference/commands/#open-inbox). You see your quick note flagged because it has no `up` link. Link it to the right parent note and date the task for next week.
 5. **Closing out:** You finish the remaining items in Focus. Both Focus and Inbox are now empty. You trust the system is ready for tomorrow.

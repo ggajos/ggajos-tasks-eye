@@ -26,20 +26,29 @@ async function expectDefaultOpenBuckets(): Promise<void> {
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   fixture([
+    note("Tree Root.md", {
+      status: "closed",
+      up: "-",
+      tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+    }),
     note("Work/Overdue Proposal.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Send the overdue proposal", due: "2026-07-07" }],
     }),
     note("Ideas/Neighborhood Dinner.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Choose a date for the neighborhood dinner" }],
     }),
     note("Work/Client Website Refresh.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: TODAY_ANCHOR, due: "2026-07-08" }],
     }),
     note("Home/Kitchen Renovation.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [
         {
           text: "Call the electrician about the updated quote",
@@ -49,40 +58,49 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     }),
     note("Family/Summer Trip.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Book train tickets to Gdańsk", due: "2026-07-08" }],
     }),
     note("Work/Quarterly Planning.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: TOMORROW_ANCHOR, due: "2026-07-09" }],
     }),
     note("Health/Annual Checkups.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Confirm the dentist appointment", due: "2026-07-09" }],
     }),
     note("Work/Release Notes.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Draft the release notes", due: "2026-07-10" }],
     }),
     note("Family/Weekend Plans.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Confirm next weekend plans", due: "2026-07-13" }],
     }),
     note("Home/Insurance Renewal.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Compare home insurance offers", due: "2026-07-15" }],
     }),
     note("Learning/Reading Group.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [
         { text: "Finish notes for the reading group", due: "2026-07-29" },
       ],
     }),
     note("Personal/Tax Records.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Scan the 2025 tax documents", due: "2026-08-05" }],
     }),
     note("Home/Balcony Garden.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Order spring seed trays", due: "2026-09-01" }],
     }),
   ]),

@@ -1,8 +1,12 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { collectStatusGroups } from "../src/completedTasks";
 import { isoToTs } from "../src/date";
-import { buildEyeFileFromMarkdown } from "../src/indexer";
+import {
+  buildEyeFileFromMarkdown,
+  buildEyeFilesFromMarkdown,
+} from "../src/indexer";
 import type { RenderItem } from "../src/model";
 import {
   bucketForTs,
@@ -34,6 +38,67 @@ function itemNames(items: RenderItem[]): string[] {
 }
 
 describe("row model", () => {
+  it("treats the explicit root as an ordinary note in every view", () => {
+    const files = buildEyeFilesFromMarkdown([
+      {
+        path: "Root.md",
+        markdown: `---
+status: open
+up: -
+---
+
+- [x] reviewed ✅ 2026-07-08
+- [ ] continue the work 📅 2026-07-08
+`,
+      },
+    ]);
+
+    expect(
+      selectRows(files, "focus", "Root").map((row) => row.file.basename),
+    ).toEqual(["Root"]);
+    expect(
+      selectRows(files, "open", "Root").map((row) => row.file.basename),
+    ).toEqual(["Root"]);
+    expect(Object.keys(collectStatusGroups(files, "2026-07-08", true))).toEqual(
+      ["Root"],
+    );
+  });
+
+  it("uses the up tree for row context fields", () => {
+    const files = buildEyeFilesFromMarkdown([
+      {
+        path: "Root.md",
+        markdown:
+          "---\nstatus: closed\nup: -\n---\n\n- [x] reviewed ✅ 2026-07-08",
+      },
+      {
+        path: "Contexts/Mission.md",
+        markdown: "---\nstatus: closed\nup: [[Root]]\n---\n",
+      },
+      {
+        path: "elsewhere/Deep.md",
+        markdown:
+          "---\nstatus: open\nup: [[Mission]]\n---\n\n- [ ] next 📅 2099-01-01",
+      },
+    ]);
+
+    const root = buildRowModel(
+      files.find((file) => file.basename === "Root")!,
+      undefined,
+      files,
+    );
+    const deep = buildRowModel(
+      files.find((file) => file.basename === "Deep")!,
+      undefined,
+      files,
+    );
+
+    expect(root.contextKey).toBe("Root");
+    expect(root.contextLabel).toBe("Root");
+    expect(deep.contextKey).toBe("Mission");
+    expect(deep.contextLabel).toBe("Mission");
+  });
+
   it("orders equal due dates by task priority before title", () => {
     const rows = [
       buildRowModel(
@@ -41,6 +106,7 @@ describe("row model", () => {
           "Mission/Alpha.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] lower priority ⏬ 📅 2026-07-08
@@ -52,6 +118,7 @@ status: open
           "Mission/Zulu.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] higher priority 🔺 📅 2026-07-08
@@ -76,6 +143,7 @@ status: open
         "Mission/Done ignored.md",
         `---
 status: open
+up: -
 ---
 
 - [x] completed earlier 📅 2000-01-01 ✅ 2000-01-01
@@ -123,6 +191,7 @@ describe("board grouping", () => {
           "Mission/Overdue.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] overdue task 📅 2026-07-06
@@ -132,6 +201,7 @@ status: open
           "Mission/No due.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] no due task
@@ -141,6 +211,7 @@ status: open
           "Mission/Today.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] today task 📅 2026-07-07
@@ -168,6 +239,7 @@ status: open
           "Mission/Later.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] later task 📅 2026-07-27
@@ -177,6 +249,7 @@ status: open
           "Mission/Sooner.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] sooner task 📅 2026-07-20
@@ -204,6 +277,7 @@ status: open
           "Mission/Mission B.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] mission b 📅 2026-07-13
@@ -213,6 +287,7 @@ status: open
           "Mission/Mission A.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] mission a 📅 2026-07-13
@@ -222,6 +297,7 @@ status: open
           "Growth/Growth.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] growth 📅 2026-07-13
@@ -248,6 +324,7 @@ status: open
           "Mission/Trip.md",
           `---
 status: open
+up: -
 ---
 
 - [ ] after vacation 📅 2026-07-27

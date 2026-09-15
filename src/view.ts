@@ -13,6 +13,8 @@ import {
 } from "./constants";
 import {
   discoverContexts,
+  getGlobalContext,
+  isGlobalContextFilter,
   normalizeContextFilter,
   withVacationContext,
 } from "./context";
@@ -197,14 +199,16 @@ export class EyeView extends ItemView {
     root: HTMLElement,
     files: EyeFile[],
   ): Promise<void> {
+    const globalContext = getGlobalContext(files);
     const contexts = this.contextsForMode(discoverContexts(files));
     const contextFilter = normalizeContextFilter(
       this.plugin.settings.contextFilter,
       contexts,
+      globalContext,
     );
 
     root.replaceChildren();
-    this.renderToolbar(root, contexts, contextFilter);
+    this.renderToolbar(root, contexts, contextFilter, globalContext);
 
     if (this.state.mode === "done") {
       await this.renderCompleted(root, files, contextFilter);
@@ -235,6 +239,7 @@ export class EyeView extends ItemView {
         selectRows(files, "open", "*", availability),
         contextFilter,
         availability,
+        globalContext,
       );
       if (!rendered) {
         list.appendChild(element("div", "eye-empty", this.emptyMessage()));
@@ -252,6 +257,7 @@ export class EyeView extends ItemView {
       vacationSourceRows,
       contextFilter,
       availability,
+      globalContext,
     );
     if (!rendered) {
       list.appendChild(element("div", "eye-empty", this.emptyMessage()));
@@ -273,11 +279,16 @@ export class EyeView extends ItemView {
   private renderToolbar(
     root: HTMLElement,
     contexts: string[],
-    activeContextFilter = normalizeContextFilter(
-      this.plugin.settings.contextFilter,
-      contexts,
-    ),
+    activeContextFilter?: string,
+    globalContext = "*",
   ): void {
+    const activeFilter =
+      activeContextFilter ??
+      normalizeContextFilter(
+        this.plugin.settings.contextFilter,
+        contexts,
+        globalContext,
+      );
     const toolbar = element("div", "eye-toolbar");
     const nav = element("div", "eye-mode-nav");
 
@@ -299,11 +310,16 @@ export class EyeView extends ItemView {
     toolbar.appendChild(element("div", "eye-toolbar-spacer"));
 
     toolbar.appendChild(
-      contextFilterControl(contexts, activeContextFilter, (context) => {
-        void this.plugin
-          .setContextFilter(context)
-          .then(() => this.requestRender());
-      }),
+      contextFilterControl(
+        contexts,
+        activeFilter,
+        (context) => {
+          void this.plugin
+            .setContextFilter(context)
+            .then(() => this.requestRender());
+        },
+        globalContext,
+      ),
     );
 
     root.appendChild(toolbar);
@@ -365,7 +381,8 @@ export class EyeView extends ItemView {
     const contexts = Object.keys(grouped)
       .filter(
         (context) =>
-          !contextFilter || contextFilter === "*" || context === contextFilter,
+          isGlobalContextFilter(contextFilter, files) ||
+          context === contextFilter,
       )
       .sort();
 
@@ -475,6 +492,7 @@ export class EyeView extends ItemView {
     vacationSourceRows: RowModel[],
     contextFilter: string,
     availability: AvailabilityConfig,
+    globalContext: string,
   ): Promise<boolean> {
     list.classList.add("eye-tree");
 
@@ -485,6 +503,7 @@ export class EyeView extends ItemView {
             vacationSourceRows,
             contextFilter,
             availability,
+            globalContext,
           )
         : rows.map((model): RenderItem => ({ kind: "task", model }));
     const buckets = buildBoardBuckets(items, nowDate());
@@ -499,12 +518,14 @@ export class EyeView extends ItemView {
     vacationSourceRows: RowModel[],
     contextFilter: string,
     availability: AvailabilityConfig,
+    globalContext: string,
   ): Promise<boolean> {
     const items = boardItemsForContext(
       rows,
       vacationSourceRows,
       contextFilter,
       availability,
+      globalContext,
     );
     const focusItems = buildBoardBuckets(items, nowDate())
       .filter((bucket) => bucket.key === "overdue" || bucket.key === "today")

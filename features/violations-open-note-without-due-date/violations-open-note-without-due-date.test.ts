@@ -5,8 +5,8 @@ const VIOLATION = "open-without-due-date";
 
 describe("Open note without due date violation", () => {
   it.each([
-    ["missing", "- [ ] choose next action"],
-    ["blank", "---\nstatus:\n---\n\n- [ ] choose next action"],
+    ["missing", "---\nup: -\n---\n\n- [ ] choose next action"],
+    ["blank", "---\nstatus:\nup: -\n---\n\n- [ ] choose next action"],
   ])("treats %s status as open", (_label, markdown) => {
     expect(violationCodes(file("Growth/Default Open.md", markdown))).toContain(
       VIOLATION,
@@ -21,6 +21,7 @@ describe("Open note without due date violation", () => {
           [
             "---",
             "status: open",
+            "up: -",
             "---",
             "",
             "- [ ] collect notes",
@@ -39,6 +40,7 @@ describe("Open note without due date violation", () => {
           [
             "---",
             "status: open",
+            "up: -",
             "---",
             "",
             "- [x] old action 📅 2026-07-10 ✅ 2026-07-10",
@@ -54,7 +56,7 @@ describe("Open note without due date violation", () => {
       violationCodes(
         file(
           `Growth/${status}.md`,
-          `---\nstatus: ${status}\n---\n\n- [ ] choose next action`,
+          `---\nstatus: ${status}\nup: -\n---\n\n- [ ] choose next action`,
         ),
       ),
     ).not.toContain(VIOLATION);
@@ -62,7 +64,7 @@ describe("Open note without due date violation", () => {
 
   it("keeps the existing empty-open-note violation separate", () => {
     const violations = violationCodes(
-      file("Growth/Empty.md", "---\nstatus: open\n---\n"),
+      file("Growth/Empty.md", "---\nstatus: open\nup: -\n---\n"),
     );
 
     expect(violations).toContain("open-without-uncompleted-tasks");
@@ -74,7 +76,7 @@ describe("Open note without due date violation", () => {
       violationMessages(
         file(
           "Growth/Unscheduled.md",
-          "---\nstatus: open\n---\n\n- [ ] choose next action",
+          "---\nstatus: open\nup: -\n---\n\n- [ ] choose next action",
         ),
       ),
     ).toContain("Open note needs a due date on at least one unchecked task.");

@@ -12,7 +12,9 @@ sidebar:
 </div>
 
 Tasks Eye turns your notes into an organized, daily task board. Each row represents a
-note, and the earliest unchecked task becomes the visible next action. The note's folder tells you the context. When you are unsure what to do next, run
+note, and the earliest unchecked task becomes the visible next action. An explicit
+`up` link tree tells Tasks Eye the note's context independently of folders. When
+you are unsure what to do next, run
 [**Tasks Eye: Show Focus**](reference/commands/#open-focus).
 
 Your Markdown remains the source of truth. Tasks Eye reads and updates the same
@@ -44,8 +46,8 @@ create a separate task database.
     <span>The Open view groups all upcoming tasks by due date, keeping them out of your immediate Focus list.</span>
   </li>
   <li>
-    <strong>Use folders as contexts.</strong>
-    <span>The label on the right comes from the note's folder. Filter by these folders when you want to focus on a specific project or area.</span>
+    <strong>Use the up tree as context.</strong>
+    <span>The label on the right comes from the note's first-level ancestor. Filter by a branch, or select the root note's basename to show every indexed note.</span>
   </li>
 </ol>
 
@@ -73,13 +75,13 @@ Focus. If you need more context, meeting notes, or links, click the note title t
 
 Focus and Open rely on your notes having clear dates and tasks.
 Inbox finds the exceptions: an overdue or missing task date, an open note with
-no unchecked tasks, an unsupported status, or a note that still needs a context
-folder. Clear these validation issues to ensure your work views stay accurate.
+no unchecked tasks, an unsupported status, or a broken `up` tree. Clear these
+validation issues to ensure your work views stay accurate.
 
 ## A simple daily workflow
 
 1. Run [**Tasks Eye: Show Focus**](reference/commands/#open-focus) and manage today's tasks: complete, reschedule, or close them.
-2. Run [**Tasks Eye: Show Inbox**](reference/commands/#open-inbox) to fix any missing dates or missing folders.
+2. Run [**Tasks Eye: Show Inbox**](reference/commands/#open-inbox) to fix missing dates, missing parent links, or other tree repairs.
 3. Use **Open** to plan ahead and **Done** when you want to look back.
 
 The deeper reference explains [how Focus behaves](features/views-focus/),

@@ -12,24 +12,34 @@ const OOO = "Planning day";
 
 const focusFixture = fixture(
   [
+    note("Tree Root.md", {
+      status: "closed",
+      up: "-",
+      tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+    }),
     note("Work/Project Brief.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: OVERDUE, due: "2026-07-07" }],
     }),
     note("Work/Launch Checklist.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: TODAY, due: "2026-07-08" }],
     }),
     note("Work/Stakeholder Update.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: FUTURE, due: "2026-07-09" }],
     }),
     note("Home/Follow-up.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: UNDATED }],
     }),
     note("Work/Paused Migration.md", {
       status: "reviewing",
+      up: "[[Tree Root]]",
       tasks: [{ text: UNSUPPORTED, due: "2026-07-08" }],
     }),
   ],

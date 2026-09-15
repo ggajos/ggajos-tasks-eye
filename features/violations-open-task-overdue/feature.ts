@@ -18,6 +18,7 @@ export default defineFeature({
     fixture: violationFixture(
       note("Case Studies/Launch Readiness.md", {
         status: "open",
+        up: "[[Root]]",
         tasks: [
           {
             text: "Resolve the overdue launch-readiness decision",
@@ -25,6 +26,13 @@ export default defineFeature({
           },
         ],
       }),
+      [
+        note("Root.md", {
+          status: "closed",
+          up: "-",
+          tasks: [{ text: "Reviewed the tree", completed: "2026-07-08" }],
+        }),
+      ],
     ),
   },
   screenshots: [

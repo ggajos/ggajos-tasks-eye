@@ -10,6 +10,7 @@ describe("Board task controls feature", () => {
         "Mission/Platform/Billing Platform Modernization.md",
         `---
 status: open
+up: -
 ---
 
 - [ ] Review the migration runbook 📅 2026-07-15
@@ -27,6 +28,7 @@ status: open
       "Mission/Platform/Billing Platform Modernization.md",
       `---
 status: open
+up: -
 ---
 
 - [ ] Approve the billing event contract 📅 2026-07-08

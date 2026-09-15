@@ -1,4 +1,6 @@
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { access, readdir, readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import type {
@@ -9,6 +11,10 @@ import type {
 import { VIOLATION_CODES } from "../src/validation";
 
 export const FEATURES_ROOT = path.resolve("features");
+
+// Synchronous CJS require used by the WDIO spec, which must register mocha
+// tests without top-level await. tsx's require hook resolves the .ts modules.
+const requireModule = createRequire(import.meta.url);
 
 interface FeatureModule {
   default?: FeatureDefinition;
@@ -100,6 +106,41 @@ export async function discoverFeatures(
     )) as FeatureModule;
     const feature = validateSemantics(dirName, module.default);
     const whyMarkdown = await readFile(whyPath, "utf8");
+    if (whyMarkdown.trim() === "") {
+      throw new Error(`Feature folder "${dirName}" has an empty why.md`);
+    }
+
+    features.push({ dirName, rootDir, whyMarkdown, feature });
+  }
+
+  return features;
+}
+
+export function discoverFeaturesSync(
+  featuresRoot = FEATURES_ROOT,
+): LoadedFeature[] {
+  if (!existsSync(featuresRoot)) return [];
+
+  const entries = readdirSync(featuresRoot, { withFileTypes: true });
+  const folders = entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b));
+
+  const features: LoadedFeature[] = [];
+  for (const dirName of folders) {
+    const rootDir = path.join(featuresRoot, dirName);
+    const definitionPath = path.join(rootDir, "feature.ts");
+    if (!existsSync(definitionPath)) continue;
+
+    const whyPath = path.join(rootDir, "why.md");
+    if (!existsSync(whyPath)) {
+      throw new Error(`Feature folder "${dirName}" is missing why.md`);
+    }
+
+    const module = requireModule(definitionPath) as FeatureModule;
+    const feature = validateSemantics(dirName, module.default);
+    const whyMarkdown = readFileSync(whyPath, "utf8");
     if (whyMarkdown.trim() === "") {
       throw new Error(`Feature folder "${dirName}" has an empty why.md`);
     }

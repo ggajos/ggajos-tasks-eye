@@ -3,6 +3,7 @@ import { TFile, TFolder } from "obsidian";
 import { describe, expect, it, vi } from "vitest";
 import {
   buildEyeFileFromMarkdown,
+  buildEyeFilesFromMarkdown,
   parseFrontmatter,
   readEyeFiles,
 } from "../src/indexer";
@@ -98,6 +99,33 @@ describe("frontmatter parsing", () => {
       nothing: null,
       tilde: null,
     });
+  });
+
+  it("parses root and wikilink up properties as strings", () => {
+    expect(parseFrontmatter("---\nup: -\n---\n")).toMatchObject({ up: "-" });
+    expect(
+      parseFrontmatter('---\nup: "[[folder/Parent|Alias]]"\n---\n'),
+    ).toMatchObject({ up: "[[folder/Parent|Alias]]" });
+    expect(
+      buildEyeFileFromMarkdown("Child.md", "---\nup: [[Parent]]\n---\n").up,
+    ).toBe("[[Parent]]");
+  });
+
+  it("resolves pure-model up links by indexed basename", () => {
+    const files = buildEyeFilesFromMarkdown([
+      {
+        path: "tree/Root.md",
+        markdown: "---\nup: -\n---\n",
+      },
+      {
+        path: "notes/Child.md",
+        markdown: "---\nup: [[tree/Root|Alias]]\n---\n",
+      },
+    ]);
+
+    expect(files.find((file) => file.basename === "Child")?.upTargetPath).toBe(
+      "tree/Root.md",
+    );
   });
 
   it("parses inline and block lists into arrays", () => {
@@ -205,5 +233,38 @@ describe("managed note discovery", () => {
 
     await expect(readEyeFiles(app, "Missing")).resolves.toEqual([]);
     expect(cachedRead).not.toHaveBeenCalled();
+  });
+
+  it("uses metadata cache to resolve live up links", async () => {
+    const rootFile = file("Work/tree/Root.md");
+    const childFile = file("Work/notes/Child.md");
+    const root = folder("Work", [
+      folder("Work/tree", [rootFile]),
+      folder("Work/notes", [childFile]),
+    ]);
+    const markdown: Record<string, string> = {
+      "Work/tree/Root.md": "---\nup: -\n---\n",
+      "Work/notes/Child.md": "---\nup: [[tree/Root]]\n---\n",
+    };
+    const cachedRead = vi.fn(
+      async (value: TFile) => markdown[value.path] ?? "",
+    );
+    const app = {
+      metadataCache: {
+        getFileCache: vi.fn(() => null),
+        getFirstLinkpathDest: vi.fn(() => rootFile),
+      },
+      vault: {
+        cachedRead,
+        getAbstractFileByPath: vi.fn(() => root),
+        getRoot: vi.fn(() => root),
+      },
+    } as unknown as App;
+
+    const files = await readEyeFiles(app, "Work");
+
+    expect(
+      files.find((value) => value.basename === "Child")?.upTargetPath,
+    ).toBe("Work/tree/Root.md");
   });
 });

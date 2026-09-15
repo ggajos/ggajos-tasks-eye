@@ -38,6 +38,7 @@ export function contextFilterControl(
   contexts: readonly string[],
   activeContext: string,
   onChange: (context: string) => void,
+  globalContext = "*",
 ): HTMLElement {
   const control = element("div", "eye-context-filter");
   const icon = element("span", "eye-context-filter-icon");
@@ -47,8 +48,14 @@ export function contextFilterControl(
 
   const select = element("select", "eye-context-select");
   select.setAttribute("aria-label", "Filter by context");
-  select.appendChild(new Option("All", "*"));
+  select.appendChild(
+    new Option(
+      globalContext === "*" ? "All" : formatContextLabel(globalContext),
+      globalContext,
+    ),
+  );
   for (const context of contexts) {
+    if (context === globalContext) continue;
     select.appendChild(new Option(formatContextLabel(context), context));
   }
   select.value = activeContext;

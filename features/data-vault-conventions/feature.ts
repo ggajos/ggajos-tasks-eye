@@ -3,11 +3,13 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Notes and task conventions",
   summary:
-    "Tasks Eye reads Markdown notes recursively from a configured vault folder, plus status frontmatter and Obsidian Tasks emoji metadata.",
+    "Tasks Eye reads Markdown notes recursively from a configured vault folder, plus status, `up` tree properties, and Obsidian Tasks emoji metadata.",
   acceptanceCriteria: [
     "The notes folder is configurable and defaults to the vault root (`/`).",
     "Tasks Eye reads Markdown notes directly inside the configured folder and all descendants.",
     "A missing configured folder produces an explicit configuration error.",
+    "The unique root note declares `up: -` and every other indexed note declares a parent wikilink.",
+    "Context follows the `up` tree rather than the note's folder.",
     "Supported note statuses are `open` and `closed`.",
     "Missing or blank status is treated as `open`.",
     "Tasks due dates and completion dates are read from Obsidian Tasks emoji metadata.",

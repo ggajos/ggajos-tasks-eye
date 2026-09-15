@@ -9,6 +9,7 @@ describe("Markdown-formatted board actions feature", () => {
         "Architecture/Technology Radar.md",
         `---
 status: open
+up: -
 ---
 
 - [ ] Review [[ADR-042 Tenant Isolation|ADR-042]] with **Security Architecture** and record the decision in \`architecture/tenant-isolation\` 📅 2026-07-08

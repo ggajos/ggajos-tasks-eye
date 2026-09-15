@@ -2,38 +2,76 @@ import { describe, expect, it } from "vitest";
 import {
   discoverContexts,
   formatContextLabel,
+  getGlobalContext,
   matchesContextFilter,
   normalizeContextFilter,
 } from "../../src/context";
-import { file } from "../testSupport";
+import { files } from "../testSupport";
 
 describe("Context filtering feature", () => {
-  it("discovers and formats folder-derived contexts", () => {
-    const contexts = discoverContexts([
-      file("Architecture/Technology Radar.md", ""),
-      file("Leadership/Engineering Strategy.md", ""),
-      file("Mission/Platform/Modernization.md", ""),
+  it("discovers contexts from first-level up links", () => {
+    const indexedFiles = files([
+      {
+        path: "Root.md",
+        markdown: "---\nup: -\n---\n",
+      },
+      {
+        path: "anywhere/Architecture.md",
+        markdown: "---\nup: [[Root]]\n---\n",
+      },
+      {
+        path: "notes/Technology Radar.md",
+        markdown: "---\nup: [[Architecture]]\n---\n",
+      },
+      {
+        path: "Leadership.md",
+        markdown: "---\nup: [[Root]]\n---\n",
+      },
     ]);
 
-    expect(contexts).toEqual([
-      "Architecture",
-      "Leadership",
-      "Mission/Platform",
-    ]);
+    const contexts = discoverContexts(indexedFiles);
+
+    expect(contexts).toEqual(["Architecture", "Leadership"]);
     expect(contexts.map(formatContextLabel)).toEqual([
       "Architecture",
       "Leadership",
-      "Mission/Platform",
     ]);
+    expect(getGlobalContext(indexedFiles)).toBe("Root");
   });
 
   it("matches rows by the same context value shown in the filter", () => {
-    expect(
-      matchesContextFilter("Mission/Platform/Billing.md", "Mission/Platform"),
-    ).toBe(true);
-    expect(
-      matchesContextFilter("Leadership/Mentorship.md", "Mission/Platform"),
-    ).toBe(false);
-    expect(normalizeContextFilter("missing", ["Architecture"])).toBe("*");
+    const indexedFiles = files([
+      {
+        path: "Root.md",
+        markdown: "---\nup: -\n---\n",
+      },
+      {
+        path: "Architecture.md",
+        markdown: "---\nup: [[Root]]\n---\n",
+      },
+      {
+        path: "notes/Billing.md",
+        markdown: "---\nup: [[Architecture]]\n---\n",
+      },
+      {
+        path: "Leadership/Mentorship.md",
+        markdown: "---\nup: [[Root]]\n---\n",
+      },
+    ]);
+    const billing = indexedFiles.find((file) => file.basename === "Billing")!;
+    const mentoring = indexedFiles.find(
+      (file) => file.basename === "Mentorship",
+    )!;
+
+    expect(matchesContextFilter(billing, "Architecture", indexedFiles)).toBe(
+      true,
+    );
+    expect(matchesContextFilter(mentoring, "Architecture", indexedFiles)).toBe(
+      false,
+    );
+    expect(matchesContextFilter(mentoring, "Root", indexedFiles)).toBe(true);
+    expect(normalizeContextFilter("missing", ["Architecture"], "Root")).toBe(
+      "Root",
+    );
   });
 });

@@ -7,8 +7,19 @@ const RENDERED_ACTION =
   "Review ADR-042 with Security Architecture and record the decision in architecture/tenant-isolation";
 
 const markdownFixture = fixture([
+  note("Tree Root.md", {
+    status: "closed",
+    up: "-",
+    tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+  }),
+  note("Architecture.md", {
+    status: "closed",
+    up: "[[Tree Root]]",
+    tasks: [{ text: "Review architecture", completed: "2000-01-01" }],
+  }),
   note("Architecture/Technology Radar.md", {
     status: "open",
+    up: "[[Architecture]]",
     tasks: [
       {
         text: "Review [[ADR-042 Tenant Isolation|ADR-042]] with **Security Architecture** and record the decision in `architecture/tenant-isolation`",
@@ -18,6 +29,7 @@ const markdownFixture = fixture([
   }),
   note("Architecture/ADR-042 Tenant Isolation.md", {
     status: "closed",
+    up: "[[Architecture]]",
     tasks: [{ text: "Approve isolation", completed: "2026-07-08" }],
   }),
 ]);

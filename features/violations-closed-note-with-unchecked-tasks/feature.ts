@@ -18,6 +18,7 @@ export default defineFeature({
         "Case Studies/ADR-042 Tenant Isolation.md",
         `---
 status: closed
+up: "[[Root]]"
 ---
 
 # ADR-042: Tenant Isolation
@@ -25,6 +26,13 @@ status: closed
 - [ ] Publish tenant migration guardrails for service owners
 `,
       ),
+      [
+        note("Root.md", {
+          status: "closed",
+          up: "-",
+          tasks: [{ text: "Reviewed the tree", completed: "2026-07-08" }],
+        }),
+      ],
     ),
   },
   screenshots: [

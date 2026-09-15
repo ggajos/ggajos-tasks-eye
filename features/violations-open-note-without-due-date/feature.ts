@@ -21,6 +21,7 @@ export default defineFeature({
         "Case Studies/Platform Capability Map.md",
         `---
 status: open
+up: "[[Root]]"
 ---
 
 # Platform Capability Map
@@ -28,6 +29,13 @@ status: open
 - [ ] Define the next review milestone for the capability map
 `,
       ),
+      [
+        note("Root.md", {
+          status: "closed",
+          up: "-",
+          tasks: [{ text: "Reviewed the tree", completed: "2026-07-08" }],
+        }),
+      ],
     ),
   },
   screenshots: [

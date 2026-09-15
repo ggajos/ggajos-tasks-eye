@@ -124,8 +124,12 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
         label: "Add an unchecked task",
       },
       {
-        slug: "violations-note-in-managed-root",
-        label: "Move a note into context",
+        slug: "violations-missing-up",
+        label: "Repair a missing parent link",
+      },
+      {
+        slug: "violations-tree-structure",
+        label: "Repair tree structure",
       },
       {
         slug: "violations-invalid-status",

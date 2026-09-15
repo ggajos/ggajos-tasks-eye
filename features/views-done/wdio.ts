@@ -11,12 +11,24 @@ const LEGACY_COMPLETED_VIEW_TYPE = "ggajos-tasks-eye-completed-view";
 const COMPLETED = "Approved ADR-042 for tenant isolation";
 
 const doneFixture = fixture([
+  note("Tree Root.md", {
+    status: "closed",
+    up: "-",
+    tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+  }),
+  note("Architecture.md", {
+    status: "closed",
+    up: "[[Tree Root]]",
+    tasks: [{ text: "Review architecture", completed: "2000-01-01" }],
+  }),
   note("Architecture/Architecture Governance.md", {
     status: "closed",
+    up: "[[Architecture]]",
     tasks: [{ text: COMPLETED, completed: "2026-07-08" }],
   }),
   note("Architecture/Billing Platform.md", {
     status: "open",
+    up: "[[Architecture]]",
     tasks: [
       {
         text: "Approve the billing domain event contract",
@@ -26,6 +38,7 @@ const doneFixture = fixture([
   }),
   note("Architecture/Technology Radar.md", {
     status: "open",
+    up: "[[Architecture]]",
     tasks: [{ text: "Review platform isolation", due: "2026-07-08" }],
   }),
 ]);
@@ -156,10 +169,21 @@ export const { acceptanceScenarios, screenshotScenarios: baseScreenshots } =
   });
 
 const futureNestingFixture = fixture([
+  note("Tree Root.md", {
+    status: "closed",
+    up: "-",
+    tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+  }),
+  note("Architecture.md", {
+    status: "closed",
+    up: "[[Tree Root]]",
+    tasks: [{ text: "Review architecture", completed: "2000-01-01" }],
+  }),
   note(
     "Architecture/Platform Rollout.md",
     `---
 status: open
+up: "[[Architecture]]"
 ---
 
 - [ ] Cutover milestone
@@ -177,6 +201,7 @@ status: open
     "Architecture/Data Mesh.md",
     `---
 status: open
+up: "[[Architecture]]"
 ---
 
 - [ ] Domain onboarding

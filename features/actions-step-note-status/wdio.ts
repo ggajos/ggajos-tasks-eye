@@ -11,12 +11,18 @@ const HEADING = "Platform launch decision";
 
 const statusFixture = fixture(
   [
+    note("Work/Tree Root.md", {
+      status: "closed",
+      up: "-",
+      tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+    }),
     note(
       MANAGED_FILE,
       [
         "---",
         "owner: Platform",
         "status: open",
+        'up: "[[Tree Root]]"',
         "---",
         "",
         `# ${HEADING}`,

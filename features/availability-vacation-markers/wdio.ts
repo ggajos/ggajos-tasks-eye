@@ -7,8 +7,14 @@ const WORK = "Prepare the availability review";
 
 const availabilityFixture = fixture(
   [
+    note("Tree Root.md", {
+      status: "closed",
+      up: "-",
+      tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+    }),
     note("Planning/Availability Review.md", {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: WORK, due: "2026-07-20" }],
     }),
   ],
@@ -241,7 +247,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
         screenshotSlug: "ooo-filter",
         async run({ save }) {
           await tasksEyePage.openBoard("open", "Open");
-          await tasksEyePage.setContextFilter("*");
+          await tasksEyePage.setContextFilter("Tree Root");
           await tasksEyePage.expandBucketForText(WORK);
           await tasksEyePage.setContextFilter("ooo");
           await tasksEyePage.expandBucketForText("Conference");

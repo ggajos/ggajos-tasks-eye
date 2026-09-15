@@ -11,14 +11,19 @@ Tasks Eye gives you three main views to manage your work:
 
 - **Focus**: Shows tasks due today or overdue. This is your daily dashboard for tasks that need immediate attention.
 - **Open**: Shows all your active notes and their next tasks grouped by due date, helping you plan ahead.
-- **Inbox**: Highlights notes that are missing metadata (e.g. not in a context folder, missing a due date, or having no unchecked tasks) so you can fix them.
+- **Inbox**: Highlights notes with broken metadata (e.g. a missing parent link, a broken note tree, a missing due date, or no unchecked tasks) so you can fix them.
 
 ## How it works
 
-1. **Create or move a note**: Put an ordinary Markdown note in your configured Tasks Eye notes folder, inside a context folder (e.g., `Tasks/Work/` or `Tasks/Private/`).
+1. **Create the note tree**: Put indexed Markdown notes anywhere below the configured Tasks Eye notes folder. Mark exactly one note as the root with `up: -`; every other note links to its parent, for example `up: "[[Work]]"`. The root is a normal note and still needs the usual status and task metadata. Folders only define the indexing boundary.
 2. **Add a task** to the note using the Obsidian Tasks format with a scheduled or due date:
 
 ```md
+---
+status: open
+up: "[[Work]]"
+---
+
 # Renew passport
 
 - [ ] Find the required documents 📅 2026-08-03
@@ -26,7 +31,7 @@ Tasks Eye gives you three main views to manage your work:
 - [ ] Submit the application
 ```
 
-3. Tasks Eye will automatically surface the **first unchecked dated task** from that note in your Focus or Open views, depending on the date.
+3. Tasks Eye will automatically surface the **first unchecked dated task** from that note in your Focus or Open views, depending on the date. A note's context is its first-level ancestor in the `up` tree, and selecting the root basename in the context filter shows the whole indexed tree.
 
 ## Requirements
 

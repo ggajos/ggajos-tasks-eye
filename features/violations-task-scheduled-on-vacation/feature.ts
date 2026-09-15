@@ -20,6 +20,7 @@ export default defineFeature({
         "Case Studies/Architecture Offsite.md",
         `---
 status: open
+up: "[[Root]]"
 ---
 
 # Architecture Offsite
@@ -27,6 +28,13 @@ status: open
 - [ ] Reschedule the platform strategy review away from OOO 📅 2026-07-13
 `,
       ),
+      [
+        note("Root.md", {
+          status: "closed",
+          up: "-",
+          tasks: [{ text: "Reviewed the tree", completed: "2026-07-08" }],
+        }),
+      ],
     ),
   },
   screenshots: [

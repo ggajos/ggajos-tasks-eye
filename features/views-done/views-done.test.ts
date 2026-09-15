@@ -4,7 +4,7 @@ import {
   cleanCompletedTaskText,
   collectStatusGroups,
 } from "../../src/completedTasks";
-import { file } from "../testSupport";
+import { buildEyeFilesFromMarkdown } from "../../src/indexer";
 
 const DATE = "2026-07-08";
 const PAST = "2026-07-07";
@@ -15,7 +15,23 @@ function groupsFor(
   { date = DATE, showFuture = true } = {},
   path = "Architecture/Governance.md",
 ): StatusNoteGroup[] {
-  const grouped = collectStatusGroups([file(path, markdown)], date, showFuture);
+  const noteMarkdown = markdown.replace(
+    /^---\n/,
+    "---\nup: [[Architecture]]\n",
+  );
+  const indexedFiles = buildEyeFilesFromMarkdown([
+    {
+      path: "Root.md",
+      markdown:
+        "---\nstatus: closed\nup: -\n---\n\n- [x] reviewed ✅ 2000-01-01",
+    },
+    {
+      path: "Architecture.md",
+      markdown: "---\nstatus: closed\nup: [[Root]]\n---\n",
+    },
+    { path, markdown: noteMarkdown },
+  ]);
+  const grouped = collectStatusGroups(indexedFiles, date, showFuture);
   return grouped.Architecture ?? [];
 }
 
@@ -94,21 +110,28 @@ status: open
   });
 
   it("hides unfinished due-dated tasks in notes without a same-day completion", () => {
-    const grouped = collectStatusGroups(
-      [
-        file(
-          "Architecture/Upcoming Only.md",
-          `---
+    const indexedFiles = buildEyeFilesFromMarkdown([
+      {
+        path: "Root.md",
+        markdown:
+          "---\nstatus: closed\nup: -\n---\n\n- [x] reviewed ✅ 2000-01-01",
+      },
+      {
+        path: "Architecture.md",
+        markdown: "---\nstatus: closed\nup: [[Root]]\n---\n",
+      },
+      {
+        path: "Architecture/Upcoming Only.md",
+        markdown: `---
 status: open
+up: [[Architecture]]
 ---
 
 - [ ] Plan next quarter 📅 ${FUTURE}
 `,
-        ),
-      ],
-      DATE,
-      true,
-    );
+      },
+    ]);
+    const grouped = collectStatusGroups(indexedFiles, DATE, true);
 
     expect(Object.keys(grouped)).toHaveLength(0);
   });
@@ -194,22 +217,29 @@ status: open
   });
 
   it("omits notes with no matching tasks", () => {
-    const grouped = collectStatusGroups(
-      [
-        file(
-          "Architecture/Idle.md",
-          `---
+    const indexedFiles = buildEyeFilesFromMarkdown([
+      {
+        path: "Root.md",
+        markdown:
+          "---\nstatus: closed\nup: -\n---\n\n- [x] reviewed ✅ 2000-01-01",
+      },
+      {
+        path: "Architecture.md",
+        markdown: "---\nstatus: closed\nup: [[Root]]\n---\n",
+      },
+      {
+        path: "Architecture/Idle.md",
+        markdown: `---
 status: open
+up: [[Architecture]]
 ---
 
 - [ ] Nothing due yet
 - [x] Completed on another day ✅ 2000-01-01
 `,
-        ),
-      ],
-      DATE,
-      true,
-    );
+      },
+    ]);
+    const grouped = collectStatusGroups(indexedFiles, DATE, true);
 
     expect(Object.keys(grouped)).toHaveLength(0);
   });

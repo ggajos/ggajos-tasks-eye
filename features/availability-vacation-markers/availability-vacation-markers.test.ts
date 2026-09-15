@@ -3,7 +3,7 @@ import { isoToTs } from "../../src/date";
 import { boardItemsForContext, selectRows } from "../../src/model";
 import type { AvailabilityConfig } from "../../src/vacation";
 import { availabilityReasonsForTs } from "../../src/vacation";
-import { file } from "../testSupport";
+import { files } from "../testSupport";
 
 const config: AvailabilityConfig = {
   nonWorkingWeekdays: [0, 6],
@@ -17,6 +17,17 @@ const config: AvailabilityConfig = {
     },
   ],
 };
+
+function tree(entries: Array<{ path: string; markdown: string }>) {
+  return files([
+    {
+      path: "Root.md",
+      markdown:
+        "---\nstatus: closed\nup: -\n---\n\n- [x] reviewed ✅ 2026-07-08",
+    },
+    ...entries,
+  ]);
+}
 
 describe("Vacation availability feature", () => {
   beforeEach(() => {
@@ -38,17 +49,18 @@ describe("Vacation availability feature", () => {
 
   it("shows only markers for the OOO context filter", () => {
     const rows = selectRows(
-      [
-        file(
-          "Mission/Trip.md",
-          `---
+      tree([
+        {
+          path: "Mission/Trip.md",
+          markdown: `---
 status: open
+up: [[Root]]
 ---
 
 - [ ] after vacation 📅 2026-07-20
 `,
-        ),
-      ],
+        },
+      ]),
       "open",
       "*",
       config,
@@ -63,17 +75,18 @@ status: open
 
   it("interleaves markers with the unfiltered work timeline", () => {
     const rows = selectRows(
-      [
-        file(
-          "Mission/Trip.md",
-          `---
+      tree([
+        {
+          path: "Mission/Trip.md",
+          markdown: `---
 status: open
+up: [[Root]]
 ---
 
 - [ ] after vacation 📅 2026-07-20
 `,
-        ),
-      ],
+        },
+      ]),
       "open",
       "*",
       config,
@@ -85,18 +98,28 @@ status: open
   });
 
   it("suppresses markers for a normal context filter", () => {
-    const files = [
-      file(
-        "Hardware/Car.md",
-        "---\nstatus: open\n---\n\n- [ ] service car 📅 2026-07-20",
-      ),
-      file(
-        "Growth/Study.md",
-        "---\nstatus: open\n---\n\n- [ ] study 📅 2026-07-20",
-      ),
-    ];
-    const filteredRows = selectRows(files, "open", "Hardware", config);
-    const allRows = selectRows(files, "open", "*", config);
+    const indexedFiles = tree([
+      {
+        path: "Hardware.md",
+        markdown: "---\nstatus: closed\nup: [[Root]]\n---\n",
+      },
+      {
+        path: "Hardware/Car.md",
+        markdown:
+          "---\nstatus: open\nup: [[Hardware]]\n---\n\n- [ ] service car 📅 2026-07-20",
+      },
+      {
+        path: "Growth.md",
+        markdown: "---\nstatus: closed\nup: [[Root]]\n---\n",
+      },
+      {
+        path: "Growth/Study.md",
+        markdown:
+          "---\nstatus: open\nup: [[Growth]]\n---\n\n- [ ] study 📅 2026-07-20",
+      },
+    ]);
+    const filteredRows = selectRows(indexedFiles, "open", "Hardware", config);
+    const allRows = selectRows(indexedFiles, "open", "*", config);
     const items = boardItemsForContext(
       filteredRows,
       allRows,

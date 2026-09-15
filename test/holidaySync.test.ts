@@ -102,7 +102,7 @@ describe("Nager holiday sync", () => {
       "2026-07-17";
     const file = buildEyeFileFromMarkdown(
       "Planning/Roadmap.md",
-      "- [ ] future 📅 2029-03-01\n- [x] done 📅 2035-01-01",
+      "---\nup: -\n---\n\n- [ ] future 📅 2029-03-01\n- [x] done 📅 2035-01-01",
     );
 
     expect(requiredHolidayYears([file])).toEqual([2026, 2027, 2029]);

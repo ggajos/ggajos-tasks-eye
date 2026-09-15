@@ -12,8 +12,14 @@ const MISSING_ERROR =
 const configuredFolderScenarios = featureScenarios(
   fixture(
     [
+      note("Workspace/Tree Root.md", {
+        status: "closed",
+        up: "-",
+        tasks: [{ text: "Review the note tree", completed: "2000-01-01" }],
+      }),
       note("Workspace/Mission/Platform/Billing Platform Modernization.md", {
         status: "open",
+        up: "[[Tree Root]]",
         tasks: [{ text: ACTION, due: "2026-07-08" }],
       }),
       note("Elsewhere/Unrelated.md", {

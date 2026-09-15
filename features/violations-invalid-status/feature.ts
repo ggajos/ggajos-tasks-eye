@@ -17,6 +17,7 @@ export default defineFeature({
         "Case Studies/Service Ownership Model.md",
         `---
 status: reviewing
+up: "[[Root]]"
 ---
 
 # Service Ownership Model
@@ -24,6 +25,13 @@ status: reviewing
 - [ ] Align escalation boundaries with platform and product leadership
 `,
       ),
+      [
+        note("Root.md", {
+          status: "closed",
+          up: "-",
+          tasks: [{ text: "Reviewed the tree", completed: "2026-07-08" }],
+        }),
+      ],
     ),
   },
   screenshots: [

@@ -1,8 +1,7 @@
 import type { DueBucket, EyeMode } from "./constants";
 import { DUE_BUCKETS } from "./constants";
 import {
-  getContextFromPath,
-  getTopLevelContext,
+  getContextForFile,
   matchesContextFilter,
   VACATION_CONTEXT,
 } from "./context";
@@ -49,9 +48,10 @@ export { getEarliestDueDate } from "./taskSelection";
 export function rowErrors(
   file: EyeFile,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+  indexedFiles: readonly EyeFile[] = [file],
 ): ValidationViolation[] {
   const earliestDue = getEarliestDueDate(file.tasks);
-  return validateFile(file, availability).filter(
+  return validateFile(file, availability, indexedFiles).filter(
     (violation) =>
       violation.code !== "task-on-unavailable-day" ||
       violation.dueTs === earliestDue,
@@ -61,6 +61,7 @@ export function rowErrors(
 export function buildRowModel(
   file: EyeFile,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+  indexedFiles: readonly EyeFile[] = [file],
 ): RowModel {
   const earliestDue = getEarliestDueDate(file.tasks);
   const earliestTask = findEarliestDueTask(file.tasks);
@@ -68,23 +69,21 @@ export function buildRowModel(
     file,
     earliestDue,
     earliestTask,
-    errors: rowErrors(file, availability),
+    errors: rowErrors(file, availability, indexedFiles),
     isFuture: earliestDue !== null && isAfterToday(earliestDue),
     actionLabel: earliestTask
       ? stripDueDate(earliestTask.text)
       : "No unchecked tasks",
-    contextKey: getTopLevelContext(file.path, file.managedFolderPath),
-    contextLabel: getContextFromPath(file.path, file.managedFolderPath),
+    contextKey: getContextForFile(file, indexedFiles),
+    contextLabel: getContextForFile(file, indexedFiles),
   };
 }
 
-function compareByContextTitle(a: EyeFile, b: EyeFile): number {
-  const context = getContextFromPath(a.path, a.managedFolderPath).localeCompare(
-    getContextFromPath(b.path, b.managedFolderPath),
-  );
+function compareByContextTitle(a: RowModel, b: RowModel): number {
+  const context = a.contextLabel.localeCompare(b.contextLabel);
   if (context !== 0) return context;
 
-  return a.basename.localeCompare(b.basename);
+  return a.file.basename.localeCompare(b.file.basename);
 }
 
 export function compareRowModels(a: RowModel, b: RowModel): number {
@@ -98,7 +97,7 @@ export function compareRowModels(a: RowModel, b: RowModel): number {
   const priorityB = b.earliestTask?.priority ?? NORMAL_PRIORITY;
   if (priorityA !== priorityB) return priorityA - priorityB;
 
-  return compareByContextTitle(a.file, b.file);
+  return compareByContextTitle(a, b);
 }
 
 export function rowMatchesMode(model: RowModel, mode: EyeMode): boolean {
@@ -118,15 +117,9 @@ export function selectRows(
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
 ): RowModel[] {
   return files
-    .map((file) => buildRowModel(file, availability))
+    .map((file) => buildRowModel(file, availability, files))
     .filter((model) => rowMatchesMode(model, mode))
-    .filter((model) =>
-      matchesContextFilter(
-        model.file.path,
-        contextFilter,
-        model.file.managedFolderPath,
-      ),
-    )
+    .filter((model) => matchesContextFilter(model.file, contextFilter, files))
     .sort(compareRowModels);
 }
 
@@ -189,6 +182,7 @@ export function boardItemsForContext(
   vacationSourceRows: RowModel[],
   contextFilter: string,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+  globalContext = "*",
 ): RenderItem[] {
   if (contextFilter === VACATION_CONTEXT) {
     return vacationMarkersForRows(vacationSourceRows, availability).map(
@@ -199,7 +193,11 @@ export function boardItemsForContext(
     );
   }
 
-  if (contextFilter && contextFilter !== "*") {
+  if (
+    contextFilter &&
+    contextFilter !== "*" &&
+    contextFilter !== globalContext
+  ) {
     return rows.map((model) => ({
       kind: "task",
       model,

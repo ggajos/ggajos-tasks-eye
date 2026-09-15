@@ -8,8 +8,14 @@ const FILE = "Architecture/Release Readiness.md";
 const FIRST_TASK = "Approved the production readiness checklist";
 
 const uncheckFixture = fixture([
+  note("Tree Root.md", {
+    status: "closed",
+    up: "-",
+    tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+  }),
   note(FILE, {
     status: "closed",
+    up: "[[Tree Root]]",
     tasks: [
       { text: FIRST_TASK, completed: "2026-07-08" },
       {

@@ -194,20 +194,34 @@ async function narrowRowShape(): Promise<{
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   fixture([
+    note("Tree Root.md", {
+      status: "closed",
+      up: "-",
+      tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+    }),
     note(`Work/${OPEN_WITHOUT_TASK}.md`, {
       status: "open",
+      up: "[[Tree Root]]",
       body: "Ideas collected after the last planning session.",
     }),
     note(`Home/${OPEN_WITHOUT_DATE}.md`, {
       status: "open",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Ask for the final cabinet measurements" }],
     }),
     note(`Work/${CLOSED_WITH_WORK}.md`, {
       status: "closed",
+      up: "[[Tree Root]]",
       tasks: [{ text: "Share the follow-up summary", due: "2026-07-08" }],
+    }),
+    note(`${LONG_CONTEXT}.md`, {
+      status: "closed",
+      up: "[[Tree Root]]",
+      tasks: [{ text: "Review the long-range plan", completed: "2000-01-01" }],
     }),
     note(`${LONG_CONTEXT}/${INVALID_STATUS}.md`, {
       status: "reviewing",
+      up: `[[${LONG_CONTEXT}]]`,
       tasks: [
         {
           text: "Choose the next book for the next reading group",

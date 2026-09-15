@@ -19,6 +19,7 @@ export default defineFeature({
         "Case Studies/Engineering Strategy Q3.md",
         `---
 status: open
+up: "[[Root]]"
 ---
 
 # Engineering Strategy Q3
@@ -27,6 +28,13 @@ The strategy covers platform leverage and reliability investment, but still
 needs a concrete next action.
 `,
       ),
+      [
+        note("Root.md", {
+          status: "closed",
+          up: "-",
+          tasks: [{ text: "Reviewed the tree", completed: "2026-07-08" }],
+        }),
+      ],
     ),
   },
   screenshots: [

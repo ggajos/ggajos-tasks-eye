@@ -1,5 +1,5 @@
 import { STATUSES } from "./constants";
-import { getContextFromPath } from "./context";
+import { isRootFile, resolveUpChain, resolveUpTarget } from "./context";
 import { formatYmd, isBeforeToday } from "./date";
 import { isPathInManagedFolder } from "./managedPath";
 import { getEarliestDueDate } from "./taskSelection";
@@ -12,7 +12,10 @@ import {
 
 export const VIOLATION_CODES = [
   "invalid-status",
-  "note-in-managed-root",
+  "note-without-up",
+  "up-target-missing",
+  "up-cycle",
+  "multiple-roots",
   "closed-with-unchecked-tasks",
   "open-without-uncompleted-tasks",
   "open-without-due-date",
@@ -31,6 +34,7 @@ export interface ValidationViolation {
 
 interface ValidationContext {
   file: EyeFile;
+  indexedFiles: readonly EyeFile[];
   availability: AvailabilityConfig;
   status: string;
   hasExplicitStatus: boolean;
@@ -67,12 +71,45 @@ const invalidStatus: ValidationRule = ({ file, status, hasExplicitStatus }) => {
   );
 };
 
-const noteInManagedRoot: ValidationRule = ({ file }) => {
-  if (getContextFromPath(file.path, file.managedFolderPath) !== "-") return [];
+const noteWithoutUp: ValidationRule = ({ file }) => {
+  if (Object.getOwnPropertyDescriptor(file, "up") !== undefined) return [];
   return singleViolation(
-    "note-in-managed-root",
-    "Note needs to be moved into a context folder.",
+    "note-without-up",
+    "Note needs an `up` link to its parent.",
   );
+};
+
+const upTargetMissing: ValidationRule = ({ file, indexedFiles }) => {
+  if (
+    Object.getOwnPropertyDescriptor(file, "up") === undefined ||
+    isRootFile(file)
+  ) {
+    return [];
+  }
+  if (resolveUpTarget(file, indexedFiles)) return [];
+  return singleViolation(
+    "up-target-missing",
+    "`up` link points to a note that doesn't exist.",
+  );
+};
+
+const upCycle: ValidationRule = ({ file, indexedFiles }) => {
+  if (
+    Object.getOwnPropertyDescriptor(file, "up") === undefined ||
+    isRootFile(file)
+  ) {
+    return [];
+  }
+  const resolution = resolveUpChain(file, indexedFiles);
+  if (!resolution.cycle) return [];
+  return singleViolation("up-cycle", "`up` links form a loop.");
+};
+
+const multipleRoots: ValidationRule = ({ file, indexedFiles }) => {
+  if (!isRootFile(file)) return [];
+  const rootCount = indexedFiles.filter(isRootFile).length;
+  if (rootCount <= 1) return [];
+  return singleViolation("multiple-roots", "Only one note can act as root.");
 };
 
 const closedWithUncheckedTasks: ValidationRule = ({
@@ -150,7 +187,10 @@ const tasksOnUnavailableDays: ValidationRule = ({
 
 const VALIDATION_RULES: readonly ValidationRule[] = [
   invalidStatus,
-  noteInManagedRoot,
+  noteWithoutUp,
+  upTargetMissing,
+  upCycle,
+  multipleRoots,
   closedWithUncheckedTasks,
   openWithoutTasks,
   openWithoutDueDate,
@@ -161,11 +201,13 @@ const VALIDATION_RULES: readonly ValidationRule[] = [
 export function validateFile(
   file: EyeFile,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+  indexedFiles: readonly EyeFile[] = [file],
 ): ValidationViolation[] {
   if (!isPathInManagedFolder(file.path, file.managedFolderPath)) return [];
 
   const context: ValidationContext = {
     file,
+    indexedFiles: indexedFiles.length > 0 ? indexedFiles : [file],
     availability,
     status: statusValue(file),
     hasExplicitStatus:

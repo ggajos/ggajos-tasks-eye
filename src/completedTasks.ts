@@ -1,4 +1,4 @@
-import { getContextFromPath } from "./context";
+import { getContextForFile } from "./context";
 import { stripPrioritySignifier } from "./priority";
 import type { EyeFile, EyeTask } from "./types";
 
@@ -101,8 +101,9 @@ export function collectStatusGroups(
   showFuture: boolean,
 ): Record<string, StatusNoteGroup[]> {
   const grouped: Record<string, StatusNoteGroup[]> = {};
+  const indexedFiles = Array.from(files);
 
-  for (const file of files) {
+  for (const file of indexedFiles) {
     const hasCompletionOnDate = file.tasks.some((task) =>
       isCompletedOnDate(task, date),
     );
@@ -115,8 +116,7 @@ export function collectStatusGroups(
     const matchedCount = countMatched(nodes);
     if (matchedCount === 0) continue;
 
-    const context =
-      getContextFromPath(file.path, file.managedFolderPath) || "-";
+    const context = getContextForFile(file, indexedFiles);
     grouped[context] ??= [];
     grouped[context]!.push({
       context,

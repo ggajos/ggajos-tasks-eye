@@ -1,4 +1,4 @@
-import { discoverFeatures } from "../../scripts/feature-discovery";
+import { discoverFeaturesSync } from "../../scripts/feature-discovery";
 import {
   VISUAL_VARIANTS,
   applyVisualVariant,
@@ -14,18 +14,18 @@ import {
 const SUITE = process.env.TASKS_EYE_SUITE ?? "acceptance";
 const RUN_ACCEPTANCE = SUITE === "acceptance" || SUITE === "all";
 const RUN_VISUAL = SUITE === "visual" || SUITE === "all";
-const FEATURES = await discoverFeatures();
-const FEATURE_ACCEPTANCE_SCENARIOS = await discoverFeatureAcceptanceScenarios(
-  FEATURES,
-);
-const FEATURE_SCREENSHOT_SCENARIOS = await discoverFeatureScreenshotScenarios(
-  FEATURES,
-);
+
+// Obsidian runs specs in a CommonJS runtime that forbids top-level await, so
+// feature discovery is performed synchronously here and the root suite is
+// registered directly while the spec module is evaluated.
+const features = discoverFeaturesSync();
+const acceptanceScenarios = discoverFeatureAcceptanceScenarios(features);
+const screenshotScenarios = discoverFeatureScreenshotScenarios(features);
 
 describe("Tasks Eye acceptance", () => {
   before(async () => {
     await assertEnglishObsidianLocale();
-    if (RUN_VISUAL) await beginVisualRun(FEATURE_SCREENSHOT_SCENARIOS);
+    if (RUN_VISUAL) await beginVisualRun(screenshotScenarios);
   });
 
   after(async () => {
@@ -33,7 +33,7 @@ describe("Tasks Eye acceptance", () => {
   });
 
   if (RUN_ACCEPTANCE) {
-    for (const { feature, scenario } of FEATURE_ACCEPTANCE_SCENARIOS) {
+    for (const { feature, scenario } of acceptanceScenarios) {
       it(`${feature.feature.title}: ${scenario.title}`, async () => {
         await resetFixtureVault(scenario.fixture);
         await applyVisualVariant(VISUAL_VARIANTS[0]!);
@@ -43,7 +43,7 @@ describe("Tasks Eye acceptance", () => {
   }
 
   if (RUN_VISUAL) {
-    for (const { feature, scenario } of FEATURE_SCREENSHOT_SCENARIOS) {
+    for (const { feature, scenario } of screenshotScenarios) {
       for (const variant of VISUAL_VARIANTS) {
         it(
           `documents ${feature.feature.title} ${scenario.screenshotSlug} in ${variant.label}`,

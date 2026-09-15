@@ -32,6 +32,7 @@ export interface TaskFixture {
 
 export interface NoteFixture {
   status?: string | null;
+  up?: string | null;
   body?: string;
   tasks?: readonly (string | TaskFixture)[];
 }
@@ -100,9 +101,17 @@ export function note(
   }
 
   const sections: string[] = [];
+  const frontmatter: string[] = [];
   if (source.status !== undefined) {
     const status = source.status === null ? "" : ` ${source.status}`;
-    sections.push(`---\nstatus:${status}\n---`);
+    frontmatter.push(`status:${status}`);
+  }
+  if (source.up !== undefined) {
+    const up = source.up === null ? "" : ` "${source.up}"`;
+    frontmatter.push(`up:${up}`);
+  }
+  if (frontmatter.length > 0) {
+    sections.push(`---\n${frontmatter.join("\n")}\n---`);
   }
   if (source.body?.trim()) sections.push(source.body.trim());
   if (source.tasks?.length) sections.push(source.tasks.map(task).join("\n"));

@@ -1,5 +1,6 @@
 ---
 status: open
+up: -
 ---
 
 - [ ] first undated task
