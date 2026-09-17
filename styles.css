@@ -724,11 +724,8 @@
   padding: 8px;
 }
 
-.eye-note-tree ul {
-  margin: 0;
-  padding-left: 1.1em;
-}
-
-.eye-note-tree > .markdown-rendered > ul {
-  padding-left: 0.6em;
+.eye-note-tree ul,
+.eye-note-tree li {
+  margin: 0 !important;
+  padding-left: 0.2em !important;
 }
