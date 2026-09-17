@@ -86,6 +86,32 @@ export function buildDescendants(
   return build(current, new Set([current.path]));
 }
 
+export type TreeLinkResolver = (ref: TreeNoteRef) => string;
+
+export function noteTreeMarkdown(
+  tree: NoteTree,
+  toLinkText: TreeLinkResolver,
+): string {
+  const lines: string[] = [];
+  const push = (ref: TreeNoteRef, depth: number): void => {
+    lines.push(`${"  ".repeat(depth)}- [[${toLinkText(ref)}]]`);
+  };
+
+  let depth = 0;
+  for (const ref of tree.spine) push(ref, depth++);
+  push(tree.current, depth);
+
+  const walk = (nodes: readonly TreeNode[], nodeDepth: number): void => {
+    for (const node of nodes) {
+      push(node, nodeDepth);
+      walk(node.children, nodeDepth + 1);
+    }
+  };
+  walk(tree.descendants, depth + 1);
+
+  return lines.join("\n");
+}
+
 export function buildNoteTree(
   activePath: string | null,
   files: readonly ContextFile[],

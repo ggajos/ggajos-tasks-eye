@@ -1,10 +1,10 @@
 import type { WorkspaceLeaf } from "obsidian";
-import { ItemView } from "obsidian";
+import { ItemView, Keymap, MarkdownRenderer, TFile } from "obsidian";
 import { BOARD_RENDER_FAILED_MESSAGE } from "./constants";
 import type TheEyePlugin from "./main";
-import type { NoteTree, TreeNode } from "./tree";
-import { buildNoteTree } from "./tree";
-import { element, internalLink } from "./ui";
+import type { NoteTree, TreeNoteRef } from "./tree";
+import { buildNoteTree, noteTreeMarkdown } from "./tree";
+import { element } from "./ui";
 
 export const TREE_VIEW_TYPE = "ggajos-tasks-eye-tree-view";
 
@@ -42,7 +42,7 @@ export class TreeView extends ItemView {
 
   async requestRender(): Promise<void> {
     const token = ++this.renderToken;
-    const root = element("div", "eye-tree");
+    const root = element("div", "eye-note-tree");
     this.contentEl.replaceChildren(root);
 
     const folderError = this.plugin.managedFolderError();
@@ -61,7 +61,7 @@ export class TreeView extends ItemView {
         root.appendChild(element("div", "eye-empty", EMPTY_TREE_MESSAGE));
         return;
       }
-      this.renderTree(root, tree);
+      await this.renderTree(root, tree, activePath ?? "");
     } catch (error) {
       if (token !== this.renderToken) return;
       console.error("Tasks Eye failed to render the tree.", error);
@@ -71,46 +71,44 @@ export class TreeView extends ItemView {
     }
   }
 
-  private renderTree(root: HTMLElement, tree: NoteTree): void {
-    const openNote = (path: string): void => {
-      void this.plugin.openFile(path);
-    };
-
-    let container = root;
-    for (const ref of tree.spine) {
-      const node = element("div", "eye-tree-node");
-      node.appendChild(internalLink(ref.basename, ref.path, openNote));
-      container.appendChild(node);
-      const children = element("div", "eye-tree-children");
-      container.appendChild(children);
-      container = children;
-    }
-
-    const current = element("div", "eye-tree-node is-current");
-    current.appendChild(
-      internalLink(tree.current.basename, tree.current.path, openNote),
+  private async renderTree(
+    root: HTMLElement,
+    tree: NoteTree,
+    sourcePath: string,
+  ): Promise<void> {
+    const markdown = noteTreeMarkdown(tree, (ref) =>
+      this.linkTextFor(ref, sourcePath),
     );
-    container.appendChild(current);
-
-    const descendants = element("div", "eye-tree-children");
-    container.appendChild(descendants);
-    this.renderNodes(descendants, tree.descendants, openNote);
+    const body = element("div", "markdown-rendered");
+    root.appendChild(body);
+    // Obsidian does not handle internal-link clicks inside a custom view.
+    body.addEventListener("click", (event) => {
+      const link = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+        "a.internal-link",
+      );
+      const href = link?.getAttribute("href");
+      if (!href) return;
+      event.preventDefault();
+      void this.plugin.app.workspace.openLinkText(
+        href,
+        sourcePath,
+        Keymap.isModEvent(event),
+      );
+    });
+    await MarkdownRenderer.render(
+      this.plugin.app,
+      markdown,
+      body,
+      sourcePath,
+      this,
+    );
   }
 
-  private renderNodes(
-    container: HTMLElement,
-    nodes: readonly TreeNode[],
-    openNote: (path: string) => void,
-  ): void {
-    for (const node of nodes) {
-      const nodeEl = element("div", "eye-tree-node");
-      nodeEl.appendChild(internalLink(node.basename, node.path, openNote));
-      container.appendChild(nodeEl);
-      if (node.children.length > 0) {
-        const children = element("div", "eye-tree-children");
-        container.appendChild(children);
-        this.renderNodes(children, node.children, openNote);
-      }
+  private linkTextFor(ref: TreeNoteRef, sourcePath: string): string {
+    const file = this.plugin.app.vault.getAbstractFileByPath(ref.path);
+    if (file instanceof TFile) {
+      return this.plugin.app.metadataCache.fileToLinktext(file, sourcePath);
     }
+    return ref.path.replace(/\.md$/i, "");
   }
 }

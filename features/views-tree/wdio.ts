@@ -61,7 +61,31 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             CHILD_A,
             CHILD_B,
           ]);
-          expect(await tasksEyePage.treeCurrentNote()).toBe(CURRENT);
+          expect(await tasksEyePage.treeNoteOutline()).toEqual([
+            { name: ROOT, depth: 0 },
+            { name: CONTEXT, depth: 1 },
+            { name: PROJECT, depth: 2 },
+            { name: CURRENT, depth: 3 },
+            { name: CHILD_A, depth: 4 },
+            { name: CHILD_B, depth: 4 },
+          ]);
+        },
+      },
+      {
+        title: "opens a note when its tree link is clicked",
+        async run() {
+          await tasksEyePage.openPreview("Work/Homepage Copy.md", CURRENT);
+          await tasksEyePage.openTree(CURRENT);
+
+          await tasksEyePage.clickTreeNote(CHILD_A);
+
+          await tasksEyePage.waitForTreeNotes([
+            ROOT,
+            CONTEXT,
+            PROJECT,
+            CURRENT,
+            CHILD_A,
+          ]);
         },
       },
       {
@@ -72,7 +96,6 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           await tasksEyePage.openPreview("Home/Home.md", "Home");
           await tasksEyePage.openTree("Home");
 
-          expect(await tasksEyePage.treeCurrentNote()).toBe("Home");
           expect(await tasksEyePage.treeNoteNames()).toEqual([ROOT, "Home"]);
         },
       },

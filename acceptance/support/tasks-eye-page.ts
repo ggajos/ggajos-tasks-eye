@@ -117,7 +117,7 @@ export const tasksEyePage = {
     try {
       await browser.waitUntil(async () => {
         actual = await browser.execute(() =>
-          document.querySelector(".eye-tree")?.textContent ?? "");
+          document.querySelector(".eye-note-tree")?.textContent ?? "");
         return actual.includes(text);
       }, { timeout: 20_000 });
     } catch {
@@ -125,21 +125,61 @@ export const tasksEyePage = {
         `Expected tree view to contain "${text}"; last content was ${JSON.stringify(actual)}`,
       );
     }
-    const element = await $(".eye-tree");
+    const element = await $(".eye-note-tree");
     await element.waitForDisplayed({ timeout: 5_000 });
     return element as unknown as WdioElement;
   },
 
   async treeNoteNames(): Promise<string[]> {
     return await browser.execute(() =>
-      [...document.querySelectorAll<HTMLElement>(".eye-tree .eye-tree-node")]
-        .map((node) => node.textContent ?? ""));
+      [
+        ...document.querySelectorAll<HTMLElement>(
+          ".eye-note-tree li a.internal-link",
+        ),
+      ].map((node) => node.textContent ?? ""));
   },
 
-  async treeCurrentNote(): Promise<string | null> {
-    return await browser.execute(() =>
-      document.querySelector<HTMLElement>(".eye-tree .eye-tree-node.is-current")
-        ?.textContent ?? null);
+  async treeNoteOutline(): Promise<{ name: string; depth: number }[]> {
+    return await browser.execute(() => {
+      const root = document.querySelector(".eye-note-tree");
+      if (!root) return [];
+      return [
+        ...root.querySelectorAll<HTMLElement>("li a.internal-link"),
+      ].map((link) => {
+        let depth = -1;
+        let node: HTMLElement | null = link;
+        while (node && node !== root) {
+          if (node.tagName === "UL") depth += 1;
+          node = node.parentElement;
+        }
+        return { name: link.textContent ?? "", depth };
+      });
+    });
+  },
+
+  async clickTreeNote(name: string): Promise<void> {
+    const links = await $$(".eye-note-tree li a.internal-link");
+    for (const link of links) {
+      if (await link.getText() === name) {
+        await link.click();
+        return;
+      }
+    }
+    throw new Error(`Tree link "${name}" was not found`);
+  },
+
+  async waitForTreeNotes(expected: readonly string[]): Promise<void> {
+    let actual: string[] = [];
+    try {
+      await browser.waitUntil(async () => {
+        actual = await this.treeNoteNames();
+        return actual.join("\u0000") === expected.join("\u0000");
+      }, { timeout: 20_000 });
+    } catch {
+      throw new Error(
+        `Expected tree to show ${JSON.stringify(expected)}; last names were ${JSON.stringify(actual)}`,
+      );
+    }
   },
 
   async openBoard(mode: EyeMode, text: string): Promise<WdioElement> {

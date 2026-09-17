@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { TreeNode } from "../../src/tree";
-import { buildNoteTree } from "../../src/tree";
+import { buildNoteTree, noteTreeMarkdown } from "../../src/tree";
 import { file } from "../testSupport";
 
 // Builds an EyeFile with a specific `up` frontmatter.
@@ -110,5 +110,57 @@ describe("buildNoteTree", () => {
     expect(result.current.basename).toBe("A");
     // The cycle is broken rather than expanded infinitely.
     expect(result.spine.map((ref) => ref.basename)).toEqual(["B"]);
+  });
+});
+
+// Mirrors what the view does with `metadataCache.fileToLinktext`.
+const linkText = (ref: { path: string }) =>
+  ref.path.replace(/\.md$/i, "").split("/").pop() ?? ref.path;
+
+describe("noteTreeMarkdown", () => {
+  it("indents the spine, the current note and its descendants", () => {
+    const tree = buildNoteTree(SITE.path, VAULT)!;
+    expect(noteTreeMarkdown(tree, linkText)).toBe(
+      [
+        "- [[Root]]",
+        "  - [[Work]]",
+        "    - [[Site]]",
+        "      - [[Site A]]",
+        "      - [[Site B]]",
+      ].join("\n"),
+    );
+  });
+
+  it("nests grandchildren one level deeper than their parent", () => {
+    const tree = buildNoteTree(WORK.path, VAULT)!;
+    expect(noteTreeMarkdown(tree, linkText)).toBe(
+      [
+        "- [[Root]]",
+        "  - [[Work]]",
+        "    - [[Site]]",
+        "      - [[Site A]]",
+        "      - [[Site B]]",
+      ].join("\n"),
+    );
+  });
+
+  it("emits a single item for a root note without descendants", () => {
+    const only = noteFile("Solo.md", '"-"');
+    const tree = buildNoteTree(only.path, [only])!;
+    expect(noteTreeMarkdown(tree, linkText)).toBe("- [[Solo]]");
+  });
+
+  it("uses the resolver for every reference", () => {
+    const tree = buildNoteTree(SITE_A.path, VAULT)!;
+    expect(
+      noteTreeMarkdown(tree, (ref) => ref.path.replace(/\.md$/i, "")),
+    ).toBe(
+      [
+        "- [[Root]]",
+        "  - [[Work/Work]]",
+        "    - [[Work/Site]]",
+        "      - [[Work/Site A]]",
+      ].join("\n"),
+    );
   });
 });
