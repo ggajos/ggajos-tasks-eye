@@ -10,6 +10,7 @@ import { completeTaskInFile, shiftTaskDueInFile } from "./actions";
 import {
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
+  OPEN_TREE_COMMAND,
   STATUS_STEP_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "./commands";
@@ -44,6 +45,7 @@ import { stepNoteStatus } from "./noteStatus";
 import { TasksEyeSettingTab } from "./settings";
 import type { TasksApiV1 } from "./tasksApi";
 import { getTasksApi } from "./tasksApi";
+import { TREE_VIEW_TYPE, TreeView } from "./treeView";
 import type { EyeFile, EyeSettings, RowModel } from "./types";
 import type { AvailabilityConfig, PersonalTimeOff } from "./vacation";
 import {
@@ -114,11 +116,16 @@ export default class TheEyePlugin extends Plugin {
     this.settings = normalizeSettings(await this.loadData());
 
     this.registerView(VIEW_TYPE, (leaf) => new EyeView(leaf, this));
+    this.registerView(TREE_VIEW_TYPE, (leaf) => new TreeView(leaf, this));
     this.settingsTab = new TasksEyeSettingTab(this.app, this);
     this.addSettingTab(this.settingsTab);
 
     this.addRibbonIcon("eye", "Open Tasks Eye", () => {
       void this.openEye(this.settings.mode);
+    });
+
+    this.addRibbonIcon("list-tree", "Open Tasks Eye Tree", () => {
+      void this.openTree();
     });
 
     for (const mode of Object.keys(MODE_COMMANDS) as Array<
@@ -139,6 +146,13 @@ export default class TheEyePlugin extends Plugin {
       name: OPEN_COMPLETED_COMMAND.name,
       callback: () => {
         void this.openCompletedTasks();
+      },
+    });
+    this.addCommand({
+      id: OPEN_TREE_COMMAND.id,
+      name: OPEN_TREE_COMMAND.name,
+      callback: () => {
+        void this.openTree();
       },
     });
     this.addCommand({
@@ -198,6 +212,16 @@ export default class TheEyePlugin extends Plugin {
         ) {
           this.queueRefresh();
         }
+      }),
+    );
+    this.registerEvent(
+      this.app.workspace.on("active-leaf-change", () => {
+        void this.refreshTreeViews();
+      }),
+    );
+    this.registerEvent(
+      this.app.workspace.on("file-open", () => {
+        void this.refreshTreeViews();
       }),
     );
     if (!this.tasksApiAvailable()) {
@@ -476,6 +500,18 @@ export default class TheEyePlugin extends Plugin {
     }
   }
 
+  async openTree(): Promise<void> {
+    const existingLeaf =
+      this.app.workspace.getLeavesOfType(TREE_VIEW_TYPE)[0] ?? null;
+    const leaf = existingLeaf ?? this.app.workspace.getRightLeaf(false);
+    if (!leaf) return;
+    await leaf.setViewState({
+      type: TREE_VIEW_TYPE,
+      active: true,
+    });
+    await this.app.workspace.revealLeaf(leaf);
+  }
+
   async openFile(path: string): Promise<void> {
     const file = this.app.vault.getAbstractFileByPath(path);
     if (!(file instanceof TFile)) {
@@ -604,6 +640,14 @@ export default class TheEyePlugin extends Plugin {
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
     for (const leaf of leaves) {
       if (leaf.view instanceof EyeView) await leaf.view.requestRender();
+    }
+    await this.refreshTreeViews();
+  }
+
+  private async refreshTreeViews(): Promise<void> {
+    const leaves = this.app.workspace.getLeavesOfType(TREE_VIEW_TYPE);
+    for (const leaf of leaves) {
+      if (leaf.view instanceof TreeView) await leaf.view.requestRender();
     }
   }
 }

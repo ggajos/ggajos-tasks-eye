@@ -500,6 +500,7 @@ export async function resetFixtureVault(value: FeatureFixture): Promise<void> {
     for (const type of [
       "markdown",
       "ggajos-tasks-eye-view",
+      "ggajos-tasks-eye-tree-view",
       "ggajos-tasks-eye-completed-view",
     ]) {
       for (const leaf of app.workspace.getLeavesOfType(type)) leaf.detach();

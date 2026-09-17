@@ -26,6 +26,26 @@ export function button(
   return btn;
 }
 
+export function internalLink(
+  basename: string,
+  path: string,
+  onOpen: (path: string) => void,
+  className?: string,
+): HTMLAnchorElement {
+  const link = element(
+    "a",
+    className ? `internal-link ${className}` : "internal-link",
+    basename,
+  );
+  link.setAttribute("href", path);
+  link.setAttribute("data-href", path);
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    onOpen(path);
+  });
+  return link;
+}
+
 export function unwrapSingleParagraph(el: HTMLElement): void {
   const child = el.firstElementChild;
   if (child?.tagName !== "P" || child.nextElementSibling) return;

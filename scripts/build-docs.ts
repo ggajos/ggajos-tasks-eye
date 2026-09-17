@@ -95,6 +95,7 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
     items: [
       { slug: "views-focus", label: "Handle today's work" },
       { slug: "views-open", label: "Choose what to do next" },
+      { slug: "views-tree", label: "See the note tree" },
       { slug: "actions-board-task-controls", label: "Complete or reschedule" },
       { slug: "filters-context-filtering", label: "Narrow by context" },
       { slug: "views-inbox", label: "Repair notes in Inbox" },

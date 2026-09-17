@@ -111,6 +111,37 @@ export const tasksEyePage = {
   plugin: (text: string) => activeView(PLUGIN, text),
   editor: (text: string) => activeView(EDITOR, text),
 
+  async openTree(text: string): Promise<WdioElement> {
+    await browser.executeObsidianCommand("ggajos-tasks-eye:open-tree");
+    let actual = "";
+    try {
+      await browser.waitUntil(async () => {
+        actual = await browser.execute(() =>
+          document.querySelector(".eye-tree")?.textContent ?? "");
+        return actual.includes(text);
+      }, { timeout: 20_000 });
+    } catch {
+      throw new Error(
+        `Expected tree view to contain "${text}"; last content was ${JSON.stringify(actual)}`,
+      );
+    }
+    const element = await $(".eye-tree");
+    await element.waitForDisplayed({ timeout: 5_000 });
+    return element as unknown as WdioElement;
+  },
+
+  async treeNoteNames(): Promise<string[]> {
+    return await browser.execute(() =>
+      [...document.querySelectorAll<HTMLElement>(".eye-tree .eye-tree-node")]
+        .map((node) => node.textContent ?? ""));
+  },
+
+  async treeCurrentNote(): Promise<string | null> {
+    return await browser.execute(() =>
+      document.querySelector<HTMLElement>(".eye-tree .eye-tree-node.is-current")
+        ?.textContent ?? null);
+  },
+
   async openBoard(mode: EyeMode, text: string): Promise<WdioElement> {
     await browser.executeObsidianCommand(`ggajos-tasks-eye:open-${mode}`);
     return await activeViewContent(PLUGIN, text);

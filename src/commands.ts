@@ -28,6 +28,11 @@ export const OPEN_COMPLETED_COMMAND: CommandDefinition = {
   name: "Show Done",
 };
 
+export const OPEN_TREE_COMMAND: CommandDefinition = {
+  id: "open-tree",
+  name: "Open Tree",
+};
+
 export const UNCHECK_SELECTED_COMMAND: CommandDefinition = {
   id: "uncheck-selected-tasks",
   name: "Reopen selected tasks",
