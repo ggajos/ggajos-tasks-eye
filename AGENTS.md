@@ -8,20 +8,18 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 
 ## Common Commands
 
-- `npm run build` type-checks and bundles the plugin.
-- `npm test` runs the Vitest unit suite only; this is the regular development
-  feedback loop.
-- `npm run test:visual` runs all behavioral and screenshot WDIO scenarios only
-  inside the pinned Podman Linux/Xvfb environment, overwrites the tracked
-  screenshots, regenerates five 1200×800 PNG showcase cards in
-  `acceptance/artifacts/community-submission/`, and rebuilds generated docs.
-- `npm run docs` publishes accepted screenshots and rebuilds generated docs.
-  It fails when a generated JavaScript chunk exceeds the 500 KiB budget.
-- `npm run release` publishes a beta after the unit, build, and docs gates.
-- `npm run release:public` publishes a stable release and additionally requires
-  the Podman WDIO gate to leave screenshots and generated docs unchanged.
+| Category | Command | Use |
+| --- | --- | --- |
+| Essential | `npm run build` | Format, type-check, and bundle the plugin. |
+| Essential | `npm test` | Run the Vitest unit suite; the regular development feedback loop. |
+| Essential | `npm run test:visual` | Run behavioral and screenshot WDIO tests in pinned Podman Linux/Xvfb, overwrite tracked screenshots, generate five community-submission cards, then run `dev:docs`. |
+| Local/optional | `npm run dev:coverage` | Run Vitest with coverage. |
+| Local/optional | `npm run dev:docs` | Publish screenshots and build generated docs |
+| Local/optional | `npm run dev:docs:serve` | Rebuild docs, then preview them at `http://127.0.0.1:4173/`. |
+| Operations | `npm run ops:release:beta` | Publish a beta after the unit, build, and docs gates. |
+| Operations | `npm run ops:release:public` | Publish a stable release; additionally requires Podman WDIO to leave screenshots and generated docs unchanged. |
 
-Create stable releases only with `npm run release:public`. Let the release
+Create stable releases only with `npm run ops:release:public`. Let the release
 automation bump version files, create and push the release commit and tag, and
 publish the GitHub assets. Do not edit release versions manually, rewrite tags,
 replace published releases, or invoke internal release helpers directly.
@@ -65,8 +63,8 @@ Feature screenshots referenced in `feature.ts` must match the final scenario
 slugs.
 
 Generated docs under `docs/` and `docs-src/src/content/docs/features/` are
-rebuilt by `npm run docs`; avoid hand-editing generated output unless the task
-explicitly asks for it.
+rebuilt by `npm run dev:docs` (and therefore `npm run test:visual`); avoid
+hand-editing generated output unless the task explicitly asks for it.
 
 Screenshots live under `acceptance/snapshots/docs/features/<slug>/`
 and are committed PNGs, so every baseline change is visible in `git status` and
@@ -99,7 +97,7 @@ The invariant: every visual run writes the complete tracked screenshot tree;
 git is the only visual diff. `@wdio/visual-service` provides deterministic
 element capture, while the repository does no image comparison or report
 generation. The container mounts `acceptance/snapshots` read-write so captures
-persist on the host. `npm run release:public` fails when that run leaves
+persist on the host. `npm run ops:release:public` fails when that run leaves
 screenshots or generated docs dirty.
 
 ## Developer Documentation

@@ -13,12 +13,12 @@
   "scripts": {
     "build": "biome check --write . && tsc --noEmit --skipLibCheck && node esbuild.config.mjs production",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "test:visual": "node acceptance/scripts/run-visual.mjs && npm run docs",
-    "docs": "tsc --noEmit --skipLibCheck && node acceptance/scripts/publish-doc-screenshots.mjs && tsx scripts/build-docs.ts && astro build --config docs-src/astro.config.mjs",
-    "docs:serve": "npm run docs && astro preview --host 127.0.0.1 --port 4173 --config docs-src/astro.config.mjs",
-    "release": "node scripts/obsidian-release.mjs release beta",
-    "release:public": "node scripts/obsidian-release.mjs release public"
+    "test:visual": "node acceptance/scripts/run-visual.mjs && npm run dev:docs",
+    "dev:coverage": "vitest run --coverage",
+    "dev:docs": "tsc --noEmit --skipLibCheck && node acceptance/scripts/publish-doc-screenshots.mjs && tsx scripts/build-docs.ts && astro build --config docs-src/astro.config.mjs",
+    "dev:docs:serve": "npm run dev:docs && astro preview --host 127.0.0.1 --port 4173 --config docs-src/astro.config.mjs",
+    "ops:release:beta": "node scripts/obsidian-release.mjs release beta",
+    "ops:release:public": "node scripts/obsidian-release.mjs release public"
   },
   "keywords": [
     "obsidian",
