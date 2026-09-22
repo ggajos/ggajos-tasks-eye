@@ -11,6 +11,7 @@ export default defineFeature({
     "The current note is bold, sits at column zero between its ancestors and descendants, and is not a link.",
     "Ancestors and descendants use matching dot prefixes to show their distance from the current note.",
     "Other notes render as native Obsidian markdown links, so link styling plugins apply; clicking one opens it and re-anchors the panel.",
+    "Long tree links stay on one line, truncate with an ellipsis, and expose their full label in a tooltip.",
     "Opening a note that is not indexed shows a gentle empty state.",
   ],
   screenshots: [

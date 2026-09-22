@@ -94,7 +94,8 @@ export function noteTreeMarkdown(
 ): string {
   const lines: string[] = [];
   const pushLink = (ref: TreeNoteRef, distance: number): void => {
-    lines.push(`${". ".repeat(distance)}[[${toLinkText(ref)}]]  `);
+    const label = `${".\u00a0".repeat(distance)}${ref.basename}`;
+    lines.push(`[[${toLinkText(ref)}|${label}]]  `);
   };
 
   for (const [index, ref] of tree.spine.entries()) {

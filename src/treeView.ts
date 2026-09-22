@@ -102,6 +102,11 @@ export class TreeView extends ItemView {
       sourcePath,
       this,
     );
+    body
+      .querySelectorAll<HTMLAnchorElement>("a.internal-link")
+      .forEach((link) => {
+        link.title = link.textContent ?? "";
+      });
   }
 
   private linkTextFor(ref: TreeNoteRef, sourcePath: string): string {

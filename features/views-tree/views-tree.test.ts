@@ -122,11 +122,11 @@ describe("noteTreeMarkdown", () => {
     const tree = buildNoteTree(SITE.path, VAULT)!;
     expect(noteTreeMarkdown(tree, linkText)).toBe(
       [
-        ". . [[Root]]  ",
-        ". [[Work]]  ",
+        "[[Root|.\u00a0.\u00a0Root]]  ",
+        "[[Work|.\u00a0Work]]  ",
         "**Site**  ",
-        ". [[Site A]]  ",
-        ". [[Site B]]  ",
+        "[[Site A|.\u00a0Site A]]  ",
+        "[[Site B|.\u00a0Site B]]  ",
       ].join("\n"),
     );
   });
@@ -135,11 +135,11 @@ describe("noteTreeMarkdown", () => {
     const tree = buildNoteTree(WORK.path, VAULT)!;
     expect(noteTreeMarkdown(tree, linkText)).toBe(
       [
-        ". [[Root]]  ",
+        "[[Root|.\u00a0Root]]  ",
         "**Work**  ",
-        ". [[Site]]  ",
-        ". . [[Site A]]  ",
-        ". . [[Site B]]  ",
+        "[[Site|.\u00a0Site]]  ",
+        "[[Site A|.\u00a0.\u00a0Site A]]  ",
+        "[[Site B|.\u00a0.\u00a0Site B]]  ",
       ].join("\n"),
     );
   });
@@ -156,9 +156,9 @@ describe("noteTreeMarkdown", () => {
       noteTreeMarkdown(tree, (ref) => ref.path.replace(/\.md$/i, "")),
     ).toBe(
       [
-        ". . . [[Root]]  ",
-        ". . [[Work/Work]]  ",
-        ". [[Work/Site]]  ",
+        "[[Root|.\u00a0.\u00a0.\u00a0Root]]  ",
+        "[[Work/Work|.\u00a0.\u00a0Work]]  ",
+        "[[Work/Site|.\u00a0Site]]  ",
         "**Site A**  ",
       ].join("\n"),
     );

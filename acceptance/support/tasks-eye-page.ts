@@ -129,7 +129,7 @@ export const tasksEyePage = {
 
   async treeNoteNames(): Promise<string[]> {
     return (await this.treeNoteLines()).map((line) =>
-      line.replace(/^(?:\. )+/, ""),
+      line.replace(/^(?:\.\u00a0)+/, ""),
     );
   },
 
@@ -147,12 +147,31 @@ export const tasksEyePage = {
   async clickTreeNote(name: string): Promise<void> {
     const links = await $$(".eye-note-tree a.internal-link");
     for (const link of links) {
-      if (await link.getText() === name) {
+      if (
+        (await link.getText()).replace(/^(?:\.[\u00a0 ])+/, "") === name
+      ) {
         await link.click();
         return;
       }
     }
     throw new Error(`Tree link "${name}" was not found`);
+  },
+
+  async treeNoteLinkDetails(
+    name: string,
+  ): Promise<{ title: string; isTruncated: boolean }> {
+    return await browser.execute((noteName) => {
+      const link = [
+        ...document.querySelectorAll<HTMLAnchorElement>(
+          ".eye-note-tree a.internal-link",
+        ),
+      ].find((candidate) => candidate.textContent?.includes(noteName));
+      if (!link) throw new Error(`Tree link "${noteName}" was not found`);
+      return {
+        title: link.title,
+        isTruncated: link.scrollWidth > link.clientWidth,
+      };
+    }, name);
   },
 
   async waitForTreeNotes(expected: readonly string[]): Promise<void> {

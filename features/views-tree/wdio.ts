@@ -10,6 +10,7 @@ const CURRENT = "Homepage Copy";
 const CHILD_A = "Draft Outline";
 const GRANDCHILD_A = "First Draft";
 const CHILD_B = "Review With Marta";
+const LONG_CHILD = "Prepare the detailed launch communication plan";
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   fixture([
@@ -44,6 +45,11 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
       up: "[[Homepage Copy]]",
       tasks: ["Book the review"],
     }),
+    note(`Work/${LONG_CHILD}.md`, {
+      status: "open",
+      up: "[[Homepage Copy]]",
+      tasks: ["Review the launch checklist"],
+    }),
     note("Home/Home.md", {
       status: "open",
       up: "[[Life]]",
@@ -66,17 +72,23 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             CURRENT,
             CHILD_A,
             GRANDCHILD_A,
+            LONG_CHILD,
             CHILD_B,
           ]);
           expect(await tasksEyePage.treeNoteLines()).toEqual([
-            ". . . Life",
-            ". . Work",
-            ". Website Refresh",
+            `${".\u00a0".repeat(3)}${ROOT}`,
+            `${".\u00a0".repeat(2)}${CONTEXT}`,
+            `.\u00a0${PROJECT}`,
             CURRENT,
-            ". Draft Outline",
-            ". . First Draft",
-            ". Review With Marta",
+            `.\u00a0${CHILD_A}`,
+            `${".\u00a0".repeat(2)}${GRANDCHILD_A}`,
+            `.\u00a0${LONG_CHILD}`,
+            `.\u00a0${CHILD_B}`,
           ]);
+          expect(await tasksEyePage.treeNoteLinkDetails(LONG_CHILD)).toEqual({
+            title: `.\u00a0${LONG_CHILD}`,
+            isTruncated: true,
+          });
         },
       },
       {
