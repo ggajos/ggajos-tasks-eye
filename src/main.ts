@@ -5,7 +5,7 @@ import type {
   TAbstractFile,
   WorkspaceLeaf,
 } from "obsidian";
-import { Notice, Plugin, TFile } from "obsidian";
+import { addIcon, Notice, Plugin, TFile } from "obsidian";
 import { completeTaskInFile, shiftTaskDueInFile } from "./actions";
 import {
   MODE_COMMANDS,
@@ -56,6 +56,11 @@ import {
 import { EyeView, VIEW_TYPE } from "./view";
 
 const HOLIDAY_RETRY_MS = 60 * 60 * 1000;
+const ALL_CLEAR_ICON = "ggajos-tasks-eye-circle-check";
+const ALL_CLEAR_ICON_SVG = `
+  <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+  <path d="m7.75 12 2.8 2.8 5.7-5.7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+`;
 
 function defaultSettings(): EyeSettings {
   return {
@@ -114,6 +119,7 @@ export default class TheEyePlugin extends Plugin {
 
   async onload(): Promise<void> {
     this.settings = normalizeSettings(await this.loadData());
+    addIcon(ALL_CLEAR_ICON, ALL_CLEAR_ICON_SVG);
 
     this.registerView(VIEW_TYPE, (leaf) => new EyeView(leaf, this));
     this.registerView(TREE_VIEW_TYPE, (leaf) => new TreeView(leaf, this));

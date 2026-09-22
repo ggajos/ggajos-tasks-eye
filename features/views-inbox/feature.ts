@@ -10,13 +10,18 @@ export default defineFeature({
     "Inbox reuses the note-first board rows and due-date buckets from Open.",
     "Every Inbox bucket starts expanded so validation issues are immediately visible.",
     "Inbox rows keep their validation messages, note links, context badges, and row actions.",
-    "Inbox displays an all-clear empty state when no notes need attention.",
+    "Inbox celebrates an all-clear state with `Inbox zero.` and a large check icon when no notes need attention.",
   ],
   screenshots: [
     {
       slug: "repair-queue",
       title: "An issue list with clear next steps",
       alt: "Inbox board grouping realistic workflow issues into expanded due-date buckets",
+    },
+    {
+      slug: "all-clear",
+      title: "A healthy inbox",
+      alt: "Tasks Eye Inbox view celebrating that no notes need attention",
     },
   ],
 });

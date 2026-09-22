@@ -21,7 +21,12 @@ import {
 import { formatHumanDate, nowDate, shiftIsoDate, todayIso } from "./date";
 import type TheEyePlugin from "./main";
 import type { BoardBucket, BoardDayGroup, RenderItem } from "./model";
-import { boardItemsForContext, buildBoardBuckets, selectRows } from "./model";
+import {
+  boardItemsForContext,
+  buildBoardBuckets,
+  buildRowModels,
+  selectRowModels,
+} from "./model";
 import type { EyeFile, RowModel } from "./types";
 import {
   button,
@@ -34,6 +39,7 @@ import type { AvailabilityConfig, VacationMarker } from "./vacation";
 export const VIEW_TYPE = "ggajos-tasks-eye-view";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const ALL_CLEAR_ICON = "ggajos-tasks-eye-circle-check";
 
 function isIsoDate(value: unknown): value is string {
   return typeof value === "string" && DATE_RE.test(value);
@@ -69,6 +75,12 @@ interface ViewState {
   mode: EyeMode;
   date: string;
   showFuture: boolean;
+}
+
+export function emptyMessage(mode: EyeMode): string {
+  if (mode === "focus") return "Today is handled.";
+  if (mode === "inbox") return "Inbox zero.";
+  return `No notes in ${MODE_LABELS[mode]}.`;
 }
 
 function readViewState(state: unknown, current: ViewState): ViewState {
@@ -208,14 +220,15 @@ export class EyeView extends ItemView {
     );
 
     root.replaceChildren();
-    this.renderToolbar(root, contexts, contextFilter, globalContext);
 
     if (this.state.mode === "done") {
+      this.renderToolbar(root, contexts, contextFilter, globalContext);
       await this.renderCompleted(root, files, contextFilter);
       return;
     }
 
     if (!this.plugin.tasksApiAvailable()) {
+      this.renderToolbar(root, contexts, contextFilter, globalContext);
       root.appendChild(
         element("div", "eye-error", TASKS_PLUGIN_REQUIRED_MESSAGE),
       );
@@ -223,12 +236,12 @@ export class EyeView extends ItemView {
     }
 
     const availability = this.plugin.availabilityConfig();
-    const rows = selectRows(
-      files,
-      this.state.mode,
-      contextFilter,
-      availability,
-    );
+    const models = buildRowModels(files, availability);
+    const rows = selectRowModels(models, files, this.state.mode, contextFilter);
+    this.renderToolbar(root, contexts, contextFilter, globalContext, {
+      focus: selectRowModels(models, files, "focus", contextFilter).length,
+      inbox: selectRowModels(models, files, "inbox", contextFilter).length,
+    });
     const list = element("div", "eye-list");
     root.appendChild(list);
 
@@ -236,20 +249,20 @@ export class EyeView extends ItemView {
       const rendered = await this.renderFocus(
         list,
         rows,
-        selectRows(files, "open", "*", availability),
+        selectRowModels(models, files, "open", "*"),
         contextFilter,
         availability,
         globalContext,
       );
       if (!rendered) {
-        list.appendChild(element("div", "eye-empty", this.emptyMessage()));
+        list.appendChild(this.renderEmptyState());
       }
       return;
     }
 
     const vacationSourceRows =
       this.state.mode === "open"
-        ? selectRows(files, this.state.mode, "*", availability)
+        ? selectRowModels(models, files, this.state.mode, "*")
         : rows;
     const rendered = await this.renderBoard(
       list,
@@ -260,14 +273,28 @@ export class EyeView extends ItemView {
       globalContext,
     );
     if (!rendered) {
-      list.appendChild(element("div", "eye-empty", this.emptyMessage()));
+      list.appendChild(this.renderEmptyState());
     }
   }
 
-  private emptyMessage(): string {
-    if (this.state.mode === "focus") return "No open work due today.";
-    if (this.state.mode === "inbox") return "No notes need attention.";
-    return `No notes in ${MODE_LABELS[this.state.mode]}.`;
+  private renderEmptyState(): HTMLElement {
+    if (this.state.mode !== "focus" && this.state.mode !== "inbox") {
+      return element("div", "eye-empty", emptyMessage(this.state.mode));
+    }
+
+    const state = element("div", "eye-empty eye-all-clear");
+    const icon = element("span", "eye-all-clear-icon");
+    icon.setAttribute("aria-hidden", "true");
+    setIcon(icon, ALL_CLEAR_ICON);
+    const iconSvg = icon.querySelector<SVGElement>("svg");
+    iconSvg?.setAttribute("viewBox", "0 0 24 24");
+    iconSvg?.style.setProperty("height", "64px", "important");
+    iconSvg?.style.setProperty("width", "64px", "important");
+    state.append(
+      icon,
+      element("div", "eye-all-clear-message", emptyMessage(this.state.mode)),
+    );
+    return state;
   }
 
   private contextsForMode(contexts: string[]): string[] {
@@ -281,6 +308,7 @@ export class EyeView extends ItemView {
     contexts: string[],
     activeContextFilter?: string,
     globalContext = "*",
+    counts?: Partial<Record<"focus" | "inbox", number>>,
   ): void {
     const activeFilter =
       activeContextFilter ??
@@ -293,12 +321,23 @@ export class EyeView extends ItemView {
     const nav = element("div", "eye-mode-nav");
 
     for (const mode of MODES) {
+      const count =
+        mode === "focus" || mode === "inbox" ? counts?.[mode] : undefined;
+      const countLabel =
+        count === undefined || count === 0
+          ? ""
+          : ` (${count} ${count === 1 ? "item" : "items"})`;
       const btn = button(
         `eye-mode-button${mode === this.state.mode ? " is-active" : ""}`,
-        `Show ${MODE_LABELS[mode]}`,
+        `Show ${MODE_LABELS[mode]}${countLabel}`,
         () => void this.plugin.openEye(mode),
         MODE_LABELS[mode],
       );
+      if (count !== undefined && count > 0) {
+        const badge = element("span", "eye-mode-count", String(count));
+        badge.setAttribute("aria-hidden", "true");
+        btn.appendChild(badge);
+      }
       nav.appendChild(btn);
     }
 

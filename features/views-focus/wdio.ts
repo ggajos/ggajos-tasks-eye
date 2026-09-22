@@ -62,6 +62,17 @@ const focusFixture = fixture(
   },
 );
 
+const allClearFocusFixture = fixture(
+  [
+    note("Tree Root.md", {
+      status: "closed",
+      up: "-",
+      tasks: [{ text: "Wrapped up", completed: "2026-07-08" }],
+    }),
+  ],
+  { settings: { mode: "focus" } },
+);
+
 async function focusState() {
   return await browser.execute(() => {
     const root = document.querySelector(
@@ -78,43 +89,62 @@ async function focusState() {
   });
 }
 
-export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
-  focusFixture,
-  {
-    acceptance: [
-      {
-        title: "shows only flat Today content with shared validation",
-        async run() {
-          await tasksEyePage.openBoard("focus", TODAY);
-          const state = await focusState();
-          if (
-            state.bucketCount !== 0 ||
-            state.dayDividerCount !== 0 ||
-            !state.text.includes(OVERDUE) ||
-            !state.text.includes(TODAY) ||
-            !state.text.includes(OOO) ||
-            state.text.includes(FUTURE) ||
-            state.text.includes(UNDATED) ||
-            state.text.includes(UNSUPPORTED) ||
-            !state.violations.includes("open-task-overdue")
-          ) {
-            throw new Error(`Unexpected Focus state: ${JSON.stringify(state)}`);
-          }
-        },
+const focusScenarios = featureScenarios(focusFixture, {
+  acceptance: [
+    {
+      title: "shows only flat Today content with shared validation",
+      async run() {
+        await tasksEyePage.openBoard("focus", TODAY);
+        const state = await focusState();
+        if (
+          state.bucketCount !== 0 ||
+          state.dayDividerCount !== 0 ||
+          !state.text.includes(OVERDUE) ||
+          !state.text.includes(TODAY) ||
+          !state.text.includes(OOO) ||
+          state.text.includes(FUTURE) ||
+          state.text.includes(UNDATED) ||
+          state.text.includes(UNSUPPORTED) ||
+          !state.violations.includes("open-task-overdue")
+        ) {
+          throw new Error(`Unexpected Focus state: ${JSON.stringify(state)}`);
+        }
       },
-    ],
-    screenshots: [
-      {
-        screenshotSlug: "board",
-        async run({ save }) {
-          const root = await tasksEyePage.openBoard("focus", TODAY);
-          await expect(root).toHaveText(expect.stringContaining(OVERDUE));
-          await expect(root).toHaveText(
-            expect.stringContaining("Task is overdue: 2026-07-07."),
-          );
-          await save(root);
-        },
+    },
+  ],
+  screenshots: [
+    {
+      screenshotSlug: "board",
+      async run({ save }) {
+        const root = await tasksEyePage.openBoard("focus", TODAY);
+        await expect(root).toHaveText(expect.stringContaining(OVERDUE));
+        await expect(root).toHaveText(
+          expect.stringContaining("Task is overdue: 2026-07-07."),
+        );
+        await save(root);
       },
-    ],
-  },
-);
+    },
+  ],
+});
+
+const allClearScenarios = featureScenarios(allClearFocusFixture, {
+  screenshots: [
+    {
+      screenshotSlug: "all-clear",
+      async run({ save }) {
+        const root = await tasksEyePage.openBoard("focus", "Today is handled.");
+        await expect(root).toHaveText(
+          expect.stringContaining("Today is handled."),
+        );
+        await expect(root.$(".eye-all-clear-icon")).toBeDisplayed();
+        await save(root);
+      },
+    },
+  ],
+});
+
+export const acceptanceScenarios = focusScenarios.acceptanceScenarios;
+export const screenshotScenarios = [
+  ...focusScenarios.screenshotScenarios,
+  ...allClearScenarios.screenshotScenarios,
+];

@@ -10,6 +10,17 @@ const INVALID_STATUS = "Reading List";
 const LONG_CONTEXT = "Personal Planning and Development";
 const UNROUTED = "Quick Capture";
 
+const allClearInboxFixture = fixture(
+  [
+    note("Tree Root.md", {
+      status: "closed",
+      up: "-",
+      tasks: [{ text: "Reviewed", completed: "2026-07-08" }],
+    }),
+  ],
+  { settings: { mode: "inbox" } },
+);
+
 async function inboxBoardShape(): Promise<{
   actionLineCount: number;
   actionsFollowNotes: boolean;
@@ -192,7 +203,7 @@ async function narrowRowShape(): Promise<{
   }, LONG_CONTEXT);
 }
 
-export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
+const inboxScenarios = featureScenarios(
   fixture([
     note("Tree Root.md", {
       status: "closed",
@@ -311,3 +322,23 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     ],
   },
 );
+
+const allClearScenarios = featureScenarios(allClearInboxFixture, {
+  screenshots: [
+    {
+      screenshotSlug: "all-clear",
+      async run({ save }) {
+        const root = await tasksEyePage.openBoard("inbox", "Inbox zero.");
+        await expect(root).toHaveText(expect.stringContaining("Inbox zero."));
+        await expect(root.$(".eye-all-clear-icon")).toBeDisplayed();
+        await save(root);
+      },
+    },
+  ],
+});
+
+export const acceptanceScenarios = inboxScenarios.acceptanceScenarios;
+export const screenshotScenarios = [
+  ...inboxScenarios.screenshotScenarios,
+  ...allClearScenarios.screenshotScenarios,
+];

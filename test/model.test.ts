@@ -12,8 +12,10 @@ import {
   bucketForTs,
   buildBoardBuckets,
   buildRowModel,
+  buildRowModels,
   compareRowModels,
   mergeItems,
+  selectRowModels,
   selectRows,
 } from "../src/model";
 import type { EyeFile, RowModel } from "../src/types";
@@ -38,6 +40,32 @@ function itemNames(items: RenderItem[]): string[] {
 }
 
 describe("row model", () => {
+  it("builds models once before selecting multiple context-filtered modes", () => {
+    const files = buildEyeFilesFromMarkdown([
+      {
+        path: "Focus.md",
+        markdown:
+          "---\nstatus: open\nup: -\n---\n\n- [ ] focus task 📅 2026-07-08",
+      },
+      {
+        path: "Invalid.md",
+        markdown: "---\nstatus: reviewing\nup: -\n---\n",
+      },
+    ]);
+    const models = buildRowModels(files);
+
+    expect(
+      selectRowModels(models, files, "focus", "*").map(
+        (row) => row.file.basename,
+      ),
+    ).toEqual(["Focus"]);
+    expect(
+      selectRowModels(models, files, "inbox", "*").map(
+        (row) => row.file.basename,
+      ),
+    ).toEqual(["Invalid", "Focus"]);
+  });
+
   it("treats the explicit root as an ordinary note in every view", () => {
     const files = buildEyeFilesFromMarkdown([
       {

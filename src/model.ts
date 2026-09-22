@@ -110,17 +110,37 @@ export function rowMatchesMode(model: RowModel, mode: EyeMode): boolean {
   return false;
 }
 
+export function buildRowModels(
+  files: readonly EyeFile[],
+  availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+): RowModel[] {
+  return files.map((file) => buildRowModel(file, availability, files));
+}
+
+export function selectRowModels(
+  models: readonly RowModel[],
+  files: readonly EyeFile[],
+  mode: EyeMode,
+  contextFilter: string,
+): RowModel[] {
+  return models
+    .filter((model) => rowMatchesMode(model, mode))
+    .filter((model) => matchesContextFilter(model.file, contextFilter, files))
+    .sort(compareRowModels);
+}
+
 export function selectRows(
   files: EyeFile[],
   mode: EyeMode,
   contextFilter: string,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
 ): RowModel[] {
-  return files
-    .map((file) => buildRowModel(file, availability, files))
-    .filter((model) => rowMatchesMode(model, mode))
-    .filter((model) => matchesContextFilter(model.file, contextFilter, files))
-    .sort(compareRowModels);
+  return selectRowModels(
+    buildRowModels(files, availability),
+    files,
+    mode,
+    contextFilter,
+  );
 }
 
 function vacationMarkersForRows(

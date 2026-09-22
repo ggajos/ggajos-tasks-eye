@@ -102,6 +102,17 @@
   color: var(--nav-item-color-active, var(--nav-item-color-selected, var(--text-normal)));
 }
 
+.eye-mode-count {
+  color: var(--text-muted);
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  margin-left: 4px;
+}
+
+.eye-plugin button.eye-mode-button.is-active .eye-mode-count {
+  color: currentColor;
+}
+
 .eye-toolbar-spacer {
   flex: 1 1 auto;
 }
@@ -696,6 +707,31 @@
 .eye-error {
   color: var(--text-muted);
   padding: 16px 4px;
+}
+
+.eye-all-clear {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.eye-all-clear-icon {
+  color: var(--interactive-accent);
+  display: inline-flex;
+  height: 64px;
+  width: 64px;
+}
+
+.eye-all-clear-icon svg {
+  height: 64px !important;
+  width: 64px !important;
+}
+
+.eye-all-clear-message {
+  margin-top: 10px;
 }
 
 .eye-error {
