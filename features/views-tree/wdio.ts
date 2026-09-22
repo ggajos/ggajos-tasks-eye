@@ -8,6 +8,7 @@ const CONTEXT = "Work";
 const PROJECT = "Website Refresh";
 const CURRENT = "Homepage Copy";
 const CHILD_A = "Draft Outline";
+const GRANDCHILD_A = "First Draft";
 const CHILD_B = "Review With Marta";
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
@@ -32,6 +33,11 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
       status: "open",
       up: "[[Homepage Copy]]",
       tasks: ["Sketch the sections"],
+    }),
+    note("Work/First Draft.md", {
+      status: "open",
+      up: "[[Draft Outline]]",
+      tasks: ["Write the opening section"],
     }),
     note("Work/Review With Marta.md", {
       status: "open",
@@ -59,15 +65,17 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             PROJECT,
             CURRENT,
             CHILD_A,
+            GRANDCHILD_A,
             CHILD_B,
           ]);
-          expect(await tasksEyePage.treeNoteOutline()).toEqual([
-            { name: ROOT, depth: 0 },
-            { name: CONTEXT, depth: 1 },
-            { name: PROJECT, depth: 2 },
-            { name: CURRENT, depth: 3 },
-            { name: CHILD_A, depth: 4 },
-            { name: CHILD_B, depth: 4 },
+          expect(await tasksEyePage.treeNoteLines()).toEqual([
+            ". . . Life",
+            ". . Work",
+            ". Website Refresh",
+            CURRENT,
+            ". Draft Outline",
+            ". . First Draft",
+            ". Review With Marta",
           ]);
         },
       },
@@ -85,6 +93,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             PROJECT,
             CURRENT,
             CHILD_A,
+            GRANDCHILD_A,
           ]);
         },
       },

@@ -723,9 +723,3 @@
   line-height: var(--line-height-tight, 1.3);
   padding: 8px;
 }
-
-.eye-note-tree ul,
-.eye-note-tree li {
-  margin: 0 !important;
-  padding-left: 0.2em !important;
-}

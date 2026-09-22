@@ -93,21 +93,22 @@ export function noteTreeMarkdown(
   toLinkText: TreeLinkResolver,
 ): string {
   const lines: string[] = [];
-  const push = (ref: TreeNoteRef, depth: number): void => {
-    lines.push(`${"  ".repeat(depth)}- [[${toLinkText(ref)}]]`);
+  const pushLink = (ref: TreeNoteRef, distance: number): void => {
+    lines.push(`${". ".repeat(distance)}[[${toLinkText(ref)}]]  `);
   };
 
-  let depth = 0;
-  for (const ref of tree.spine) push(ref, depth++);
-  push(tree.current, depth);
+  for (const [index, ref] of tree.spine.entries()) {
+    pushLink(ref, tree.spine.length - index);
+  }
+  lines.push(`**${tree.current.basename}**  `);
 
-  const walk = (nodes: readonly TreeNode[], nodeDepth: number): void => {
+  const walk = (nodes: readonly TreeNode[], distance: number): void => {
     for (const node of nodes) {
-      push(node, nodeDepth);
-      walk(node.children, nodeDepth + 1);
+      pushLink(node, distance);
+      walk(node.children, distance + 1);
     }
   };
-  walk(tree.descendants, depth + 1);
+  walk(tree.descendants, 1);
 
   return lines.join("\n");
 }

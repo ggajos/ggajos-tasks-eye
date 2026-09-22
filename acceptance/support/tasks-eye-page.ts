@@ -128,34 +128,24 @@ export const tasksEyePage = {
   },
 
   async treeNoteNames(): Promise<string[]> {
-    return await browser.execute(() =>
-      [
-        ...document.querySelectorAll<HTMLElement>(
-          ".eye-note-tree li a.internal-link",
-        ),
-      ].map((node) => node.textContent ?? ""));
+    return (await this.treeNoteLines()).map((line) =>
+      line.replace(/^(?:\. )+/, ""),
+    );
   },
 
-  async treeNoteOutline(): Promise<{ name: string; depth: number }[]> {
+  async treeNoteLines(): Promise<string[]> {
     return await browser.execute(() => {
       const root = document.querySelector(".eye-note-tree");
       if (!root) return [];
-      return [
-        ...root.querySelectorAll<HTMLElement>("li a.internal-link"),
-      ].map((link) => {
-        let depth = -1;
-        let node: HTMLElement | null = link;
-        while (node && node !== root) {
-          if (node.tagName === "UL") depth += 1;
-          node = node.parentElement;
-        }
-        return { name: link.textContent ?? "", depth };
-      });
+      return root.innerText
+        .split("\n")
+        .map((line) => line.trimEnd())
+        .filter((line) => line.length > 0);
     });
   },
 
   async clickTreeNote(name: string): Promise<void> {
-    const links = await $$(".eye-note-tree li a.internal-link");
+    const links = await $$(".eye-note-tree a.internal-link");
     for (const link of links) {
       if (await link.getText() === name) {
         await link.click();

@@ -118,28 +118,28 @@ const linkText = (ref: { path: string }) =>
   ref.path.replace(/\.md$/i, "").split("/").pop() ?? ref.path;
 
 describe("noteTreeMarkdown", () => {
-  it("indents the spine, the current note and its descendants", () => {
+  it("renders the spine, current note and descendants around one anchor", () => {
     const tree = buildNoteTree(SITE.path, VAULT)!;
     expect(noteTreeMarkdown(tree, linkText)).toBe(
       [
-        "- [[Root]]",
-        "  - [[Work]]",
-        "    - [[Site]]",
-        "      - [[Site A]]",
-        "      - [[Site B]]",
+        ". . [[Root]]  ",
+        ". [[Work]]  ",
+        "**Site**  ",
+        ". [[Site A]]  ",
+        ". [[Site B]]  ",
       ].join("\n"),
     );
   });
 
-  it("nests grandchildren one level deeper than their parent", () => {
+  it("uses dot distance for nested descendants", () => {
     const tree = buildNoteTree(WORK.path, VAULT)!;
     expect(noteTreeMarkdown(tree, linkText)).toBe(
       [
-        "- [[Root]]",
-        "  - [[Work]]",
-        "    - [[Site]]",
-        "      - [[Site A]]",
-        "      - [[Site B]]",
+        ". [[Root]]  ",
+        "**Work**  ",
+        ". [[Site]]  ",
+        ". . [[Site A]]  ",
+        ". . [[Site B]]  ",
       ].join("\n"),
     );
   });
@@ -147,7 +147,7 @@ describe("noteTreeMarkdown", () => {
   it("emits a single item for a root note without descendants", () => {
     const only = noteFile("Solo.md", '"-"');
     const tree = buildNoteTree(only.path, [only])!;
-    expect(noteTreeMarkdown(tree, linkText)).toBe("- [[Solo]]");
+    expect(noteTreeMarkdown(tree, linkText)).toBe("**Solo**  ");
   });
 
   it("uses the resolver for every reference", () => {
@@ -156,10 +156,10 @@ describe("noteTreeMarkdown", () => {
       noteTreeMarkdown(tree, (ref) => ref.path.replace(/\.md$/i, "")),
     ).toBe(
       [
-        "- [[Root]]",
-        "  - [[Work/Work]]",
-        "    - [[Work/Site]]",
-        "      - [[Work/Site A]]",
+        ". . . [[Root]]  ",
+        ". . [[Work/Work]]  ",
+        ". [[Work/Site]]  ",
+        "**Site A**  ",
       ].join("\n"),
     );
   });

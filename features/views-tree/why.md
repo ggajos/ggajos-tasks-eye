@@ -7,10 +7,12 @@ it.
 
 The Tree view makes that structure visible. It walks the `up` links from the
 current note up to the root and shows that spine, then expands the full subtree
-of notes below the current one. Ancestors appear as a single path, without
-sibling clutter, so the line back to the root stays obvious.
+of notes below the current one. The current note stays bold at column zero;
+plain dot prefixes express distance from it in either direction. Ancestors
+appear as a single path, without sibling clutter, so the line back to the root
+stays obvious.
 
-Everything is a plain Obsidian link. Notes keep their normal styling, and
-clicking one opens it — which re-anchors the panel on the note you just opened,
-so the tree follows you as you move through the vault. The view stays note-level
-on purpose: it is a map of how notes relate through `up`, not another task list.
+All other notes are plain Obsidian links, so they keep their normal styling and
+clicking one re-anchors the panel on the note you just opened. The view stays
+note-level on purpose: it is a map of how notes relate through `up`, not another
+task list.
