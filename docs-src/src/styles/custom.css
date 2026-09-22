@@ -307,27 +307,6 @@ body {
   white-space: nowrap;
 }
 
-starlight-tabs {
-  display: block;
-  overflow: hidden;
-  border: 1px solid var(--eye-border);
-  border-radius: var(--eye-radius);
-  background: var(--eye-surface);
-}
-
-starlight-tabs [role="tablist"] {
-  border-bottom-color: var(--eye-border);
-  background: var(--eye-surface-raised);
-}
-
-starlight-tabs [role="tab"] {
-  letter-spacing: 0;
-}
-
-starlight-tabs [role="tabpanel"] {
-  padding: 0.9rem;
-}
-
 .feature-shot {
   width: fit-content;
   max-width: 100%;
@@ -358,10 +337,6 @@ starlight-tabs [role="tabpanel"] {
 
   .feature-grid {
     grid-template-columns: 1fr;
-  }
-
-  starlight-tabs [role="tabpanel"] {
-    padding: 0.5rem;
   }
 }
 

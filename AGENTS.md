@@ -12,16 +12,14 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 - `npm test` runs the Vitest unit suite only; this is the regular development
   feedback loop.
 - `npm run test:visual` runs all behavioral and screenshot WDIO scenarios only
-  inside the pinned Podman Linux/Xvfb environment and writes an ignored HTML
-  comparison report. It also regenerates five 1200×800 PNG showcase cards in
-  `acceptance/artifacts/community-submission/` from the run's dark-theme
-  captures.
-- `npm run test:visual:approve` promotes a complete reviewed visual run and
-  rebuilds generated docs. Visual runs never update baselines implicitly.
+  inside the pinned Podman Linux/Xvfb environment, overwrites the tracked
+  screenshots, regenerates five 1200×800 PNG showcase cards in
+  `acceptance/artifacts/community-submission/`, and rebuilds generated docs.
 - `npm run docs` publishes accepted screenshots and rebuilds generated docs.
+  It fails when a generated JavaScript chunk exceeds the 500 KiB budget.
 - `npm run release` publishes a beta after the unit, build, and docs gates.
 - `npm run release:public` publishes a stable release and additionally requires
-  the Podman WDIO gate to pass without visual differences.
+  the Podman WDIO gate to leave screenshots and generated docs unchanged.
 
 Create stable releases only with `npm run release:public`. Let the release
 automation bump version files, create and push the release commit and tag, and
@@ -70,14 +68,39 @@ Generated docs under `docs/` and `docs-src/src/content/docs/features/` are
 rebuilt by `npm run docs`; avoid hand-editing generated output unless the task
 explicitly asks for it.
 
-Screenshot baselines under `acceptance/snapshots/docs/` change only through
-`npm run test:visual:approve` after reviewing the report at
-`acceptance/artifacts/visual/report/index.html`.
+Screenshots live under `acceptance/snapshots/docs/features/<slug>/`
+and are committed PNGs, so every baseline change is visible in `git status` and
+reviewable as an image diff in a pull request.
 
-Agents must never run `npm run test:visual:approve`, directly edit screenshot
-baselines, or otherwise promote or delete visual results. After
-`npm run test:visual`, report the comparison-report path and ask the user to
-review it and run the approval command themselves.
+Agents must never stage or discard screenshot changes. Deciding whether a
+rendering change is intended is a human judgement. After `npm run test:visual`,
+report the changed paths for the user to review in VS Code's Source Control
+image diff.
+
+## Visual Development Flow
+
+Screenshots use one theme only: `dark-minimal` (Minimal theme on a dark base),
+defined once in `features/visualTheme.ts`.
+
+- **Ordinary development** — run `npm test`. Visual runs are only for
+  rendering-affecting work and pre-release checks.
+- **Adding a feature screenshot** — write `feature.ts` and `wdio.ts`, then run
+  `npm run test:visual`. The run writes the PNG into the tracked screenshot
+  tree and rebuilds docs. Review it in VS Code's Source Control image diff,
+  then commit it.
+- **Changing behavior that alters rendering** — run `npm run test:visual`.
+  Review the changed PNGs in VS Code's Source Control image diff. Stage
+  intentional changes; discard unintended ones with git, fix the code, and
+  re-run.
+- **Removing a screenshot scenario** — run `npm run test:visual`. The end-of-run
+  prune deletes its now-unwritten PNG, which appears as a deletion in git.
+
+The invariant: every visual run writes the complete tracked screenshot tree;
+git is the only visual diff. `@wdio/visual-service` provides deterministic
+element capture, while the repository does no image comparison or report
+generation. The container mounts `acceptance/snapshots` read-write so captures
+persist on the host. `npm run release:public` fails when that run leaves
+screenshots or generated docs dirty.
 
 ## Developer Documentation
 
@@ -96,10 +119,6 @@ Do not silence or work around them without revisiting the stated constraint:
   automation. GitHub Actions is not the authoritative builder, so adding a
   post-hoc attestation would misrepresent provenance. Reproducible build
   verification remains the integrity check.
-- **Unknown `starlight-tabs` CSS type selector:** these selectors live in the
-  documentation stylesheet and target a real custom element defined by
-  `@astrojs/starlight`; they are not plugin runtime CSS. The generic CSS review
-  warning is a false positive, so the valid selectors remain unchanged.
 
 ## Fixtures
 

@@ -141,6 +141,7 @@ async function checkReleaseVisual() {
   }
   if (channel === "public") {
     await run("npm", ["run", "test:visual"]);
+    await requireCleanVisualOutputs();
     return;
   }
   throw new Error("Release channel context is missing.");
@@ -212,13 +213,50 @@ async function exists(file) {
   }
 }
 
-async function run(command, args) {
+async function requireCleanVisualOutputs() {
+  const output = await capture("git", [
+    "status",
+    "--porcelain",
+    "--",
+    "acceptance/snapshots",
+    "docs",
+  ]);
+  if (output.trim()) {
+    throw new Error(
+      "Visual screenshots or generated docs changed during the release check. Review and commit them before releasing:\n" +
+        output,
+    );
+  }
+}
+
+async function run(command, args, options = {}) {
   await new Promise((resolve, reject) => {
-    const child = spawn(command, args, { stdio: "inherit" });
+    const child = spawn(command, args, { stdio: "inherit", ...options });
     child.on("error", reject);
     child.on("exit", (code) => {
       if (code === 0) {
         resolve();
+      } else {
+        reject(new Error(`${command} ${args.join(" ")} exited with ${code}.`));
+      }
+    });
+  });
+}
+
+async function capture(command, args) {
+  return await new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd: projectRoot,
+      stdio: ["ignore", "pipe", "inherit"],
+    });
+    let output = "";
+    child.stdout.on("data", (chunk) => {
+      output += chunk;
+    });
+    child.on("error", reject);
+    child.on("exit", (code) => {
+      if (code === 0) {
+        resolve(output);
       } else {
         reject(new Error(`${command} ${args.join(" ")} exited with ${code}.`));
       }

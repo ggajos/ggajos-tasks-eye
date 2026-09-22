@@ -1,13 +1,11 @@
 import { discoverFeaturesSync } from "../../scripts/feature-discovery";
 import {
-  VISUAL_VARIANTS,
-  applyVisualVariant,
+  applyVisualTheme,
   assertEnglishObsidianLocale,
-  beginVisualRun,
   checkFeatureDocSnapshot,
   discoverFeatureAcceptanceScenarios,
   discoverFeatureScreenshotScenarios,
-  finishVisualRun,
+  pruneUnwrittenScreenshots,
   resetFixtureVault,
 } from "../support/tasks-eye";
 
@@ -21,22 +19,26 @@ const RUN_VISUAL = SUITE === "visual" || SUITE === "all";
 const features = discoverFeaturesSync();
 const acceptanceScenarios = discoverFeatureAcceptanceScenarios(features);
 const screenshotScenarios = discoverFeatureScreenshotScenarios(features);
+let runFailed = false;
 
 describe("Tasks Eye acceptance", () => {
   before(async () => {
     await assertEnglishObsidianLocale();
-    if (RUN_VISUAL) await beginVisualRun(screenshotScenarios);
+  });
+
+  afterEach(function () {
+    if (this.currentTest?.state === "failed") runFailed = true;
   });
 
   after(async () => {
-    if (RUN_VISUAL) await finishVisualRun();
+    if (RUN_VISUAL && !runFailed) await pruneUnwrittenScreenshots();
   });
 
   if (RUN_ACCEPTANCE) {
     for (const { feature, scenario } of acceptanceScenarios) {
       it(`${feature.feature.title}: ${scenario.title}`, async () => {
         await resetFixtureVault(scenario.fixture);
-        await applyVisualVariant(VISUAL_VARIANTS[0]!);
+        await applyVisualTheme();
         await scenario.run();
       });
     }
@@ -44,24 +46,21 @@ describe("Tasks Eye acceptance", () => {
 
   if (RUN_VISUAL) {
     for (const { feature, scenario } of screenshotScenarios) {
-      for (const variant of VISUAL_VARIANTS) {
-        it(
-          `documents ${feature.feature.title} ${scenario.screenshotSlug} in ${variant.label}`,
-          async () => {
-            await resetFixtureVault(scenario.fixture);
-            await applyVisualVariant(variant);
-            await scenario.run({
-              save: (element, options) => checkFeatureDocSnapshot(
-                feature.feature.slug,
-                variant,
-                scenario.screenshotSlug,
-                element,
-                options,
-              ),
-            });
-          },
-        );
-      }
+      it(
+        `documents ${feature.feature.title} ${scenario.screenshotSlug}`,
+        async () => {
+          await resetFixtureVault(scenario.fixture);
+          await applyVisualTheme();
+          await scenario.run({
+            save: (element, options) => checkFeatureDocSnapshot(
+              feature.feature.slug,
+              scenario.screenshotSlug,
+              element,
+              options,
+            ),
+          });
+        },
+      );
     }
   }
 });

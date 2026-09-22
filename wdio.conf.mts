@@ -18,7 +18,6 @@ const tasksPluginVersion =
   process.env.TASKS_PLUGIN_VERSION ?? (visualSuite ? "8.2.2" : "latest");
 const minimalThemeVersion = process.env.MINIMAL_THEME_VERSION ?? "8.2.1";
 const obsidianLanguage = "en-US";
-
 const plugins: PluginEntry[] = [
   { id: "obsidian-tasks-plugin", version: tasksPluginVersion },
   { path: "." },
@@ -32,21 +31,13 @@ if (visualSuite) {
   services.push([
     "visual",
     {
-      baselineFolder: path.resolve("acceptance", "snapshots", "docs"),
       screenshotPath: path.resolve("acceptance", "artifacts", "visual"),
       formatImageName: "{tag}",
       clearRuntimeFolder: true,
-      autoSaveBaseline: false,
-      alwaysSaveActualImage: true,
       disableBlinkingCursor: true,
       disableCSSAnimation: true,
       hideScrollBars: true,
       waitForFontsLoaded: true,
-      compareOptions: {
-        ignoreAntialiasing: true,
-        rawMisMatchPercentage: true,
-        returnAllCompareData: true,
-      },
     },
   ]);
 }

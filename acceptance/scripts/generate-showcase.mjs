@@ -7,7 +7,7 @@ const root = process.cwd();
 const actualRoot = path.resolve(
   root,
   process.env.TASKS_EYE_VISUAL_ACTUAL_ROOT ??
-    path.join("acceptance", "artifacts", "visual", "actual"),
+    path.join("acceptance", "snapshots", "docs"),
 );
 const outputDir = path.resolve(
   root,
@@ -29,7 +29,7 @@ if (
 const cards = [
   {
     filename: "01-focus-on-today.png",
-    screenshot: "features/views-focus/dark/board.png",
+    screenshot: "features/views-focus/board.png",
     windowTitle: "Tasks Eye — Focus",
     eyebrow: "FOCUS VIEW",
     title: ["Know what needs", "attention today."],
@@ -42,7 +42,7 @@ const cards = [
   },
   {
     filename: "02-plan-ahead.png",
-    screenshot: "features/views-open/dark/board.png",
+    screenshot: "features/views-open/board.png",
     windowTitle: "Tasks Eye — Open",
     eyebrow: "OPEN VIEW",
     title: ["Plan the work", "ahead."],
@@ -55,7 +55,7 @@ const cards = [
   },
   {
     filename: "03-act-from-the-board.png",
-    screenshot: "features/actions-board-task-controls/dark/controls.png",
+    screenshot: "features/actions-board-task-controls/controls.png",
     windowTitle: "Tasks Eye — Quick actions",
     eyebrow: "QUICK ACTIONS",
     title: ["Act without leaving", "the board."],
@@ -68,7 +68,7 @@ const cards = [
   },
   {
     filename: "04-repair-inbox.png",
-    screenshot: "features/views-inbox/dark/repair-queue.png",
+    screenshot: "features/views-inbox/repair-queue.png",
     windowTitle: "Tasks Eye — Inbox",
     eyebrow: "REPAIR QUEUE",
     title: ["Turn inconsistencies", "into a clear queue."],
@@ -83,8 +83,7 @@ const cards = [
   },
   {
     filename: "05-plan-around-availability.png",
-    screenshot:
-      "features/availability-vacation-markers/dark/settings.png",
+    screenshot: "features/availability-vacation-markers/settings.png",
     windowTitle: "Tasks Eye — Availability",
     eyebrow: "AVAILABILITY",
     title: ["Plan around real", "availability."],

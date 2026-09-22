@@ -1,19 +1,11 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
 const root = process.cwd();
 const image = "tasks-eye-visual:local";
 const platform = "linux/arm64";
-const report = path.resolve(
-  root,
-  "acceptance",
-  "artifacts",
-  "visual",
-  "report",
-  "index.html",
-);
 const showcase = path.resolve(
   root,
   "acceptance",
@@ -64,8 +56,10 @@ try {
 
   const cache = path.resolve(root, "acceptance", ".cache", "visual-obsidian");
   const artifacts = path.resolve(root, "acceptance", "artifacts");
+  const snapshots = path.resolve(root, "acceptance", "snapshots");
   mkdirSync(cache, { recursive: true });
   mkdirSync(artifacts, { recursive: true });
+  mkdirSync(snapshots, { recursive: true });
 
   console.log("Building the cached WDIO-test image...");
   const build = tryRun(podman, [
@@ -95,22 +89,15 @@ try {
     `${cache}:/app/.obsidian-cache:rw`,
     "--volume",
     `${artifacts}:/app/acceptance/artifacts:rw`,
+    // Captures are written directly to the tracked screenshot tree.
+    "--volume",
+    `${snapshots}:/app/acceptance/snapshots:rw`,
     image,
   ]);
 
-  if (existsSync(report)) {
-    console.log(`Visual report: ${report}`);
-    if (existsSync(showcase)) {
-      console.log(`Community-submission screenshots: ${showcase}`);
-    }
-    if (visual.status !== 0) {
-      console.log(
-        "Inspect the WDIO output and report; approve only intentional screenshot changes with: npm run test:visual:approve",
-      );
-    }
-  } else {
-    console.error("No visual report was produced; inspect the runner output above.");
-  }
+  console.log(`Community-submission screenshots: ${showcase}`);
+  console.log("Screenshot changes:");
+  tryRun("git", ["status", "--short", "--", "acceptance/snapshots"]);
   process.exitCode = visual.status ?? 1;
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);

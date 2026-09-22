@@ -1,19 +1,10 @@
 import { existsSync } from "node:fs";
-import {
-  access,
-  mkdir,
-  readdir,
-  rm,
-  writeFile,
-} from "node:fs/promises";
+import { readdir, rm } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { $, browser } from "@wdio/globals";
 import { obsidianPage } from "wdio-obsidian-service";
-import {
-  DOCUMENTATION_VARIANTS,
-  type DocumentationVariantKey,
-} from "../../features/visualVariants";
+import { VISUAL_THEME } from "../../features/visualTheme";
 import {
   isFeatureFixture,
   type FeatureFixture,
@@ -27,19 +18,7 @@ import { buildEyeFilesFromMarkdown } from "../../src/eyeFile";
 import { tasksEyePage, type WdioElement } from "./tasks-eye-page";
 
 export const SNAPSHOT_ROOT = path.resolve("acceptance", "snapshots", "docs");
-export const VISUAL_ARTIFACT_ROOT = path.resolve(
-  "acceptance",
-  "artifacts",
-  "visual",
-);
-const VISUAL_MANIFEST_PATH = path.join(VISUAL_ARTIFACT_ROOT, "manifest.json");
-
-export interface VisualVariant {
-  key: DocumentationVariantKey;
-  label: string;
-  baseTheme: "light" | "dark";
-  obsidianTheme: "default" | "Minimal";
-}
+const writtenScreenshotPaths = new Set<string>();
 
 export interface FeatureScreenshotScenario {
   screenshotSlug: string;
@@ -84,55 +63,6 @@ interface FeatureWdioModule {
 export interface DiscoveredFeatureScreenshotScenario {
   feature: LoadedFeature;
   scenario: FeatureScreenshotScenario;
-}
-
-type VisualResultStatus =
-  | "matched"
-  | "changed"
-  | "missing-baseline"
-  | "error";
-
-interface VisualRunResult {
-  key: string;
-  title: string;
-  status: VisualResultStatus;
-  mismatchPercentage?: number;
-  baseline: string;
-  actual: string;
-  diff: string;
-  error?: string;
-}
-
-interface VisualRunManifest {
-  startedAt: string;
-  finishedAt?: string;
-  completed: boolean;
-  expected: string[];
-  staleBaselines: string[];
-  results: VisualRunResult[];
-}
-
-let visualRunManifest: VisualRunManifest | undefined;
-
-const VISUAL_VARIANT_CONFIG: Record<
-  DocumentationVariantKey,
-  Pick<VisualVariant, "baseTheme" | "obsidianTheme">
-> = {
-  light: { baseTheme: "light", obsidianTheme: "default" },
-  dark: { baseTheme: "dark", obsidianTheme: "default" },
-  "dark-minimal": { baseTheme: "dark", obsidianTheme: "Minimal" },
-};
-
-export const VISUAL_VARIANTS: readonly VisualVariant[] = DOCUMENTATION_VARIANTS
-  .map((variant) => ({ ...variant, ...VISUAL_VARIANT_CONFIG[variant.key] }));
-
-async function exists(filePath: string): Promise<boolean> {
-  try {
-    await access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 // Synchronous CJS require used by the WDIO spec, which must register mocha
@@ -293,160 +223,121 @@ async function listFiles(root: string): Promise<string[]> {
   return files.flat();
 }
 
-export function expectedSnapshotPaths(
-  scenarios: readonly DiscoveredFeatureScreenshotScenario[],
-): Set<string> {
-  const expected = new Set<string>();
-  for (const { feature, scenario } of scenarios) {
-    const filename = scenario.screenshotSlug.endsWith(".png")
-      ? scenario.screenshotSlug
-      : `${scenario.screenshotSlug}.png`;
-    for (const variant of VISUAL_VARIANTS) {
-      expected.add(path.join(
-        "features",
-        feature.feature.slug,
-        variant.key,
-        filename,
-      ));
-    }
-  }
-  return expected;
-}
-
 function portablePath(value: string): string {
   return value.split(path.sep).join("/");
 }
 
 function snapshotPathFor(
   featureSlug: string,
-  variant: VisualVariant,
   screenshotSlug: string,
 ): string {
   const filename = screenshotSlug.endsWith(".png")
     ? screenshotSlug
     : `${screenshotSlug}.png`;
-  return path.join("features", featureSlug, variant.key, filename);
+  return path.join("features", featureSlug, filename);
 }
 
-async function baselinePaths(): Promise<string[]> {
-  return (await listFiles(path.join(SNAPSHOT_ROOT, "features")))
+async function pngPathsUnder(root: string): Promise<string[]> {
+  return (await listFiles(path.join(root, "features")))
     .filter((file) => file.endsWith(".png"))
-    .map((file) => portablePath(path.relative(SNAPSHOT_ROOT, file)))
+    .map((file) => portablePath(path.relative(root, file)))
     .sort();
 }
 
-async function writeVisualManifest(): Promise<void> {
-  if (!visualRunManifest) return;
-  await mkdir(VISUAL_ARTIFACT_ROOT, { recursive: true });
-  await writeFile(
-    VISUAL_MANIFEST_PATH,
-    `${JSON.stringify(visualRunManifest, null, 2)}\n`,
-  );
-}
-
-export async function beginVisualRun(
-  scenarios: readonly DiscoveredFeatureScreenshotScenario[],
-): Promise<void> {
-  await rm(VISUAL_ARTIFACT_ROOT, { recursive: true, force: true });
-  await Promise.all([
-    mkdir(path.join(VISUAL_ARTIFACT_ROOT, "actual"), { recursive: true }),
-    mkdir(path.join(VISUAL_ARTIFACT_ROOT, "diff"), { recursive: true }),
-    mkdir(path.join(VISUAL_ARTIFACT_ROOT, "report"), { recursive: true }),
-  ]);
-  const expected = [...expectedSnapshotPaths(scenarios)]
-    .map(portablePath)
-    .sort();
-  const expectedSet = new Set(expected);
-  visualRunManifest = {
-    startedAt: new Date().toISOString(),
-    completed: false,
-    expected,
-    staleBaselines: (await baselinePaths())
-      .filter((file) => !expectedSet.has(file)),
-    results: [],
-  };
-  await writeVisualManifest();
-}
-
-export async function finishVisualRun(): Promise<void> {
-  if (!visualRunManifest) return;
-  const resultsByKey = new Map(
-    visualRunManifest.results.map((result) => [result.key, result]),
-  );
-  const resultKeys = new Set(resultsByKey.keys());
-  const currentBaselines = await baselinePaths();
-  const expectedSet = new Set(visualRunManifest.expected);
-  visualRunManifest.staleBaselines = currentBaselines
-    .filter((file) => !expectedSet.has(file));
-  visualRunManifest.finishedAt = new Date().toISOString();
-  const completedResults = await Promise.all(
-    visualRunManifest.expected.map(async (key) => {
-      const result = resultsByKey.get(key);
-      return result !== undefined && result.status !== "error" &&
-        await exists(path.resolve(result.actual));
-    }),
-  );
-  visualRunManifest.completed = completedResults.every(Boolean);
-  await writeVisualManifest();
-
-  const missingResults = visualRunManifest.expected
-    .filter((key) => !resultKeys.has(key));
-  if (missingResults.length > 0) {
-    throw new Error(
-      `Visual run did not capture ${missingResults.length} expected screenshot(s): ${missingResults.join(", ")}`,
-    );
+export async function pruneUnwrittenScreenshots(): Promise<void> {
+  const stale = (await pngPathsUnder(SNAPSHOT_ROOT))
+    .filter((relativePath) => !writtenScreenshotPaths.has(relativePath));
+  for (const relativePath of stale) {
+    await rm(path.join(SNAPSHOT_ROOT, relativePath));
   }
-  if (visualRunManifest.staleBaselines.length > 0) {
-    throw new Error(
-      `Visual baselines contain ${visualRunManifest.staleBaselines.length} stale screenshot(s); review and approve the run to remove them: ${visualRunManifest.staleBaselines.join(", ")}`,
-    );
-  }
-}
-
-async function recordVisualResult(result: VisualRunResult): Promise<void> {
-  if (!visualRunManifest) {
-    throw new Error("Visual run was not initialized");
-  }
-  visualRunManifest.results = [
-    ...visualRunManifest.results.filter(({ key }) => key !== result.key),
-    result,
-  ].sort((a, b) => a.key.localeCompare(b.key));
-  await writeVisualManifest();
 }
 
 async function prepareStableCapture(preserveHover = false): Promise<void> {
-  if (preserveHover) {
-    // Hover scenarios establish the pointer position and wait for controls first.
-    // Disabling pointer events here would hide the state being documented.
-    await browser.execute(async () => {
-      await document.fonts.ready;
-    });
-    return;
-  }
-  await browser.execute(async () => {
-    const style = document.createElement("style");
-    style.id = "tasks-eye-visual-capture";
-    style.textContent = `
-      html.tasks-eye-visual-capture body,
-      html.tasks-eye-visual-capture body * {
-        pointer-events: none !important;
-      }
-    `;
-    document.getElementById(style.id)?.remove();
-    document.head.append(style);
-    document.documentElement.classList.add("tasks-eye-visual-capture");
+  await browser.execute(async (suppressPointerEvents) => {
+    if (suppressPointerEvents) {
+      // Hover scenarios establish the pointer position and wait for controls
+      // first, so suppressing pointer events would hide the documented state.
+      const style = document.createElement("style");
+      style.id = "tasks-eye-visual-capture";
+      style.textContent = `
+        html.tasks-eye-visual-capture body,
+        html.tasks-eye-visual-capture body * {
+          pointer-events: none !important;
+        }
+      `;
+      document.getElementById(style.id)?.remove();
+      document.head.append(style);
+      document.documentElement.classList.add("tasks-eye-visual-capture");
+    }
     await document.fonts.ready;
     await new Promise<void>((resolve) => requestAnimationFrame(() =>
       requestAnimationFrame(() => resolve())
     ));
+  }, !preserveHover);
+}
+
+/**
+ * Waits until the same DOM node's structure and layout match for three frames,
+ * so captures no longer depend on a fixed sleep guessing when Obsidian has
+ * settled. Reading the current node inside the page avoids stale WebDriver
+ * element references while Obsidian replaces DOM nodes during re-rendering.
+ */
+async function waitForStableRendering(element: WdioElement): Promise<void> {
+  const selector = element.selector;
+  if (typeof selector !== "string") {
+    throw new Error("Visual capture requires an element with a string selector");
+  }
+
+  let previous: string | undefined;
+  let matchingFrames = 0;
+  await browser.waitUntil(async () => {
+    const current = await browser.execute((query) => {
+      const target = document.querySelector<HTMLElement>(query);
+      if (!target?.isConnected || target.getClientRects().length === 0) {
+        return undefined;
+      }
+      const windowWithCaptureState = window as Window & {
+        tasksEyeVisualCaptureTarget?: {
+          selector: string;
+          target: HTMLElement;
+        };
+      };
+      const sameTarget =
+        windowWithCaptureState.tasksEyeVisualCaptureTarget?.selector === query &&
+        windowWithCaptureState.tasksEyeVisualCaptureTarget.target === target;
+      windowWithCaptureState.tasksEyeVisualCaptureTarget = {
+        selector: query,
+        target,
+      };
+      if (!sameTarget) return undefined;
+      const bounds = target.getBoundingClientRect();
+      return JSON.stringify({
+        html: target.outerHTML,
+        bounds: [bounds.x, bounds.y, bounds.width, bounds.height],
+      });
+    }, selector);
+    if (current === undefined) {
+      previous = undefined;
+      matchingFrames = 0;
+      return false;
+    }
+    matchingFrames = current === previous ? matchingFrames + 1 : 0;
+    previous = current;
+    return matchingFrames >= 2;
+  }, {
+    timeout: 10_000,
+    interval: 100,
+    timeoutMsg: "Element kept changing; it never rendered a stable frame",
   });
-  await browser.pause(50);
 }
 
 async function cleanupStableCapture(): Promise<void> {
   await browser.execute(() => {
     document.documentElement.classList.remove("tasks-eye-visual-capture");
     document.getElementById("tasks-eye-visual-capture")?.remove();
+    delete (window as Window & {
+      tasksEyeVisualCaptureTarget?: unknown;
+    }).tasksEyeVisualCaptureTarget;
   });
 }
 
@@ -454,23 +345,23 @@ async function refreshCaptureElement(element: WdioElement): Promise<WdioElement>
   const selector = element.selector;
   if (typeof selector !== "string") return element;
   const refreshed = await $(selector);
-  await refreshed.waitForDisplayed({ timeout: 5_000 });
   return refreshed as unknown as WdioElement;
 }
 
-async function compareElementWithRetry(
+async function saveElementWithRetry(
   element: WdioElement,
   screenshotSlug: string,
-  folders: { baselineFolder: string; actualFolder: string; diffFolder: string },
-): Promise<Awaited<ReturnType<typeof browser.checkElement>>> {
+  actualFolder: string,
+): Promise<void> {
   let lastError: unknown;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     try {
-      return await browser.checkElement(
+      await browser.saveElement(
         await refreshCaptureElement(element),
         screenshotSlug,
-        folders,
+        { actualFolder },
       );
+      return;
     } catch (error) {
       lastError = error;
       if (!String(error).toLowerCase().includes("stale element") || attempt === 2) {
@@ -531,80 +422,32 @@ export async function resetFixtureVault(value: FeatureFixture): Promise<void> {
   }, { today, settings: value.settings });
 }
 
-export async function applyVisualVariant(variant: VisualVariant): Promise<void> {
-  await obsidianPage.setTheme(variant.obsidianTheme);
+export async function applyVisualTheme(): Promise<void> {
+  await obsidianPage.setTheme(VISUAL_THEME.obsidianTheme);
   await browser.execute((baseTheme) => {
     document.body.classList.remove("theme-light", "theme-dark");
     document.body.classList.add(
       baseTheme === "dark" ? "theme-dark" : "theme-light",
     );
     document.documentElement.style.colorScheme = baseTheme;
-  }, variant.baseTheme);
+  }, VISUAL_THEME.baseTheme);
 }
 
 export async function checkFeatureDocSnapshot(
   featureSlug: string,
-  variant: VisualVariant,
   screenshotSlug: string,
   element: WdioElement,
   options: { preserveHover?: boolean } = {},
 ): Promise<void> {
-  const key = portablePath(snapshotPathFor(
-    featureSlug,
-    variant,
-    screenshotSlug,
-  ));
-  const baseline = path.join(SNAPSHOT_ROOT, key);
-  const actual = path.join(VISUAL_ARTIFACT_ROOT, "actual", key);
-  const diff = path.join(VISUAL_ARTIFACT_ROOT, "diff", key);
-  const baselineExists = await exists(baseline);
-  let comparison: Awaited<ReturnType<typeof browser.checkElement>>;
+  const key = portablePath(snapshotPathFor(featureSlug, screenshotSlug));
+  const screenshot = path.join(SNAPSHOT_ROOT, key);
 
   await prepareStableCapture(options.preserveHover);
   try {
-    comparison = await compareElementWithRetry(element, screenshotSlug, {
-      baselineFolder: path.dirname(baseline),
-      actualFolder: path.dirname(actual),
-      diffFolder: path.dirname(diff),
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    await recordVisualResult({
-      key,
-      title: `${featureSlug}: ${screenshotSlug} (${variant.label})`,
-      status: baselineExists ? "error" : "missing-baseline",
-      baseline: path.relative(process.cwd(), baseline),
-      actual: path.relative(process.cwd(), actual),
-      diff: path.relative(process.cwd(), diff),
-      error: message,
-    });
-    throw error;
+    await waitForStableRendering(element);
+    await saveElementWithRetry(element, screenshotSlug, path.dirname(screenshot));
+    writtenScreenshotPaths.add(key);
   } finally {
     await cleanupStableCapture();
-  }
-
-  if (
-    typeof comparison !== "object" ||
-    comparison === null ||
-    !("misMatchPercentage" in comparison)
-  ) {
-    throw new Error(`Visual comparison for ${key} returned no image details`);
-  }
-
-  const mismatchPercentage = comparison.misMatchPercentage;
-  const status = mismatchPercentage === 0 ? "matched" : "changed";
-  await recordVisualResult({
-    key,
-    title: `${featureSlug}: ${screenshotSlug} (${variant.label})`,
-    status,
-    mismatchPercentage,
-    baseline: path.relative(process.cwd(), baseline),
-    actual: path.relative(process.cwd(), actual),
-    diff: path.relative(process.cwd(), diff),
-  });
-  if (status === "changed") {
-    throw new Error(
-      `Visual mismatch for ${key}: ${mismatchPercentage}% (see acceptance/artifacts/visual/report/index.html)`,
-    );
   }
 }

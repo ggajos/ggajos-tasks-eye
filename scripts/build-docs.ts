@@ -12,7 +12,6 @@ import type {
   LoadedFeature,
   LoadedFeatureDefinition,
 } from "../features/types";
-import { DOCUMENTATION_VARIANTS } from "../features/visualVariants";
 import { discoverFeatures } from "./feature-discovery";
 
 const DOCS_SRC_ROOT = path.resolve("docs-src");
@@ -21,13 +20,6 @@ const FEATURE_CONTENT_ROOT = path.join(CONTENT_ROOT, "features");
 const REFERENCE_CONTENT_ROOT = path.join(CONTENT_ROOT, "reference");
 const GENERATED_ROOT = path.join(DOCS_SRC_ROOT, "src", "generated");
 const TEMPLATE_ROOT = path.join(DOCS_SRC_ROOT, "templates");
-const SCREENSHOT_VARIANT_ORDER = ["dark-minimal", "dark", "light"];
-
-const screenshotVariants = [...DOCUMENTATION_VARIANTS].sort(
-  (a, b) =>
-    SCREENSHOT_VARIANT_ORDER.indexOf(a.key) -
-    SCREENSHOT_VARIANT_ORDER.indexOf(b.key),
-);
 
 interface FeatureGroup {
   label: string;
@@ -202,10 +194,9 @@ function featurePath(feature: LoadedFeatureDefinition): string {
 function screenshotAssetPath(
   feature: LoadedFeatureDefinition,
   screenshot: FeatureScreenshot,
-  variantKey: string,
   prefix: string,
 ): string {
-  return `${prefix}assets/features/${feature.slug}/${variantKey}/${screenshot.slug}.png`;
+  return `${prefix}assets/features/${feature.slug}/${screenshot.slug}.png`;
 }
 
 function renderCommandTable(
@@ -312,29 +303,13 @@ function withoutLeadingHeading(markdown: string): string {
 function renderScreenshots(feature: LoadedFeatureDefinition): string {
   return feature.screenshots
     .map((screenshot) => {
-      const tabs = screenshotVariants
-        .map((variant) => {
-          const src = screenshotAssetPath(
-            feature,
-            screenshot,
-            variant.key,
-            "../../",
-          );
-          const alt = `${screenshot.alt} in ${variant.label}`;
-          return `<TabItem label="${escapeHtml(variant.label)}">
-  <figure class="feature-shot">
-    <img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" loading="lazy" />
-    <figcaption>${escapeHtml(screenshot.title)} · ${escapeHtml(variant.label)}</figcaption>
-  </figure>
-</TabItem>`;
-        })
-        .join("\n");
-
+      const src = screenshotAssetPath(feature, screenshot, "../../");
       return `### ${screenshot.title}
 
-<Tabs syncKey="feature-screenshot-theme">
-${tabs}
-</Tabs>`;
+<figure class="feature-shot">
+  <img src="${escapeHtml(src)}" alt="${escapeHtml(screenshot.alt)}" loading="lazy" />
+  <figcaption>${escapeHtml(screenshot.title)}</figcaption>
+</figure>`;
     })
     .join("\n\n");
 }
@@ -347,8 +322,6 @@ sidebar:
   label: ${yamlString(feature.feature.title)}
   order: ${order}
 ---
-
-import { Tabs, TabItem } from '@astrojs/starlight/components';
 
 ${feature.feature.summary}
 

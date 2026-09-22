@@ -12,9 +12,8 @@ async function activeView(selector: string, text: string): Promise<WdioElement> 
   let actual = "";
   try {
     await browser.waitUntil(async () => {
-      const element = await $(selector);
-      if (!await element.isExisting()) return false;
-      actual = await element.getText();
+      actual = await browser.execute((query) =>
+        document.querySelector(query)?.textContent ?? "", selector);
       return actual.includes(text);
     }, { timeout: 20_000 });
   } catch {
@@ -23,7 +22,6 @@ async function activeView(selector: string, text: string): Promise<WdioElement> 
     );
   }
   const element = await $(selector);
-  await element.waitForDisplayed({ timeout: 5_000 });
   return element as unknown as WdioElement;
 }
 
@@ -44,7 +42,6 @@ async function activeViewContent(
     );
   }
   const element = await $(selector);
-  await element.waitForDisplayed({ timeout: 5_000 });
   return element as unknown as WdioElement;
 }
 
@@ -232,11 +229,15 @@ export const tasksEyePage = {
   },
 
   async toggleBucketWithKey(bucket: DueBucket, key: "Enter" | "Space"): Promise<void> {
-    const header = await $(
-      `${PLUGIN} .eye-bucket[data-eye-bucket="${bucket}"] .eye-bucket-header`,
-    );
-    await header.waitForDisplayed();
-    await browser.execute((element) => element.focus(), header);
+    const selector =
+      `${PLUGIN} .eye-bucket[data-eye-bucket="${bucket}"] .eye-bucket-header`;
+    const focused = await browser.execute((query) => {
+      const header = document.querySelector<HTMLElement>(query);
+      if (!header || header.getClientRects().length === 0) return false;
+      header.focus();
+      return document.activeElement === header;
+    }, selector);
+    if (!focused) throw new Error(`Missing ${bucket} bucket header`);
     await browser.keys(key);
   },
 
