@@ -39,6 +39,12 @@ export function canRaisePriority(rank: number): boolean {
   return rank > HIGHEST_PRIORITY;
 }
 
+export function priorityRowClasses(priority: number): string[] {
+  const classes = [`eye-priority-rank-${priority}`];
+  if (priority > NORMAL_PRIORITY) classes.push("eye-priority-low");
+  return classes;
+}
+
 export function canLowerPriority(rank: number): boolean {
   return rank < LOWEST_PRIORITY;
 }

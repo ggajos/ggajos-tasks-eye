@@ -73,6 +73,48 @@ const allClearFocusFixture = fixture(
   { settings: { mode: "focus" } },
 );
 
+const LEAD = "Escalate the billing dispute";
+const priorityFocusFixture = fixture(
+  [
+    note("Tree Root.md", {
+      status: "closed",
+      up: "-",
+      tasks: [{ text: "Review the tree", completed: "2000-01-01" }],
+    }),
+    note("Work/Billing Dispute.md", {
+      status: "open",
+      up: "[[Tree Root]]",
+      tasks: [{ text: `${LEAD} 🔺`, due: "2026-07-08" }],
+    }),
+    note("Work/Standup Notes.md", {
+      status: "open",
+      up: "[[Tree Root]]",
+      tasks: [{ text: "Prepare the standup notes ⏫", due: "2026-07-08" }],
+    }),
+    note("Work/Release Sign-off.md", {
+      status: "open",
+      up: "[[Tree Root]]",
+      tasks: [{ text: "Sign off on the release 🔼", due: "2026-07-08" }],
+    }),
+    note("Work/Auditor Reply.md", {
+      status: "open",
+      up: "[[Tree Root]]",
+      tasks: [{ text: "Reply to the auditor", due: "2026-07-08" }],
+    }),
+    note("Home/Office Plants.md", {
+      status: "open",
+      up: "[[Tree Root]]",
+      tasks: [{ text: "Water the office plants 🔽", due: "2026-07-08" }],
+    }),
+    note("Home/Filing Backlog.md", {
+      status: "open",
+      up: "[[Tree Root]]",
+      tasks: [{ text: "Sort the filing backlog ⏬", due: "2026-07-08" }],
+    }),
+  ],
+  { settings: { mode: "focus" } },
+);
+
 async function focusState() {
   return await browser.execute(() => {
     const root = document.querySelector(
@@ -143,8 +185,25 @@ const allClearScenarios = featureScenarios(allClearFocusFixture, {
   ],
 });
 
+const priorityScenarios = featureScenarios(priorityFocusFixture, {
+  screenshots: [
+    {
+      screenshotSlug: "priority-and-dim",
+      async run({ save }) {
+        const root = await tasksEyePage.openBoard("focus", LEAD);
+        await expect(root).toHaveText(expect.stringContaining(LEAD));
+        await expect(
+          root.$(".eye-focus-list > .eye-row:first-child"),
+        ).toHaveElementClass("eye-priority-rank-0");
+        await save(root);
+      },
+    },
+  ],
+});
+
 export const acceptanceScenarios = focusScenarios.acceptanceScenarios;
 export const screenshotScenarios = [
   ...focusScenarios.screenshotScenarios,
   ...allClearScenarios.screenshotScenarios,
+  ...priorityScenarios.screenshotScenarios,
 ];

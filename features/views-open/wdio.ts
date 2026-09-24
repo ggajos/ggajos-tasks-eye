@@ -44,14 +44,14 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     note("Work/Client Website Refresh.md", {
       status: "open",
       up: "[[Tree Root]]",
-      tasks: [{ text: TODAY_ANCHOR, due: "2026-07-08" }],
+      tasks: [{ text: `${TODAY_ANCHOR} 🔺`, due: "2026-07-08" }],
     }),
     note("Home/Kitchen Renovation.md", {
       status: "open",
       up: "[[Tree Root]]",
       tasks: [
         {
-          text: "Call the electrician about the updated quote",
+          text: "Call the electrician about the updated quote ⏫",
           due: "2026-07-08",
         },
       ],
@@ -59,17 +59,19 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     note("Family/Summer Trip.md", {
       status: "open",
       up: "[[Tree Root]]",
-      tasks: [{ text: "Book train tickets to Gdańsk", due: "2026-07-08" }],
+      tasks: [{ text: "Book train tickets to Gdańsk 🔼", due: "2026-07-08" }],
     }),
     note("Work/Quarterly Planning.md", {
       status: "open",
       up: "[[Tree Root]]",
-      tasks: [{ text: TOMORROW_ANCHOR, due: "2026-07-09" }],
+      tasks: [{ text: `${TOMORROW_ANCHOR} 🔽`, due: "2026-07-09" }],
     }),
     note("Health/Annual Checkups.md", {
       status: "open",
       up: "[[Tree Root]]",
-      tasks: [{ text: "Confirm the dentist appointment", due: "2026-07-09" }],
+      tasks: [
+        { text: "Confirm the dentist appointment ⏬", due: "2026-07-09" },
+      ],
     }),
     note("Work/Release Notes.md", {
       status: "open",

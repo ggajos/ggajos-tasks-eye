@@ -27,7 +27,12 @@ import {
   buildRowModels,
   selectRowModels,
 } from "./model";
-import { canLowerPriority, canRaisePriority } from "./priority";
+import {
+  canLowerPriority,
+  canRaisePriority,
+  NORMAL_PRIORITY,
+  priorityRowClasses,
+} from "./priority";
 import type { EyeFile, RowModel } from "./types";
 import {
   button,
@@ -559,6 +564,7 @@ export class EyeView extends ItemView {
     availability: AvailabilityConfig,
     globalContext: string,
   ): Promise<boolean> {
+    list.classList.add("eye-focus-list");
     const items = boardItemsForContext(
       rows,
       vacationSourceRows,
@@ -716,8 +722,16 @@ export class EyeView extends ItemView {
     return link;
   }
 
+  private applyPriority(row: HTMLElement, model: RowModel): void {
+    const priority = model.earliestTask?.priority ?? NORMAL_PRIORITY;
+    row.dataset.eyePriority = String(priority);
+    const classes = priorityRowClasses(priority);
+    if (classes.length > 0) row.classList.add(...classes);
+  }
+
   private async renderRow(list: HTMLElement, model: RowModel): Promise<void> {
     const row = element("div", "eye-row eye-task-row");
+    this.applyPriority(row, model);
     const noteLine = element("div", "eye-note-line");
     const actionCell = element("div", "eye-action-cell");
     const action = element("div", "eye-task-title");

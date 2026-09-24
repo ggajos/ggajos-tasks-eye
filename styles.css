@@ -324,6 +324,58 @@
   gap: 2px;
 }
 
+/* Priority: every row carries a left accent bar whose color ramps from urgent
+   warm hues (above-normal) through neutral (normal) to faint greys (below-
+   normal), so a lower-priority bar never out-shouts a higher one. Below-normal
+   rows are additionally de-emphasized. Colors come from theme variables and
+   pair with the priority signifier already present in the task text, so
+   priority is never conveyed by color alone. */
+.eye-task-row::before {
+  content: "";
+  background: var(--eye-priority-color, var(--text-muted));
+  border-radius: 3px;
+  bottom: 4px;
+  left: 0;
+  position: absolute;
+  top: 4px;
+  width: 3px;
+}
+
+.eye-priority-rank-0 {
+  --eye-priority-color: var(--color-red);
+}
+
+.eye-priority-rank-1 {
+  --eye-priority-color: var(--color-orange);
+}
+
+.eye-priority-rank-2 {
+  --eye-priority-color: var(--color-yellow);
+}
+
+.eye-priority-rank-3 {
+  --eye-priority-color: var(--text-muted);
+}
+
+.eye-priority-rank-4 {
+  --eye-priority-color: var(--text-faint);
+}
+
+.eye-priority-rank-5 {
+  --eye-priority-color: var(--background-modifier-border);
+}
+
+.eye-task-row.eye-priority-low {
+  opacity: 0.72;
+}
+
+/* Focus dimming: the first row is the sharp "do this now" anchor; every row
+   below it (including its priority accent) recedes so the eye rests on the
+   top item. Dimmed rows stay readable and directly actionable. */
+.eye-focus-list > .eye-row:not(:first-child) {
+  opacity: 0.5;
+}
+
 .eye-context-badge {
   --eye-context-rgb: var(--text-muted-rgb, 136, 136, 136);
 

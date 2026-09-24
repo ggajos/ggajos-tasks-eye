@@ -7,6 +7,7 @@ import {
   NORMAL_PRIORITY,
   nextPriorityRank,
   parsePriority,
+  priorityRowClasses,
   setPriorityInText,
   stripPrioritySignifier,
 } from "../src/priority";
@@ -160,5 +161,32 @@ describe("setPriorityInText", () => {
     expect(
       setPriorityInText("- [ ] Ship the deck 📅 2026-01-05 ^abc-123", 1),
     ).toBe("- [ ] Ship the deck ⏫ 📅 2026-01-05 ^abc-123");
+  });
+});
+
+describe("priorityRowClasses", () => {
+  it("marks above-normal ranks with a rank class", () => {
+    expect(priorityRowClasses(HIGHEST_PRIORITY)).toEqual([
+      "eye-priority-rank-0",
+    ]);
+    expect(priorityRowClasses(1)).toEqual(["eye-priority-rank-1"]);
+    expect(priorityRowClasses(2)).toEqual(["eye-priority-rank-2"]);
+  });
+
+  it("marks normal priority with only its rank class", () => {
+    expect(priorityRowClasses(NORMAL_PRIORITY)).toEqual([
+      "eye-priority-rank-3",
+    ]);
+  });
+
+  it("marks below-normal ranks as low with a rank class", () => {
+    expect(priorityRowClasses(4)).toEqual([
+      "eye-priority-rank-4",
+      "eye-priority-low",
+    ]);
+    expect(priorityRowClasses(LOWEST_PRIORITY)).toEqual([
+      "eye-priority-rank-5",
+      "eye-priority-low",
+    ]);
   });
 });
