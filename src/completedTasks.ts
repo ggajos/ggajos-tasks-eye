@@ -118,7 +118,8 @@ export function collectStatusGroups(
 
     const context = getContextForFile(file, indexedFiles);
     grouped[context] ??= [];
-    grouped[context]!.push({
+    const bucket = grouped[context];
+    bucket.push({
       context,
       fileName: file.basename,
       filePath: file.path,

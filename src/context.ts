@@ -33,7 +33,9 @@ export function isRootFile(file: ContextFile): boolean {
 
 export function upTargetBasename(file: ContextFile): string | null {
   const value =
-    Array.isArray(file.up) && file.up.length === 1 ? file.up[0] : file.up;
+    Array.isArray(file.up) && file.up.length === 1
+      ? (file.up[0] as unknown)
+      : file.up;
   if (typeof value !== "string") return null;
   const match = value.trim().match(WIKILINK_RE);
   return match ? targetBasename(match[1]!.trim()) : null;

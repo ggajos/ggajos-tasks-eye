@@ -22,9 +22,9 @@ function resolveLiveUpTarget(app: App, file: EyeFile): string | undefined {
   const target = wikilinkTarget(file.up);
   if (!target) return undefined;
 
-  const getFirstLinkpathDest = app.metadataCache.getFirstLinkpathDest;
-  if (typeof getFirstLinkpathDest !== "function") return undefined;
-  return getFirstLinkpathDest.call(app.metadataCache, target, file.path)?.path;
+  const cache = app.metadataCache;
+  if (typeof cache.getFirstLinkpathDest !== "function") return undefined;
+  return cache.getFirstLinkpathDest(target, file.path)?.path;
 }
 
 function rawUpValue(value: unknown): string {

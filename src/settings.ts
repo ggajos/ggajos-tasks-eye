@@ -112,20 +112,24 @@ export class TasksEyeSettingTab extends PluginSettingTab {
           "No personal dates or ranges. Leave the end date empty for a single day. Ranges include both dates.",
         addItem: {
           name: "Add personal time off",
-          action: async () => {
-            await this.eyePlugin.addPersonalTimeOff();
-            this.update();
+          action: () => {
+            void (async () => {
+              await this.eyePlugin.addPersonalTimeOff();
+              this.update();
+            })();
           },
         },
-        onDelete: async (index) => {
-          const entry = personalTimeOff[index];
-          if (!entry) {
-            throw new Error(
-              `No personal time-off entry exists at index ${index}.`,
-            );
-          }
-          await this.eyePlugin.deletePersonalTimeOff(entry.id);
-          this.update();
+        onDelete: (index) => {
+          void (async () => {
+            const entry = personalTimeOff[index];
+            if (!entry) {
+              throw new Error(
+                `No personal time-off entry exists at index ${index}.`,
+              );
+            }
+            await this.eyePlugin.deletePersonalTimeOff(entry.id);
+            this.update();
+          })();
         },
         items: personalTimeOff.map((entry) => ({
           name: this.personalTimeOffLabel(entry),

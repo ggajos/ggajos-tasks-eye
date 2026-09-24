@@ -307,8 +307,6 @@ export class EyeView extends ItemView {
     setIcon(icon, ALL_CLEAR_ICON);
     const iconSvg = icon.querySelector<SVGElement>("svg");
     iconSvg?.setAttribute("viewBox", "0 0 24 24");
-    iconSvg?.style.setProperty("height", "64px", "important");
-    iconSvg?.style.setProperty("width", "64px", "important");
     state.append(
       icon,
       element("div", "eye-all-clear-message", emptyMessage(this.state.mode)),
