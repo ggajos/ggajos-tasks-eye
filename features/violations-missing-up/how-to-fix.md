@@ -65,5 +65,31 @@ status: open
 - It can live in any folder. Many vaults keep a single note such as `Home` or
   `Index` as the root and point every top-level note's `up` at it.
 
+### A complete root note
+
+A root note is a normal note that happens to declare `up: -`. Here is a full,
+valid example — frontmatter plus an unchecked, dated task so an `open` note also
+satisfies the task and due-date rules:
+
+```markdown
+---
+status: open
+up: -
+---
+
+- [ ] Review the tree 📅 2026-07-09
+```
+
+A closed root note needs no unchecked task:
+
+```markdown
+---
+status: closed
+up: -
+---
+
+- [x] Reviewed the tree ✅ 2026-07-09
+```
+
 Once one root exists and every other note's `up` chain reaches it, the missing-
 parent violations clear.
