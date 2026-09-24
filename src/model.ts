@@ -13,7 +13,6 @@ import {
   todayIso,
 } from "./date";
 import { NORMAL_PRIORITY } from "./priority";
-import { stripDueDate } from "./taskParsing";
 import { findEarliestDueTask, getEarliestDueDate } from "./taskSelection";
 import type { EyeFile, RowModel } from "./types";
 import type { AvailabilityConfig, VacationMarker } from "./vacation";
@@ -71,9 +70,7 @@ export function buildRowModel(
     earliestTask,
     errors: rowErrors(file, availability, indexedFiles),
     isFuture: earliestDue !== null && isAfterToday(earliestDue),
-    actionLabel: earliestTask
-      ? stripDueDate(earliestTask.text)
-      : "No unchecked tasks",
+    actionLabel: earliestTask ? earliestTask.text : "No unchecked tasks",
     contextKey: getContextForFile(file, indexedFiles),
     contextLabel: getContextForFile(file, indexedFiles),
   };

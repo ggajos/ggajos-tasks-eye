@@ -180,7 +180,7 @@ up: -
       ),
     );
 
-    expect(row.actionLabel).toBe("open later");
+    expect(row.actionLabel).toBe("open later 📅 2026-06-20");
     expect(row.earliestDue).toBe(isoToTs("2026-06-20"));
   });
 });

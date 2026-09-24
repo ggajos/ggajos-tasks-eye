@@ -19,7 +19,9 @@ up: -
       ),
     );
 
-    expect(row.actionLabel).toBe("Approve the billing event contract");
+    expect(row.actionLabel).toBe(
+      "Approve the billing event contract 📅 2026-07-08",
+    );
     expect(row.earliestTask?.dueIso).toBe("2026-07-08");
   });
 

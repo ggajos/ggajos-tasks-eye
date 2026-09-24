@@ -5,7 +5,6 @@ import {
   setTaskPriorityInMarkdown,
   shiftDueDateInText,
   shiftTaskDueInMarkdown,
-  stripDueDate,
 } from "../src/taskParsing";
 
 describe("task parsing", () => {
@@ -43,14 +42,6 @@ describe("task parsing", () => {
     expect(shiftDueDateInText("- [ ] Review 📅 2026-07-08", 7)).toBe(
       "- [ ] Review 📅 2026-07-15",
     );
-  });
-
-  it("strips due date markers from display labels", () => {
-    expect(stripDueDate("Review 📅 2026-07-08")).toBe("Review");
-    expect(stripDueDate("Review ⏫ 📅 2026-07-08")).toBe("Review");
-    expect(stripDueDate("Review ðŸ“… 2026-07-08")).toBe("Review");
-    expect(stripDueDate("Review ð")).toBe("Review");
-    expect(stripDueDate("Review 2026-07-08")).toBe("Review");
   });
 
   it("replaces the matched task line with multi-line Tasks output", () => {

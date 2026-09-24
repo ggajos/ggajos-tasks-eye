@@ -74,7 +74,7 @@ up: -
       ),
     );
 
-    expect(row.actionLabel).toBe("earlier");
+    expect(row.actionLabel).toBe("earlier 📅 2026-07-08");
     expect(row.earliestTask?.dueIso).toBe("2026-07-08");
   });
 });

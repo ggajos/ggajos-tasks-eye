@@ -4,7 +4,7 @@ import { tasksEyePage } from "../../acceptance/support/tasks-eye-page";
 import { fixture, note } from "../fixtures";
 
 const RENDERED_ACTION =
-  "Review ADR-042 with Security Architecture and record the decision in architecture/tenant-isolation";
+  "Review ADR-042 with Security Architecture and record the decision in architecture/tenant-isolation 📅 2026-07-08";
 
 const markdownFixture = fixture([
   note("Tree Root.md", {

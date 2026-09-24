@@ -1,11 +1,6 @@
 import { isoToTs, shiftIsoDate } from "./date";
 import type { PriorityDirection } from "./priority";
-import {
-  nextPriorityRank,
-  parsePriority,
-  setPriorityInText,
-  stripPrioritySignifier,
-} from "./priority";
+import { nextPriorityRank, parsePriority, setPriorityInText } from "./priority";
 import type { EyeTask } from "./types";
 
 const TASK_LINE_RE = /^(\s*)([-*+]\s+\[([^\]])\]\s*)(.*)$/;
@@ -49,18 +44,6 @@ export function shiftDueDateInText(text: string, deltaDays: number): string {
   const match = text.match(DUE_RE);
   if (!match) return text;
   return text.replace(DUE_RE, `$1${shiftIsoDate(match[2]!, deltaDays)}`);
-}
-
-export function stripDueDate(text: string): string {
-  return stripPrioritySignifier(
-    text
-      .replace(/📅\s*\d{4}-\d{2}-\d{2}/g, "")
-      .replace(/ðŸ\S*\s*\d{4}-\d{2}-\d{2}/g, "")
-      .replace(/ð\S*/g, "")
-      .replace(/\s+\d{4}-\d{2}-\d{2}$/g, "")
-      .replace(/\s{2,}/g, " ")
-      .trim(),
-  );
 }
 
 function replacementLines(replacement: string): string[] {
