@@ -1,7 +1,11 @@
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { completeTaskInFile, shiftTaskDueInFile } from "../src/actions";
+import {
+  completeTaskInFile,
+  setTaskPriorityInFile,
+  shiftTaskDueInFile,
+} from "../src/actions";
 import { parseTaskLine } from "../src/taskParsing";
 import type { EyeTask } from "../src/types";
 import { noticeLog } from "./stubs/obsidian";
@@ -103,6 +107,57 @@ describe("shiftTaskDueInFile", () => {
     expect(noticeLog[0]).toContain("work/note.md");
     expect(errorSpy).toHaveBeenCalledTimes(1);
     errorSpy.mockRestore();
+  });
+});
+
+describe("setTaskPriorityInFile", () => {
+  it("raises the priority of the matched task line", async () => {
+    const line = "- [ ] Write report 📅 2026-07-17";
+    const files = {
+      "work/note.md": { markdown: line, processCalls: 0 },
+    };
+    const app = fakeApp(files);
+
+    await setTaskPriorityInFile(app, "work/note.md", task(line), "raise");
+
+    expect(files["work/note.md"].markdown).toBe(
+      "- [ ] Write report 🔼 📅 2026-07-17",
+    );
+    expect(files["work/note.md"].processCalls).toBe(1);
+    expect(noticeLog).toHaveLength(0);
+  });
+
+  it("lowers the priority of the matched task line", async () => {
+    const line = "- [ ] Write report 🔼 📅 2026-07-17";
+    const files = {
+      "work/note.md": { markdown: line, processCalls: 0 },
+    };
+    const app = fakeApp(files);
+
+    await setTaskPriorityInFile(app, "work/note.md", task(line), "lower");
+
+    expect(files["work/note.md"].markdown).toBe(
+      "- [ ] Write report 📅 2026-07-17",
+    );
+    expect(noticeLog).toHaveLength(0);
+  });
+
+  it("notifies and skips writing when the file is missing", async () => {
+    const files = {
+      "work/note.md": { markdown: "- [ ] task", processCalls: 0 },
+    };
+    const app = fakeApp(files);
+
+    await setTaskPriorityInFile(
+      app,
+      "work/missing.md",
+      task("- [ ] task 📅 2026-07-17"),
+      "raise",
+    );
+
+    expect(files["work/note.md"].processCalls).toBe(0);
+    expect(noticeLog).toHaveLength(1);
+    expect(noticeLog[0]).toContain("work/missing.md");
   });
 });
 

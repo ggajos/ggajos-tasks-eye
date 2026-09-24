@@ -1,5 +1,11 @@
 import { isoToTs, shiftIsoDate } from "./date";
-import { parsePriority, stripPrioritySignifier } from "./priority";
+import type { PriorityDirection } from "./priority";
+import {
+  nextPriorityRank,
+  parsePriority,
+  setPriorityInText,
+  stripPrioritySignifier,
+} from "./priority";
 import type { EyeTask } from "./types";
 
 const TASK_LINE_RE = /^(\s*)([-*+]\s+\[([^\]])\]\s*)(.*)$/;
@@ -97,4 +103,14 @@ export function shiftTaskDueInMarkdown(
 ): string {
   const shifted = shiftDueDateInText(task.lineText, deltaDays);
   return replaceTaskLine(markdown, task, shifted);
+}
+
+export function setTaskPriorityInMarkdown(
+  markdown: string,
+  task: EyeTask,
+  direction: PriorityDirection,
+): string {
+  const targetRank = nextPriorityRank(task.priority, direction);
+  const updated = setPriorityInText(task.lineText, targetRank);
+  return replaceTaskLine(markdown, task, updated);
 }

@@ -1,7 +1,12 @@
 import type { App } from "obsidian";
 import { Notice, TFile } from "obsidian";
 import { fileNotFoundMessage, taskUpdateFailedMessage } from "./constants";
-import { replaceTaskLine, shiftTaskDueInMarkdown } from "./taskParsing";
+import type { PriorityDirection } from "./priority";
+import {
+  replaceTaskLine,
+  setTaskPriorityInMarkdown,
+  shiftTaskDueInMarkdown,
+} from "./taskParsing";
 import type { TasksApiV1 } from "./tasksApi";
 import type { EyeTask } from "./types";
 
@@ -40,6 +45,17 @@ export async function shiftTaskDueInFile(
 ): Promise<void> {
   await updateMarkdownFile(app, filePath, (markdown) =>
     shiftTaskDueInMarkdown(markdown, task, deltaDays),
+  );
+}
+
+export async function setTaskPriorityInFile(
+  app: App,
+  filePath: string,
+  task: EyeTask,
+  direction: PriorityDirection,
+): Promise<void> {
+  await updateMarkdownFile(app, filePath, (markdown) =>
+    setTaskPriorityInMarkdown(markdown, task, direction),
   );
 }
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   parseTaskLine,
   replaceTaskLine,
+  setTaskPriorityInMarkdown,
   shiftDueDateInText,
   shiftTaskDueInMarkdown,
   stripDueDate,
@@ -90,6 +91,47 @@ describe("task parsing", () => {
 
     expect(shiftTaskDueInMarkdown(markdown, task!, -1)).toContain(
       "📅 2026-07-07",
+    );
+  });
+
+  it("raises and lowers the represented task's priority in markdown", () => {
+    const task = parseTaskLine("- [ ] Reprioritize me 📅 2026-07-08", 4);
+    expect(task).not.toBeNull();
+
+    const markdown = [
+      "---",
+      "status: open",
+      "---",
+      "",
+      "- [ ] Reprioritize me 📅 2026-07-08",
+    ].join("\n");
+
+    const raised = setTaskPriorityInMarkdown(markdown, task!, "raise");
+    expect(raised).toContain("Reprioritize me 🔼 📅 2026-07-08");
+
+    const raisedTask = parseTaskLine(
+      "- [ ] Reprioritize me 🔼 📅 2026-07-08",
+      4,
+    );
+    const lowered = setTaskPriorityInMarkdown(markdown, raisedTask!, "lower");
+    expect(lowered).toContain("Reprioritize me 📅 2026-07-08");
+    expect(lowered).not.toContain("🔼");
+  });
+
+  it("appends priority for a task that has no due date", () => {
+    const task = parseTaskLine("- [ ] Undated work", 4);
+    expect(task).not.toBeNull();
+
+    const markdown = [
+      "---",
+      "status: open",
+      "---",
+      "",
+      "- [ ] Undated work",
+    ].join("\n");
+
+    expect(setTaskPriorityInMarkdown(markdown, task!, "raise")).toContain(
+      "- [ ] Undated work 🔼",
     );
   });
 });

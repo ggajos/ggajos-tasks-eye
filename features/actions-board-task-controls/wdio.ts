@@ -27,7 +27,7 @@ const boardFixture = fixture([
     up: "[[Tree Root]]",
     tasks: [
       {
-        text: "Call the electrician about the updated quote",
+        text: "Call the electrician about the updated quote 🔺",
         due: "2026-07-08",
       },
     ],
@@ -35,7 +35,7 @@ const boardFixture = fixture([
   note("Family/Summer Trip.md", {
     status: "open",
     up: "[[Tree Root]]",
-    tasks: [{ text: "Book train tickets to Gdańsk", due: "2026-07-08" }],
+    tasks: [{ text: "Book train tickets to Gdańsk ⏬", due: "2026-07-08" }],
   }),
 ]);
 
@@ -62,7 +62,10 @@ async function rowControlsState(rowText: string) {
       ...(actions?.querySelectorAll<HTMLButtonElement>(
         "button.eye-shift-button",
       ) ?? []),
-    ].map((button) => button.textContent?.trim() ?? "");
+    ].map((button) => ({
+      text: button.textContent?.trim() ?? "",
+      disabled: button.disabled,
+    }));
 
     return {
       rowBounds: row?.getBoundingClientRect().toJSON(),
@@ -78,7 +81,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   {
     acceptance: [
       {
-        title: "shows the compact due-date controls on an opaque strip",
+        title: "shows the compact action controls on an opaque strip",
         async run() {
           await tasksEyePage.openBoard("open", ACTION);
           const before = await rowControlsState(ACTION);
@@ -101,7 +104,13 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           expect(state.actionBounds.right).toBeLessThanOrEqual(
             state.rowBounds.right,
           );
-          expect(state.shifts).toEqual(["-1", "+1", "+7"]);
+          expect(state.shifts.map((shift) => shift.text)).toEqual([
+            "-1",
+            "+1",
+            "↑",
+            "↓",
+          ]);
+          expect(state.shifts.every((shift) => !shift.disabled)).toBe(true);
           expect(state.backgroundColor).not.toBe("");
           expect(state.backgroundColor).not.toBe("transparent");
           expect(state.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
@@ -116,6 +125,48 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             "Move due date 1 day later",
           );
           await waitForFileText(`${ACTION} 📅 2026-07-09`);
+        },
+      },
+      {
+        title: "raises task priority through board controls",
+        async run() {
+          await tasksEyePage.openBoard("open", ACTION);
+          await tasksEyePage.clickRowAction(ACTION, "Raise task priority");
+          await waitForFileText(`${ACTION} 🔼 📅 2026-07-08`);
+        },
+      },
+      {
+        title: "lowers task priority through board controls",
+        async run() {
+          await tasksEyePage.openBoard("open", ACTION);
+          await tasksEyePage.clickRowAction(ACTION, "Lower task priority");
+          await waitForFileText(`${ACTION} 🔽 📅 2026-07-08`);
+        },
+      },
+      {
+        title: "disables the raise button at the highest priority",
+        async run() {
+          const ROW = "Call the electrician about the updated quote";
+          await tasksEyePage.openBoard("open", ROW);
+          await tasksEyePage.hoverRowAction(ROW, "Raise task priority");
+          const state = await rowControlsState(ROW);
+          const raise = state.shifts.find((shift) => shift.text === "↑");
+          const lower = state.shifts.find((shift) => shift.text === "↓");
+          expect(raise?.disabled).toBe(true);
+          expect(lower?.disabled).toBe(false);
+        },
+      },
+      {
+        title: "disables the lower button at the lowest priority",
+        async run() {
+          const ROW = "Book train tickets to Gdańsk";
+          await tasksEyePage.openBoard("open", ROW);
+          await tasksEyePage.hoverRowAction(ROW, "Lower task priority");
+          const state = await rowControlsState(ROW);
+          const raise = state.shifts.find((shift) => shift.text === "↑");
+          const lower = state.shifts.find((shift) => shift.text === "↓");
+          expect(raise?.disabled).toBe(false);
+          expect(lower?.disabled).toBe(true);
         },
       },
       {

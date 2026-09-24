@@ -27,6 +27,7 @@ import {
   buildRowModels,
   selectRowModels,
 } from "./model";
+import { canLowerPriority, canRaisePriority } from "./priority";
 import type { EyeFile, RowModel } from "./types";
 import {
   button,
@@ -63,8 +64,7 @@ function attentionPill(): HTMLElement {
 }
 
 function dueShiftLabel(deltaDays: number): string {
-  const interval = Math.abs(deltaDays) === 7 ? "1 week" : "1 day";
-  return `Move due date ${interval} ${deltaDays > 0 ? "later" : "earlier"}`;
+  return `Move due date 1 day ${deltaDays > 0 ? "later" : "earlier"}`;
 }
 
 function headingId(prefix: string, key: string): string {
@@ -777,7 +777,7 @@ export class EyeView extends ItemView {
     actions.appendChild(done);
 
     if (model.earliestDue !== null) {
-      for (const delta of [-1, 1, 7]) {
+      for (const delta of [-1, 1]) {
         actions.appendChild(
           button(
             "eye-shift-button",
@@ -788,6 +788,24 @@ export class EyeView extends ItemView {
         );
       }
     }
+
+    const raise = button(
+      "eye-shift-button",
+      "Raise task priority",
+      () => void this.plugin.setTaskPriority(model, "raise"),
+      "↑",
+    );
+    raise.disabled = !canRaisePriority(task.priority);
+    actions.appendChild(raise);
+
+    const lower = button(
+      "eye-shift-button",
+      "Lower task priority",
+      () => void this.plugin.setTaskPriority(model, "lower"),
+      "↓",
+    );
+    lower.disabled = !canLowerPriority(task.priority);
+    actions.appendChild(lower);
 
     return actions;
   }

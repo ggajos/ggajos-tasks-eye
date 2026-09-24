@@ -6,7 +6,11 @@ import type {
   WorkspaceLeaf,
 } from "obsidian";
 import { addIcon, Notice, Plugin, TFile } from "obsidian";
-import { completeTaskInFile, shiftTaskDueInFile } from "./actions";
+import {
+  completeTaskInFile,
+  setTaskPriorityInFile,
+  shiftTaskDueInFile,
+} from "./actions";
 import {
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
@@ -42,6 +46,7 @@ import {
 } from "./managedPath";
 import type { StatusStepDirection } from "./noteStatus";
 import { stepNoteStatus } from "./noteStatus";
+import type { PriorityDirection } from "./priority";
 import { TasksEyeSettingTab } from "./settings";
 import type { TasksApiV1 } from "./tasksApi";
 import { getTasksApi } from "./tasksApi";
@@ -534,6 +539,20 @@ export default class TheEyePlugin extends Plugin {
       model.file.path,
       model.earliestTask,
       deltaDays,
+    );
+    this.queueRefresh();
+  }
+
+  async setTaskPriority(
+    model: RowModel,
+    direction: PriorityDirection,
+  ): Promise<void> {
+    if (!model.earliestTask) return;
+    await setTaskPriorityInFile(
+      this.app,
+      model.file.path,
+      model.earliestTask,
+      direction,
     );
     this.queueRefresh();
   }
