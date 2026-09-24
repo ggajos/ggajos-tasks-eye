@@ -322,6 +322,7 @@
   flex-direction: column;
   font-size: var(--font-ui-medium, 15px);
   gap: 2px;
+  padding-left: 12px;
 }
 
 /* Priority: every row carries a left accent bar whose color ramps from urgent
@@ -333,13 +334,15 @@
 .eye-task-row::before {
   content: "";
   background: var(--eye-priority-color, var(--text-muted));
-  border-radius: 3px;
+  border-radius: 1px;
   bottom: 4px;
   left: 0;
   position: absolute;
   top: 4px;
-  width: 3px;
+  width: 1px;
 }
+
+
 
 .eye-priority-rank-0 {
   --eye-priority-color: var(--color-red);
