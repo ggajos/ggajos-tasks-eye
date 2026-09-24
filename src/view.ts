@@ -41,6 +41,8 @@ import {
   unwrapSingleParagraph,
 } from "./ui";
 import type { AvailabilityConfig, VacationMarker } from "./vacation";
+import type { ViolationCode } from "./validation";
+import { violationDocsUrl } from "./violationDocs";
 
 export const VIEW_TYPE = "ggajos-tasks-eye-view";
 
@@ -66,6 +68,18 @@ function attentionPill(): HTMLElement {
   marker.title = "Needs attention";
   marker.setAttribute("aria-label", "Needs attention");
   return marker;
+}
+
+function renderViolationLink(
+  code: ViolationCode,
+  message: string,
+): HTMLAnchorElement {
+  const link = element("a", "eye-violation-link", message);
+  link.href = violationDocsUrl(code);
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.title = "Open the documentation for this violation";
+  return link;
 }
 
 function dueShiftLabel(deltaDays: number): string {
@@ -750,8 +764,11 @@ export class EyeView extends ItemView {
       model.errors.length > 0 ? element("div", "eye-errors") : null;
     if (errors) {
       for (const violation of model.errors) {
-        const error = element("div", undefined, violation.message);
+        const error = element("div", undefined);
         error.dataset.eyeViolation = violation.code;
+        error.appendChild(
+          renderViolationLink(violation.code, violation.message),
+        );
         errors.appendChild(error);
       }
     }

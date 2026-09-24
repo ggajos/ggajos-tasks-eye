@@ -29,6 +29,7 @@ export interface LoadedFeature {
   dirName: string;
   rootDir: string;
   whyMarkdown: string;
+  howToFixMarkdown?: string;
   feature: LoadedFeatureDefinition;
 }
 

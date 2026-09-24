@@ -110,7 +110,24 @@ export async function discoverFeatures(
       throw new Error(`Feature folder "${dirName}" has an empty why.md`);
     }
 
-    features.push({ dirName, rootDir, whyMarkdown, feature });
+    const howToFixPath = path.join(rootDir, "how-to-fix.md");
+    let howToFixMarkdown: string | undefined;
+    if (await exists(howToFixPath)) {
+      howToFixMarkdown = await readFile(howToFixPath, "utf8");
+      if (howToFixMarkdown.trim() === "") {
+        throw new Error(
+          `Feature folder "${dirName}" has an empty how-to-fix.md`,
+        );
+      }
+    }
+
+    features.push({
+      dirName,
+      rootDir,
+      whyMarkdown,
+      howToFixMarkdown,
+      feature,
+    });
   }
 
   return features;
@@ -145,7 +162,24 @@ export function discoverFeaturesSync(
       throw new Error(`Feature folder "${dirName}" has an empty why.md`);
     }
 
-    features.push({ dirName, rootDir, whyMarkdown, feature });
+    const howToFixPath = path.join(rootDir, "how-to-fix.md");
+    let howToFixMarkdown: string | undefined;
+    if (existsSync(howToFixPath)) {
+      howToFixMarkdown = readFileSync(howToFixPath, "utf8");
+      if (howToFixMarkdown.trim() === "") {
+        throw new Error(
+          `Feature folder "${dirName}" has an empty how-to-fix.md`,
+        );
+      }
+    }
+
+    features.push({
+      dirName,
+      rootDir,
+      whyMarkdown,
+      howToFixMarkdown,
+      feature,
+    });
   }
 
   return features;

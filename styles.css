@@ -602,6 +602,16 @@
   margin-top: 5px;
 }
 
+.eye-violation-link {
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.eye-violation-link:hover {
+  text-decoration: underline;
+}
+
 .eye-actions {
   align-content: start;
   align-items: center;

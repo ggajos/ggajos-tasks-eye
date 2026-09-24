@@ -314,6 +314,16 @@ function renderScreenshots(feature: LoadedFeatureDefinition): string {
     .join("\n\n");
 }
 
+function renderHowToFix(feature: LoadedFeature): string {
+  const markdown = feature.howToFixMarkdown?.trim();
+  if (!markdown) return "";
+  return `## How to fix
+
+${withoutLeadingHeading(markdown)}
+
+`;
+}
+
 function renderFeaturePage(feature: LoadedFeature, order: number): string {
   return `---
 title: ${yamlString(feature.feature.title)}
@@ -329,7 +339,7 @@ ${feature.feature.summary}
 
 ${withoutLeadingHeading(feature.whyMarkdown.trim())}
 
-## What to expect
+${renderHowToFix(feature)}## What to expect
 
 ${renderAcceptanceCriteria(feature.feature)}
 ${renderViolationSample(feature.feature)}
