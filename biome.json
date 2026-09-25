@@ -11,6 +11,7 @@
       "test/**/*.ts",
       "features/**/*.ts",
       "scripts/**/*.ts",
+      "demo/**/*.ts",
       "vitest.config.ts",
       "wdio.conf.mts",
       "esbuild.config.mjs"

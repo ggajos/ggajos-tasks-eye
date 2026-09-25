@@ -4,7 +4,8 @@
 
 Tasks Eye is a TypeScript Obsidian plugin for note-centered task views. Source
 code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
-`features/<slug>/`, and generated documentation in `docs/`.
+`features/<slug>/`, generated documentation in `docs/`, and the standalone demo
+vault generator in `demo/`.
 
 ## Common Commands
 
@@ -16,6 +17,7 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 | Local/optional | `npm run dev:coverage` | Run Vitest with coverage. |
 | Local/optional | `npm run dev:docs` | Publish screenshots and build generated docs |
 | Local/optional | `npm run dev:docs:serve` | Rebuild docs, then preview them at `http://127.0.0.1:4173/`. |
+| Local/optional | `npm run dev:demo` | Regenerate the public demo vault into `../org-demo`, re-anchored on today. |
 | Operations | `npm run ops:verify:clean` | Verify `package-lock.json` resolves only from the public npm registry, then install and build from a clean checkout in a Podman container with the corporate registry host blackholed. Approximates Obsidian's community-plugin review sandbox. |
 | Operations | `npm run ops:release:beta` | Publish a beta after the clean-install, unit, build, and docs gates. |
 | Operations | `npm run ops:release:public` | Publish a stable release; additionally requires Podman WDIO to leave screenshots and generated docs unchanged. |
@@ -133,6 +135,22 @@ the reviewer's network-restricted sandbox. This check is a hard, unconditional
 gate in both `ops:release:beta` and `ops:release:public` — do not make it
 skippable, and do not treat `npm run test:visual`'s Podman container as a
 substitute: that image can still reach any publicly-routable host.
+
+## Demo Vault
+
+`demo/` generates the public demo vault into `../org-demo` via
+`npm run dev:demo`. It is deliberately **self-contained**: nothing in `demo/`
+imports from `src/` or `features/`, so plugin refactors cannot break it.
+
+Task dates are declared as target buckets (`today`, `nextWeek`, `overdue`,
+`saturday`) and resolved against the real today at generation time, so
+re-running the generator re-anchors the whole vault. Healthy notes prefer
+working days; only the unavailable-day demo lands on a weekend.
+
+The generator writes notes only. It never deletes and never touches
+`.obsidian/`, so plugin settings and workspace survive a run. There is no
+coverage gate — when a feature is added to `features/`, update `demo/content.ts`
+by hand. See `demo/README.md` for the vault shape and coverage notes.
 
 ## Fixtures
 

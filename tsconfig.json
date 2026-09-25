@@ -29,6 +29,7 @@
     "test/**/*.ts",
     "features/**/*.ts",
     "scripts/**/*.ts",
+    "demo/**/*.ts",
     "vitest.config.ts"
   ],
   "exclude": [
