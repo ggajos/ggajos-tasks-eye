@@ -16,7 +16,8 @@ code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 | Local/optional | `npm run dev:coverage` | Run Vitest with coverage. |
 | Local/optional | `npm run dev:docs` | Publish screenshots and build generated docs |
 | Local/optional | `npm run dev:docs:serve` | Rebuild docs, then preview them at `http://127.0.0.1:4173/`. |
-| Operations | `npm run ops:release:beta` | Publish a beta after the unit, build, and docs gates. |
+| Operations | `npm run ops:verify:clean` | Verify `package-lock.json` resolves only from the public npm registry, then install and build from a clean checkout in a Podman container with the corporate registry host blackholed. Approximates Obsidian's community-plugin review sandbox. |
+| Operations | `npm run ops:release:beta` | Publish a beta after the clean-install, unit, build, and docs gates. |
 | Operations | `npm run ops:release:public` | Publish a stable release; additionally requires Podman WDIO to leave screenshots and generated docs unchanged. |
 
 Create stable releases only with `npm run ops:release:public`. Let the release
@@ -117,6 +118,21 @@ Do not silence or work around them without revisiting the stated constraint:
   automation. GitHub Actions is not the authoritative builder, so adding a
   post-hoc attestation would misrepresent provenance. Reproducible build
   verification remains the integrity check.
+
+## Clean-Install Verification (`npm run ops:verify:clean`)
+
+Obsidian's community-plugin review (`community.obsidian.md`) once failed with
+"Source review dependency installation failed" because `package-lock.json` had
+picked up entries resolving from a corporate Artifactory mirror instead of the
+public npm registry (the mirror was reachable from anywhere, so a container
+alone did not catch this — only a registry/egress restriction does). The
+project now pins the public registry via a tracked `.npmrc`, and
+`npm run ops:verify:clean` re-lints the lockfile and reinstalls/builds inside a
+Podman container with the corporate registry host blackholed, approximating
+the reviewer's network-restricted sandbox. This check is a hard, unconditional
+gate in both `ops:release:beta` and `ops:release:public` — do not make it
+skippable, and do not treat `npm run test:visual`'s Podman container as a
+substitute: that image can still reach any publicly-routable host.
 
 ## Fixtures
 

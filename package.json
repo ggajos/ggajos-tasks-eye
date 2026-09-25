@@ -17,6 +17,7 @@
     "dev:coverage": "vitest run --coverage",
     "dev:docs": "tsc --noEmit --skipLibCheck && node acceptance/scripts/publish-doc-screenshots.mjs && tsx scripts/build-docs.ts && astro build --config docs-src/astro.config.mjs",
     "dev:docs:serve": "npm run dev:docs && astro preview --host 127.0.0.1 --port 4173 --config docs-src/astro.config.mjs",
+    "ops:verify:clean": "node scripts/verify-clean-install.mjs",
     "ops:release:beta": "node scripts/obsidian-release.mjs release beta",
     "ops:release:public": "node scripts/obsidian-release.mjs release public"
   },
@@ -29,6 +30,7 @@
   "engines": {
     "node": ">=22.13.0"
   },
+  "packageManager": "npm@12.0.1",
   "devDependencies": {
     "@astrojs/starlight": "^0.41.3",
     "@biomejs/biome": "2.5.4",

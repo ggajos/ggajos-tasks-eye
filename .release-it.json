@@ -16,6 +16,7 @@
   "hooks": {
     "before:bump": [
       "node scripts/obsidian-release.mjs check",
+      "npm run ops:verify:clean",
       "npm test",
       "npm run build",
       "node scripts/obsidian-release.mjs check-release-visual",
