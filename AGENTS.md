@@ -15,7 +15,7 @@ vault generator in `demo/`.
 | Essential | `npm test` | Run the Vitest unit suite; the regular development feedback loop. |
 | Essential | `npm run test:visual` | Run behavioral and screenshot WDIO tests in pinned Podman Linux/Xvfb, overwrite tracked screenshots, generate five community-submission cards, then run `dev:docs`. |
 | Local/optional | `npm run dev:coverage` | Run Vitest with coverage. |
-| Local/optional | `npm run dev:docs` | Publish screenshots and build generated docs |
+| Local/optional | `npm run dev:docs` | Publish screenshots, render the Reladraw workflow SVG, and build generated docs |
 | Local/optional | `npm run dev:docs:serve` | Rebuild docs, then preview them at `http://127.0.0.1:4173/`. |
 | Local/optional | `npm run dev:demo` | Regenerate the public demo vault into `../org-demo`, re-anchored on today. |
 | Operations | `npm run ops:verify:clean` | Verify `package-lock.json` resolves only from the public npm registry, then install and build from a clean checkout in a Podman container with the corporate registry host blackholed. Approximates Obsidian's community-plugin review sandbox. |
@@ -68,6 +68,10 @@ slugs.
 Generated docs under `docs/` and `docs-src/src/content/docs/features/` are
 rebuilt by `npm run dev:docs` (and therefore `npm run test:visual`); avoid
 hand-editing generated output unless the task explicitly asks for it.
+The public workflow diagram source lives at
+`docs-src/diagrams/working-modes.reladraw`. `scripts/build-docs.ts` renders it
+to `docs-src/public/assets/workflow/working-modes.svg` during `dev:docs`; Astro
+then publishes the SVG into `docs/assets/workflow/`.
 
 Screenshots live under `acceptance/snapshots/docs/features/<slug>/`
 and are committed PNGs, so every baseline change is visible in `git status` and

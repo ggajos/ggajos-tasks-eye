@@ -1,0 +1,92 @@
+// Human attention workflow, agreed in the September 2026 interview.
+// V4: orthogonal connectors, aligned branches, and separate return lanes.
+// Previous versions remain unchanged. Reladraw 0.11.1.
+diagram theme: dark background: #0b1018 text: (color: #e7edf5)
+default leaf fill: #1b2534 border: #40516a text: (size: 16)
+default container fill: #111a26 border: #2a394e text: (size: 18)
+default edge line: (path: square, corners: sharp, thickness: 2) text: (size: 13)
+style progress line: (color: #65d9a5) text: (color: #65d9a5)
+style adjust line: (color: #f2bd63) text: (color: #f2bd63)
+style repeat line: (color: #79b8ff) text: (color: #79b8ff)
+style mode line: (color: #bc9aff, pattern: dashed) text: (color: #bc9aff)
+style dim text: (color: #9babc0, size: 13)
+style active fill: #17352f border: #65d9a5
+style question fill: #263246 border: #71839b
+style attention fill: #352c1e border: #b79150
+style returnpoint fill: #192d43 border: #79b8ff
+style milestone fill: #204b3e border: #88edbd text: (size: 19)
+
+node execution "" border: #41665d
+node execution.caption "FOCUS FIRST   ·   repeat until today's queue is empty" (size: 18) shape: none
+node execution.focus "Open Focus / Any notes?" below execution.caption (gap: 75) left level with execution.caption style: question
+node execution.work "Work on the note / [dim]Finish completed tasks[/dim] / [dim]Add work/context if useful[/dim]" right of execution.focus (gap: 120) style: active
+node execution.done "Whole note complete?" right of execution.work (gap: 70) style: question
+node execution.close "Close note" right of execution.done (gap: 60) style: active
+node execution.continue "Continue now?" below execution.work (gap: 90) level with execution.attention style: question
+node execution.attention "Choose next attention / [dim]Later that day: lower priority[/dim] / [dim]Another day: move due date[/dim]" below execution.focus (gap: 75) style: attention
+
+edge execution.focus -> execution.work "highest priority" style: progress from: right to: left
+edge execution.work -> execution.done style: progress from: right to: left
+edge execution.done -> execution.close "yes" style: progress from: right to: left
+edge execution.done -> execution.continue "no" style: progress from: bottom to: right
+edge execution.continue -> execution.work "yes" style: repeat from: top to: bottom
+edge execution.continue -> execution.attention "stop" style: adjust from: left to: right
+
+edge execution.close -> execution.focus "next highest-priority note" style: repeat from: top to: top
+edge execution.attention -> execution.focus "pick again" style: repeat from: top to: bottom
+
+node cleared "Today's queue cleared / [dim]Future topics can remain open[/dim]" below execution (gap: 90) style: milestone
+edge execution.focus -> cleared "empty" style: progress from: left to: top left of execution.attention
+
+node plan "" below cleared (gap: 60) left level with cleared
+node plan.caption "PLAN TOMORROW / [dim]Open view · review the entire list[/dim]" (size: 18) shape: none
+node plan.review "Next unreviewed note?" below plan.caption (gap: 70) left level with plan.caption style: question
+node plan.keep "Keep tomorrow / Raise key priorities" below plan.review (gap: 85) style: attention
+node plan.postpone "Move attention / to a later day" right of plan.keep (gap: 70) style: attention
+node plan.ready "Tomorrow ready / [dim]Only priorities + must-advance work[/dim]" below plan.keep and plan.postpone (gap: 80) style: active
+edge cleared -> plan.review "plan" style: mode from: bottom to: top
+edge plan.review -> plan.keep "important / must advance" style: adjust from: bottom to: top
+edge plan.review -> plan.postpone "can wait" style: adjust from: right to: top
+edge plan.keep -> plan.review "next note" style: repeat from: left to: left
+edge plan.postpone -> plan.review "next note" style: repeat from: right to: right
+edge plan.review -> plan.ready "all reviewed" style: progress from: left to: left
+
+node repair "" left of plan (gap: 150) top level with plan contents: (widths: match)
+node repair.caption "REPAIR / [dim]Natural break · from any mode[/dim]" (size: 18) shape: none
+node repair.inbox "Open Inbox / Any notes?" below repair.caption (gap: 50) style: question
+node repair.fix "Repair a note" below repair.inbox (gap: 70)
+node repair.check "Inbox zero / Focus has work?" below repair.fix (gap: 70) style: question
+node repair.resume "Resume interrupted mode / or plan tomorrow" below repair.check (gap: 70)
+edge repair.inbox -> repair.fix "yes" style: progress from: bottom to: top
+edge repair.fix -> repair.inbox "check again" style: repeat from: right to: right
+edge repair.inbox -> repair.check "empty" style: progress from: left to: left
+edge repair.check -> execution.focus "yes · Focus first" style: mode from: left to: left
+edge repair.check -> repair.resume "no" style: mode from: bottom to: top
+
+node future "" right of plan (gap: 300) top level with plan contents: (widths: match)
+node future.caption "WORK AHEAD / [dim]Optional · priorities already tackled[/dim]" (size: 18) shape: none
+node future.open "Open future lists / Tomorrow, then further days" below future.caption (gap: 50) style: question
+node future.useful "Useful work across / tomorrow + later?" below future.open (gap: 75) style: question
+node future.work "Work on a useful note / [dim]Finish tasks; add work/context if useful[/dim] / [dim]Close the note only when complete[/dim]" below future.useful (gap: 70) style: active
+node future.next "Next attention / [dim]Keep date, lower priority, or move date[/dim] / [dim]Only if the note is still open[/dim]" below future.work (gap: 60) style: attention
+node future.note "[dim]Work early without moving the date.[/dim]" below future.next (gap: 40) shape: none
+edge plan.ready -> future.open "optional · time left" style: mode from: right to: left between plan and future
+edge future.open -> future.useful style: progress from: bottom to: top
+edge future.useful -> future.work "yes" style: progress from: bottom to: top
+edge future.work -> future.next "unfinished · stop for now" style: progress from: bottom to: top
+edge future.work -> future.work "continue" style: repeat from: top to: right
+edge future.work -> future.useful "note closed" style: repeat from: left to: left
+edge future.next -> future.useful "next note" style: repeat from: right to: right right of future
+
+node finish "Finish for now / [dim]Next session: start with Focus[/dim]" below plan.ready (gap: 350) style: milestone
+edge plan.ready -> finish "enough for today" style: progress from: bottom to: top
+edge future.useful -> finish "none useful / or stop for now" style: progress from: left to: right
+
+node title "Attention is precious." (size: 32) shape: none above execution (gap: 80) left level with execution
+node subtitle "Tackle today's commitments. Clear the queue. Choose what comes next." (size: 16, color: #9babc0) shape: none below title (gap: 15) left level with title
+node key "Due date = attention day     ·     Priority = order within that day / Blocked topic? Schedule an action: ask about X because it is a blocker. / Replan whenever needed; the recommended route starts after Focus is empty." (size: 14, color: #9babc0, wrap: 130) shape: none below finish (gap: 65)
+node legend "" fill: none border: none below key (gap: 30)
+node legend.progress "→ Advance" (size: 13) shape: none style: progress
+node legend.adjust "→ Change priority/date" (size: 13) right of legend.progress (gap: 35) shape: none style: adjust
+node legend.repeat "→ Repeat within mode" (size: 13) right of legend.adjust (gap: 35) shape: none style: repeat
+node legend.mode "⇢ Switch mode" (size: 13) right of legend.repeat (gap: 35) shape: none style: mode

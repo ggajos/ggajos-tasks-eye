@@ -151,6 +151,32 @@ body {
   line-height: 1.5;
 }
 
+.attention-workflow {
+  margin: 1.5rem 0;
+  border: 1px solid var(--eye-border);
+  border-radius: var(--eye-radius);
+  overflow: hidden;
+  background: #0b1018;
+}
+
+.attention-workflow__canvas {
+  overflow-x: auto;
+}
+
+.attention-workflow img {
+  display: block;
+  width: 100%;
+  min-width: 68rem;
+  max-width: none;
+  height: auto;
+}
+
+.attention-workflow figcaption {
+  padding: 0.8rem 1rem;
+  color: var(--sl-color-gray-2);
+  font-size: var(--sl-text-sm);
+}
+
 .overview-anatomy {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

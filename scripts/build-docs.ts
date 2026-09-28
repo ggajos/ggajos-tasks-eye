@@ -1,5 +1,6 @@
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { compile } from "reladraw";
 import type { DocumentedCommand } from "../features/commands";
 import {
   DOCUMENTED_COMMAND_GROUPS,
@@ -20,6 +21,18 @@ const FEATURE_CONTENT_ROOT = path.join(CONTENT_ROOT, "features");
 const REFERENCE_CONTENT_ROOT = path.join(CONTENT_ROOT, "reference");
 const GENERATED_ROOT = path.join(DOCS_SRC_ROOT, "src", "generated");
 const TEMPLATE_ROOT = path.join(DOCS_SRC_ROOT, "templates");
+const WORKFLOW_DIAGRAM_SOURCE = path.join(
+  DOCS_SRC_ROOT,
+  "diagrams",
+  "working-modes.reladraw",
+);
+const WORKFLOW_DIAGRAM_OUTPUT = path.join(
+  DOCS_SRC_ROOT,
+  "public",
+  "assets",
+  "workflow",
+  "working-modes.svg",
+);
 
 interface FeatureGroup {
   label: string;
@@ -401,6 +414,12 @@ function renderSidebar(features: readonly LoadedFeature[]): string {
 
 async function build(): Promise<void> {
   const features = (await discoverFeatures()).sort(byGroupThenTitle);
+
+  const workflowDiagram = compile(
+    await readFile(WORKFLOW_DIAGRAM_SOURCE, "utf8"),
+  );
+  await mkdir(path.dirname(WORKFLOW_DIAGRAM_OUTPUT), { recursive: true });
+  await writeFile(WORKFLOW_DIAGRAM_OUTPUT, workflowDiagram);
 
   await mkdir(CONTENT_ROOT, { recursive: true });
   await mkdir(GENERATED_ROOT, { recursive: true });

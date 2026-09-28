@@ -29,6 +29,30 @@ that tree; folders only decide which notes are indexed.
 ### The Meaning of a Due Date
 Treat a scheduled or due date as the **next due date**—the date on which an action should surface again for your attention—not necessarily as a hard external deadline. If today is not the right moment for a task, rescheduling it to tomorrow is a valid decision, not a failure.
 
+## A daily attention workflow
+
+Attention is limited, so Focus is the committed list for today. Start with its
+highest-priority note. Finish the task you can do, add context or another task
+when useful, and close the note once all its work is complete. If work remains,
+continue or decide when it needs attention next: lower its priority for later
+today, or move its date to another day. Return to Focus until its list is empty.
+
+<figure class="attention-workflow">
+  <div class="attention-workflow__canvas">
+    <img src="../assets/workflow/working-modes.svg" alt="Daily attention workflow: repeat Focus until empty, repair Inbox to zero, plan tomorrow, then finish or optionally work ahead" loading="lazy" />
+  </div>
+  <figcaption>
+    <a href="../assets/workflow/working-modes.svg">Open the full-size workflow diagram</a>.
+    Scroll horizontally to read it here on a narrow screen.
+  </figcaption>
+</figure>
+
+Repair Inbox at a natural break and keep it close to zero; a repaired note may
+bring work into Focus. Once Focus is empty, review tomorrow in Open. Keep only
+important work or work that must advance that day, raise the priority of what
+matters most, and postpone what can wait. Then stop for now or, if useful,
+work ahead on tomorrow's and later notes.
+
 ## Note Statuses
 
 Tasks Eye respects the lifecycle of your notes using two explicit statuses (defined in your YAML frontmatter or properties):
@@ -64,7 +88,7 @@ A typical day using Tasks Eye looks like this:
   </figcaption>
 </figure>
 
-2. **Execution:** You complete the task in the first note. For the second, you realize you need input from a colleague, so you add a new task "Wait for reply" and date it for tomorrow.
+2. **Execution:** You complete the task in the first note. For the second, you need input from a colleague, so you add an actionable task, "Ask about X because it blocks Y," and date it for tomorrow.
 3. **Capture:** A random idea strikes. You create a quick note and jot down a task. It lands anywhere inside the indexed boundary.
 4. **Afternoon Repair:** You run [**Tasks Eye: Show Inbox**](../reference/commands/#open-inbox). You see your quick note flagged because it has no `up` link. Link it to the right parent note and date the task for next week.
-5. **Closing out:** You finish the remaining items in Focus. Both Focus and Inbox are now empty. You trust the system is ready for tomorrow.
+5. **Closing out:** You finish the remaining items in Focus and repair Inbox to zero. In Open, review tomorrow's list, raise the priority of the most important work, and postpone what can wait. With that list ready, you can finish for now or work ahead.
