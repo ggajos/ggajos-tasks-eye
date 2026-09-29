@@ -39,6 +39,7 @@ export interface EyeSettings {
   mode: EyeMode;
   contextFilter: string;
   notesFolderPath: string;
+  excludedFolderPaths: string[];
   availability: AvailabilitySettings;
   holidayCache: HolidayCache;
 }

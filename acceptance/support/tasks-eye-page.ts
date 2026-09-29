@@ -104,7 +104,88 @@ async function rowAction(
   }, rowText, ariaLabel, click);
 }
 
+async function openTasksEyeSettings(
+  expectedTexts: readonly string[],
+): Promise<{ mainWindow: string; modal: WdioElement }> {
+  const mainWindow = await browser.getWindowHandle();
+  const existingWindows = new Set(await browser.getWindowHandles());
+  await browser.executeObsidianCommand("app:open-settings");
+
+  let settingsWindow: string | undefined;
+  await browser.waitUntil(
+    async () => {
+      settingsWindow = (await browser.getWindowHandles()).find(
+        (windowHandle) => !existingWindows.has(windowHandle),
+      );
+      return settingsWindow !== undefined;
+    },
+    { timeout: 10_000, timeoutMsg: "Obsidian settings window did not open" },
+  );
+  if (!settingsWindow) throw new Error("Obsidian settings window is missing");
+  await browser.switchToWindow(settingsWindow);
+
+  try {
+    await selectTasksEyeSettingsTab(expectedTexts);
+  } catch (error) {
+    await closeTasksEyeSettings(mainWindow);
+    throw error;
+  }
+  const modal = await $(".modal.mod-settings");
+  return { mainWindow, modal: modal as unknown as WdioElement };
+}
+
+async function selectTasksEyeSettingsTab(
+  expectedTexts: readonly string[],
+): Promise<void> {
+  await browser.waitUntil(
+    async () =>
+      await browser.execute(() => {
+        const tabs = document.querySelectorAll<HTMLElement>(
+          ".modal.mod-settings .vertical-tab-nav-item",
+        );
+        const tab = [...tabs].find(
+          (candidate) => candidate.textContent?.trim() === "Tasks Eye",
+        );
+        tab?.click();
+        return tab !== undefined;
+      }),
+    { timeout: 10_000, timeoutMsg: "Tasks Eye settings tab did not open" },
+  );
+  await waitForSettingsText(expectedTexts);
+}
+
+async function waitForSettingsText(
+  expectedTexts: readonly string[],
+): Promise<void> {
+  let actual = "";
+  try {
+    await browser.waitUntil(
+      async () => {
+        actual = await browser.execute(() =>
+          document.querySelector<HTMLElement>(
+            ".modal.mod-settings .vertical-tab-content",
+          )?.textContent ?? "");
+        return expectedTexts.every((text) => actual.includes(text));
+      },
+      { timeout: 10_000 },
+    );
+  } catch {
+    throw new Error(
+      `Expected Tasks Eye settings to contain ${JSON.stringify(expectedTexts)}; last text was ${JSON.stringify(actual)}`,
+    );
+  }
+}
+
+async function closeTasksEyeSettings(mainWindow: string): Promise<void> {
+  await browser.closeWindow();
+  await browser.switchToWindow(mainWindow);
+}
+
 export const tasksEyePage = {
+  openSettings: openTasksEyeSettings,
+  waitForSettingsText,
+  closeSettings: closeTasksEyeSettings,
+
   plugin: (text: string) => activeView(PLUGIN, text),
   editor: (text: string) => activeView(EDITOR, text),
 

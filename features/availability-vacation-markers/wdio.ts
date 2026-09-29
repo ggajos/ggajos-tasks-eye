@@ -57,60 +57,15 @@ const availabilityFixture = fixture(
 );
 
 async function openAvailabilitySettings() {
-  const mainWindow = await browser.getWindowHandle();
-  const existingWindows = new Set(await browser.getWindowHandles());
-  await browser.executeObsidianCommand("app:open-settings");
-
-  let settingsWindow: string | undefined;
-  await browser.waitUntil(
-    async () => {
-      settingsWindow = (await browser.getWindowHandles()).find(
-        (windowHandle) => !existingWindows.has(windowHandle),
-      );
-      return settingsWindow !== undefined;
-    },
-    {
-      timeout: 10_000,
-      timeoutMsg: "Obsidian settings window did not open",
-    },
-  );
-  if (!settingsWindow) throw new Error("Obsidian settings window is missing");
-  await browser.switchToWindow(settingsWindow);
-
-  await browser.waitUntil(
-    async () =>
-      await browser.execute(() => {
-        const tabs = document.querySelectorAll<HTMLElement>(
-          ".modal.mod-settings .vertical-tab-nav-item",
-        );
-        const tab = [...tabs].find(
-          (candidate) => candidate.textContent?.trim() === "Tasks Eye",
-        );
-        tab?.click();
-        return tab !== undefined;
-      }),
-    { timeout: 10_000, timeoutMsg: "Tasks Eye settings tab did not open" },
-  );
-  await browser.waitUntil(
-    async () =>
-      await browser.execute(() => {
-        const text = document.querySelector<HTMLElement>(
-          ".modal.mod-settings",
-        )?.textContent;
-        return (
-          text?.includes("Public holidays") &&
-          text.includes("Non-working days") &&
-          text.includes("Personal time off")
-        );
-      }),
-    { timeout: 10_000, timeoutMsg: "Tasks Eye settings did not render" },
-  );
-  return { mainWindow, modal: await $(".modal.mod-settings") };
+  return await tasksEyePage.openSettings([
+    "Public holidays",
+    "Non-working days",
+    "Personal time off",
+  ]);
 }
 
 async function closeAvailabilitySettings(mainWindow: string) {
-  await browser.closeWindow();
-  await browser.switchToWindow(mainWindow);
+  await tasksEyePage.closeSettings(mainWindow);
 }
 
 export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
@@ -229,6 +184,24 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
                 throw new Error("Tasks Eye settings content is missing");
               }
               content.style.setProperty("zoom", "0.75");
+              // Frame Availability only: hide the Sources sections rendered above it.
+              const excluded = content.querySelector<HTMLElement>(
+                ".eye-excluded-folders",
+              );
+              for (
+                let node: HTMLElement | null = excluded;
+                node && node !== content;
+                node = node.parentElement
+              ) {
+                if (node === excluded) {
+                  node.style.setProperty("display", "none");
+                }
+                let sibling = node.previousElementSibling;
+                while (sibling) {
+                  (sibling as HTMLElement).style.setProperty("display", "none");
+                  sibling = sibling.previousElementSibling;
+                }
+              }
             });
             await expect(modal).toHaveText(expect.stringContaining("Poland"));
             await expect(modal).toHaveText(

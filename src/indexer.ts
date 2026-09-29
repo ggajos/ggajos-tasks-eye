@@ -8,6 +8,7 @@ import {
   collectDescendantMarkdownFiles,
   findManagedFolder,
 } from "./managedFolder";
+import { exclusionCoveringNotesFolder } from "./managedPath";
 import type { EyeFile } from "./types";
 
 export type { Frontmatter, MarkdownFileSource } from "./eyeFile";
@@ -62,11 +63,18 @@ function logLiveUpResolution(
 export async function readEyeFiles(
   app: App,
   managedFolderPath: string,
+  excludedFolderPaths: readonly string[] = [],
 ): Promise<EyeFile[]> {
+  if (exclusionCoveringNotesFolder(managedFolderPath, excludedFolderPaths)) {
+    return [];
+  }
   const managedFolder = findManagedFolder(app, managedFolderPath);
   if (!managedFolder) return [];
 
-  const files = collectDescendantMarkdownFiles(managedFolder);
+  const files = collectDescendantMarkdownFiles(
+    managedFolder,
+    excludedFolderPaths,
+  );
   const result: EyeFile[] = [];
 
   for (const file of files) {

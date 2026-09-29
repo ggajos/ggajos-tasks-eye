@@ -39,10 +39,16 @@ import { readEyeFiles } from "./indexer";
 import { findManagedFolder } from "./managedFolder";
 import {
   DEFAULT_MANAGED_FOLDER_PATH,
-  isPathInManagedFolder,
+  excludedFolderError,
+  excludedNotesFolderMessage,
+  exclusionCoveringNotesFolder,
+  isPathInSources,
   isPathRelatedToManagedFolder,
   missingManagedFolderMessage,
+  normalizeExcludedFolderPath,
+  normalizeExcludedFolderPaths,
   normalizeManagedFolderPath,
+  notesFolderExclusionError,
 } from "./managedPath";
 import type { StatusStepDirection } from "./noteStatus";
 import { stepNoteStatus } from "./noteStatus";
@@ -72,6 +78,7 @@ function defaultSettings(): EyeSettings {
     mode: DEFAULT_MODE,
     contextFilter: "*",
     notesFolderPath: DEFAULT_MANAGED_FOLDER_PATH,
+    excludedFolderPaths: [],
     availability: {
       countryCode: DEFAULT_AVAILABILITY_SETTINGS.countryCode,
       nonWorkingWeekdays: [...DEFAULT_AVAILABILITY_SETTINGS.nonWorkingWeekdays],
@@ -102,6 +109,9 @@ function normalizeSettings(value: unknown): EyeSettings {
       typeof saved.notesFolderPath === "string"
         ? saved.notesFolderPath
         : defaults.notesFolderPath,
+    ),
+    excludedFolderPaths: normalizeExcludedFolderPaths(
+      saved.excludedFolderPaths,
     ),
     availability: normalizeAvailabilitySettings(saved.availability),
     holidayCache: normalizeHolidayCache(saved.holidayCache),
@@ -268,7 +278,11 @@ export default class TheEyePlugin extends Plugin {
   }
 
   async readFiles(): Promise<EyeFile[]> {
-    const files = await readEyeFiles(this.app, this.settings.notesFolderPath);
+    const files = await readEyeFiles(
+      this.app,
+      this.settings.notesFolderPath,
+      this.settings.excludedFolderPaths,
+    );
     void this.refreshHolidayData(false, files, true);
     return files;
   }
@@ -442,7 +456,15 @@ export default class TheEyePlugin extends Plugin {
   }
 
   managedFolderError(): string | null {
-    return this.managedFolderErrorFor(this.settings.notesFolderPath);
+    const missing = this.managedFolderErrorFor(this.settings.notesFolderPath);
+    if (missing) return missing;
+    const covering = exclusionCoveringNotesFolder(
+      this.settings.notesFolderPath,
+      this.settings.excludedFolderPaths,
+    );
+    return covering
+      ? excludedNotesFolderMessage(this.settings.notesFolderPath, covering)
+      : null;
   }
 
   managedFolderErrorFor(notesFolderPath: string): string | null {
@@ -452,9 +474,84 @@ export default class TheEyePlugin extends Plugin {
       : null;
   }
 
+  notesFolderSettingError(notesFolderPath: string): string | null {
+    return (
+      notesFolderExclusionError(
+        notesFolderPath,
+        this.settings.excludedFolderPaths,
+      ) ?? this.managedFolderErrorFor(notesFolderPath)
+    );
+  }
+
+  excludedFolderSettingError(index: number, value: string): string | null {
+    return excludedFolderError(
+      value,
+      index,
+      this.settings.notesFolderPath,
+      this.settings.excludedFolderPaths,
+    );
+  }
+
+  excludedFolderExists(excludedFolderPath: string): boolean {
+    const normalized = normalizeExcludedFolderPath(excludedFolderPath);
+    return (
+      normalized !== "" && findManagedFolder(this.app, normalized) !== null
+    );
+  }
+
+  async addExcludedFolder(): Promise<void> {
+    this.settings.excludedFolderPaths = [
+      ...this.settings.excludedFolderPaths,
+      "",
+    ];
+    await this.saveData(this.settings);
+  }
+
+  async setExcludedFolder(index: number, value: string): Promise<void> {
+    if (index < 0 || index >= this.settings.excludedFolderPaths.length) {
+      throw new Error(`No excluded folder exists at index ${index}.`);
+    }
+    const error = this.excludedFolderSettingError(index, value);
+    if (error) throw new Error(error);
+    const normalized = normalizeExcludedFolderPath(value);
+    if (this.settings.excludedFolderPaths[index] === normalized) return;
+    this.settings.excludedFolderPaths = this.settings.excludedFolderPaths.map(
+      (existing, existingIndex) =>
+        existingIndex === index ? normalized : existing,
+    );
+    await this.saveExcludedFolderChange();
+  }
+
+  async deleteExcludedFolder(index: number): Promise<void> {
+    const removed = this.settings.excludedFolderPaths[index];
+    if (removed === undefined) {
+      throw new Error(`No excluded folder exists at index ${index}.`);
+    }
+    this.settings.excludedFolderPaths =
+      this.settings.excludedFolderPaths.filter(
+        (_, existingIndex) => existingIndex !== index,
+      );
+    if (removed === "") {
+      await this.saveData(this.settings);
+      return;
+    }
+    await this.saveExcludedFolderChange();
+  }
+
+  private async saveExcludedFolderChange(): Promise<void> {
+    this.settings.contextFilter = "*";
+    await this.saveData(this.settings);
+    await this.refreshViews();
+  }
+
   async setNotesFolderPath(notesFolderPath: string): Promise<void> {
     const normalized = normalizeManagedFolderPath(notesFolderPath);
     if (this.settings.notesFolderPath === normalized) return;
+    const exclusionError = notesFolderExclusionError(
+      normalized,
+      this.settings.excludedFolderPaths,
+    );
+    if (exclusionError) throw new Error(exclusionError);
     this.settings.notesFolderPath = normalized;
     this.settings.contextFilter = "*";
     await this.saveData(this.settings);
@@ -650,7 +747,11 @@ export default class TheEyePlugin extends Plugin {
   }
 
   private isRelevantFile(file: TAbstractFile): boolean {
-    return isPathInManagedFolder(file.path, this.settings.notesFolderPath);
+    return isPathInSources(
+      file.path,
+      this.settings.notesFolderPath,
+      this.settings.excludedFolderPaths,
+    );
   }
 
   private queueRefresh(): void {

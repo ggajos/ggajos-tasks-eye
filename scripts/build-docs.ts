@@ -112,6 +112,7 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
     items: [
       { slug: "actions-step-note-status", label: "Step a note through states" },
       { slug: "data-vault-conventions", label: "Organize notes and tasks" },
+      { slug: "data-sources", label: "Choose which folders to read" },
     ],
   },
   {

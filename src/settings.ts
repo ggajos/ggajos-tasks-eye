@@ -7,7 +7,14 @@ import type {
 import { PluginSettingTab } from "obsidian";
 import { isIsoDate } from "./date";
 import type TheEyePlugin from "./main";
-import { DEFAULT_MANAGED_FOLDER_PATH, vaultFolderPath } from "./managedPath";
+import {
+  DEFAULT_MANAGED_FOLDER_PATH,
+  isExclusionOutsideNotesFolder,
+  isPathInManagedFolder,
+  MISSING_EXCLUSION_WARNING,
+  OUTSIDE_EXCLUSION_NOTE,
+  vaultFolderPath,
+} from "./managedPath";
 import {
   formatNonWorkingWeekdays,
   NON_WORKING_WEEKDAY_ABBREVIATIONS,
@@ -15,10 +22,25 @@ import {
   parseNonWorkingWeekdays,
 } from "./vacation";
 
+type ExcludedFolderKey = `excludedFolder:${number}`;
+
 type SettingsControlKey =
   | "notesFolderPath"
+  | ExcludedFolderKey
   | "holidayCountry"
   | "nonWorkingWeekdays";
+
+const EXCLUDED_FOLDER_KEY_PREFIX = "excludedFolder:";
+
+function excludedFolderKey(index: number): ExcludedFolderKey {
+  return `${EXCLUDED_FOLDER_KEY_PREFIX}${index}`;
+}
+
+function excludedFolderIndex(key: string): number | null {
+  if (!key.startsWith(EXCLUDED_FOLDER_KEY_PREFIX)) return null;
+  const index = Number(key.slice(EXCLUDED_FOLDER_KEY_PREFIX.length));
+  return Number.isInteger(index) && index >= 0 ? index : null;
+}
 
 const WEEKDAY_INPUT_DESCRIPTION = `Use comma-separated abbreviations: ${NON_WORKING_WEEKDAY_ABBREVIATIONS.join(
   ", ",
@@ -39,18 +61,62 @@ export class TasksEyeSettingTab extends PluginSettingTab {
   getSettingDefinitions(): SettingDefinitionItem<SettingsControlKey>[] {
     const personalTimeOff =
       this.eyePlugin.settings.availability.personalTimeOff;
+    const excludedFolderPaths = this.eyePlugin.settings.excludedFolderPaths;
     return [
       {
-        name: "Notes folder",
-        desc: "Tasks Eye reads Markdown notes in this folder and all subfolders.",
-        control: {
-          type: "folder",
-          key: "notesFolderPath",
-          includeRoot: true,
-          placeholder: DEFAULT_MANAGED_FOLDER_PATH,
-          validate: (value) =>
-            this.eyePlugin.managedFolderErrorFor(value) ?? undefined,
+        type: "group",
+        heading: "Sources",
+        cls: "eye-settings eye-sources",
+        items: [
+          {
+            name: "Notes folder",
+            desc: "Tasks Eye reads Markdown notes in this folder and all subfolders.",
+            control: {
+              type: "folder",
+              key: "notesFolderPath",
+              includeRoot: true,
+              placeholder: DEFAULT_MANAGED_FOLDER_PATH,
+              validate: (value) =>
+                this.eyePlugin.notesFolderSettingError(value) ?? undefined,
+            },
+          },
+        ],
+      },
+      {
+        type: "list",
+        heading: "Excluded folders",
+        cls: "eye-settings eye-excluded-folders",
+        emptyState:
+          "No excluded folders. Tasks Eye reads every subfolder of the notes folder.",
+        addItem: {
+          name: "Add excluded folder",
+          action: () => {
+            void (async () => {
+              await this.eyePlugin.addExcludedFolder();
+              this.update();
+            })();
+          },
         },
+        onDelete: (index) => {
+          void (async () => {
+            await this.eyePlugin.deleteExcludedFolder(index);
+            this.update();
+          })();
+        },
+        items: excludedFolderPaths.map((path, index) => ({
+          name: path || "New excluded folder",
+          desc: this.excludedFolderDescription(path),
+          searchable: false,
+          control: {
+            type: "folder",
+            key: excludedFolderKey(index),
+            placeholder: "Choose a folder",
+            filter: (folder) => this.suggestExcludedFolder(folder.path),
+            validate: (value) =>
+              this.eyePlugin.excludedFolderSettingError(index, value) ??
+              undefined,
+          },
+        })),
       },
       {
         type: "group",
@@ -142,6 +208,10 @@ export class TasksEyeSettingTab extends PluginSettingTab {
   }
 
   getControlValue(key: string): unknown {
+    const excludedIndex = excludedFolderIndex(key);
+    if (excludedIndex !== null) {
+      return this.eyePlugin.settings.excludedFolderPaths[excludedIndex] ?? "";
+    }
     switch (key) {
       case "notesFolderPath":
         return vaultFolderPath(this.eyePlugin.settings.notesFolderPath);
@@ -161,9 +231,17 @@ export class TasksEyeSettingTab extends PluginSettingTab {
       throw new TypeError(`Tasks Eye setting "${key}" must be a string.`);
     }
 
+    const excludedIndex = excludedFolderIndex(key);
+    if (excludedIndex !== null) {
+      await this.eyePlugin.setExcludedFolder(excludedIndex, value);
+      this.update();
+      return;
+    }
+
     switch (key) {
       case "notesFolderPath":
         await this.eyePlugin.setNotesFolderPath(value);
+        this.update();
         return;
       case "holidayCountry":
         await this.eyePlugin.setHolidayCountry(value);
@@ -177,6 +255,38 @@ export class TasksEyeSettingTab extends PluginSettingTab {
       default:
         throw new Error(`Tasks Eye does not define a "${key}" setting.`);
     }
+  }
+
+  private excludedFolderDescription(path: string): string {
+    if (!path) return "Choose a folder inside the notes folder to ignore.";
+    if (!this.eyePlugin.excludedFolderExists(path)) {
+      return MISSING_EXCLUSION_WARNING;
+    }
+    if (
+      isExclusionOutsideNotesFolder(
+        path,
+        this.eyePlugin.settings.notesFolderPath,
+      )
+    ) {
+      return OUTSIDE_EXCLUSION_NOTE;
+    }
+    return "Notes in this folder and its subfolders are ignored.";
+  }
+
+  private suggestExcludedFolder(path: string): boolean {
+    const notesFolder = vaultFolderPath(
+      this.eyePlugin.settings.notesFolderPath,
+    );
+    const candidate = vaultFolderPath(path);
+    return (
+      candidate !== "" &&
+      candidate !== notesFolder &&
+      isPathInManagedFolder(
+        candidate,
+        this.eyePlugin.settings.notesFolderPath,
+      ) &&
+      !this.eyePlugin.settings.excludedFolderPaths.includes(candidate)
+    );
   }
 
   private personalTimeOffLabel(entry: PersonalTimeOff): string {

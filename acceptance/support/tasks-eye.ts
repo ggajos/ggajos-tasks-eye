@@ -413,12 +413,15 @@ export async function resetFixtureVault(value: FeatureFixture): Promise<void> {
         plugins: Record<string, {
           settings: unknown;
           saveData: (data: unknown) => Promise<void>;
+          settingsTab?: { update?: () => void } | null;
         }>;
       };
     }).plugins.plugins["ggajos-tasks-eye"];
     if (!plugin) throw new Error("Tasks Eye plugin is not loaded");
     Object.assign(plugin, { settings: fixtureState.settings });
     await plugin.saveData(plugin.settings);
+    // Obsidian caches setting definitions; rebuild them for the new fixture.
+    plugin.settingsTab?.update?.();
   }, { today, settings: value.settings });
 }
 

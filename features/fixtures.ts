@@ -14,6 +14,7 @@ export interface FeatureFixture {
     mode: FixtureMode;
     contextFilter: string;
     notesFolderPath: string;
+    excludedFolderPaths: string[];
     availability: AvailabilitySettings;
     holidayCache: HolidayCache;
   };
@@ -139,6 +140,7 @@ export function fixture(
       mode: options.settings?.mode ?? "open",
       contextFilter: options.settings?.contextFilter ?? "*",
       notesFolderPath: options.settings?.notesFolderPath ?? "/",
+      excludedFolderPaths: [...(options.settings?.excludedFolderPaths ?? [])],
       availability: options.settings?.availability ?? defaultAvailability(),
       holidayCache: options.settings?.holidayCache ?? emptyHolidayCache(),
     },
@@ -172,6 +174,10 @@ export function isFeatureFixture(value: unknown): value is FeatureFixture {
     typeof candidate.settings?.mode === "string" &&
     typeof candidate.settings?.contextFilter === "string" &&
     typeof candidate.settings?.notesFolderPath === "string" &&
+    Array.isArray(candidate.settings?.excludedFolderPaths) &&
+    candidate.settings.excludedFolderPaths.every(
+      (path) => typeof path === "string",
+    ) &&
     typeof candidate.settings?.availability === "object" &&
     candidate.settings.availability !== null &&
     typeof candidate.settings?.holidayCache === "object" &&

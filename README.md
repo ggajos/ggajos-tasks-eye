@@ -15,7 +15,7 @@ Tasks Eye gives you three main views to manage your work:
 
 ## How it works
 
-1. **Create the note tree**: Put indexed Markdown notes anywhere below the configured Tasks Eye notes folder. Mark exactly one note as the root with `up: -`; every other note links to its parent, for example `up: "[[Work]]"`. The root is a normal note and still needs the usual status and task metadata. Folders only define the indexing boundary.
+1. **Create the note tree**: Put indexed Markdown notes anywhere below the configured Tasks Eye notes folder, except any excluded folders (both are set under **Sources** in settings). Mark exactly one note as the root with `up: -`; every other note links to its parent, for example `up: "[[Work]]"`. The root is a normal note and still needs the usual status and task metadata. Folders only define the indexing boundary.
 2. **Add a task** to the note using the Obsidian Tasks format with a scheduled or due date:
 
 ```md

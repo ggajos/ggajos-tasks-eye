@@ -1,6 +1,6 @@
 import type { App } from "obsidian";
 import { TFile, TFolder } from "obsidian";
-import { vaultFolderPath } from "./managedPath";
+import { isPathExcluded, vaultFolderPath } from "./managedPath";
 
 export function findManagedFolder(
   app: App,
@@ -12,11 +12,17 @@ export function findManagedFolder(
   return file instanceof TFolder ? file : null;
 }
 
-export function collectDescendantMarkdownFiles(folder: TFolder): TFile[] {
+export function collectDescendantMarkdownFiles(
+  folder: TFolder,
+  excludedFolderPaths: readonly string[] = [],
+): TFile[] {
   const result: TFile[] = [];
   for (const child of folder.children) {
+    if (isPathExcluded(child.path, excludedFolderPaths)) continue;
     if (child instanceof TFolder) {
-      result.push(...collectDescendantMarkdownFiles(child));
+      result.push(
+        ...collectDescendantMarkdownFiles(child, excludedFolderPaths),
+      );
     } else if (child instanceof TFile && child.extension === "md") {
       result.push(child);
     }
