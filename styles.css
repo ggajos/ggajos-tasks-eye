@@ -851,6 +851,11 @@
   box-shadow: none;
 }
 
+.eye-note-tree .eye-tree-toggle {
+  height: 20px;
+  padding-block: 1px;
+}
+
 .eye-note-tree button:focus-visible {
   outline: 2px solid var(--interactive-accent);
   outline-offset: -2px;
@@ -865,7 +870,7 @@
   display: flex;
   align-items: flex-start;
   gap: 3px;
-  padding-block: 3px;
+  padding-block: 1px;
   padding-inline-start: calc(var(--eye-tree-depth) * 14px);
   border-radius: var(--radius-s, 4px);
 }
@@ -891,7 +896,7 @@
 }
 
 .eye-tree-row.is-current {
-  margin-block: 4px;
+  margin-block: 1px;
   background: var(--background-secondary);
 }
 
@@ -902,7 +907,6 @@
 .eye-tree-title {
   flex: 1;
   min-width: 0;
-  padding-block: 3px;
   overflow-wrap: anywhere;
   white-space: normal;
 }

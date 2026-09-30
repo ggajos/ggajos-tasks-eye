@@ -57,6 +57,7 @@ async function openTree() {
 }
 
 async function expectWrappedTitles() {
+  const wrappedNames = [ROOT, CURRENT, LONG_CHILD, UNBROKEN];
   const geometry = await browser.execute(
     (names) => {
       const tree = document.querySelector<HTMLElement>(".eye-note-tree")!;
@@ -86,6 +87,13 @@ async function expectWrappedTitles() {
           }
         }
         const bounds = title.getBoundingClientRect();
+        const rowStyle = getComputedStyle(row);
+        const textHeight =
+          lines.size * parseFloat(getComputedStyle(title).lineHeight);
+        const entryHeight =
+          row.getBoundingClientRect().height +
+          parseFloat(rowStyle.marginTop) +
+          parseFloat(rowStyle.marginBottom);
         return {
           name,
           text: title.textContent,
@@ -98,15 +106,19 @@ async function expectWrappedTitles() {
           ),
           rowVisible: row.getClientRects().length > 0,
           panelFits: tree.scrollWidth <= tree.clientWidth + 1,
+          dense: entryHeight <= textHeight + 6,
           toggleCount: row.querySelectorAll("button").length,
         };
       });
     },
-    [ROOT, CURRENT, LONG_CHILD, UNBROKEN],
+    [...wrappedNames, CONTEXT, CHILD_A, GRANDCHILD_B],
   );
   for (const item of geometry) {
     expect(item.text).toBe(item.name);
-    expect(item.lineCount).toBeGreaterThan(1);
+    if (wrappedNames.includes(item.name))
+      expect(item.lineCount).toBeGreaterThan(1);
+    else expect(item.lineCount).toBe(1);
+    expect(item.dense).toBe(true);
     expect(item.aligned).toBe(true);
     expect(item.contained).toBe(true);
     expect(item.rowVisible).toBe(true);
@@ -156,7 +168,8 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
   {
     acceptance: [
       {
-        title: "shows full titles with aligned wrapping in a narrow panel",
+        title:
+          "shows full titles with aligned wrapping and dense spacing in a narrow panel",
         async run() {
           await openTree();
           await expectWrappedTitles();
