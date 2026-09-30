@@ -276,7 +276,7 @@ export class EyeView extends ItemView {
           element(
             "div",
             "eye-empty",
-            `No completed tasks for ${formatHumanDate(this.state.date)}.`,
+            `No completed tasks for ${formatHumanDate(this.state.date, nowDate())}.`,
           ),
         );
       }

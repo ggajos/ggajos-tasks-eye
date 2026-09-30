@@ -1,5 +1,5 @@
 import { STATUSES } from "./constants";
-import { formatYmd, isBeforeToday } from "./date";
+import { formatYmd, isBeforeToday, nowDate } from "./date";
 import { isPathInManagedFolder } from "./managedPath";
 import type { NoteGraph } from "./noteGraph";
 import { hasUp, isRootFile, noteGraph } from "./noteGraph";
@@ -40,6 +40,7 @@ interface ValidationContext {
   status: string;
   hasExplicitStatus: boolean;
   uncompletedTasks: EyeTask[];
+  now: Date;
 }
 
 type ValidationRule = (context: ValidationContext) => ValidationViolation[];
@@ -133,10 +134,10 @@ const openWithoutDueDate: ValidationRule = ({ status, uncompletedTasks }) => {
   );
 };
 
-const openTaskOverdue: ValidationRule = ({ status, uncompletedTasks }) => {
+const openTaskOverdue: ValidationRule = ({ status, uncompletedTasks, now }) => {
   if (status !== "open") return [];
   const earliestDue = getEarliestDueDate(uncompletedTasks);
-  if (earliestDue === null || !isBeforeToday(earliestDue)) return [];
+  if (earliestDue === null || !isBeforeToday(earliestDue, now)) return [];
   return [
     {
       code: "open-task-overdue",
@@ -190,6 +191,7 @@ export function validateFile(
   file: EyeFile,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
   indexedFiles: readonly EyeFile[] = [file],
+  now: Date = nowDate(),
 ): ValidationViolation[] {
   if (!isPathInManagedFolder(file.path, file.managedFolderPath)) return [];
 
@@ -201,6 +203,7 @@ export function validateFile(
     hasExplicitStatus:
       file.status !== undefined && file.status !== null && file.status !== "",
     uncompletedTasks: file.tasks.filter((task) => !task.completed),
+    now,
   };
 
   return VALIDATION_RULES.flatMap((rule) => rule(context));

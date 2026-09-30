@@ -5,6 +5,7 @@ import {
   formatYear,
   formatYmd,
   isoToTs,
+  nowDate,
   shiftIsoDate,
 } from "./date";
 
@@ -192,12 +193,13 @@ export function availabilityConfigFromSettings(
 function makeMarker(
   iso: string,
   reasons: AvailabilityReason[],
+  now: Date,
 ): VacationMarker {
   const year = formatYear(iso);
   return {
     ts: isoToTs(iso),
     dateLabel: formatMonthDay(iso),
-    yearLabel: year === currentYear() ? "" : year,
+    yearLabel: year === currentYear(now) ? "" : year,
     dayLabel: formatWeekday(iso),
     reasons,
     label: reasons.map((reason) => reason.label).join(" · "),
@@ -208,6 +210,7 @@ export function vacationMarkers(
   fromTs: number,
   toTs: number,
   config: AvailabilityConfig,
+  now: Date = nowDate(),
 ): VacationMarker[] {
   const markers: VacationMarker[] = [];
   if (toTs < fromTs) return markers;
@@ -217,7 +220,7 @@ export function vacationMarkers(
   while (iso <= end) {
     const reasons = availabilityReasonsForTs(isoToTs(iso), config);
     if (reasons.some((reason) => reason.kind !== "weekend")) {
-      markers.push(makeMarker(iso, reasons));
+      markers.push(makeMarker(iso, reasons, now));
     }
     iso = shiftIsoDate(iso, 1);
   }

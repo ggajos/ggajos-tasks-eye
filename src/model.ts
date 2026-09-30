@@ -48,9 +48,10 @@ export function rowErrors(
   file: EyeFile,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
   indexedFiles: readonly EyeFile[] = [file],
+  now: Date = nowDate(),
 ): ValidationViolation[] {
   const earliestDue = getEarliestDueDate(file.tasks);
-  return validateFile(file, availability, indexedFiles).filter(
+  return validateFile(file, availability, indexedFiles, now).filter(
     (violation) =>
       violation.code !== "task-on-unavailable-day" ||
       violation.dueTs === earliestDue,
@@ -61,6 +62,7 @@ export function buildRowModel(
   file: EyeFile,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
   indexedFiles: readonly EyeFile[] = [file],
+  now: Date = nowDate(),
 ): RowModel {
   const earliestDue = getEarliestDueDate(file.tasks);
   const earliestTask = findEarliestDueTask(file.tasks);
@@ -69,8 +71,8 @@ export function buildRowModel(
     file,
     earliestDue,
     earliestTask,
-    errors: rowErrors(file, availability, indexedFiles),
-    isFuture: earliestDue !== null && isAfterToday(earliestDue),
+    errors: rowErrors(file, availability, indexedFiles, now),
+    isFuture: earliestDue !== null && isAfterToday(earliestDue, now),
     actionLabel: earliestTask ? earliestTask.text : "No unchecked tasks",
     contextKey: context,
     contextLabel: context,
@@ -111,8 +113,9 @@ export function rowMatchesMode(model: RowModel, mode: EyeMode): boolean {
 export function buildRowModels(
   files: readonly EyeFile[],
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+  now: Date = nowDate(),
 ): RowModel[] {
-  return files.map((file) => buildRowModel(file, availability, files));
+  return files.map((file) => buildRowModel(file, availability, files, now));
 }
 
 export function selectRowModels(
@@ -132,9 +135,10 @@ export function selectRows(
   mode: EyeMode,
   contextFilter: string,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
+  now: Date = nowDate(),
 ): RowModel[] {
   return selectRowModels(
-    buildRowModels(files, availability),
+    buildRowModels(files, availability, now),
     files,
     mode,
     contextFilter,
@@ -300,8 +304,8 @@ function dayKey(ts: number | null): string {
   return ts === null ? "noDue" : formatYmd(ts);
 }
 
-function dayLabel(ts: number | null): string {
-  return ts === null ? "No Due Date" : formatHumanDate(ts);
+function dayLabel(ts: number | null, now: Date): string {
+  return ts === null ? "No Due Date" : formatHumanDate(ts, now);
 }
 
 function emptyBoardBucket(key: DueBucket, label: string): MutableBoardBucket {
@@ -333,7 +337,7 @@ export function buildBoardBuckets(
     if (!day) {
       day = {
         key,
-        label: dayLabel(ts),
+        label: dayLabel(ts, now),
         items: [],
         taskCount: 0,
       };

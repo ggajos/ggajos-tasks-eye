@@ -79,34 +79,41 @@ export function formatWeekday(value: number | string): string {
   return WEEKDAYS[toLocalDate(value).getDay()] ?? "";
 }
 
-export function formatHumanDate(value: number | string): string {
+export function formatHumanDate(
+  value: number | string,
+  now: Date = nowDate(),
+): string {
   const dt = toLocalDate(value);
   const month = FULL_MONTHS[dt.getMonth()] ?? "";
   const weekday = FULL_WEEKDAYS[dt.getDay()] ?? "";
   const label = `${month} ${pad(dt.getDate())} - ${weekday}`;
-  return dt.getFullYear() === nowDate().getFullYear()
+  return dt.getFullYear() === now.getFullYear()
     ? label
     : `${dt.getFullYear()} ${label}`;
 }
 
-export function isAfterToday(value: number | string): boolean {
+export function isAfterToday(
+  value: number | string,
+  now: Date = nowDate(),
+): boolean {
   const dt = toLocalDate(value);
-  const now = nowDate();
   const day = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return day.getTime() > today.getTime();
 }
 
-export function isBeforeToday(value: number | string): boolean {
+export function isBeforeToday(
+  value: number | string,
+  now: Date = nowDate(),
+): boolean {
   const dt = toLocalDate(value);
-  const now = nowDate();
   const day = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return day.getTime() < today.getTime();
 }
 
-export function currentYear(): string {
-  return String(nowDate().getFullYear());
+export function currentYear(now: Date = nowDate()): string {
+  return String(now.getFullYear());
 }
 
 export function shiftIsoDate(iso: string, deltaDays: number): string {

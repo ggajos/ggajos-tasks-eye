@@ -195,4 +195,49 @@ describe("Board module", () => {
     expect(emptyDay.body.contexts).toEqual([]);
     expect(emptyDay.isEmpty).toBe(true);
   });
+
+  it("evaluates every date decision from request.now alone", () => {
+    (window as Window & { TASKS_EYE_TODAY?: string }).TASKS_EYE_TODAY =
+      "2000-01-01";
+
+    const focus = buildBoard(vault, {
+      mode: "focus",
+      contextFilter: "*",
+      now: NOW,
+    });
+    expect(focus.body.kind).toBe("focus");
+    if (focus.body.kind !== "focus") return;
+    expect(itemLabels(focus.body.items)).toEqual(["Overdue", "Today"]);
+    expect(focus.counts).toEqual({ focus: 2, inbox: 2 });
+
+    const open = buildBoard(vault, {
+      mode: "open",
+      contextFilter: "*",
+      now: NOW,
+    });
+    expect(bucketKeys(open)).toEqual([
+      "overdue",
+      "noDue",
+      "today",
+      "tomorrow",
+      "nextWeek",
+    ]);
+    if (open.body.kind !== "buckets") return;
+    const today = open.body.buckets.find((bucket) => bucket.key === "today");
+    expect(today?.days[0]?.label).toBe("July 17 - Friday");
+
+    const inbox = buildBoard(vault, {
+      mode: "inbox",
+      contextFilter: "*",
+      now: NOW,
+    });
+    if (inbox.body.kind !== "buckets") throw new Error("expected buckets");
+    const overdueRow = inbox.body.buckets[0]?.days[0]?.items[0];
+    expect(
+      overdueRow?.kind === "task" &&
+        overdueRow.model.errors.some(
+          (violation) => violation.code === "open-task-overdue",
+        ),
+    ).toBe(true);
+  });
 });

@@ -103,7 +103,7 @@ export function buildBoard(
   }
 
   const { availability } = snapshot;
-  const models = buildRowModels(files, availability);
+  const models = buildRowModels(files, availability, now);
   const select = (selectMode: EyeMode, filter: string) =>
     selectRowModels(models, files, selectMode, filter);
   const rows = select(mode, contextFilter);
