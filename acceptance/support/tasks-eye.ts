@@ -26,7 +26,7 @@ export interface FeatureScreenshotScenario {
   run: (context: {
     save: (
       element: WdioElement,
-      options?: { preserveHover?: boolean },
+      options?: { preserveHover?: boolean; boardWidth?: number },
     ) => Promise<void>;
   }) => Promise<void>;
 }
@@ -440,17 +440,68 @@ export async function checkFeatureDocSnapshot(
   featureSlug: string,
   screenshotSlug: string,
   element: WdioElement,
-  options: { preserveHover?: boolean } = {},
+  options: { preserveHover?: boolean; boardWidth?: number } = {},
 ): Promise<void> {
   const key = portablePath(snapshotPathFor(featureSlug, screenshotSlug));
   const screenshot = path.join(SNAPSHOT_ROOT, key);
 
-  await prepareStableCapture(options.preserveHover);
+  const layoutState = options.boardWidth === undefined ? undefined :
+    await browser.execute((width) => {
+      const selectors = [
+        ".workspace-split.mod-left-split",
+        ".workspace-split.mod-right-split",
+        ".workspace-leaf.mod-active .view-content",
+      ];
+      const rows = [...document.querySelectorAll<HTMLElement>(
+        ".workspace-leaf.mod-active .eye-plugin .eye-row",
+      )];
+      const hoveredRow = rows.findIndex((row) => row.matches(":hover"));
+      const styles = selectors.map((selector) => {
+        const target = document.querySelector<HTMLElement>(selector);
+        if (!target) throw new Error(`Screenshot layout is missing ${selector}`);
+        const previous = target.getAttribute("style");
+        if (selector.endsWith(".view-content")) {
+          const style = getComputedStyle(target);
+          const paneWidth = width + parseFloat(style.paddingLeft) +
+            parseFloat(style.paddingRight) + parseFloat(style.borderLeftWidth) +
+            parseFloat(style.borderRightWidth);
+          target.style.width = `${paneWidth}px`;
+          target.style.minWidth = `${paneWidth}px`;
+          target.style.maxWidth = `${paneWidth}px`;
+          target.style.boxSizing = "border-box";
+        } else {
+          target.style.setProperty("display", "none", "important");
+        }
+        return { selector, previous };
+      });
+      return { styles, hoveredRow };
+    }, options.boardWidth);
+
   try {
+    if (options.preserveHover && layoutState && layoutState.hoveredRow >= 0) {
+      const rows = await element.$$(".eye-row");
+      await rows[layoutState.hoveredRow].moveTo();
+    }
+    await prepareStableCapture(options.preserveHover);
     await waitForStableRendering(element);
+    if (options.boardWidth !== undefined) {
+      const width = await element.getSize("width");
+      if (Math.abs(width - options.boardWidth) > 1) {
+        throw new Error(`Expected a ${options.boardWidth}px board screenshot, got ${width}px`);
+      }
+    }
     await saveElementWithRetry(element, screenshotSlug, path.dirname(screenshot));
     writtenScreenshotPaths.add(key);
   } finally {
     await cleanupStableCapture();
+    if (layoutState !== undefined) {
+      await browser.execute((styles) => {
+        for (const { selector, previous } of styles) {
+          const target = document.querySelector<HTMLElement>(selector);
+          if (previous === null) target?.removeAttribute("style");
+          else target?.setAttribute("style", previous);
+        }
+      }, layoutState.styles);
+    }
   }
 }

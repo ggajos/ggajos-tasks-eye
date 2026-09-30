@@ -61,7 +61,7 @@ const cards = [
     title: ["Act without leaving", "the board."],
     description: [
       "Complete tasks or move due dates",
-      "with focused inline controls.",
+      "and adjust priority inline.",
     ],
     pills: ["Fast updates", "Tasks integration"],
     accent: "#22c55e",

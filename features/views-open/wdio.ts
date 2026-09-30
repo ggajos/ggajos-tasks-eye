@@ -157,7 +157,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
           await expect(root).toHaveText(
             expect.stringContaining(TOMORROW_ANCHOR),
           );
-          await save(root);
+          await save(root, { boardWidth: 650 });
         },
       },
     ],

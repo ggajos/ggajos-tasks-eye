@@ -187,7 +187,7 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
             ACTION,
             "Move due date 1 day earlier",
           );
-          await save(root, { preserveHover: true });
+          await save(root, { preserveHover: true, boardWidth: 650 });
         },
       },
     ],

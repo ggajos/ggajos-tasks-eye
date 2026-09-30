@@ -316,7 +316,7 @@ const inboxScenarios = featureScenarios(
           ]) {
             await expect(root).toHaveText(expect.stringContaining(title));
           }
-          await save(root);
+          await save(root, { boardWidth: 650 });
         },
       },
     ],

@@ -163,7 +163,7 @@ const focusScenarios = featureScenarios(focusFixture, {
         await expect(root).toHaveText(
           expect.stringContaining("Task is overdue: 2026-07-07."),
         );
-        await save(root);
+        await save(root, { boardWidth: 650 });
       },
     },
   ],
