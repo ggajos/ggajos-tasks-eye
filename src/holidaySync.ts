@@ -14,7 +14,7 @@ const NAGER_API_ROOT = "https://date.nager.at/api/v4";
 const COUNTRY_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const HOLIDAY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
-type JsonRequest = (url: string) => Promise<unknown>;
+export type JsonRequest = (url: string) => Promise<unknown>;
 
 export interface SyncResult {
   cache: HolidayCache;

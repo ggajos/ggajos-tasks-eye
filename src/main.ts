@@ -31,10 +31,8 @@ import {
   newPersonalTimeOff,
   normalizeAvailabilitySettings,
   normalizeHolidayCache,
-  requiredHolidayYears,
-  syncNagerCountries,
-  syncNagerHolidayYears,
 } from "./holidaySync";
+import { HolidaySyncer } from "./holidaySyncer";
 import { readEyeFiles } from "./indexer";
 import { findManagedFolder } from "./managedFolder";
 import {
@@ -59,7 +57,7 @@ import { createSnapshot, SnapshotCache } from "./snapshot";
 import type { TasksApiV1 } from "./tasksApi";
 import { getTasksApi } from "./tasksApi";
 import { TREE_VIEW_TYPE, TreeView } from "./treeView";
-import type { EyeFile, EyeSettings, RowModel } from "./types";
+import type { EyeSettings, RowModel } from "./types";
 import type { AvailabilityConfig, PersonalTimeOff } from "./vacation";
 import {
   availabilityConfigFromSettings,
@@ -68,7 +66,6 @@ import {
 } from "./vacation";
 import { EyeView, VIEW_TYPE } from "./view";
 
-const HOLIDAY_RETRY_MS = 60 * 60 * 1000;
 const ALL_CLEAR_ICON = "ggajos-tasks-eye-circle-check";
 const ALL_CLEAR_ICON_SVG = `
   <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
@@ -123,17 +120,15 @@ function normalizeSettings(value: unknown): EyeSettings {
 export default class TheEyePlugin extends Plugin {
   settings: EyeSettings = defaultSettings();
   private settingsTab: TasksEyeSettingTab | null = null;
-  private holidaySyncChain: Promise<void> = Promise.resolve();
-  private holidaySyncCount = 0;
-  private holidaySyncError: string | null = null;
-  private holidayRetryTimer: number | null = null;
+  private readonly holidays = new HolidaySyncer({
+    state: () => this.settings,
+    save: () => this.saveData(this.settings),
+    dataChanged: () => this.refreshViews(),
+    statusChanged: () => this.settingsTab?.update(),
+  });
   private personalSequence = 0;
   private refreshTimer: number | null = null;
   private readonly snapshots = new SnapshotCache(() => this.loadSnapshot());
-
-  get holidaySyncing(): boolean {
-    return this.holidaySyncCount > 0;
-  }
 
   async onload(): Promise<void> {
     this.settings = normalizeSettings(await this.loadData());
@@ -251,10 +246,7 @@ export default class TheEyePlugin extends Plugin {
     if (!this.tasksApiAvailable()) {
       new Notice(TASKS_PLUGIN_REQUIRED_MESSAGE);
     }
-    if (this.settings.availability.countryCode) {
-      void this.refreshHolidayCountries();
-      void this.refreshHolidayData();
-    }
+    this.holidays.start();
   }
 
   onunload(): void {
@@ -262,10 +254,7 @@ export default class TheEyePlugin extends Plugin {
       window.clearTimeout(this.refreshTimer);
       this.refreshTimer = null;
     }
-    if (this.holidayRetryTimer !== null) {
-      window.clearTimeout(this.holidayRetryTimer);
-      this.holidayRetryTimer = null;
-    }
+    this.holidays.stop();
   }
 
   tasksApiAvailable(): boolean {
@@ -291,7 +280,7 @@ export default class TheEyePlugin extends Plugin {
       this.settings.excludedFolderPaths,
     );
     // Holiday years depend on the due dates just indexed.
-    void this.refreshHolidayData(false, files, true);
+    void this.holidays.refreshYears(false, files, true);
     return createSnapshot(files, this.availabilityConfig());
   }
 
@@ -303,105 +292,15 @@ export default class TheEyePlugin extends Plugin {
   }
 
   holidaySyncStatus(): string {
-    if (!this.settings.availability.countryCode) {
-      if (this.holidaySyncing) return "Loading available countries…";
-      return this.holidaySyncError
-        ? "Countries are temporarily unavailable; retrying automatically."
-        : "Choose a country to enable public holidays.";
-    }
-    const cachedYears =
-      this.settings.holidayCache.countryCode ===
-      this.settings.availability.countryCode
-        ? Object.entries(this.settings.holidayCache.years).sort(([a], [b]) =>
-            a.localeCompare(b),
-          )
-        : [];
-    const latest = cachedYears
-      .map(([, cached]) => Date.parse(cached.fetchedAt))
-      .filter(Number.isFinite)
-      .sort((a, b) => b - a)[0];
-    const cacheStatus =
-      cachedYears.length === 0
-        ? "No cached public holidays yet."
-        : `Updated ${
-            latest
-              ? new Intl.DateTimeFormat(undefined, {
-                  dateStyle: "medium",
-                }).format(latest)
-              : "previously"
-          } · cached years ${cachedYears.map(([year]) => year).join(", ")}.`;
-    const status = this.holidaySyncing
-      ? `Updating automatically… ${cacheStatus}`
-      : cacheStatus;
-    return this.holidaySyncError
-      ? `${status} Could not update; using cached data.`
-      : status;
+    return this.holidays.status();
   }
 
   async refreshHolidayCountries(force = false): Promise<void> {
-    await this.enqueueHolidaySync(async () => {
-      const result = await syncNagerCountries(this.settings.holidayCache, {
-        force,
-      });
-      if (result.changed) {
-        this.settings.holidayCache = {
-          ...this.settings.holidayCache,
-          countries: result.cache.countries,
-          countriesFetchedAt: result.cache.countriesFetchedAt,
-        };
-        await this.saveData(this.settings);
-      }
-      this.recordHolidaySyncErrors(
-        result.errors,
-        !this.settings.availability.countryCode,
-      );
-    });
-  }
-
-  async refreshHolidayData(
-    force = false,
-    files: readonly EyeFile[] = [],
-    prune = false,
-  ): Promise<void> {
-    const countryCode = this.settings.availability.countryCode;
-    if (!countryCode || (!force && this.holidayRetryTimer !== null)) return;
-    const years = requiredHolidayYears(files);
-    await this.enqueueHolidaySync(async () => {
-      if (this.settings.availability.countryCode !== countryCode) return;
-      const result = await syncNagerHolidayYears(
-        this.settings.holidayCache,
-        countryCode,
-        years,
-        { force, prune },
-      );
-      if (this.settings.availability.countryCode !== countryCode) return;
-      if (result.changed) {
-        this.settings.holidayCache = result.cache;
-        await this.saveData(this.settings);
-        await this.refreshViews();
-      }
-      this.recordHolidaySyncErrors(result.errors);
-    });
+    await this.holidays.refreshCountries(force);
   }
 
   async setHolidayCountry(countryCode: string): Promise<void> {
-    const normalized = /^[A-Z]{2}$/.test(countryCode.toUpperCase())
-      ? countryCode.toUpperCase()
-      : "";
-    if (this.settings.availability.countryCode === normalized) return;
-    this.settings.availability.countryCode = normalized;
-    if (this.settings.holidayCache.countryCode !== normalized) {
-      this.settings.holidayCache = {
-        ...this.settings.holidayCache,
-        countryCode: normalized,
-        years: {},
-      };
-    }
-    this.holidaySyncError = null;
-    await this.saveData(this.settings);
-    await this.refreshViews();
-    this.settingsTab?.update();
-    if (normalized) await this.refreshHolidayData(true);
+    await this.holidays.setCountry(countryCode);
   }
 
   async setNonWorkingWeekdays(days: readonly number[]): Promise<void> {
@@ -701,52 +600,6 @@ export default class TheEyePlugin extends Plugin {
         error,
       );
       new Notice(`Tasks Eye: could not change note status.`);
-    }
-  }
-
-  private async enqueueHolidaySync(work: () => Promise<void>): Promise<void> {
-    this.holidaySyncCount++;
-    this.settingsTab?.update();
-    const run = this.holidaySyncChain.then(work, work);
-    this.holidaySyncChain = run.catch(() => undefined);
-    try {
-      await run;
-    } catch (error) {
-      this.holidaySyncError =
-        error instanceof Error ? error.message : String(error);
-      console.error("Tasks Eye could not refresh public holidays.", error);
-    } finally {
-      this.holidaySyncCount--;
-      this.settingsTab?.update();
-    }
-  }
-
-  private recordHolidaySyncErrors(
-    errors: readonly string[],
-    clearOnSuccess = true,
-  ): void {
-    if (errors.length > 0) {
-      this.holidaySyncError = errors.join("; ");
-      if (this.holidayRetryTimer === null) {
-        this.holidayRetryTimer = window.setTimeout(() => {
-          this.holidayRetryTimer = null;
-          void this.retryHolidaySync();
-        }, HOLIDAY_RETRY_MS);
-      }
-      return;
-    }
-    if (!clearOnSuccess) return;
-    this.holidaySyncError = null;
-    if (this.holidayRetryTimer !== null) {
-      window.clearTimeout(this.holidayRetryTimer);
-      this.holidayRetryTimer = null;
-    }
-  }
-
-  private async retryHolidaySync(): Promise<void> {
-    await this.refreshHolidayCountries();
-    if (this.settings.availability.countryCode) {
-      await this.refreshHolidayData();
     }
   }
 
