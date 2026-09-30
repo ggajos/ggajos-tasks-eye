@@ -8,7 +8,9 @@ software-engineer vault that exercises every plugin feature, written into
 npm run dev:demo
 ```
 
-No arguments, no flags, no configuration.
+No arguments, no flags, no configuration. The root script runs the generator
+with [Deno](https://deno.com) (`deno run -A scripts/demo/generate.ts`), so Deno
+2+ must be installed on the host.
 
 ## Why it is a generator
 
@@ -19,7 +21,7 @@ collapses into Overdue, healthy notes start reporting overdue violations, and
 the plugin looks like it nags.
 
 So the content declares a *target bucket* per task ("today", "nextWeek",
-"overdue", "saturday") rather than a date. `demo/dates.ts` resolves those
+"overdue", "saturday") rather than a date. `dates.ts` resolves those
 against the real today each run. **Re-running the generator re-anchors the
 entire vault** — that is the whole staleness story.
 

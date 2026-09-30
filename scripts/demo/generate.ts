@@ -2,14 +2,13 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
-import { DEMO_NOTES, type DemoNote, type DemoTask } from "./content";
+import { DEMO_NOTES, type DemoNote, type DemoTask } from "./content.ts";
 import {
-  type DueBucket,
   formatYmd,
   nextSaturday,
   recentWorkingDay,
   resolveDueDate,
-} from "./dates";
+} from "./dates.ts";
 
 const PRIORITY_SIGNIFIERS: Record<string, string> = {
   highest: "🔺",
@@ -21,6 +20,7 @@ const PRIORITY_SIGNIFIERS: Record<string, string> = {
 
 const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
+  "..",
   "..",
 );
 const DESTINATION = path.resolve(REPO_ROOT, "..", "org-demo");
@@ -56,9 +56,7 @@ function resolveTaskDate(
   // sequential steps in one note never look like they are due the same day.
   for (let attempt = 0; attempt < 12; attempt += 1) {
     const occurrence = (occurrences.get(key) ?? 0) + attempt;
-    const resolved = formatYmd(
-      resolveDueDate(task.due as DueBucket | "overdue", today, occurrence),
-    );
+    const resolved = formatYmd(resolveDueDate(task.due, today, occurrence));
     if (!usedInNote.has(resolved) || attempt === 11) {
       occurrences.set(key, occurrence + 1);
       usedInNote.add(resolved);
@@ -141,11 +139,6 @@ async function main(): Promise<void> {
     await mkdir(path.dirname(target), { recursive: true });
     await writeFile(target, note.markdown, "utf8");
   }
-
-  console.log(
-    `Tasks Eye demo vault: wrote ${rendered.length} notes to ${DESTINATION}`,
-  );
-  console.log(`Anchored on ${formatYmd(today)}. Nothing was deleted.`);
 }
 
 main().catch((error: unknown) => {

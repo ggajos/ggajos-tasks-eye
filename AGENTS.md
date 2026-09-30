@@ -5,7 +5,7 @@
 Tasks Eye is a TypeScript Obsidian plugin for note-centered task views. Source
 code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
 `features/<slug>/`, generated documentation in `docs/`, and the standalone demo
-vault generator in `demo/`.
+vault generator in `scripts/demo/`.
 
 ## Common Commands
 
@@ -142,9 +142,12 @@ substitute: that image can still reach any publicly-routable host.
 
 ## Demo Vault
 
-`demo/` generates the public demo vault into `../org-demo` via
-`npm run dev:demo`. It is deliberately **self-contained**: nothing in `demo/`
-imports from `src/` or `features/`, so plugin refactors cannot break it.
+`scripts/demo/` generates the public demo vault into `../org-demo` via
+`npm run dev:demo`. It is deliberately **self-contained**: nothing in
+`scripts/demo/` imports from `src/` or `features/`, so plugin refactors cannot
+break it. The generator runs on [Deno](https://deno.com) (2.x), which must be
+installed on the host; it declares no npm dependencies. The folder is kept
+outside the plugin's tsc project and lint scope on purpose.
 
 Task dates are declared as target buckets (`today`, `nextWeek`, `overdue`,
 `saturday`) and resolved against the real today at generation time, so
@@ -153,8 +156,9 @@ working days; only the unavailable-day demo lands on a weekend.
 
 The generator writes notes only. It never deletes and never touches
 `.obsidian/`, so plugin settings and workspace survive a run. There is no
-coverage gate — when a feature is added to `features/`, update `demo/content.ts`
-by hand. See `demo/README.md` for the vault shape and coverage notes.
+coverage gate — when a feature is added to `features/`, update
+`scripts/demo/content.ts` by hand. See `scripts/demo/README.md` for the vault
+shape and coverage notes.
 
 ## Fixtures
 

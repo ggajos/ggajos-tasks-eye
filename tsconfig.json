@@ -29,10 +29,10 @@
     "test/**/*.ts",
     "features/**/*.ts",
     "scripts/**/*.ts",
-    "demo/**/*.ts",
     "vitest.config.ts"
   ],
   "exclude": [
+    "scripts/demo/**",
     "acceptance/**/*.ts",
     "features/**/wdio.ts"
   ]
