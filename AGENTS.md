@@ -160,6 +160,12 @@ gate in both `ops:release:beta` and `ops:release:public` — do not make it
 skippable, and do not treat `npm run test:visual`'s Podman container as a
 substitute: that image can still reach any publicly-routable host.
 
+The clean-install build disables intermediate image caching and removes its
+temporary image after success. If Podman reports `no space left on device`,
+check `podman system df`; on macOS, check the VM with
+`podman machine ssh df -h` as well. `podman image prune` reclaims unused,
+untagged images while preserving tagged images and volumes.
+
 ## Demo Vault
 
 `scripts/demo/` generates the public demo vault into `../org-demo` via

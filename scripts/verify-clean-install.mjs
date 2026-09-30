@@ -11,7 +11,7 @@ import process from "node:process";
 // that class of failure (there is no public CI in this project).
 
 const root = process.cwd();
-const image = "tasks-eye-cleanroom:local";
+const image = `tasks-eye-cleanroom:check-${process.pid}`;
 const platform = "linux/arm64";
 const blockedHost = "artifactory.allegrogroup.com";
 
@@ -77,21 +77,26 @@ try {
     "--add-host",
     `${blockedHost}:127.0.0.1`,
     "--no-cache",
+    // This check always rebuilds; retaining intermediate images wastes disk.
+    "--layers=false",
     ".",
   ]);
 
   if (build.status !== 0) {
     console.error(
-      "\nClean-install check failed: the dependency tree could not be " +
-        "installed and built using only the public npm registry, with " +
-        `${blockedHost} blackholed. This is what Obsidian's review sandbox ` +
-        "would also see. Inspect the build log above for which assertion " +
-        "failed (script-free install vs full install vs build) and check " +
-        "package-lock.json for non-npmjs.org resolved URLs.",
+      "\nClean-install check failed. Inspect the build log above for the cause. " +
+        "For 'no space left on device', check `podman system df` and free " +
+        "Podman storage; `podman image prune` removes unused, untagged images. " +
+        "For dependency installation failures, check registry access and " +
+        `install scripts with ${blockedHost} blackholed.`,
     );
     process.exit(build.status ?? 1);
   }
 
+  const cleanup = tryRun(podman, ["image", "rm", image], { quiet: true });
+  if (cleanup.status !== 0) {
+    console.warn(`Could not remove the temporary verification image: ${image}`);
+  }
   console.log("Clean-install check passed.");
 } catch (error) {
   console.error(error instanceof Error ? error.message : error);
