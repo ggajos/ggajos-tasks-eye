@@ -35,12 +35,19 @@ entry point; the WDIO configuration rejects every host run.
 
 ## Validation Rules
 
-Validation and row selection live primarily in `src/model.ts`.
+Validation lives in `src/validation.ts`; row selection lives in `src/model.ts`
+behind one seam, and screens are assembled in `src/board.ts`.
 
-- `validateFile()` owns note-level validation messages.
-- `rowErrors()` filters validation messages shown on a board row.
-- `rowMatchesMode()` controls which rows appear in Focus, Open, and Inbox.
-- `buildRowModel()` controls row labels, next-action selection, and row state.
+- `validateFile()` (`src/validation.ts`) owns note-level validation messages.
+- `rowSelection(files, availability, now).select(mode, contextFilter)`
+  (`src/model.ts`) is the only Row entry point. Its private helpers filter the
+  validation messages shown on a row, decide which rows appear in Focus, Open,
+  and Inbox, and build row labels, next-action selection, and row state.
+- `buildBoard()` (`src/board.ts`) turns a vault snapshot into a `BoardScreen`
+  for every mode, including Done. It evaluates all date-sensitive decisions
+  from `request.now`.
+- `src/renderer.ts` turns a `BoardScreen` into DOM through a `ScreenHost`;
+  `src/view.ts` is only the Obsidian adapter.
 
 Inbox is the repair queue: a row appears there when its model has validation
 errors.

@@ -50,7 +50,7 @@ export interface BoardCounts {
 export type BoardBody =
   | { kind: "focus"; items: RenderItem[] }
   | { kind: "buckets"; buckets: BoardBucket[] }
-  | { kind: "done"; contexts: DoneContextGroup[] };
+  | { kind: "done"; contexts: DoneContextGroup[]; dateLabel: string };
 
 export interface BoardScreen extends BoardContexts {
   counts: BoardCounts;
@@ -321,16 +321,21 @@ export function buildBoard(
   const { contextFilter, globalContext } = context;
 
   if (mode === "done") {
+    const date = request.date ?? formatYmd(now.getTime());
     const prepared = prepareDone(
       files,
-      request.date ?? formatYmd(now.getTime()),
+      date,
       request.showFuture ?? true,
       contextFilter,
     );
     return {
       ...context,
       counts: { focus: 0, inbox: 0 },
-      body: { kind: "done", contexts: prepared.contexts },
+      body: {
+        kind: "done",
+        contexts: prepared.contexts,
+        dateLabel: formatHumanDate(date, now),
+      },
       isEmpty: prepared.isEmpty,
     };
   }

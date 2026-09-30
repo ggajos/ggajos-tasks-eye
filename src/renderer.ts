@@ -16,7 +16,6 @@ import type {
 } from "./completedTasks";
 import type { EyeMode } from "./constants";
 import { MODE_LABELS, MODES } from "./constants";
-import { formatHumanDate, nowDate } from "./date";
 import {
   canLowerPriority,
   canRaisePriority,
@@ -245,7 +244,7 @@ export async function renderScreen(
       element(
         "div",
         "eye-empty",
-        `No completed tasks for ${formatHumanDate(ui.date, nowDate())}.`,
+        `No completed tasks for ${screen.body.dateLabel}.`,
       ),
     );
   }

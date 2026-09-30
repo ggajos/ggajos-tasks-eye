@@ -265,6 +265,15 @@ describe("Board module", () => {
           (violation) => violation.code === "open-task-overdue",
         ),
     ).toBe(true);
+
+    const done = buildBoard(vault, {
+      mode: "done",
+      contextFilter: "*",
+      now: NOW,
+      date: "2026-07-02",
+    });
+    if (done.body.kind !== "done") throw new Error("expected done");
+    expect(done.body.dateLabel).toBe("July 02 - Thursday");
   });
 });
 
