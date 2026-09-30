@@ -1,5 +1,6 @@
 import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { ItemView, MarkdownRenderer, setIcon } from "obsidian";
+import { boardContexts, buildBoard } from "./board";
 import { BoardCollapseState } from "./boardCollapse";
 import type { StatusNoteGroup, StatusTaskNode } from "./completedTasks";
 import { collectStatusGroups, groupMatchedCount } from "./completedTasks";
@@ -11,22 +12,10 @@ import {
   MODES,
   TASKS_PLUGIN_REQUIRED_MESSAGE,
 } from "./constants";
-import {
-  discoverContexts,
-  getGlobalContext,
-  isGlobalContextFilter,
-  normalizeContextFilter,
-  withVacationContext,
-} from "./context";
+import { isGlobalContextFilter, normalizeContextFilter } from "./context";
 import { formatHumanDate, nowDate, shiftIsoDate, todayIso } from "./date";
 import type TheEyePlugin from "./main";
 import type { BoardBucket, BoardDayGroup, RenderItem } from "./model";
-import {
-  boardItemsForContext,
-  buildBoardBuckets,
-  buildRowModels,
-  selectRowModels,
-} from "./model";
 import {
   canLowerPriority,
   canRaisePriority,
@@ -40,7 +29,7 @@ import {
   element,
   unwrapSingleParagraph,
 } from "./ui";
-import type { AvailabilityConfig, VacationMarker } from "./vacation";
+import type { VacationMarker } from "./vacation";
 import type { ViolationCode } from "./validation";
 import { violationDocsUrl } from "./violationDocs";
 
@@ -230,23 +219,26 @@ export class EyeView extends ItemView {
     root: HTMLElement,
     files: EyeFile[],
   ): Promise<void> {
-    const globalContext = getGlobalContext(files);
-    const contexts = this.contextsForMode(discoverContexts(files));
-    const contextFilter = normalizeContextFilter(
-      this.plugin.settings.contextFilter,
-      contexts,
-      globalContext,
-    );
-
     root.replaceChildren();
+    const mode = this.state.mode;
 
-    if (this.state.mode === "done") {
+    if (mode === "done") {
+      const { contexts, contextFilter, globalContext } = boardContexts(
+        files,
+        mode,
+        this.plugin.settings.contextFilter,
+      );
       this.renderToolbar(root, contexts, contextFilter, globalContext);
       await this.renderCompleted(root, files, contextFilter);
       return;
     }
 
     if (!this.plugin.tasksApiAvailable()) {
+      const { contexts, contextFilter, globalContext } = boardContexts(
+        files,
+        mode,
+        this.plugin.settings.contextFilter,
+      );
       this.renderToolbar(root, contexts, contextFilter, globalContext);
       root.appendChild(
         element("div", "eye-error", TASKS_PLUGIN_REQUIRED_MESSAGE),
@@ -254,46 +246,32 @@ export class EyeView extends ItemView {
       return;
     }
 
-    const availability = this.plugin.availabilityConfig();
-    const models = buildRowModels(files, availability);
-    const rows = selectRowModels(models, files, this.state.mode, contextFilter);
-    this.renderToolbar(root, contexts, contextFilter, globalContext, {
-      focus: selectRowModels(models, files, "focus", contextFilter).length,
-      inbox: selectRowModels(models, files, "inbox", contextFilter).length,
+    const screen = buildBoard(files, {
+      mode,
+      contextFilter: this.plugin.settings.contextFilter,
+      availability: this.plugin.availabilityConfig(),
+      now: nowDate(),
     });
+    this.renderToolbar(
+      root,
+      screen.contexts,
+      screen.contextFilter,
+      screen.globalContext,
+      screen.counts,
+    );
     const list = element("div", "eye-list");
     root.appendChild(list);
 
-    if (this.state.mode === "focus") {
-      const rendered = await this.renderFocus(
-        list,
-        rows,
-        selectRowModels(models, files, "open", "*"),
-        contextFilter,
-        availability,
-        globalContext,
-      );
-      if (!rendered) {
-        list.appendChild(this.renderEmptyState());
+    if (screen.body.kind === "focus") {
+      list.classList.add("eye-focus-list");
+      for (const item of screen.body.items) await this.renderItem(list, item);
+    } else {
+      list.classList.add("eye-tree");
+      for (const bucket of screen.body.buckets) {
+        await this.renderBucket(list, bucket);
       }
-      return;
     }
-
-    const vacationSourceRows =
-      this.state.mode === "open"
-        ? selectRowModels(models, files, this.state.mode, "*")
-        : rows;
-    const rendered = await this.renderBoard(
-      list,
-      rows,
-      vacationSourceRows,
-      contextFilter,
-      availability,
-      globalContext,
-    );
-    if (!rendered) {
-      list.appendChild(this.renderEmptyState());
-    }
+    if (screen.isEmpty) list.appendChild(this.renderEmptyState());
   }
 
   private renderEmptyState(): HTMLElement {
@@ -312,12 +290,6 @@ export class EyeView extends ItemView {
       element("div", "eye-all-clear-message", emptyMessage(this.state.mode)),
     );
     return state;
-  }
-
-  private contextsForMode(contexts: string[]): string[] {
-    return this.state.mode === "focus" || this.state.mode === "open"
-      ? withVacationContext(contexts)
-      : contexts;
   }
 
   private renderToolbar(
@@ -540,57 +512,6 @@ export class EyeView extends ItemView {
       }
       list.appendChild(children);
     }
-  }
-
-  private async renderBoard(
-    list: HTMLElement,
-    rows: RowModel[],
-    vacationSourceRows: RowModel[],
-    contextFilter: string,
-    availability: AvailabilityConfig,
-    globalContext: string,
-  ): Promise<boolean> {
-    list.classList.add("eye-tree");
-
-    const items =
-      this.state.mode === "open"
-        ? boardItemsForContext(
-            rows,
-            vacationSourceRows,
-            contextFilter,
-            availability,
-            globalContext,
-          )
-        : rows.map((model): RenderItem => ({ kind: "task", model }));
-    const buckets = buildBoardBuckets(items, nowDate());
-
-    for (const bucket of buckets) await this.renderBucket(list, bucket);
-    return buckets.length > 0;
-  }
-
-  private async renderFocus(
-    list: HTMLElement,
-    rows: RowModel[],
-    vacationSourceRows: RowModel[],
-    contextFilter: string,
-    availability: AvailabilityConfig,
-    globalContext: string,
-  ): Promise<boolean> {
-    list.classList.add("eye-focus-list");
-    const items = boardItemsForContext(
-      rows,
-      vacationSourceRows,
-      contextFilter,
-      availability,
-      globalContext,
-    );
-    const focusItems = buildBoardBuckets(items, nowDate())
-      .filter((bucket) => bucket.key === "overdue" || bucket.key === "today")
-      .flatMap((bucket) => bucket.days)
-      .flatMap((day) => day.items);
-
-    for (const item of focusItems) await this.renderItem(list, item);
-    return focusItems.length > 0;
   }
 
   private async renderBucket(

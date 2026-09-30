@@ -10,7 +10,7 @@ import {
   formatYmd,
   isAfterToday,
   isoToTs,
-  todayIso,
+  nowDate,
 } from "./date";
 import { NORMAL_PRIORITY } from "./priority";
 import { findEarliestDueTask, getEarliestDueDate } from "./taskSelection";
@@ -143,6 +143,7 @@ export function selectRows(
 function vacationMarkersForRows(
   rows: RowModel[],
   availability: AvailabilityConfig,
+  now: Date,
 ): VacationMarker[] {
   let lastDue: number | null = null;
   for (const model of rows) {
@@ -154,7 +155,11 @@ function vacationMarkersForRows(
     }
   }
   if (lastDue === null) return [];
-  return vacationMarkers(isoToTs(todayIso()), lastDue, availability);
+  return vacationMarkers(
+    isoToTs(formatYmd(now.getTime())),
+    lastDue,
+    availability,
+  );
 }
 
 export function mergeItems(
@@ -200,9 +205,10 @@ export function boardItemsForContext(
   contextFilter: string,
   availability: AvailabilityConfig = EMPTY_AVAILABILITY_CONFIG,
   globalContext = "*",
+  now: Date = nowDate(),
 ): RenderItem[] {
   if (contextFilter === VACATION_CONTEXT) {
-    return vacationMarkersForRows(vacationSourceRows, availability).map(
+    return vacationMarkersForRows(vacationSourceRows, availability, now).map(
       (marker) => ({
         kind: "marker",
         marker,
@@ -223,7 +229,7 @@ export function boardItemsForContext(
 
   return mergeItems(
     rows,
-    vacationMarkersForRows(vacationSourceRows, availability),
+    vacationMarkersForRows(vacationSourceRows, availability, now),
   );
 }
 
