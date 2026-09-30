@@ -3,16 +3,16 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Tree view",
   summary:
-    "The Tree view opens in a side panel and shows where the active note sits in the `up` hierarchy: the spine from the root down to the current note, then the full subtree of notes beneath it, with dot prefixes that show distance from the current note.",
+    "Open Tree in a side panel to see the active note’s parents and descendants. Dots show how far each note is from the current one.",
   acceptanceCriteria: [
     "The Tree panel follows the active note and re-anchors as you navigate.",
-    "It renders the ancestor spine from the root down to the current note, without siblings.",
+    "It shows the path of parents down to the current note, without sibling notes.",
     "It renders the full descendant subtree of the current note, sorted by note name.",
     "The current note is bold, sits at column zero between its ancestors and descendants, and is not a link.",
     "Ancestors and descendants use matching dot prefixes to show their distance from the current note.",
     "Other notes render as native Obsidian markdown links, so link styling plugins apply; clicking one opens it and re-anchors the panel.",
     "Long tree links stay on one line, truncate with an ellipsis, and expose their full label in a tooltip.",
-    "Opening a note that is not indexed shows a gentle empty state.",
+    "Opening a note outside the included folders shows an empty state.",
   ],
   screenshots: [
     {

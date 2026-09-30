@@ -1,7 +1,7 @@
 # Demo vault generator
 
 Generates a public, hands-on **demo vault** for Tasks Eye: a realistic
-software-engineer vault that exercises every plugin feature, written into
+software-engineer vault with examples of the plugin’s workflow, written into
 `../org-demo`.
 
 ```sh
@@ -55,7 +55,7 @@ note's context is its first-level ancestor:
 
 | Context | Purpose |
 | --- | --- |
-| `Start here` | Guide notes — closed and taskless, so they never appear as board rows |
+| `Start here` | Guide notes — closed and taskless, so they stay out of Focus and Open |
 | `Work` | Day-job engineering: migrations, CI, reviews, on-call |
 | `Personal` | Life admin: taxes, home lab, repairs, training |
 | `Learning` | Books, courses, talk prep |
@@ -66,8 +66,9 @@ because a note with no `up` link cannot belong to one.
 
 ## Coverage
 
-`features/` contains 23 folders, but `features/views-hold/` is an empty
-placeholder, so the real target is **22 features** — all of them exercised.
+The demo covers the main views, actions, and repair rules. Compare
+`content.ts` with the current `features/*/feature.ts` files when adding features;
+coverage is maintained by hand.
 
 Nine of the ten validation codes are materialized. **`multiple-roots` is
 documented in prose only**, in `Start here/3 - Fixing Inbox items.md`: a second
@@ -75,8 +76,9 @@ documented in prose only**, in `Start here/3 - Fixing Inbox items.md`: a second
 vault-wide, so it cannot coexist with a healthy demo.
 
 Availability is demonstrated through **weekends**, which are non-working days by
-default (`nonWorkingWeekdays: [0, 6]`). That covers both the availability marker
-and the `task-on-unavailable-day` violation without writing plugin settings.
+default (`nonWorkingWeekdays: [0, 6]`). That demonstrates the
+`task-on-unavailable-day` violation without writing plugin settings. Weekends
+alone do not create availability markers.
 Public holidays and personal time-off ranges live in settings and are described
 rather than shown.
 

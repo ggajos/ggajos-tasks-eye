@@ -9,7 +9,7 @@ export default defineFeature({
     "The command is registered without a default hotkey.",
     "Standard checked task markers become unchecked markers.",
     "Tasks completion dates are removed from reopened task lines.",
-    "The command uses the Tasks API when available and falls back to local line rewriting otherwise.",
+    "The command also works when the Tasks API is unavailable: it reopens the selected standard checkboxes and removes their completion dates.",
   ],
   screenshots: [
     {

@@ -3,6 +3,7 @@ import type { CommandDefinition } from "../src/commands";
 import {
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
+  OPEN_TREE_COMMAND,
   STATUS_STEP_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "../src/commands";
@@ -35,7 +36,7 @@ const statusStepCommand = (
 export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
   {
     title: "View navigation",
-    description: "Move between the four Tasks Eye views.",
+    description: "Open the four board views or the separate Tree panel.",
     commands: [
       {
         ...MODE_COMMANDS.focus,
@@ -64,6 +65,14 @@ export const DOCUMENTED_COMMAND_GROUPS: readonly DocumentedCommandGroup[] = [
         featureTitle: "Done view",
         explanation: "Show the Done view for today.",
         recommendedHotkey: { modifiers: ["Ctrl"], key: "4" },
+      },
+      {
+        ...OPEN_TREE_COMMAND,
+        featureSlug: "views-tree",
+        featureTitle: "Tree panel",
+        explanation:
+          "Show the active note’s parents and descendants in a side panel.",
+        recommendedHotkey: { modifiers: ["Ctrl"], key: "5" },
       },
     ],
   },

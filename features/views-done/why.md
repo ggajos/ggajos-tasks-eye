@@ -11,6 +11,6 @@ separate history log. An "Unfinished" toggle extends the day's history with any
 unfinished task that carries a due date, whether that date is past, today, or
 future. It only includes those tasks inside notes that also completed a task on
 the selected day, so the view stays a focused overview of what happened and
-what still needs attention in the notes you touched. Subtask nesting is
-reproduced using Tasks' emoji format, so completed subtasks stay under their
-parent instead of collapsing into a flat list.
+what still needs attention in the notes you touched. Task indentation preserves
+subtask nesting. Parent tasks remain visible as context even when only a
+child matches the selected day.

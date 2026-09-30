@@ -46,7 +46,7 @@ export function isWeekend(value: Date): boolean {
   return day === 0 || day === 6;
 }
 
-// Mirrors bucketForTs() in src/model.ts. Kept local so the generator stays
+// Mirrors bucketForTs() in src/board.ts. Kept local so the generator stays
 // decoupled from plugin internals.
 export function bucketFor(value: Date, today: Date): DueBucket | "overdue" {
   const start = startOfDay(today);

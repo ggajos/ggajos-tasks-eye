@@ -5,11 +5,11 @@ export default defineFeature({
   summary:
     "Tasks Eye reads status, `up` tree properties, and Obsidian Tasks emoji metadata from ordinary Markdown notes.",
   acceptanceCriteria: [
-    "The unique root note declares `up: -` and every other indexed note declares a parent wikilink.",
+    'For a tree entirely inside the notes folder, one root declares `up: "-"` and the other notes link to their parents. Existing parents outside the included folders are also supported.',
     "Context follows the `up` tree rather than the note's folder.",
     "Supported note statuses are `open` and `closed`.",
     "Missing or blank status is treated as `open`.",
-    "Tasks due dates and completion dates are read from Obsidian Tasks emoji metadata.",
+    "Tasks Eye reads `📅 YYYY-MM-DD` due dates and `✅ YYYY-MM-DD` completion dates. Scheduled and start markers do not control board dates.",
   ],
   screenshots: [
     {

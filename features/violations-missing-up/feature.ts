@@ -4,11 +4,11 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Repair missing parent links",
   summary:
-    "Inbox identifies notes that do not declare a valid `up` link to another indexed note.",
+    "Inbox identifies missing parent properties and parent links that cannot be resolved.",
   acceptanceCriteria: [
-    "A note without an `up` property reports `Note needs an `up` link to its parent.`.",
+    "A note without an `up` property reports: Note needs an `up` link to its parent.",
     "A note whose `up` link does not resolve reports `up` link points to a note that doesn't exist.",
-    "A valid root declares `up: -` and is not reported as missing its parent.",
+    'A valid root declares `up: "-"` and needs no parent link.',
     "Broken parent links do not prevent otherwise valid notes from appearing in Open.",
   ],
   violation: {

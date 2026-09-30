@@ -1,6 +1,6 @@
 // Human attention workflow, agreed in the September 2026 interview.
 // V4: orthogonal connectors, aligned branches, and separate return lanes.
-// Previous versions remain unchanged. Reladraw 0.11.1.
+// Editable source; generated SVG is rebuilt by dev:docs. Reladraw 0.11.1.
 diagram theme: dark background: #0b1018 text: (color: #e7edf5)
 default leaf fill: #1b2534 border: #40516a text: (size: 16)
 default container fill: #111a26 border: #2a394e text: (size: 18)
@@ -19,20 +19,20 @@ style milestone fill: #204b3e border: #88edbd text: (size: 19)
 node execution "" border: #41665d
 node execution.caption "FOCUS FIRST   ·   repeat until today's queue is empty" (size: 18) shape: none
 node execution.focus "Open Focus / Any notes?" below execution.caption (gap: 75) left level with execution.caption style: question
-node execution.work "Work on the note / [dim]Finish completed tasks[/dim] / [dim]Add work/context if useful[/dim]" right of execution.focus (gap: 120) style: active
+node execution.work "Work on the note / [dim]Mark finished tasks complete[/dim] / [dim]Add work/context if useful[/dim]" right of execution.focus (gap: 120) style: active
 node execution.done "Whole note complete?" right of execution.work (gap: 70) style: question
 node execution.close "Close note" right of execution.done (gap: 60) style: active
 node execution.continue "Continue now?" below execution.work (gap: 90) level with execution.attention style: question
 node execution.attention "Choose next attention / [dim]Later that day: lower priority[/dim] / [dim]Another day: move due date[/dim]" below execution.focus (gap: 75) style: attention
 
-edge execution.focus -> execution.work "highest priority" style: progress from: right to: left
+edge execution.focus -> execution.work "first note" style: progress from: right to: left
 edge execution.work -> execution.done style: progress from: right to: left
 edge execution.done -> execution.close "yes" style: progress from: right to: left
 edge execution.done -> execution.continue "no" style: progress from: bottom to: right
 edge execution.continue -> execution.work "yes" style: repeat from: top to: bottom
 edge execution.continue -> execution.attention "stop" style: adjust from: left to: right
 
-edge execution.close -> execution.focus "next highest-priority note" style: repeat from: top to: top
+edge execution.close -> execution.focus "next note" style: repeat from: top to: top
 edge execution.attention -> execution.focus "pick again" style: repeat from: top to: bottom
 
 node cleared "Today's queue cleared / [dim]Future topics can remain open[/dim]" below execution (gap: 90) style: milestone

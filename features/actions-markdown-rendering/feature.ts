@@ -3,11 +3,11 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Markdown in board tasks",
   summary:
-    "Board actions use Obsidian's Markdown renderer so links and inline formatting remain meaningful outside the source note.",
+    "Task text keeps its links, emphasis, and inline code when shown on the board.",
   acceptanceCriteria: [
     "Internal links render as Obsidian links instead of raw wiki-link syntax.",
     "Emphasis and inline code retain their native Markdown presentation.",
-    "Link resolution uses the task's source note as its Markdown context.",
+    "Links point to the same notes they would from the original task.",
     "The rendered action continues to expose its normal task controls.",
   ],
   screenshots: [

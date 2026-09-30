@@ -3,11 +3,11 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Inbox view",
   summary:
-    "Inbox collects notes that need a small repair before the workflow can treat them reliably.",
+    "Inbox shows notes needing attention: missing information, overdue work, availability conflicts, or inconsistent task and note status.",
   acceptanceCriteria: [
     "Inbox shows notes with validation issues.",
     "Inbox includes notes with issues whether their status is open, closed, or unsupported.",
-    "Inbox reuses the note-first board rows and due-date buckets from Open.",
+    "Like Open, Inbox shows one row per note, grouped by due date.",
     "Every Inbox bucket starts expanded so validation issues are immediately visible.",
     "Inbox rows keep their validation messages, note links, context badges, and row actions.",
     "Inbox celebrates an all-clear state with `Inbox zero.` and a large check icon when no notes need attention.",

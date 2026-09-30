@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
+  OPEN_TREE_COMMAND,
   STATUS_STEP_COMMANDS,
   UNCHECK_SELECTED_COMMAND,
 } from "../src/commands";
@@ -62,6 +63,7 @@ describe("documented commands", () => {
     const runtimeCommands = [
       ...Object.values(MODE_COMMANDS),
       OPEN_COMPLETED_COMMAND,
+      OPEN_TREE_COMMAND,
       UNCHECK_SELECTED_COMMAND,
       ...Object.values(STATUS_STEP_COMMANDS),
     ];
@@ -71,7 +73,7 @@ describe("documented commands", () => {
     );
   });
 
-  it("publishes the former defaults as documentation-only recommendations", () => {
+  it("publishes optional hotkeys as documentation-only recommendations", () => {
     expect(
       DOCUMENTED_COMMANDS.map((command) => [
         command.id,
@@ -82,6 +84,7 @@ describe("documented commands", () => {
       ["open-open", "Ctrl+2"],
       ["open-inbox", "Ctrl+3"],
       ["open-completed-tasks", "Ctrl+4"],
+      ["open-tree", "Ctrl+5"],
       ["set-note-status-previous", "Ctrl+Shift+1"],
       ["set-note-status-next", "Ctrl+Shift+2"],
       ["uncheck-selected-tasks", "Ctrl+Shift+D"],
@@ -109,6 +112,7 @@ describe("documented commands", () => {
       MODE_COMMANDS.open.id,
       MODE_COMMANDS.inbox.id,
       OPEN_COMPLETED_COMMAND.id,
+      OPEN_TREE_COMMAND.id,
     ]);
   });
 
@@ -118,6 +122,7 @@ describe("documented commands", () => {
       MODE_COMMANDS.open.name,
       MODE_COMMANDS.inbox.name,
       OPEN_COMPLETED_COMMAND.name,
+      OPEN_TREE_COMMAND.name,
       UNCHECK_SELECTED_COMMAND.name,
       STATUS_STEP_COMMANDS.previous.name,
       STATUS_STEP_COMMANDS.next.name,
@@ -126,6 +131,7 @@ describe("documented commands", () => {
       "Show Open",
       "Show Inbox",
       "Show Done",
+      "Open Tree",
       "Reopen selected tasks",
       "Set note status: Previous",
       "Set note status: Next",

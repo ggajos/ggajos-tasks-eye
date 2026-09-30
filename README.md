@@ -1,46 +1,92 @@
 # Tasks Eye
 
-Tasks Eye is an Obsidian plugin that helps you track what to do next across your notes. 
-Instead of a giant list of tasks, Tasks Eye treats your notes as projects or work items, and surfaces the next actionable task for each one. 
+Tasks Eye helps you choose what to work on next across your Obsidian notes.
+Each board row represents a note and shows its next task. Your plans, links,
+and working context stay beside the tasks in Markdown.
 
-Your Markdown notes and Obsidian Tasks checkboxes remain the source of truth.
+## Choose a view
 
-## Core Features
+| View | Use it to |
+| --- | --- |
+| **Focus** | Handle open work due today or overdue. |
+| **Open** | Review all open notes and plan their next actions by date. |
+| **Inbox** | Find missing tasks or dates, overdue work, availability conflicts, and broken properties or parent links. |
+| **Done** | Review tasks completed on a chosen day. |
 
-Tasks Eye gives you three main views to manage your work:
+The separate **Tree** side panel shows the active note's parents and descendants.
 
-- **Focus**: Shows tasks due today or overdue. This is your daily dashboard for tasks that need immediate attention.
-- **Open**: Shows all your active notes and their next tasks grouped by due date, helping you plan ahead.
-- **Inbox**: Highlights notes with broken metadata (e.g. a missing parent link, a broken note tree, a missing due date, or no unchecked tasks) so you can fix them.
+## Start with three notes
 
-## How it works
+Install and enable Tasks Eye and the
+[Tasks](https://obsidian.md/plugins?id=obsidian-tasks-plugin) community plugin.
+Tasks Eye requires Obsidian 1.13.4 or newer.
 
-1. **Create the note tree**: Put indexed Markdown notes anywhere below the configured Tasks Eye notes folder, except any excluded folders (both are set under **Sources** in settings). Mark exactly one note as the root with `up: -`; every other note links to its parent, for example `up: "[[Work]]"`. The root is a normal note and still needs the usual status and task metadata. Folders only define the indexing boundary.
-2. **Add a task** to the note using the Obsidian Tasks format with a scheduled or due date:
+Under **Settings → Tasks Eye → Sources**, set **Notes folder** to a folder such
+as `Tasks`. Tasks Eye reads Markdown notes in that folder and its subfolders,
+except folders you exclude there.
+
+Create these three files in that folder. Copy each block into the corresponding
+file, starting at its first line.
+
+**Home.md** — the root of the note tree:
+
+```md
+---
+status: closed
+up: "-"
+---
+```
+
+**Personal.md** — a branch for related notes:
+
+```md
+---
+status: closed
+up: "[[Home]]"
+---
+```
+
+**Renew passport.md** — an active note:
 
 ```md
 ---
 status: open
-up: "[[Work]]"
+up: "[[Personal]]"
 ---
 
-# Renew passport
+Keep application guidance and useful links here.
 
-- [ ] Find the required documents 📅 2026-08-03
+- [ ] Find the required documents 📅 2026-10-01
 - [ ] Take a compliant photo
-- [ ] Submit the application
 ```
 
-3. Tasks Eye will automatically surface the **first unchecked dated task** from that note in your Focus or Open views, depending on the date. A note's context is its first-level ancestor in the `up` tree, and selecting the root basename in the context filter shows the whole indexed tree.
+Replace the example date with today, then open **Focus** from the Tasks Eye
+board. The passport note appears under the **Personal** context. Selecting
+**Home** in the context filter shows the whole tree. Folders choose which
+notes are read; `up` links determine how those notes are related.
 
-## Requirements
+Tasks Eye chooses the unchecked task with the **earliest due date**, regardless
+of where it appears in the note. Tasks with the same date keep their order in
+the note. If no unchecked task has a date, Open and Inbox show the first
+unchecked task so you can add one.
 
-Tasks Eye requires Obsidian 1.13.4 or newer and the
-[Tasks](https://obsidian.md/plugins?id=obsidian-tasks-plugin) community plugin.
+## A date means “return to this”
 
-## Documentation and Workflows
+Use the Tasks due marker, `📅 YYYY-MM-DD`, for the day you want to revisit an
+action. It can be an attention date rather than a hard deadline. Tasks Eye
+calls a past date **overdue**; Tasks scheduled and start dates do not control
+its boards.
 
-For full feature documentation, commands, and optional workflow guides (such as using Tasks Eye for GTD), visit the [Tasks Eye Documentation](https://ggajos.com/ggajos-tasks-eye/).
+Start with Focus, complete or reschedule the next action, and use Inbox to
+resolve anything that needs attention. Focus sorts by date, then task priority
+within each date. Use Open to plan ahead and Done to review completed work.
+
+## Learn more
+
+The [documentation](https://ggajos.com/ggajos-tasks-eye/) includes setup,
+a daily workflow, detailed feature rules, commands, and an optional GTD guide.
+See [Sources](https://ggajos.com/ggajos-tasks-eye/features/data-sources/) for
+exclusions and parent notes outside the notes folder.
 
 ## Network use
 

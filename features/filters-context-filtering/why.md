@@ -1,12 +1,16 @@
-## Why context filtering exists
+## Review one area at a time
 
-The `up` tree describes the broad context of a note independently of its vault
-folder. Tasks Eye uses each note's first-level ancestor in the tree as its
-context, so a note can move folders without changing the way work is grouped.
+In a tree such as Home → Work → Meeting, **Work** is the context for both
+Work and Meeting. Select Work in the toolbar to review that branch in Focus,
+Open, Inbox, or Done.
 
-The unique root note is the global filter option. Selecting its basename shows
-every indexed note; selecting a first-level branch narrows the board to that
-branch and all of its descendants.
+Select the root note's name, such as Home, to return to the whole tree.
+If there is no unique indexed root, the global option is `*`.
+If a previously selected context no longer exists, the filter returns to the
+global option.
 
-Filtering is intentionally non-destructive: it changes the current view, not
-the notes themselves.
+Moving a note between included folders does not change its context. Changing
+its parent link can. Filtering changes what you see without editing any notes.
+
+The **OOO** option shows availability markers in Focus and Open.
+Selecting a normal context hides those markers.

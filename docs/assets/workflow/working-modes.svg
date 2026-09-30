@@ -1,43 +1,43 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1996" height="1950" viewBox="-106 0 1996 1950" font-family="'DejaVu Sans Mono', 'Menlo', 'Consolas', 'Liberation Mono', 'Courier New', monospace" font-size="14px">
   <defs>
-    <marker id="r8071f616-arrow-65d9a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="rc01ae15f-arrow-65d9a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#65d9a5"/>
     </marker>
-    <marker id="r8071f616-arrow-65d9a5-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="rc01ae15f-arrow-65d9a5-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#65d9a5"/>
     </marker>
-    <marker id="r8071f616-arrow-79b8ff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="rc01ae15f-arrow-79b8ff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#79b8ff"/>
     </marker>
-    <marker id="r8071f616-arrow-79b8ff-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="rc01ae15f-arrow-79b8ff-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#79b8ff"/>
     </marker>
-    <marker id="r8071f616-arrow-f2bd63" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="rc01ae15f-arrow-f2bd63" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#f2bd63"/>
     </marker>
-    <marker id="r8071f616-arrow-f2bd63-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="rc01ae15f-arrow-f2bd63-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#f2bd63"/>
     </marker>
-    <marker id="r8071f616-arrow-bc9aff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="rc01ae15f-arrow-bc9aff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#bc9aff"/>
     </marker>
-    <marker id="r8071f616-arrow-bc9aff-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="rc01ae15f-arrow-bc9aff-back" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#bc9aff"/>
     </marker>
-    <mask id="r8071f616-cut-1" maskUnits="userSpaceOnUse" x="-106" y="0" width="1996" height="1950">
+    <mask id="rc01ae15f-cut-1" maskUnits="userSpaceOnUse" x="-106" y="0" width="1996" height="1950">
       <rect x="-106" y="0" width="1996" height="1950" fill="white"/>
       <circle cx="922.5" cy="937" r="7" fill="black"/>
     </mask>
-    <mask id="r8071f616-cut-2" maskUnits="userSpaceOnUse" x="-106" y="0" width="1996" height="1950">
+    <mask id="rc01ae15f-cut-2" maskUnits="userSpaceOnUse" x="-106" y="0" width="1996" height="1950">
       <rect x="-106" y="0" width="1996" height="1950" fill="white"/>
       <circle cx="514.8" cy="937" r="7" fill="black"/>
     </mask>
-    <mask id="r8071f616-cut-3" maskUnits="userSpaceOnUse" x="-106" y="0" width="1996" height="1950">
+    <mask id="rc01ae15f-cut-3" maskUnits="userSpaceOnUse" x="-106" y="0" width="1996" height="1950">
       <rect x="-106" y="0" width="1996" height="1950" fill="white"/>
-      <circle cx="54.5" cy="320" r="7" fill="black"/>
+      <circle cx="68.5" cy="320" r="7" fill="black"/>
       <circle cx="22.8" cy="1190" r="7" fill="black"/>
     </mask>
-    <mask id="r8071f616-cut-4" maskUnits="userSpaceOnUse" x="-106" y="0" width="1996" height="1950">
+    <mask id="rc01ae15f-cut-4" maskUnits="userSpaceOnUse" x="-106" y="0" width="1996" height="1950">
       <rect x="-106" y="0" width="1996" height="1950" fill="white"/>
       <circle cx="1168" cy="1075" r="7" fill="black"/>
       <circle cx="1147.25" cy="1280" r="7" fill="black"/>
@@ -45,39 +45,39 @@
     </mask>
   </defs>
   <rect x="-106" y="0" width="1996" height="1950" fill="#0b1018"/>
-  <path d="M97 163 H1326 a8 8 0 0 1 8 8 V534 a8 8 0 0 1 -8 8 H97 a8 8 0 0 1 -8 -8 V171 a8 8 0 0 1 8 -8 Z" fill="#111a26" stroke="#41665d"/>
+  <path d="M111 163 H1312 a8 8 0 0 1 8 8 V534 a8 8 0 0 1 -8 8 H111 a8 8 0 0 1 -8 -8 V171 a8 8 0 0 1 8 -8 Z" fill="#111a26" stroke="#41665d"/>
 
   <g font-size="18px">
-  <text x="199" y="195.3" fill="#e7edf5" text-anchor="start">FOCUS FIRST   ·   repeat until today's queue is empty</text>
+  <text x="213" y="195.3" fill="#e7edf5" text-anchor="start">FOCUS FIRST   ·   repeat until today's queue is empty</text>
   </g>
-  <path d="M207 276 H315 a8 8 0 0 1 8 8 V340 a8 8 0 0 1 -8 8 H207 a8 8 0 0 1 -8 -8 V284 a8 8 0 0 1 8 -8 Z" fill="#263246" stroke="#71839b"/>
+  <path d="M221 276 H329 a8 8 0 0 1 8 8 V340 a8 8 0 0 1 -8 8 H221 a8 8 0 0 1 -8 -8 V284 a8 8 0 0 1 8 -8 Z" fill="#263246" stroke="#71839b"/>
   <g font-size="16px">
-  <text x="261" y="306.6" fill="#e7edf5" text-anchor="middle">Open Focus</text>
-  <text x="261" y="328.6" fill="#e7edf5" text-anchor="middle">Any notes?</text>
+  <text x="275" y="306.6" fill="#e7edf5" text-anchor="middle">Open Focus</text>
+  <text x="275" y="328.6" fill="#e7edf5" text-anchor="middle">Any notes?</text>
   </g>
-  <path d="M534 265 H796 a8 8 0 0 1 8 8 V351 a8 8 0 0 1 -8 8 H534 a8 8 0 0 1 -8 -8 V273 a8 8 0 0 1 8 -8 Z" fill="#17352f" stroke="#65d9a5"/>
+  <path d="M501 265 H782 a8 8 0 0 1 8 8 V351 a8 8 0 0 1 -8 8 H501 a8 8 0 0 1 -8 -8 V273 a8 8 0 0 1 8 -8 Z" fill="#17352f" stroke="#65d9a5"/>
   <g font-size="16px">
-  <text x="665" y="295.6" fill="#e7edf5" text-anchor="middle">Work on the note</text>
-  <text x="665" y="317.6" fill="#9babc0" text-anchor="middle">Finish completed tasks</text>
-  <text x="665" y="339.6" fill="#9babc0" text-anchor="middle">Add work/context if useful</text>
+  <text x="641.5" y="295.6" fill="#e7edf5" text-anchor="middle">Work on the note</text>
+  <text x="641.5" y="317.6" fill="#9babc0" text-anchor="middle">Mark finished tasks complete</text>
+  <text x="641.5" y="339.6" fill="#9babc0" text-anchor="middle">Add work/context if useful</text>
   </g>
-  <path d="M882 287 H1086 a8 8 0 0 1 8 8 V329 a8 8 0 0 1 -8 8 H882 a8 8 0 0 1 -8 -8 V295 a8 8 0 0 1 8 -8 Z" fill="#263246" stroke="#71839b"/>
+  <path d="M868 287 H1072 a8 8 0 0 1 8 8 V329 a8 8 0 0 1 -8 8 H868 a8 8 0 0 1 -8 -8 V295 a8 8 0 0 1 8 -8 Z" fill="#263246" stroke="#71839b"/>
   <g font-size="16px">
-  <text x="984" y="317.6" fill="#e7edf5" text-anchor="middle">Whole note complete?</text>
+  <text x="970" y="317.6" fill="#e7edf5" text-anchor="middle">Whole note complete?</text>
   </g>
-  <path d="M1204 287 H1312 a8 8 0 0 1 8 8 V329 a8 8 0 0 1 -8 8 H1204 a8 8 0 0 1 -8 -8 V295 a8 8 0 0 1 8 -8 Z" fill="#17352f" stroke="#65d9a5"/>
+  <path d="M1190 287 H1298 a8 8 0 0 1 8 8 V329 a8 8 0 0 1 -8 8 H1190 a8 8 0 0 1 -8 -8 V295 a8 8 0 0 1 8 -8 Z" fill="#17352f" stroke="#65d9a5"/>
   <g font-size="16px">
-  <text x="1258" y="317.6" fill="#e7edf5" text-anchor="middle">Close note</text>
+  <text x="1244" y="317.6" fill="#e7edf5" text-anchor="middle">Close note</text>
   </g>
-  <path d="M596.5 456 H733.5 a8 8 0 0 1 8 8 V498 a8 8 0 0 1 -8 8 H596.5 a8 8 0 0 1 -8 -8 V464 a8 8 0 0 1 8 -8 Z" fill="#263246" stroke="#71839b"/>
+  <path d="M573 456 H710 a8 8 0 0 1 8 8 V498 a8 8 0 0 1 -8 8 H573 a8 8 0 0 1 -8 -8 V464 a8 8 0 0 1 8 -8 Z" fill="#263246" stroke="#71839b"/>
   <g font-size="16px">
-  <text x="665" y="486.6" fill="#e7edf5" text-anchor="middle">Continue now?</text>
+  <text x="641.5" y="486.6" fill="#e7edf5" text-anchor="middle">Continue now?</text>
   </g>
-  <path d="M111 434 H411 a8 8 0 0 1 8 8 V520 a8 8 0 0 1 -8 8 H111 a8 8 0 0 1 -8 -8 V442 a8 8 0 0 1 8 -8 Z" fill="#352c1e" stroke="#b79150"/>
+  <path d="M125 434 H425 a8 8 0 0 1 8 8 V520 a8 8 0 0 1 -8 8 H125 a8 8 0 0 1 -8 -8 V442 a8 8 0 0 1 8 -8 Z" fill="#352c1e" stroke="#b79150"/>
   <g font-size="16px">
-  <text x="261" y="464.6" fill="#e7edf5" text-anchor="middle">Choose next attention</text>
-  <text x="261" y="486.6" fill="#9babc0" text-anchor="middle">Later that day: lower priority</text>
-  <text x="261" y="508.6" fill="#9babc0" text-anchor="middle">Another day: move due date</text>
+  <text x="275" y="464.6" fill="#e7edf5" text-anchor="middle">Choose next attention</text>
+  <text x="275" y="486.6" fill="#9babc0" text-anchor="middle">Later that day: lower priority</text>
+  <text x="275" y="508.6" fill="#9babc0" text-anchor="middle">Another day: move due date</text>
   </g>
   <path d="M540 632 H883 a8 8 0 0 1 8 8 V704 a8 8 0 0 1 -8 8 H540 a8 8 0 0 1 -8 -8 V640 a8 8 0 0 1 8 -8 Z" fill="#204b3e" stroke="#88edbd"/>
   <g font-size="19px">
@@ -171,10 +171,10 @@
   <text x="777.5" y="1691.65" fill="#9babc0" text-anchor="middle">Next session: start with Focus</text>
   </g>
   <g font-size="32px">
-  <text x="89" y="72.7" fill="#e7edf5" text-anchor="start">Attention is precious.</text>
+  <text x="103" y="72.7" fill="#e7edf5" text-anchor="start">Attention is precious.</text>
   </g>
   <g font-size="16px">
-  <text x="89" y="114.6" fill="#9babc0" text-anchor="start">Tackle today's commitments. Clear the queue. Choose what comes next.</text>
+  <text x="103" y="114.6" fill="#9babc0" text-anchor="start">Tackle today's commitments. Clear the queue. Choose what comes next.</text>
   </g>
   <text x="466.5" y="1791.4" fill="#9babc0" text-anchor="start">Due date = attention day · Priority = order within that day</text>
   <text x="466.5" y="1810.4" fill="#9babc0" text-anchor="start">Blocked topic? Schedule an action: ask about X because it is a blocker.</text>
@@ -193,140 +193,140 @@
   <g font-size="13px">
   <text x="978.5" y="1891.55" fill="#bc9aff" text-anchor="start">⇢ Switch mode</text>
   </g>
-  <path d="M 323 312 L 526 312" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
-  <rect x="357" y="303" width="135" height="18" fill="#0b1018"/>
+  <path d="M 337 312 L 493 312" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
+  <rect x="371" y="303" width="88" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="424.5" y="316.55" fill="#65d9a5" text-anchor="middle">highest priority</text>
+  <text x="415" y="316.55" fill="#65d9a5" text-anchor="middle">first note</text>
   </g>
-  <path d="M 804 312 L 874 312" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
-  <path d="M 1094 312 L 1196 312" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
-  <rect x="1128" y="303" width="34" height="18" fill="#0b1018"/>
+  <path d="M 790 312 L 860 312" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
+  <path d="M 1080 312 L 1182 312" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
+  <rect x="1114" y="303" width="34" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="1145" y="316.55" fill="#65d9a5" text-anchor="middle">yes</text>
+  <text x="1131" y="316.55" fill="#65d9a5" text-anchor="middle">yes</text>
   </g>
-  <path d="M 984 337 L 984 481 L 741.5 481" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
-  <rect x="849.75" y="472" width="26" height="18" fill="#0b1018"/>
+  <path d="M 970 337 L 970 481 L 718 481" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
+  <rect x="831" y="472" width="26" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="862.75" y="485.55" fill="#65d9a5" text-anchor="middle">no</text>
+  <text x="844" y="485.55" fill="#65d9a5" text-anchor="middle">no</text>
   </g>
-  <path d="M 665 456 L 665 359" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)"/>
-  <rect x="648" y="398.5" width="34" height="18" fill="#0b1018"/>
+  <path d="M 641.5 456 L 641.5 359" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)"/>
+  <rect x="624.5" y="398.5" width="34" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="665" y="412.05" fill="#79b8ff" text-anchor="middle">yes</text>
+  <text x="641.5" y="412.05" fill="#79b8ff" text-anchor="middle">yes</text>
   </g>
-  <path d="M 588.5 481 L 419 481" fill="none" stroke="#f2bd63" stroke-width="2" marker-end="url(#r8071f616-arrow-f2bd63)"/>
-  <rect x="482.75" y="472" width="42" height="18" fill="#0b1018"/>
+  <path d="M 565 481 L 433 481" fill="none" stroke="#f2bd63" stroke-width="2" marker-end="url(#rc01ae15f-arrow-f2bd63)"/>
+  <rect x="478" y="472" width="42" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="503.75" y="485.55" fill="#f2bd63" text-anchor="middle">stop</text>
+  <text x="499" y="485.55" fill="#f2bd63" text-anchor="middle">stop</text>
   </g>
-  <path d="M 1258 287 L 1258 241 L 261 241 L 261 276" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)"/>
-  <rect x="653" y="232" width="213" height="18" fill="#0b1018"/>
+  <path d="M 1244 287 L 1244 241 L 275 241 L 275 276" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)"/>
+  <rect x="719" y="232" width="81" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="759.5" y="245.55" fill="#79b8ff" text-anchor="middle">next highest-priority note</text>
+  <text x="759.5" y="245.55" fill="#79b8ff" text-anchor="middle">next note</text>
   </g>
-  <path d="M 261 434 L 261 348" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)"/>
-  <rect x="217" y="382" width="88" height="18" fill="#0b1018"/>
+  <path d="M 275 434 L 275 348" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)"/>
+  <rect x="231" y="382" width="88" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="261" y="395.55" fill="#79b8ff" text-anchor="middle">pick again</text>
+  <text x="275" y="395.55" fill="#79b8ff" text-anchor="middle">pick again</text>
   </g>
-  <path d="M 199 304 L 54.5 304 L 54.5 600.8 L 711.5 600.8 L 711.5 632" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
-  <rect x="30" y="443.4" width="49" height="18" fill="#0b1018"/>
+  <path d="M 213 304 L 68.5 304 L 68.5 600.8 L 711.5 600.8 L 711.5 632" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
+  <rect x="44" y="443.4" width="49" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="54.5" y="456.95" fill="#65d9a5" text-anchor="middle">empty</text>
+  <text x="68.5" y="456.95" fill="#65d9a5" text-anchor="middle">empty</text>
   </g>
-  <path d="M 711.5 712 L 711.5 749 L 522 749 L 522 858 L 661 858 L 661 904" fill="none" stroke="#bc9aff" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#r8071f616-arrow-bc9aff)"/>
+  <path d="M 711.5 712 L 711.5 749 L 522 749 L 522 858 L 661 858 L 661 904" fill="none" stroke="#bc9aff" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#rc01ae15f-arrow-bc9aff)"/>
   <rect x="595.75" y="740" width="42" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="616.75" y="753.55" fill="#bc9aff" text-anchor="middle">plan</text>
   </g>
-  <path d="M 661 954 L 661 1058" fill="none" stroke="#f2bd63" stroke-width="2" marker-end="url(#r8071f616-arrow-f2bd63)"/>
+  <path d="M 661 954 L 661 1058" fill="none" stroke="#f2bd63" stroke-width="2" marker-end="url(#rc01ae15f-arrow-f2bd63)"/>
   <rect x="609" y="988" width="104" height="36" fill="#0b1018"/>
   <g font-size="13px">
   <text x="661" y="1001.55" fill="#f2bd63" text-anchor="middle">important</text>
   <text x="661" y="1019.55" fill="#f2bd63" text-anchor="middle">must advance</text>
   </g>
-  <path d="M 776 921 L 922.5 921 L 922.5 1058" fill="none" stroke="#f2bd63" stroke-width="2" marker-end="url(#r8071f616-arrow-f2bd63)"/>
+  <path d="M 776 921 L 922.5 921 L 922.5 1058" fill="none" stroke="#f2bd63" stroke-width="2" marker-end="url(#rc01ae15f-arrow-f2bd63)"/>
   <rect x="812.75" y="912" width="73" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="849.25" y="925.55" fill="#f2bd63" text-anchor="middle">can wait</text>
   </g>
-  <path d="M 551 1094 L 514.8 1094 L 514.8 921 L 546 921" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)"/>
+  <path d="M 551 1094 L 514.8 1094 L 514.8 921 L 546 921" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)"/>
   <rect x="474.3" y="998.5" width="81" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="514.8" y="1012.05" fill="#79b8ff" text-anchor="middle">next note</text>
   </g>
-  <path d="M 1004 1094 L 1035.2 1094 L 1035.2 937 L 776 937" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)" mask="url(#r8071f616-cut-1)"/>
+  <path d="M 1004 1094 L 1035.2 1094 L 1035.2 937 L 776 937" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)" mask="url(#rc01ae15f-cut-1)"/>
   <rect x="892.9" y="928" width="81" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="933.4" y="941.55" fill="#79b8ff" text-anchor="middle">next note</text>
   </g>
-  <path d="M 546 937 L 498.8 937 L 498.8 1246 L 595.5 1246" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)" mask="url(#r8071f616-cut-2)"/>
-  <rect x="446.8" y="1082.5" width="104" height="18" fill="#0b1018"/>
+  <path d="M 546 937 L 499 937 L 499 1246 L 595.5 1246" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)" mask="url(#rc01ae15f-cut-2)"/>
+  <rect x="447" y="1082.5" width="104" height="18" fill="#0b1018"/>
   <g font-size="13px">
-  <text x="498.8" y="1096.05" fill="#65d9a5" text-anchor="middle">all reviewed</text>
+  <text x="499" y="1096.05" fill="#65d9a5" text-anchor="middle">all reviewed</text>
   </g>
-  <path d="M 211 956 L 211 1042" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
+  <path d="M 211 956 L 211 1042" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
   <rect x="194" y="990" width="34" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="211" y="1003.55" fill="#65d9a5" text-anchor="middle">yes</text>
   </g>
-  <path d="M 368 1067 L 399.2 1067 L 399.2 920 L 368 920" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)"/>
+  <path d="M 368 1067 L 399.2 1067 L 399.2 920 L 368 920" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)"/>
   <rect x="351.2" y="984.5" width="96" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="399.2" y="998.05" fill="#79b8ff" text-anchor="middle">check again</text>
   </g>
-  <path d="M 54 920 L 22.8 920 L 22.8 1206 L 54 1206" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
+  <path d="M 54 920 L 22.8 920 L 22.8 1206 L 54 1206" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
   <rect x="-1.7" y="1054" width="49" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="22.8" y="1067.55" fill="#65d9a5" text-anchor="middle">empty</text>
   </g>
-  <path d="M 54 1190 L 6.8 1190 L 6.8 320 L 199 320" fill="none" stroke="#bc9aff" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#r8071f616-arrow-bc9aff)" mask="url(#r8071f616-cut-3)"/>
+  <path d="M 54 1190 L 6.8 1190 L 6.8 320 L 213 320" fill="none" stroke="#bc9aff" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#rc01ae15f-arrow-bc9aff)" mask="url(#rc01ae15f-cut-3)"/>
   <rect x="-64.7" y="746" width="143" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="6.8" y="759.55" fill="#bc9aff" text-anchor="middle">yes · Focus first</text>
   </g>
-  <path d="M 211 1234 L 211 1320" fill="none" stroke="#bc9aff" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#r8071f616-arrow-bc9aff)"/>
+  <path d="M 211 1234 L 211 1320" fill="none" stroke="#bc9aff" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#rc01ae15f-arrow-bc9aff)"/>
   <rect x="198" y="1268" width="26" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="211" y="1281.55" fill="#bc9aff" text-anchor="middle">no</text>
   </g>
-  <path d="M 959.5 1246 L 993.5 1246 L 993.5 1280 L 1168 1280 L 1168 886 L 1298 886 L 1298 920 L 1332 920" fill="none" stroke="#bc9aff" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#r8071f616-arrow-bc9aff)"/>
+  <path d="M 959.5 1246 L 993.5 1246 L 993.5 1280 L 1168 1280 L 1168 886 L 1298 886 L 1298 920 L 1332 920" fill="none" stroke="#bc9aff" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#rc01ae15f-arrow-bc9aff)"/>
   <rect x="1085" y="1074" width="166" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="1168" y="1087.55" fill="#bc9aff" text-anchor="middle">optional · time left</text>
   </g>
-  <path d="M 1538 956 L 1538 1031" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
-  <path d="M 1538 1103 L 1538 1146 L 1530 1146 L 1530 1189" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
+  <path d="M 1538 956 L 1538 1031" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
+  <path d="M 1538 1103 L 1538 1146 L 1530 1146 L 1530 1189" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
   <rect x="1521" y="1115.5" width="34" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="1538" y="1129.05" fill="#65d9a5" text-anchor="middle">yes</text>
   </g>
-  <path d="M 1538 1283 L 1538 1369" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
+  <path d="M 1538 1283 L 1538 1369" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
   <rect x="1435.5" y="1317" width="205" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="1538" y="1330.55" fill="#65d9a5" text-anchor="middle">unfinished · stop for now</text>
   </g>
-  <path d="M 1546 1189 L 1546 1157.8 L 1775.2 1157.8 L 1775.2 1236 L 1744 1236" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)"/>
+  <path d="M 1546 1189 L 1546 1157.8 L 1775.2 1157.8 L 1775.2 1236 L 1744 1236" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)"/>
   <rect x="1624.1" y="1148.8" width="73" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="1660.6" y="1162.35" fill="#79b8ff" text-anchor="middle">continue</text>
   </g>
-  <path d="M 1332 1236 L 1300.8 1236 L 1300.8 1059 L 1332 1059" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)"/>
+  <path d="M 1332 1236 L 1300.8 1236 L 1300.8 1059 L 1332 1059" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)"/>
   <rect x="1252.8" y="1138.5" width="96" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="1300.8" y="1152.05" fill="#79b8ff" text-anchor="middle">note closed</text>
   </g>
-  <path d="M 1744 1416 L 1808.5 1416 L 1808.5 1067 L 1744 1067" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#r8071f616-arrow-79b8ff)"/>
+  <path d="M 1744 1416 L 1808.5 1416 L 1808.5 1067 L 1744 1067" fill="none" stroke="#79b8ff" stroke-width="2" marker-end="url(#rc01ae15f-arrow-79b8ff)"/>
   <rect x="1768" y="1232.5" width="81" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="1808.5" y="1246.05" fill="#79b8ff" text-anchor="middle">next note</text>
   </g>
-  <path d="M 777.5 1282 L 777.5 1632" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)"/>
+  <path d="M 777.5 1282 L 777.5 1632" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)"/>
   <rect x="710" y="1448" width="135" height="18" fill="#0b1018"/>
   <g font-size="13px">
   <text x="777.5" y="1461.55" fill="#65d9a5" text-anchor="middle">enough for today</text>
   </g>
-  <path d="M 1332 1075 L 1147.25 1075 L 1147.25 1672 L 962.5 1672" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#r8071f616-arrow-65d9a5)" mask="url(#r8071f616-cut-4)"/>
+  <path d="M 1332 1075 L 1147.25 1075 L 1147.25 1672 L 962.5 1672" fill="none" stroke="#65d9a5" stroke-width="2" marker-end="url(#rc01ae15f-arrow-65d9a5)" mask="url(#rc01ae15f-cut-4)"/>
   <rect x="1083.75" y="1100.25" width="127" height="36" fill="#0b1018"/>
   <g font-size="13px">
   <text x="1147.25" y="1113.8" fill="#65d9a5" text-anchor="middle">none useful</text>

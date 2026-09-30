@@ -8,17 +8,16 @@ The rows are deliberately the same rows used by Open. Completing,
 rescheduling, filtering, opening a note, and reading validation feedback should
 not change meaning when moving between the two views.
 
-## Priority and the single anchor
+## Dates first, then priorities
 
-Focus is priority-sorted, so the top row is already the most urgent, earliest
-item — the one thing to do next. Focus leans into that: the first row stays at
-full strength while every row below it is dimmed, so the eye rests on a single
-target without losing the rest of the day as optional context.
+Focus sorts by the next action's due date, earliest first. Within the same date,
+higher-priority tasks come first; context and note title break further ties.
+The first row stays bright while later rows are dimmed to make it easier to
+choose a starting point.
 
-Priority also shows on the rows themselves. Every row carries a left accent bar
-whose color ramps from urgent warm hues (🔺/⏫/🔼) through a neutral grey for
-normal priority to progressively fainter greys for 🔽/⏬, so a lower-priority bar
-never out-shouts a higher one. Below-normal rows are additionally de-emphasized.
-The bar pairs with the priority signifier already in the task text, so priority
-is never conveyed by color alone. Below the first row the bar dims with the rest
-of the row, keeping the anchor the only sharp element.
+Each row also has a priority accent on its left edge, from warm colors for high
+priority to faint grey for low priority. Low-priority rows are dimmer too.
+The priority symbol remains in the task text, so color is not the only cue.
+
+Use your own judgment when choosing work: raising a task's priority only changes
+its place among notes on the same date.

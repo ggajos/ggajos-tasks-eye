@@ -304,6 +304,9 @@ function renderViolationSample(feature: FeatureDefinition): string {
   return `
 ## Example note to repair
 
+This example illustrates the issue. Replace its dates and parent links with
+ones that fit your vault.
+
 \`\`\`md
 ${sample.markdown.trimEnd()}
 \`\`\`
@@ -349,11 +352,11 @@ sidebar:
 
 ${feature.feature.summary}
 
-## Why it matters
+## How to use it
 
 ${withoutLeadingHeading(feature.whyMarkdown.trim())}
 
-${renderHowToFix(feature)}## What to expect
+${renderHowToFix(feature)}## Rules and details
 
 ${renderAcceptanceCriteria(feature.feature)}
 ${renderViolationSample(feature.feature)}
@@ -395,8 +398,8 @@ function renderSidebar(features: readonly LoadedFeature[]): string {
 
   const sidebar = [
     { label: "Overview", link: "/" },
-    { label: "Philosophy & Workflow", link: "/philosophy/" },
-    { label: "GTD Quickstart", link: "/gtd-quickstart/" },
+    { label: "Daily workflow", link: "/philosophy/" },
+    { label: "GTD guide", link: "/gtd-quickstart/" },
     ...featureSections,
     {
       label: "Reference",

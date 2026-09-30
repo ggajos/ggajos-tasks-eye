@@ -11,7 +11,7 @@ export default defineFeature({
       "moves it one step back along `none → open → closed`.",
     "Stepping back from `open` removes the `status` property entirely; " +
       "stepping forward from no status sets `open`.",
-    "The ends clamp: forward from `closed` and back from no status do " +
+    "At either end, the status stays as it is: forward from `closed` and back from no status do " +
       "nothing.",
     "An unsupported status value is repaired: forward sets `open` and back " +
       "removes the property.",

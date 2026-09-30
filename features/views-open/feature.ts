@@ -7,11 +7,11 @@ export default defineFeature({
   acceptanceCriteria: [
     "Notes with missing, blank, or explicit `status: open` appear in Open.",
     "Closed notes and notes with unsupported statuses do not appear in Open.",
-    "Rows use the earliest unchecked due task as the next action.",
+    "Each row shows the unchecked task with the earliest due date. If none are dated, it shows the first unchecked task.",
     "Rows use the first matching Overdue, No Due Date, Today, Tomorrow, This Week, Next Week, This Month, Next Month, or Future bucket.",
     "Weeks run Monday through Sunday and take precedence over overlapping month buckets.",
     "A new Open pane starts with Today expanded and every other due-date bucket collapsed.",
-    "Manual bucket choices survive rerenders and tab switches until the pane is closed.",
+    "Sections you expand or collapse keep that state across updates and tab switches until you close the pane.",
   ],
   screenshots: [
     {

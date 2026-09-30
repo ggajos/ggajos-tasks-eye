@@ -1,8 +1,8 @@
 ---
-title: "GTD Quickstart"
+title: "GTD guide"
 description: "Translate a familiar GTD practice into a note-centered Tasks Eye workflow."
 sidebar:
-  label: "GTD Quickstart"
+  label: "GTD guide"
   order: 2
 ---
 
@@ -81,8 +81,9 @@ The key translation is simple:
 
 ## Set up the smallest useful system
 
-Choose an indexing boundary under **Tasks Eye → Notes folder**. Folders only
-decide which notes Tasks Eye reads; they do not define context:
+Choose a notes folder under **Settings → Tasks Eye → Sources**. Add folders
+you want to skip under **Excluded folders**. Folders decide which notes Tasks
+Eye reads; parent links define context:
 
 ```text
 Tasks/
@@ -95,21 +96,13 @@ Tasks/
 Declare one root and link notes to it. `Work.md` and `Private.md` can be
 first-level branches, while descendants can live in any folder:
 
-```md
-<!-- Root.md -->
----
-up: "-"
----
+Start with the complete [three-note example](../#set-up-your-first-notes).
+Use closed root and branch notes when they exist only to organize other notes.
+Add a Private branch in the same way as Work.
 
-<!-- Any folder/Meeting.md -->
----
-up: "[[Work]]"
----
-```
-
-Tasks Eye reads every Markdown note below the configured folder. Keeping
-ordinary vault notes outside it prevents reference material from accidentally
-joining the task workflow.
+Tasks Eye reads Markdown notes below the configured folder except excluded
+folders. Keep ordinary reference outside that scope. An existing parent outside
+the scope is also supported; see [Sources](../features/data-sources/).
 
 ## Capture without breaking concentration
 
@@ -139,8 +132,7 @@ made trustworthy as an open note.
 
 ### Make the next action physical
 
-A note is the atomic unit of attention, not automatically a GTD project. It may
-represent a multi-step outcome, a standalone action, a waiting item, or a
+A note may represent a multi-step outcome, a standalone action, a waiting item, or a
 recurring responsibility. For a project, name the desired outcome in the note
 title and date only the current next action by default:
 
@@ -200,8 +192,8 @@ active-outcome inventory with next-action previews over the same source notes.
 ## Keep the system trusted with Inbox
 
 Tasks Eye's Inbox is broader than a classic GTD capture inbox. Treat it as a
-**repair queue** for every managed note that breaks the workflow contract,
-regardless of its folder or status.
+**repair queue** for notes with missing information, overdue work, or other
+issues. It checks notes in your Sources scope, including closed notes.
 
 A capture is fully processed when it becomes one of these:
 
@@ -223,7 +215,7 @@ documentation page:
 
 ## Reflect daily and weekly
 
-The daily loop is operational:
+A daily review can be short:
 
 1. Handle Focus to zero.
 2. Repair Inbox to zero.
@@ -378,14 +370,14 @@ project:
 - [ ] Review whether current projects support these horizons 🔁 every month 📅 2026-09-01
 ```
 
-Tasks Eye imposes no hierarchy here. It simply makes the chosen reflection
-cadence resurface.
+Keep these notes in your usual `up` tree. The recurring review task brings
+them back to your attention.
 
-## The operating rule
+## When to use each view
 
 When you do not know what to do next, open Focus. When Focus is handled, repair
 Inbox. During the weekly review, inspect Open and the commitments surrounding
 it.
 
-That is the complete translation: capture freely, make every active note
-actionable, and use attention dates to ensure nothing quietly disappears.
+Capture freely, give each active note a next action, and choose when it should
+return to your attention.

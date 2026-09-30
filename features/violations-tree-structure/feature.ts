@@ -4,12 +4,12 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Repair tree structure",
   summary:
-    "Inbox reports loops and duplicate roots so the explicit note tree stays resolvable.",
+    "Inbox helps you fix parent links that loop and notes that declare more than one root.",
   acceptanceCriteria: [
     "Every note in an `up` loop reports `up` links form a loop.",
     "Every note declaring `up: -` reports the duplicate-root message when more than one root exists.",
     "A unique root remains a normal note with the usual task and status validations.",
-    "Broken structure does not crash context resolution for other branches.",
+    "Other valid branches keep their context labels when one branch has a loop.",
   ],
   violation: {
     code: "up-cycle",

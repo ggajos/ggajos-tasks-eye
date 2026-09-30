@@ -4,10 +4,8 @@ Due dates are only useful if they reflect real availability. Tasks Eye checks
 scheduled work against the user's weekly schedule, nationwide public holidays,
 and personal dates or ranges.
 
-Availability stays in plugin settings because it is compact operational
-configuration rather than note content. Open **Settings → Tasks Eye** and find
-the **Availability** section; Tasks Eye does not create or parse a special
-holiday note.
+Open **Settings → Tasks Eye → Availability** to set up your calendar. These
+settings apply across your work notes.
 
 ### Public holidays
 
@@ -26,8 +24,8 @@ settings tab is opened.
 
 ### Weekly non-working days
 
-Toggle any weekday that is normally unavailable. Saturday and Sunday are
-enabled for a new configuration, but both can be changed. Weekly days affect
+Enter weekday abbreviations in **Every week**, separated by commas, such as
+`Sat, Sun`. Saturday and Sunday are the default. These days affect
 task validation; ordinary weekends are not added as separate OOO markers unless
 another public or personal reason occurs on the same date.
 
@@ -50,8 +48,16 @@ years that are no longer needed are cleaned up automatically.
 
 ### What changes on the board
 
-The markers are visible in Focus and Open because that is where daily and
-planning decisions are made. The dedicated `OOO` filter isolates availability
-when the user wants a calendar-like review. When public, personal, and weekend
-reasons overlap, one marker retains all of them. A task due on any unavailable
-day is also sent to Inbox so it can be rescheduled.
+Open shows holiday and personal time-off markers from today through the latest
+next-action date among open notes. Focus shows today's markers. With no dated
+open notes, there are no markers. **OOO** shows only these markers; selecting a
+normal context hides them.
+
+When public holidays, personal time off, and weekly non-working days overlap,
+the marker lists all reasons. Ordinary non-working weekdays alone do not
+create markers.
+
+A board row reports an availability conflict only when it falls on that note's
+earliest unchecked due date. A conflict on a later task becomes visible when
+that date becomes the earliest. The date controls move by calendar days, so
+check the new date when rescheduling across time off.

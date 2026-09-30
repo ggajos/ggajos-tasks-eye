@@ -1,11 +1,8 @@
-## Why parent links are explicit
+## Give the note a place in the tree
 
-Tasks Eye uses `up` links to keep the note tree independent from the vault's
-folders. A captured note can live anywhere inside the indexed boundary while
-still declaring the note that owns it.
+A parent link tells Tasks Eye how a note relates to the rest of your work.
+For example, a meeting note can link to Work even if the files live in
+different folders.
 
-Inbox distinguishes a missing property from a link that points at a note that
-does not exist, so each repair has a precise next step.
-
-- Missing property: `Note needs an \`up\` link to its parent.`
-- Unresolved target: "`up` link points to a note that doesn't exist."
+Inbox distinguishes a missing `up` property from a link that cannot be resolved,
+so you can add a parent or correct the existing link.

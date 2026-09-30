@@ -4,11 +4,11 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Task due on an unavailable day",
   summary:
-    "An unchecked task due on a configured unavailable day is reported as an Inbox issue.",
+    "A note appears in Inbox when its earliest unchecked due date falls on an unavailable day.",
   acceptanceCriteria: [
-    "Unchecked tasks due on configured non-working weekdays, public holidays, or personal time off are reported in Inbox.",
+    "Non-working weekdays, public holidays, and personal time off can cause a conflict on the note’s earliest unchecked due date.",
     "The issue includes the due date and every named availability reason.",
-    "Rows show only the earliest vacation collision for the note.",
+    "A conflict on a later task is hidden until that date becomes the note’s earliest unchecked due date.",
     "Tasks on normal working days do not trigger this issue.",
     "The issue is visible in both Inbox and Open.",
   ],

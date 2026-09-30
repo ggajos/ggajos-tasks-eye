@@ -3,9 +3,9 @@ import { defineFeature } from "../types";
 export default defineFeature({
   title: "Done view",
   summary:
-    "Done shows the day's completed tasks alongside unfinished tasks with due dates, preserving subtask nesting and grouping by context and note.",
+    "Review tasks completed on a chosen day, grouped by context and note. Optionally include dated unfinished tasks from those same notes.",
   acceptanceCriteria: [
-    "Done is the fifth view in Tasks Eye navigation.",
+    "Done is the fourth board tab, after Focus, Open, and Inbox.",
     "Completed tasks are selected by Tasks completion date.",
     "An 'Unfinished' toggle adds every unfinished task with a due date, but only inside notes that also have a task completed on the selected day.",
     "Subtask nesting is preserved; ancestors of a matching task appear as muted context rows without a completion check.",

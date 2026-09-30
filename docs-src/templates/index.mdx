@@ -12,7 +12,7 @@ sidebar:
 </div>
 
 Tasks Eye turns your notes into an organized, daily task board. Each row represents a
-note, and the earliest unchecked task becomes the visible next action. An explicit
+note, and the unchecked task with the earliest due date becomes the visible next action. An explicit
 `up` link tree tells Tasks Eye the note's context independently of folders. When
 you are unsure what to do next, run
 [**Tasks Eye: Show Focus**](reference/commands/#open-focus).
@@ -21,7 +21,73 @@ Your Markdown remains the source of truth. Tasks Eye reads and updates the same
 checkboxes and dates you already use with the Obsidian Tasks plugin; it does not
 create a separate task database.
 
-## See the work, not a raw list
+## Set up your first notes
+
+Tasks Eye requires Obsidian 1.13.4 or newer and the **Tasks** community plugin.
+Install and enable both plugins, then open **Settings → Tasks Eye → Sources**.
+Choose a **Notes folder**, such as `Tasks`. Its Markdown notes and subfolders
+will appear in Tasks Eye unless you add them to **Excluded folders**.
+
+Create these files inside that folder. Each code block is the complete starting
+content of one file.
+
+**Home.md** — the root:
+
+```md
+---
+status: closed
+up: "-"
+---
+```
+
+**Work.md** — a context for related notes:
+
+```md
+---
+status: closed
+up: "[[Home]]"
+---
+```
+
+**Prepare meeting.md** — a note with a next action:
+
+```md
+---
+status: open
+up: "[[Work]]"
+---
+
+Keep your agenda and background here.
+
+- [ ] Draft the agenda 📅 2026-10-01
+- [ ] Send the agenda to attendees
+```
+
+Change the example date to today and open
+[**Tasks Eye: Show Focus**](reference/commands/#open-focus).
+The meeting appears as one row under **Work**. Home and Work are closed,
+so they provide structure without appearing as active work.
+
+The `📅` marker is the Tasks **due date**. You can use it as the day to return to
+an action; it need not be a hard deadline. Past dates are called **overdue**.
+Tasks scheduled and start dates do not determine when a row appears.
+
+For larger vaults, see [Sources](features/data-sources/) and
+[note conventions](features/data-vault-conventions/).
+
+## Find the right view
+
+| View | When to use it |
+| --- | --- |
+| [Focus](features/views-focus/) | Choose from open work due today or overdue. |
+| [Open](features/views-open/) | Plan across all open notes, including future and undated work. |
+| [Inbox](features/views-inbox/) | Fix missing information, overdue dates, and other issues. |
+| [Done](features/views-done/) | Review tasks completed on a selected day. |
+
+[Tree](features/views-tree/) is a separate side panel showing the active note's
+parents and descendants. It follows you as you open notes.
+
+## Your daily board
 
 <figure class="overview-shot overview-shot--hero">
   <img src="assets/features/views-focus/board.png" alt="Tasks Eye Focus view showing today's work" />
@@ -35,19 +101,19 @@ create a separate task database.
 <ol class="overview-anatomy">
   <li>
     <strong>Start with the top row.</strong>
-    <span>Focus only shows work due today or overdue, ordered by date.</span>
+    <span>Focus only shows work due today or overdue, ordered by date and then priority within each date.</span>
   </li>
   <li>
     <strong>Read one row as one note.</strong>
-    <span>The bold text is the earliest unchecked task; the note title underneath opens the surrounding document.</span>
+    <span>The bold text is the unchecked task with the earliest due date; the note title underneath opens the surrounding document.</span>
   </li>
   <li>
     <strong>Use Open for future work.</strong>
-    <span>The Open view groups all upcoming tasks by due date, keeping them out of your immediate Focus list.</span>
+    <span>Open shows all open notes, grouped by the due date of each note’s next action.</span>
   </li>
   <li>
     <strong>Use the up tree as context.</strong>
-    <span>The label on the right comes from the note's first-level ancestor. Filter by a branch, or select the root note's basename to show every indexed note.</span>
+    <span>With Home → Work → Meeting notes, Work is the context. Select Work to narrow the board, or Home to show the whole tree.</span>
   </li>
 </ol>
 
@@ -56,7 +122,7 @@ create a separate task database.
 <figure class="overview-shot overview-shot--controls">
   <img src="assets/features/actions-board-task-controls/controls.png" alt="A Tasks Eye row with controls for completing a task or moving its date" loading="lazy" />
   <figcaption>
-    Hover or focus a row to reveal the checkmark and ±1/±7 day rescheduling controls. Every change is
+    Hover or focus a row to reveal the checkmark, date controls, and priority arrows. Every change is
     written back to the original Tasks checkbox.
   </figcaption>
 </figure>
@@ -64,19 +130,18 @@ create a separate task database.
 If the next action is simple, complete or reschedule it without leaving
 Focus. If you need more context, meeting notes, or links, click the note title to open it and work with the task in its full environment.
 
-## Inbox catches metadata issues
+## Inbox shows what needs attention
 
 <figure class="overview-shot overview-shot--inbox">
   <img src="assets/features/views-inbox/repair-queue.png" alt="Tasks Eye Inbox showing several realistic notes with missing metadata" loading="lazy" />
   <figcaption>
-    Inbox highlights notes missing required metadata so you can fix them.
+    Inbox explains missing properties, overdue work, and other issues on each row.
   </figcaption>
 </figure>
 
 Focus and Open rely on your notes having clear dates and tasks.
 Inbox finds the exceptions: an overdue or missing task date, an open note with
-no unchecked tasks, an unsupported status, or a broken `up` tree. Clear these
-validation issues to ensure your work views stay accurate.
+no unchecked tasks, an unsupported status, or a broken `up` tree. Follow the message on each row to decide what to fix or reschedule.
 
 ## A simple daily workflow
 

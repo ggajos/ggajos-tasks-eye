@@ -1,54 +1,59 @@
 ## How to fix
 
-These violations mean the `up` links resolve, but the overall tree is not
-resolvable: the chain either loops forever or has more than one root. Read the
-row message and apply the matching fix.
+Follow the message on the row. Resolving a tree issue clears its warning;
+other issues may still keep the note in Inbox.
 
-### "`up` links form a loop."
+### “`up` links form a loop.”
 
-Two or more notes point at each other (directly or through a chain), so the `up`
-chain never reaches a root. Follow the links until you find the cycle, then
-repoint one of them at a note higher up the tree:
+A note can point to itself, or a chain of notes can lead back to where it
+started. Follow the parent links and change one so the chain reaches a root.
 
-```markdown
-# A.md
-up: "[[B]]"
+For example, if A links to B and B links back to A, keep A's link and change
+B's frontmatter to point at an existing parent outside that loop:
 
-# B.md
-up: "[[A]]"   # loop: A → B → A
+```md
+---
+up: "[[Projects]]"
+status: open
+---
 ```
 
-Fix it by pointing one note at a real ancestor instead of back into the loop:
+Make sure Projects does not lead back to A or B.
 
-```markdown
-# B.md
-up: "[[Projects]]"   # B now climbs toward the root
+### “Only one note can act as root.”
+
+More than one indexed note declares `up: "-"`. Choose the root to keep, such
+as Home, and give the others a parent link.
+
+**Home.md** can remain a closed root:
+
+```md
+---
+up: "-"
+status: closed
+---
 ```
 
-Every note that was part of the loop leaves Inbox once the chain reaches the
-root.
+**Archive.md**, previously another root, can become its child:
 
-### "Only one note can act as root."
-
-More than one note declares `up: -`. A tree can have exactly one root. Decide
-which note is the real root and give every other former root a normal parent
-link:
-
-```markdown
-# Home.md
-up: -            # keep exactly one root
-
-# Archive.md
-up: -            # wrong: second root
-up: "[[Home]]"   # fix: make it a child of the real root
+```md
+---
+up: "[[Home]]"
+status: closed
+---
 ```
 
-### What a healthy tree looks like
+When editing existing notes, preserve their status and other properties unless
+you intend to change them.
 
-- Exactly one note declares `up: -` (the root).
-- Every other note declares `up: "[[Parent]]"` pointing at an indexed note.
-- Following `up` from any note reaches the root in a finite number of steps.
+### Check the resulting tree
 
-If a note is missing its `up` link entirely, or points at a note that does not
-exist, that is a different repair — see
-[Repair missing parent links](../violations-missing-up/).
+For a tree kept entirely inside your notes folder:
+
+- One note declares `up: "-"`.
+- Each other note links to its parent.
+- Following parent links eventually reaches the root without a loop.
+
+Existing parents outside the indexed notes are supported as external roots;
+see [Sources](../data-sources/). Missing or unresolved parents are a separate
+issue: [Repair missing parent links](../violations-missing-up/).

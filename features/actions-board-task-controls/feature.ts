@@ -11,7 +11,7 @@ export default defineFeature({
     "The raise button is disabled when the task is already at the highest priority, and the lower button is disabled when the task is already at the lowest priority.",
     "Moving a due date updates the matching Tasks due marker in the note.",
     "Raising or lowering priority updates the matching Tasks priority signifier in the note.",
-    "Marking a task done delegates to the Tasks API and refreshes the board.",
+    "Marking a task done uses Tasks to complete it, including its recurrence behavior, then refreshes the board.",
   ],
   screenshots: [
     {
