@@ -3,6 +3,7 @@ import type { BoardScreen } from "../src/board";
 import { boardContexts, buildBoard } from "../src/board";
 import { buildEyeFilesFromMarkdown } from "../src/indexer";
 import type { RenderItem } from "../src/model";
+import { createSnapshot } from "../src/snapshot";
 import type { AvailabilityConfig } from "../src/vacation";
 
 const NOW = new Date(2026, 6, 17);
@@ -22,7 +23,7 @@ function note(path: string, up: string, body = "", status = "open") {
   };
 }
 
-const vault = buildEyeFilesFromMarkdown([
+const files = buildEyeFilesFromMarkdown([
   note("Root.md", "-", "- [x] done ✅ 2026-07-01", "closed"),
   note("Work.md", "[[Root]]", "", "closed"),
   note("Home.md", "[[Root]]", "", "closed"),
@@ -31,6 +32,7 @@ const vault = buildEyeFilesFromMarkdown([
   note("Home/Monday.md", "[[Home]]", "- [ ] next 📅 2026-07-20"),
   note("Home/Undated.md", "[[Home]]", "- [ ] someday"),
 ]);
+const vault = createSnapshot(files, availability);
 
 function itemLabels(items: readonly RenderItem[]): string[] {
   return items.map((item) =>
@@ -57,7 +59,6 @@ describe("Board module", () => {
       mode: "focus",
       contextFilter: "*",
       now: NOW,
-      availability,
     });
 
     expect(screen.body.kind).toBe("focus");
@@ -73,7 +74,6 @@ describe("Board module", () => {
       mode: "open",
       contextFilter: "*",
       now: NOW,
-      availability,
     });
 
     expect(bucketKeys(screen)).toEqual([
@@ -94,7 +94,6 @@ describe("Board module", () => {
       mode: "open",
       contextFilter: "ooo",
       now: NOW,
-      availability,
     });
 
     if (screen.body.kind !== "buckets") throw new Error("expected buckets");
@@ -110,7 +109,6 @@ describe("Board module", () => {
       mode: "open",
       contextFilter: "Work",
       now: NOW,
-      availability,
     });
 
     if (screen.body.kind !== "buckets") throw new Error("expected buckets");
@@ -125,22 +123,21 @@ describe("Board module", () => {
       mode: "focus",
       contextFilter: "Home",
       now: NOW,
-      availability,
     });
 
     expect(screen.isEmpty).toBe(true);
   });
 
   it("offers the OOO context only for Focus and Open", () => {
-    expect(boardContexts(vault, "open", "*").contexts).toEqual([
+    expect(boardContexts(files, "open", "*").contexts).toEqual([
       "Home",
       "ooo",
       "Work",
     ]);
-    expect(boardContexts(vault, "inbox", "*").contexts).toEqual([
+    expect(boardContexts(files, "inbox", "*").contexts).toEqual([
       "Home",
       "Work",
     ]);
-    expect(boardContexts(vault, "done", "Gone").contextFilter).toBe("Root");
+    expect(boardContexts(files, "done", "Gone").contextFilter).toBe("Root");
   });
 });

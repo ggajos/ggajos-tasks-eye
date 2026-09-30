@@ -52,7 +52,7 @@ export class TreeView extends ItemView {
     }
 
     try {
-      const files = await this.plugin.readFiles();
+      const { files } = await this.plugin.snapshot();
       if (token !== this.renderToken) return;
       const activePath =
         this.plugin.app.workspace.getActiveFile()?.path ?? null;

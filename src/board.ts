@@ -12,9 +12,8 @@ import {
   buildRowModels,
   selectRowModels,
 } from "./model";
+import type { VaultSnapshot } from "./snapshot";
 import type { EyeFile, RowModel } from "./types";
-import type { AvailabilityConfig } from "./vacation";
-import { EMPTY_AVAILABILITY_CONFIG } from "./vacation";
 
 export type BoardMode = Exclude<EyeMode, "done">;
 
@@ -40,10 +39,9 @@ export interface BoardScreen extends BoardContexts {
 }
 
 export interface BoardRequest {
-  mode: EyeMode;
+  mode: BoardMode;
   contextFilter: string;
   now: Date;
-  availability?: AvailabilityConfig;
 }
 
 export function boardContexts(
@@ -73,10 +71,10 @@ function taskItems(rows: readonly RowModel[]): RenderItem[] {
 }
 
 export function buildBoard(
-  files: readonly EyeFile[],
-  request: BoardRequest & { mode: BoardMode },
+  snapshot: VaultSnapshot,
+  request: BoardRequest,
 ): BoardScreen {
-  const availability = request.availability ?? EMPTY_AVAILABILITY_CONFIG;
+  const { files, availability } = snapshot;
   const { mode, now } = request;
   const context = boardContexts(files, mode, request.contextFilter);
   const { contextFilter, globalContext } = context;

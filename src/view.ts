@@ -22,6 +22,7 @@ import {
   NORMAL_PRIORITY,
   priorityRowClasses,
 } from "./priority";
+import type { VaultSnapshot } from "./snapshot";
 import type { EyeFile, RowModel } from "./types";
 import {
   button,
@@ -201,9 +202,9 @@ export class EyeView extends ItemView {
     }
 
     try {
-      const files = await this.plugin.readFiles();
+      const snapshot = await this.plugin.snapshot();
       if (token !== this.renderToken) return;
-      await this.renderLoadedContent(root, files);
+      await this.renderLoadedContent(root, snapshot);
     } catch (error) {
       if (token !== this.renderToken) return;
       console.error("Tasks Eye failed to render the board.", error);
@@ -217,8 +218,9 @@ export class EyeView extends ItemView {
 
   private async renderLoadedContent(
     root: HTMLElement,
-    files: EyeFile[],
+    snapshot: VaultSnapshot,
   ): Promise<void> {
+    const { files } = snapshot;
     root.replaceChildren();
     const mode = this.state.mode;
 
@@ -246,10 +248,9 @@ export class EyeView extends ItemView {
       return;
     }
 
-    const screen = buildBoard(files, {
+    const screen = buildBoard(snapshot, {
       mode,
       contextFilter: this.plugin.settings.contextFilter,
-      availability: this.plugin.availabilityConfig(),
       now: nowDate(),
     });
     this.renderToolbar(
@@ -398,7 +399,7 @@ export class EyeView extends ItemView {
 
   private async renderCompleted(
     root: HTMLElement,
-    files: EyeFile[],
+    files: readonly EyeFile[],
     contextFilter: string,
   ): Promise<void> {
     const grouped = collectStatusGroups(

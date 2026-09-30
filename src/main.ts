@@ -54,6 +54,8 @@ import type { StatusStepDirection } from "./noteStatus";
 import { stepNoteStatus } from "./noteStatus";
 import type { PriorityDirection } from "./priority";
 import { TasksEyeSettingTab } from "./settings";
+import type { VaultSnapshot } from "./snapshot";
+import { createSnapshot, SnapshotCache } from "./snapshot";
 import type { TasksApiV1 } from "./tasksApi";
 import { getTasksApi } from "./tasksApi";
 import { TREE_VIEW_TYPE, TreeView } from "./treeView";
@@ -127,6 +129,7 @@ export default class TheEyePlugin extends Plugin {
   private holidayRetryTimer: number | null = null;
   private personalSequence = 0;
   private refreshTimer: number | null = null;
+  private readonly snapshots = new SnapshotCache(() => this.loadSnapshot());
 
   get holidaySyncing(): boolean {
     return this.holidaySyncCount > 0;
@@ -277,14 +280,19 @@ export default class TheEyePlugin extends Plugin {
     return api;
   }
 
-  async readFiles(): Promise<EyeFile[]> {
+  snapshot(): Promise<VaultSnapshot> {
+    return this.snapshots.get();
+  }
+
+  private async loadSnapshot(): Promise<VaultSnapshot> {
     const files = await readEyeFiles(
       this.app,
       this.settings.notesFolderPath,
       this.settings.excludedFolderPaths,
     );
+    // Holiday years depend on the due dates just indexed.
     void this.refreshHolidayData(false, files, true);
-    return files;
+    return createSnapshot(files, this.availabilityConfig());
   }
 
   availabilityConfig(): AvailabilityConfig {
@@ -755,6 +763,7 @@ export default class TheEyePlugin extends Plugin {
   }
 
   private queueRefresh(): void {
+    this.snapshots.invalidate();
     if (this.refreshTimer !== null) window.clearTimeout(this.refreshTimer);
     this.refreshTimer = window.setTimeout(() => {
       this.refreshTimer = null;
@@ -763,6 +772,7 @@ export default class TheEyePlugin extends Plugin {
   }
 
   private async refreshViews(): Promise<void> {
+    this.snapshots.invalidate();
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
     for (const leaf of leaves) {
       if (leaf.view instanceof EyeView) await leaf.view.requestRender();
