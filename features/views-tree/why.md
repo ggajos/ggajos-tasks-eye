@@ -6,13 +6,23 @@ to lose track of the path back to its root and of everything that hangs beneath
 it.
 
 The Tree view makes that structure visible. It walks the `up` links from the
-current note up to the root and shows that spine, then expands the full subtree
-of notes below the current one. The current note stays bold at column zero;
-plain dot prefixes express distance from it in either direction. Ancestors
-appear as a single path, without sibling clutter, so the line back to the root
-stays obvious.
+current note up to the root and shows that spine, then starts with the full
+subtree of notes below the current one. The current note stays bold at column zero;
+indentation and subtle guides express distance from it in either direction.
+Ancestors appear as a single path, without sibling clutter, so the line back
+to the root stays obvious.
 
 All other notes are plain Obsidian links, so they keep their normal styling and
 clicking one re-anchors the panel on the note you just opened. The view stays
 note-level on purpose: it is a map of how notes relate through `up`, not another
 task list.
+
+Long titles wrap in full, with continuation lines aligned under the title, so
+narrowing the panel does not hide the note's name. Separate chevrons let you
+collapse individual branches without following their links. The header can
+expand everything, collapse everything, or reveal one more level at a time.
+The parent path always stays visible.
+
+The view retains your expansion choices while the current note refreshes.
+Switching notes or reopening the panel starts fully expanded again, giving
+each new tree a predictable starting point without additional settings.

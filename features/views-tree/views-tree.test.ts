@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { TreeNode } from "../../src/tree";
-import { buildNoteTree, noteTreeMarkdown } from "../../src/tree";
+import {
+  buildNoteTree,
+  collapsedTreePaths,
+  expandTreeLevel,
+  noteTreeRows,
+} from "../../src/tree";
 import { file } from "../testSupport";
 
 // Builds an EyeFile with a specific `up` frontmatter.
@@ -113,54 +118,108 @@ describe("buildNoteTree", () => {
   });
 });
 
-// Mirrors what the view does with `metadataCache.fileToLinktext`.
-const linkText = (ref: { path: string }) =>
-  ref.path.replace(/\.md$/i, "").split("/").pop() ?? ref.path;
+describe("tree expansion", () => {
+  const aChild = noteFile("Work/A child.md", '"[[Site A]]"');
+  const aGrandchild = noteFile("Work/A grandchild.md", '"[[A child]]"');
+  const bChild = noteFile("Work/B child.md", '"[[Site B]]"');
+  const tree = buildNoteTree(SITE.path, [
+    ...VAULT,
+    aChild,
+    aGrandchild,
+    bChild,
+  ])!;
+  const visible = (collapsed: ReadonlySet<string>) =>
+    noteTreeRows(tree, collapsed)
+      .filter((row) => row.visible)
+      .map((row) => row.basename);
 
-describe("noteTreeMarkdown", () => {
-  it("renders the spine, current note and descendants around one anchor", () => {
-    const tree = buildNoteTree(SITE.path, VAULT)!;
-    expect(noteTreeMarkdown(tree, linkText)).toBe(
-      [
-        "[[Root|.\u00a0.\u00a0Root]]  ",
-        "[[Work|.\u00a0Work]]  ",
-        "**Site**  ",
-        "[[Site A|.\u00a0Site A]]  ",
-        "[[Site B|.\u00a0Site B]]  ",
-      ].join("\n"),
+  it("starts expanded with the current note at zero and matching ancestor/descendant indentation", () => {
+    expect(noteTreeRows(tree).map((row) => [row.basename, row.depth])).toEqual([
+      ["Root", 2],
+      ["Work", 1],
+      ["Site", 0],
+      ["Site A", 1],
+      ["A child", 2],
+      ["A grandchild", 3],
+      ["Site B", 1],
+      ["B child", 2],
+    ]);
+    expect(noteTreeRows(tree).every((row) => row.visible)).toBe(true);
+  });
+
+  it("collapses descendants while keeping the ancestor path and current note visible", () => {
+    const collapsed = collapsedTreePaths(tree);
+    expect(visible(collapsed)).toEqual(["Root", "Work", "Site"]);
+    expect([...collapsed]).toEqual([
+      SITE.path,
+      SITE_A.path,
+      aChild.path,
+      SITE_B.path,
+    ]);
+  });
+
+  it("reveals exactly one more level per click after collapsing everything", () => {
+    let collapsed = collapsedTreePaths(tree);
+    collapsed = expandTreeLevel(tree, collapsed);
+    expect(visible(collapsed)).toEqual([
+      "Root",
+      "Work",
+      "Site",
+      "Site A",
+      "Site B",
+    ]);
+    collapsed = expandTreeLevel(tree, collapsed);
+    expect(visible(collapsed)).toEqual([
+      "Root",
+      "Work",
+      "Site",
+      "Site A",
+      "A child",
+      "Site B",
+      "B child",
+    ]);
+    collapsed = expandTreeLevel(tree, collapsed);
+    expect(visible(collapsed)).toEqual(
+      noteTreeRows(tree).map((row) => row.basename),
     );
+    expect(expandTreeLevel(tree, collapsed)).toEqual(collapsed);
   });
 
-  it("uses dot distance for nested descendants", () => {
-    const tree = buildNoteTree(WORK.path, VAULT)!;
-    expect(noteTreeMarkdown(tree, linkText)).toBe(
-      [
-        "[[Root|.\u00a0Root]]  ",
-        "**Work**  ",
-        "[[Site|.\u00a0Site]]  ",
-        "[[Site A|.\u00a0.\u00a0Site A]]  ",
-        "[[Site B|.\u00a0.\u00a0Site B]]  ",
-      ].join("\n"),
-    );
+  it("expands the visible frontier of mixed branches and collapses newly revealed branches", () => {
+    // Site A was manually collapsed while its hidden child remained expanded.
+    const collapsed = new Set([SITE_A.path, SITE_B.path]);
+    const next = expandTreeLevel(tree, collapsed);
+    expect(visible(next)).toEqual([
+      "Root",
+      "Work",
+      "Site",
+      "Site A",
+      "A child",
+      "Site B",
+      "B child",
+    ]);
+    expect(next.has(aChild.path)).toBe(true);
+    expect(collapsed).toEqual(new Set([SITE_A.path, SITE_B.path]));
   });
 
-  it("emits a single item for a root note without descendants", () => {
-    const only = noteFile("Solo.md", '"-"');
-    const tree = buildNoteTree(only.path, [only])!;
-    expect(noteTreeMarkdown(tree, linkText)).toBe("**Solo**  ");
+  it("retains child choices through a manual parent collapse and re-expansion", () => {
+    const collapsed = new Set([aChild.path]);
+    collapsed.add(SITE_A.path);
+    expect(visible(collapsed)).not.toContain("A child");
+    collapsed.delete(SITE_A.path);
+    expect(visible(collapsed)).toContain("A child");
+    expect(visible(collapsed)).not.toContain("A grandchild");
+    collapsed.clear();
+    expect(visible(collapsed)).toContain("A grandchild");
   });
 
-  it("uses the resolver for every reference", () => {
-    const tree = buildNoteTree(SITE_A.path, VAULT)!;
+  it("has no expansion actions for a leaf and keeps ancestors visible", () => {
+    const leafTree = buildNoteTree(SITE_A.path, VAULT)!;
+    expect(collapsedTreePaths(leafTree).size).toBe(0);
     expect(
-      noteTreeMarkdown(tree, (ref) => ref.path.replace(/\.md$/i, "")),
-    ).toBe(
-      [
-        "[[Root|.\u00a0.\u00a0.\u00a0Root]]  ",
-        "[[Work/Work|.\u00a0.\u00a0Work]]  ",
-        "[[Work/Site|.\u00a0Site]]  ",
-        "**Site A**  ",
-      ].join("\n"),
-    );
+      noteTreeRows(leafTree, new Set([ROOT.path, WORK.path])).every(
+        (row) => row.visible,
+      ),
+    ).toBe(true);
   });
 });

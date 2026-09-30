@@ -72,32 +72,62 @@ export function buildDescendants(
   return build(current, new Set([current.path]));
 }
 
-export type TreeLinkResolver = (ref: TreeNoteRef) => string;
+export interface TreeRow extends TreeNoteRef {
+  depth: number;
+  current: boolean;
+  visible: boolean;
+  children: readonly TreeNode[];
+}
 
-export function noteTreeMarkdown(
+export function noteTreeRows(
   tree: NoteTree,
-  toLinkText: TreeLinkResolver,
-): string {
-  const lines: string[] = [];
-  const pushLink = (ref: TreeNoteRef, distance: number): void => {
-    const label = `${".\u00a0".repeat(distance)}${ref.basename}`;
-    lines.push(`[[${toLinkText(ref)}|${label}]]  `);
-  };
-
-  for (const [index, ref] of tree.spine.entries()) {
-    pushLink(ref, tree.spine.length - index);
-  }
-  lines.push(`**${tree.current.basename}**  `);
-
-  const walk = (nodes: readonly TreeNode[], distance: number): void => {
-    for (const node of nodes) {
-      pushLink(node, distance);
-      walk(node.children, distance + 1);
+  collapsed: ReadonlySet<string> = new Set(),
+): TreeRow[] {
+  const rows: TreeRow[] = tree.spine.map((ref, index) => ({
+    ...ref,
+    depth: tree.spine.length - index,
+    current: false,
+    visible: true,
+    children: [],
+  }));
+  const walk = (
+    node: TreeNode,
+    depth: number,
+    visible: boolean,
+    current = false,
+  ): void => {
+    rows.push({ ...node, depth, visible, current });
+    for (const child of node.children) {
+      walk(child, depth + 1, visible && !collapsed.has(node.path));
     }
   };
-  walk(tree.descendants, 1);
+  walk({ ...tree.current, children: tree.descendants }, 0, true, true);
+  return rows;
+}
 
-  return lines.join("\n");
+export function collapsedTreePaths(tree: NoteTree): Set<string> {
+  return new Set(
+    noteTreeRows(tree)
+      .filter((row) => row.children.length > 0)
+      .map((row) => row.path),
+  );
+}
+
+export function expandTreeLevel(
+  tree: NoteTree,
+  collapsed: ReadonlySet<string>,
+): Set<string> {
+  const next = new Set(collapsed);
+  // Take the frontier before changing anything: a click reveals only one level.
+  for (const row of noteTreeRows(tree, collapsed)) {
+    if (!row.visible || !collapsed.has(row.path) || row.children.length === 0)
+      continue;
+    next.delete(row.path);
+    for (const child of row.children) {
+      if (child.children.length > 0) next.add(child.path);
+    }
+  }
+  return next;
 }
 
 export function buildNoteTree(

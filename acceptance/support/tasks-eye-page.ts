@@ -209,28 +209,16 @@ export const tasksEyePage = {
   },
 
   async treeNoteNames(): Promise<string[]> {
-    return (await this.treeNoteLines()).map((line) =>
-      line.replace(/^(?:\.\u00a0)+/, ""),
+    return await browser.execute(() =>
+      [...document.querySelectorAll<HTMLElement>(".eye-tree-row")]
+        .filter((row) => row.getClientRects().length > 0)
+        .map((row) => row.querySelector(".eye-tree-title")?.textContent ?? ""),
     );
   },
 
-  async treeNoteLines(): Promise<string[]> {
-    return await browser.execute(() => {
-      const root = document.querySelector(".eye-note-tree");
-      if (!root) return [];
-      return root.innerText
-        .split("\n")
-        .map((line) => line.trimEnd())
-        .filter((line) => line.length > 0);
-    });
-  },
-
   async clickTreeNote(name: string): Promise<void> {
-    const links = await $$(".eye-note-tree a.internal-link");
-    for (const link of links) {
-      if (
-        (await link.getText()).replace(/^(?:\.[\u00a0 ])+/, "") === name
-      ) {
+    for (const link of await $$(".eye-note-tree a.internal-link")) {
+      if (await link.getText() === name) {
         await link.click();
         return;
       }
@@ -238,21 +226,40 @@ export const tasksEyePage = {
     throw new Error(`Tree link "${name}" was not found`);
   },
 
-  async treeNoteLinkDetails(
-    name: string,
-  ): Promise<{ title: string; isTruncated: boolean }> {
+  async treeAction(title: "Expand all" | "Collapse all" | "Expand one level"): Promise<void> {
+    await $(`.eye-tree-toolbar button[aria-label="${title}"]`).click();
+  },
+
+  async toggleTreeNote(name: string, key?: "Enter" | "Space"): Promise<void> {
+    const selector = `.eye-tree-toggle[aria-label="Collapse ${name}"], .eye-tree-toggle[aria-label="Expand ${name}"]`;
+    if (key) {
+      await browser.execute((query) => document.querySelector<HTMLElement>(query)?.focus(), selector);
+      await browser.keys(key);
+    } else {
+      await $(selector).click();
+    }
+  },
+
+  async treeExpanded(name: string): Promise<string | null> {
     return await browser.execute((noteName) => {
-      const link = [
-        ...document.querySelectorAll<HTMLAnchorElement>(
-          ".eye-note-tree a.internal-link",
-        ),
-      ].find((candidate) => candidate.textContent?.includes(noteName));
-      if (!link) throw new Error(`Tree link "${noteName}" was not found`);
-      return {
-        title: link.title,
-        isTruncated: link.scrollWidth > link.clientWidth,
-      };
+      const row = [...document.querySelectorAll(".eye-tree-row")]
+        .find((candidate) => candidate.querySelector(".eye-tree-title")?.textContent === noteName);
+      return row?.querySelector("button")?.getAttribute("aria-expanded") ?? null;
     }, name);
+  },
+
+  async refreshTree(): Promise<void> {
+    await browser.executeObsidian(async ({ app }) => {
+      const leaf = app.workspace.getLeavesOfType("ggajos-tasks-eye-tree-view")[0];
+      const view = leaf?.view as unknown as { requestRender: () => Promise<void> };
+      await view.requestRender();
+    });
+  },
+
+  async closeTree(): Promise<void> {
+    await browser.executeObsidian(({ app }) => {
+      for (const leaf of app.workspace.getLeavesOfType("ggajos-tasks-eye-tree-view")) leaf.detach();
+    });
   },
 
   async waitForTreeNotes(expected: readonly string[]): Promise<void> {

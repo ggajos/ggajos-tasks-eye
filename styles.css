@@ -831,11 +831,83 @@
   padding: 8px;
 }
 
-.eye-note-tree a.internal-link {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: bottom;
-  white-space: nowrap;
+/* Tree titles own a shrinking column so continuation lines keep their indent. */
+.eye-tree-toolbar {
+  display: flex;
+  gap: 4px;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.eye-note-tree .eye-tree-control,
+.eye-note-tree .eye-tree-toggle {
+  flex: 0 0 auto;
+  padding: 3px;
+  height: 24px;
+  width: 24px;
+  color: var(--text-muted);
+  background: transparent;
+  box-shadow: none;
+}
+
+.eye-note-tree button:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: -2px;
+}
+
+.eye-note-tree button:disabled {
+  opacity: 0.35;
+}
+
+.eye-tree-row {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  padding-block: 3px;
+  padding-inline-start: calc(var(--eye-tree-depth) * 14px);
+  border-radius: var(--radius-s, 4px);
+}
+
+.eye-tree-row::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--eye-tree-depth) * 14px);
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0 11px,
+    var(--background-modifier-border) 11px 12px,
+    transparent 12px 14px
+  );
+  pointer-events: none;
+}
+
+.eye-tree-row[hidden] {
+  display: none;
+}
+
+.eye-tree-row.is-current {
+  margin-block: 4px;
+  background: var(--background-secondary);
+}
+
+.eye-tree-toggle-spacer {
+  flex: 0 0 24px;
+}
+
+.eye-tree-title {
+  flex: 1;
+  min-width: 0;
+  padding-block: 3px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.eye-note-tree .eye-tree-title a.internal-link {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
