@@ -64,6 +64,7 @@ export function buildRowModel(
 ): RowModel {
   const earliestDue = getEarliestDueDate(file.tasks);
   const earliestTask = findEarliestDueTask(file.tasks);
+  const context = getContextForFile(file, indexedFiles);
   return {
     file,
     earliestDue,
@@ -71,8 +72,8 @@ export function buildRowModel(
     errors: rowErrors(file, availability, indexedFiles),
     isFuture: earliestDue !== null && isAfterToday(earliestDue),
     actionLabel: earliestTask ? earliestTask.text : "No unchecked tasks",
-    contextKey: getContextForFile(file, indexedFiles),
-    contextLabel: getContextForFile(file, indexedFiles),
+    contextKey: context,
+    contextLabel: context,
   };
 }
 

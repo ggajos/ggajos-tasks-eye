@@ -1,7 +1,8 @@
 import { STATUSES } from "./constants";
-import { isRootFile, resolveUpChain, resolveUpTarget } from "./context";
 import { formatYmd, isBeforeToday } from "./date";
 import { isPathInManagedFolder } from "./managedPath";
+import type { NoteGraph } from "./noteGraph";
+import { hasUp, isRootFile, noteGraph } from "./noteGraph";
 import { getEarliestDueDate } from "./taskSelection";
 import type { EyeFile, EyeTask } from "./types";
 import type { AvailabilityConfig, AvailabilityReason } from "./vacation";
@@ -34,7 +35,7 @@ export interface ValidationViolation {
 
 interface ValidationContext {
   file: EyeFile;
-  indexedFiles: readonly EyeFile[];
+  graph: NoteGraph;
   availability: AvailabilityConfig;
   status: string;
   hasExplicitStatus: boolean;
@@ -72,43 +73,30 @@ const invalidStatus: ValidationRule = ({ file, status, hasExplicitStatus }) => {
 };
 
 const noteWithoutUp: ValidationRule = ({ file }) => {
-  if (Object.getOwnPropertyDescriptor(file, "up") !== undefined) return [];
+  if (hasUp(file)) return [];
   return singleViolation(
     "note-without-up",
     "Note needs an `up` link to its parent.",
   );
 };
 
-const upTargetMissing: ValidationRule = ({ file, indexedFiles }) => {
-  if (
-    Object.getOwnPropertyDescriptor(file, "up") === undefined ||
-    isRootFile(file)
-  ) {
-    return [];
-  }
-  if (resolveUpTarget(file, indexedFiles).kind !== "missing") return [];
+const upTargetMissing: ValidationRule = ({ file, graph }) => {
+  if (!hasUp(file) || isRootFile(file)) return [];
+  if (graph.upTarget(file).kind !== "missing") return [];
   return singleViolation(
     "up-target-missing",
     "`up` link points to a note that doesn't exist.",
   );
 };
 
-const upCycle: ValidationRule = ({ file, indexedFiles }) => {
-  if (
-    Object.getOwnPropertyDescriptor(file, "up") === undefined ||
-    isRootFile(file)
-  ) {
-    return [];
-  }
-  const resolution = resolveUpChain(file, indexedFiles);
-  if (!resolution.cycle) return [];
+const upCycle: ValidationRule = ({ file, graph }) => {
+  if (!hasUp(file) || isRootFile(file)) return [];
+  if (!graph.chain(file).cycle) return [];
   return singleViolation("up-cycle", "`up` links form a loop.");
 };
 
-const multipleRoots: ValidationRule = ({ file, indexedFiles }) => {
-  if (!isRootFile(file)) return [];
-  const rootCount = indexedFiles.filter(isRootFile).length;
-  if (rootCount <= 1) return [];
+const multipleRoots: ValidationRule = ({ file, graph }) => {
+  if (!isRootFile(file) || graph.rootCount() <= 1) return [];
   return singleViolation("multiple-roots", "Only one note can act as root.");
 };
 
@@ -207,7 +195,7 @@ export function validateFile(
 
   const context: ValidationContext = {
     file,
-    indexedFiles: indexedFiles.length > 0 ? indexedFiles : [file],
+    graph: noteGraph(indexedFiles.length > 0 ? indexedFiles : [file]),
     availability,
     status: statusValue(file),
     hasExplicitStatus:

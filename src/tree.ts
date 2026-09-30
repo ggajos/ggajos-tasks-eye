@@ -1,5 +1,5 @@
-import type { ContextFile } from "./context";
-import { isRootFile, resolveUpTarget } from "./context";
+import type { ContextFile } from "./noteGraph";
+import { basenameFromPath, isRootFile, noteGraph } from "./noteGraph";
 
 export interface TreeNoteRef {
   path: string;
@@ -14,11 +14,6 @@ export interface NoteTree {
   spine: TreeNoteRef[];
   current: TreeNoteRef;
   descendants: TreeNode[];
-}
-
-function basenameFromPath(path: string): string {
-  const withoutExtension = path.replace(/\.md$/i, "");
-  return withoutExtension.split("/").pop() ?? withoutExtension;
 }
 
 function toRef(file: ContextFile): TreeNoteRef {
@@ -37,8 +32,9 @@ export function buildSpine(
   const seen = new Set<string>([current.path]);
   let node = current;
 
+  const graph = noteGraph(files);
   while (!isRootFile(node)) {
-    const resolution = resolveUpTarget(node, files);
+    const resolution = graph.upTarget(node);
     if (resolution.kind === "missing") break;
     if (resolution.kind === "resolved-but-unindexed") {
       spine.push({
@@ -62,19 +58,9 @@ export function buildDescendants(
   current: ContextFile,
   files: readonly ContextFile[],
 ): TreeNode[] {
-  const childrenByParent = new Map<string, ContextFile[]>();
-  for (const file of files) {
-    if (isRootFile(file)) continue;
-    const resolution = resolveUpTarget(file, files);
-    if (resolution.kind !== "indexed") continue;
-    const parentPath = resolution.file.path;
-    const siblings = childrenByParent.get(parentPath) ?? [];
-    siblings.push(file);
-    childrenByParent.set(parentPath, siblings);
-  }
-
+  const graph = noteGraph(files);
   const build = (node: ContextFile, seen: ReadonlySet<string>): TreeNode[] => {
-    const children = (childrenByParent.get(node.path) ?? [])
+    const children = [...graph.children(node)]
       .filter((child) => !seen.has(child.path))
       .sort(compareRefs);
     return children.map((child) => {

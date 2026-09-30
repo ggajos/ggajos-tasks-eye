@@ -1,14 +1,12 @@
 import type { App } from "obsidian";
-import {
-  buildEyeFileFromMarkdown,
-  parseFrontmatter,
-  wikilinkTarget,
-} from "./eyeFile";
+import { buildEyeFileFromMarkdown, parseFrontmatter } from "./eyeFile";
 import {
   collectDescendantMarkdownFiles,
   findManagedFolder,
 } from "./managedFolder";
 import { exclusionCoveringNotesFolder } from "./managedPath";
+import type { LinkResolver } from "./noteGraph";
+import { assignUpTargets, hasUp, isRootFile } from "./noteGraph";
 import type { EyeFile } from "./types";
 
 export type { Frontmatter, MarkdownFileSource } from "./eyeFile";
@@ -16,16 +14,14 @@ export {
   buildEyeFileFromMarkdown,
   buildEyeFilesFromMarkdown,
   parseFrontmatter,
-  wikilinkTarget,
 } from "./eyeFile";
 
-function resolveLiveUpTarget(app: App, file: EyeFile): string | undefined {
-  const target = wikilinkTarget(file.up);
-  if (!target) return undefined;
-
+function obsidianLinkResolver(app: App): LinkResolver {
   const cache = app.metadataCache;
-  if (typeof cache.getFirstLinkpathDest !== "function") return undefined;
-  return cache.getFirstLinkpathDest(target, file.path)?.path;
+  return (target, sourcePath) =>
+    typeof cache.getFirstLinkpathDest === "function"
+      ? cache.getFirstLinkpathDest(target, sourcePath)?.path
+      : undefined;
 }
 
 function rawUpValue(value: unknown): string {
@@ -37,12 +33,7 @@ function logLiveUpResolution(
   targetPath: string | undefined,
   indexedPaths: ReadonlySet<string>,
 ): void {
-  if (
-    Object.getOwnPropertyDescriptor(file, "up") === undefined ||
-    file.up === "-"
-  ) {
-    return;
-  }
+  if (!hasUp(file) || isRootFile(file)) return;
 
   const raw = rawUpValue(file.up);
   if (!targetPath) {
@@ -93,10 +84,9 @@ export async function readEyeFiles(
   }
 
   const indexedPaths = new Set(result.map((file) => file.path));
+  assignUpTargets(result, obsidianLinkResolver(app), true);
   for (const file of result) {
-    const target = resolveLiveUpTarget(app, file);
-    file.upTargetPath = target;
-    logLiveUpResolution(file, target, indexedPaths);
+    logLiveUpResolution(file, file.upTargetPath, indexedPaths);
   }
 
   return result.sort((a, b) => a.path.localeCompare(b.path));

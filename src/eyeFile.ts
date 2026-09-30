@@ -2,15 +2,15 @@ import {
   DEFAULT_MANAGED_FOLDER_PATH,
   normalizeManagedFolderPath,
 } from "./managedPath";
+import {
+  assignUpTargets,
+  basenameFromPath,
+  basenameLinkResolver,
+} from "./noteGraph";
 import { parseTasksFromMarkdown } from "./taskParsing";
 import type { EyeFile } from "./types";
 
 export type Frontmatter = Record<string, unknown>;
-
-function basenameFromPath(path: string): string {
-  const name = path.split("/").pop() ?? path;
-  return name.replace(/\.md$/i, "");
-}
 
 function unquote(value: string): string {
   const quote = value[0];
@@ -167,29 +167,8 @@ export function buildEyeFileFromMarkdown(
     file.up = frontmatter.up;
   }
 
-  const target = pureUpTargetPath(file, indexedFiles);
-  if (target) file.upTargetPath = target;
+  assignUpTargets([file], basenameLinkResolver(indexedFiles));
   return file;
-}
-
-export function wikilinkTarget(value: unknown): string | null {
-  const normalized =
-    Array.isArray(value) && value.length === 1 ? (value[0] as unknown) : value;
-  if (typeof normalized !== "string") return null;
-  const match = normalized.trim().match(/^\[\[([^|\]]+)(?:\|[^\]]*)?\]\]$/);
-  return match?.[1]?.trim() || null;
-}
-
-function pureUpTargetPath(
-  file: EyeFile,
-  indexedFiles: readonly EyeFile[],
-): string | undefined {
-  const target = wikilinkTarget(file.up);
-  if (!target) return undefined;
-  const basename = basenameFromPath(target);
-  return [...indexedFiles]
-    .sort((a, b) => a.path.localeCompare(b.path))
-    .find((candidate) => candidate.basename === basename)?.path;
 }
 
 export interface MarkdownFileSource {
@@ -211,9 +190,6 @@ export function buildEyeFilesFromMarkdown(
     ),
   );
 
-  for (const file of files) {
-    const target = pureUpTargetPath(file, files);
-    if (target) file.upTargetPath = target;
-  }
+  assignUpTargets(files, basenameLinkResolver(files));
   return files.sort((a, b) => a.path.localeCompare(b.path));
 }
