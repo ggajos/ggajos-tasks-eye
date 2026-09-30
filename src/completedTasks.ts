@@ -1,4 +1,4 @@
-import { getContextForFile } from "./context";
+import { getContextForFile, isGlobalContextFilter } from "./context";
 import { stripPrioritySignifier } from "./priority";
 import type { EyeFile, EyeTask } from "./types";
 
@@ -133,4 +133,46 @@ export function collectStatusGroups(
 
 export function groupMatchedCount(groups: StatusNoteGroup[]): number {
   return groups.reduce((sum, group) => sum + group.matchedCount, 0);
+}
+
+export interface DoneContextGroup {
+  context: string;
+  matchedCount: number;
+  groups: StatusNoteGroup[];
+}
+
+export interface DonePreparation {
+  contexts: DoneContextGroup[];
+  isEmpty: boolean;
+}
+
+/**
+ * Full displayed selection for the Done view: matching, context filtering,
+ * ordering and totals happen here, before any rendering starts.
+ */
+export function prepareDone(
+  files: readonly EyeFile[],
+  date: string,
+  showFuture: boolean,
+  contextFilter: string,
+): DonePreparation {
+  const grouped = collectStatusGroups(files, date, showFuture);
+  const indexed = Array.from(files);
+  const contexts = Object.keys(grouped)
+    .filter(
+      (context) =>
+        isGlobalContextFilter(contextFilter, indexed) ||
+        context === contextFilter,
+    )
+    .sort();
+
+  return {
+    contexts: contexts.map((context) => {
+      const groups = [...(grouped[context] ?? [])].sort((a, b) =>
+        a.fileName.localeCompare(b.fileName),
+      );
+      return { context, matchedCount: groupMatchedCount(groups), groups };
+    }),
+    isEmpty: contexts.length === 0,
+  };
 }

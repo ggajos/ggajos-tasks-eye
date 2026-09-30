@@ -31,6 +31,12 @@ const files = buildEyeFilesFromMarkdown([
   note("Work/Today.md", "[[Work]]", "- [ ] now 📅 2026-07-17"),
   note("Home/Monday.md", "[[Home]]", "- [ ] next 📅 2026-07-20"),
   note("Home/Undated.md", "[[Home]]", "- [ ] someday"),
+  note(
+    "Home/Home Review.md",
+    "[[Home]]",
+    "- [x] tidied ✅ 2026-07-01",
+    "closed",
+  ),
 ]);
 const vault = createSnapshot(files, availability);
 
@@ -139,5 +145,54 @@ describe("Board module", () => {
       "Work",
     ]);
     expect(boardContexts(files, "done", "Gone").contextFilter).toBe("Root");
+  });
+
+  it("prepares Done: sorted contexts, note groups, totals", () => {
+    const screen = buildBoard(vault, {
+      mode: "done",
+      contextFilter: "*",
+      now: NOW,
+      date: "2026-07-01",
+      showFuture: false,
+    });
+
+    expect(screen.body.kind).toBe("done");
+    if (screen.body.kind !== "done") return;
+    expect(screen.body.contexts.map((c) => c.context)).toEqual([
+      "Home",
+      "Root",
+    ]);
+    expect(
+      screen.body.contexts.map((c) => ({
+        context: c.context,
+        matchedCount: c.matchedCount,
+        files: c.groups.map((group) => group.fileName),
+      })),
+    ).toEqual([
+      { context: "Home", matchedCount: 1, files: ["Home Review"] },
+      { context: "Root", matchedCount: 1, files: ["Root"] },
+    ]);
+    expect(screen.isEmpty).toBe(false);
+  });
+
+  it("narrows Done to the selected context and reports empty days", () => {
+    const filtered = buildBoard(vault, {
+      mode: "done",
+      contextFilter: "Work",
+      now: NOW,
+      date: "2026-07-01",
+    });
+    expect(filtered.isEmpty).toBe(true);
+
+    const emptyDay = buildBoard(vault, {
+      mode: "done",
+      contextFilter: "*",
+      now: NOW,
+      date: "2026-07-02",
+    });
+    expect(emptyDay.body.kind).toBe("done");
+    if (emptyDay.body.kind !== "done") return;
+    expect(emptyDay.body.contexts).toEqual([]);
+    expect(emptyDay.isEmpty).toBe(true);
   });
 });

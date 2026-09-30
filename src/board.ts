@@ -1,3 +1,5 @@
+import type { DoneContextGroup } from "./completedTasks";
+import { prepareDone } from "./completedTasks";
 import type { EyeMode } from "./constants";
 import {
   discoverContexts,
@@ -5,6 +7,7 @@ import {
   normalizeContextFilter,
   withVacationContext,
 } from "./context";
+import { formatYmd } from "./date";
 import type { BoardBucket, RenderItem } from "./model";
 import {
   boardItemsForContext,
@@ -15,7 +18,7 @@ import {
 import type { VaultSnapshot } from "./snapshot";
 import type { EyeFile, RowModel } from "./types";
 
-export type BoardMode = Exclude<EyeMode, "done">;
+export type BoardMode = EyeMode;
 
 export interface BoardContexts {
   contexts: string[];
@@ -30,7 +33,8 @@ export interface BoardCounts {
 
 export type BoardBody =
   | { kind: "focus"; items: RenderItem[] }
-  | { kind: "buckets"; buckets: BoardBucket[] };
+  | { kind: "buckets"; buckets: BoardBucket[] }
+  | { kind: "done"; contexts: DoneContextGroup[] };
 
 export interface BoardScreen extends BoardContexts {
   counts: BoardCounts;
@@ -42,6 +46,10 @@ export interface BoardRequest {
   mode: BoardMode;
   contextFilter: string;
   now: Date;
+  /** Done mode: the reviewed completion date (ISO). */
+  date?: string;
+  /** Done mode: whether unfinished due-dated tasks are included. */
+  showFuture?: boolean;
 }
 
 export function boardContexts(
@@ -74,11 +82,27 @@ export function buildBoard(
   snapshot: VaultSnapshot,
   request: BoardRequest,
 ): BoardScreen {
-  const { files, availability } = snapshot;
+  const { files } = snapshot;
   const { mode, now } = request;
   const context = boardContexts(files, mode, request.contextFilter);
   const { contextFilter, globalContext } = context;
 
+  if (mode === "done") {
+    const prepared = prepareDone(
+      files,
+      request.date ?? formatYmd(now.getTime()),
+      request.showFuture ?? true,
+      contextFilter,
+    );
+    return {
+      ...context,
+      counts: { focus: 0, inbox: 0 },
+      body: { kind: "done", contexts: prepared.contexts },
+      isEmpty: prepared.isEmpty,
+    };
+  }
+
+  const { availability } = snapshot;
   const models = buildRowModels(files, availability);
   const select = (selectMode: EyeMode, filter: string) =>
     selectRowModels(models, files, selectMode, filter);

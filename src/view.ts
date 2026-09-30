@@ -2,8 +2,11 @@ import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { ItemView, MarkdownRenderer, setIcon } from "obsidian";
 import { boardContexts, buildBoard } from "./board";
 import { BoardCollapseState } from "./boardCollapse";
-import type { StatusNoteGroup, StatusTaskNode } from "./completedTasks";
-import { collectStatusGroups, groupMatchedCount } from "./completedTasks";
+import type {
+  DoneContextGroup,
+  StatusNoteGroup,
+  StatusTaskNode,
+} from "./completedTasks";
 import type { EyeMode } from "./constants";
 import {
   BOARD_RENDER_FAILED_MESSAGE,
@@ -12,7 +15,7 @@ import {
   MODES,
   TASKS_PLUGIN_REQUIRED_MESSAGE,
 } from "./constants";
-import { isGlobalContextFilter, normalizeContextFilter } from "./context";
+import { normalizeContextFilter } from "./context";
 import { formatHumanDate, nowDate, shiftIsoDate, todayIso } from "./date";
 import type TheEyePlugin from "./main";
 import type { BoardBucket, BoardDayGroup, RenderItem } from "./model";
@@ -23,7 +26,7 @@ import {
   priorityRowClasses,
 } from "./priority";
 import type { VaultSnapshot } from "./snapshot";
-import type { EyeFile, RowModel } from "./types";
+import type { RowModel } from "./types";
 import {
   button,
   contextFilterControl,
@@ -220,24 +223,12 @@ export class EyeView extends ItemView {
     root: HTMLElement,
     snapshot: VaultSnapshot,
   ): Promise<void> {
-    const { files } = snapshot;
     root.replaceChildren();
     const mode = this.state.mode;
 
-    if (mode === "done") {
+    if (mode !== "done" && !this.plugin.tasksApiAvailable()) {
       const { contexts, contextFilter, globalContext } = boardContexts(
-        files,
-        mode,
-        this.plugin.settings.contextFilter,
-      );
-      this.renderToolbar(root, contexts, contextFilter, globalContext);
-      await this.renderCompleted(root, files, contextFilter);
-      return;
-    }
-
-    if (!this.plugin.tasksApiAvailable()) {
-      const { contexts, contextFilter, globalContext } = boardContexts(
-        files,
+        snapshot.files,
         mode,
         this.plugin.settings.contextFilter,
       );
@@ -252,13 +243,15 @@ export class EyeView extends ItemView {
       mode,
       contextFilter: this.plugin.settings.contextFilter,
       now: nowDate(),
+      date: this.state.date,
+      showFuture: this.state.showFuture,
     });
     this.renderToolbar(
       root,
       screen.contexts,
       screen.contextFilter,
       screen.globalContext,
-      screen.counts,
+      mode === "done" ? undefined : screen.counts,
     );
     const list = element("div", "eye-list");
     root.appendChild(list);
@@ -266,13 +259,28 @@ export class EyeView extends ItemView {
     if (screen.body.kind === "focus") {
       list.classList.add("eye-focus-list");
       for (const item of screen.body.items) await this.renderItem(list, item);
-    } else {
+      if (screen.isEmpty) list.appendChild(this.renderEmptyState());
+    } else if (screen.body.kind === "buckets") {
       list.classList.add("eye-tree");
       for (const bucket of screen.body.buckets) {
         await this.renderBucket(list, bucket);
       }
+      if (screen.isEmpty) list.appendChild(this.renderEmptyState());
+    } else {
+      list.classList.add("eye-completed-list");
+      for (const context of screen.body.contexts) {
+        await this.renderDoneContext(list, context);
+      }
+      if (screen.isEmpty) {
+        list.appendChild(
+          element(
+            "div",
+            "eye-empty",
+            `No completed tasks for ${formatHumanDate(this.state.date)}.`,
+          ),
+        );
+      }
     }
-    if (screen.isEmpty) list.appendChild(this.renderEmptyState());
   }
 
   private renderEmptyState(): HTMLElement {
@@ -397,53 +405,21 @@ export class EyeView extends ItemView {
     return nav;
   }
 
-  private async renderCompleted(
-    root: HTMLElement,
-    files: readonly EyeFile[],
-    contextFilter: string,
+  private async renderDoneContext(
+    list: HTMLElement,
+    context: DoneContextGroup,
   ): Promise<void> {
-    const grouped = collectStatusGroups(
-      files,
-      this.state.date,
-      this.state.showFuture,
+    const header = element("div", "eye-bucket-header eye-completed-header");
+    header.appendChild(
+      element("span", "eye-bucket-count", `${context.matchedCount}`),
     );
-    const contexts = Object.keys(grouped)
-      .filter(
-        (context) =>
-          isGlobalContextFilter(contextFilter, files) ||
-          context === contextFilter,
-      )
-      .sort();
+    const label = element("h2", "eye-bucket-label", context.context);
+    label.id = completedContextId(context.context);
+    header.appendChild(label);
+    list.appendChild(header);
 
-    const list = element("div", "eye-list eye-completed-list");
-    root.appendChild(list);
-
-    if (contexts.length === 0) {
-      list.appendChild(
-        element(
-          "div",
-          "eye-empty",
-          `No completed tasks for ${formatHumanDate(this.state.date)}.`,
-        ),
-      );
-      return;
-    }
-
-    for (const context of contexts) {
-      const groups = [...(grouped[context] ?? [])].sort((a, b) =>
-        a.fileName.localeCompare(b.fileName),
-      );
-      const header = element("div", "eye-bucket-header eye-completed-header");
-      header.appendChild(
-        element("span", "eye-bucket-count", `${groupMatchedCount(groups)}`),
-      );
-      const label = element("h2", "eye-bucket-label", context);
-      label.id = completedContextId(context);
-      header.appendChild(label);
-      list.appendChild(header);
-
-      for (const group of groups) await this.renderStatusNote(list, group);
-    }
+    for (const group of context.groups)
+      await this.renderStatusNote(list, group);
   }
 
   private async renderStatusNote(
