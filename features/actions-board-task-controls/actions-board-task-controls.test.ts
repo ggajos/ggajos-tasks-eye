@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildRowModel } from "../../src/model";
+import { rowSelection } from "../../src/model";
 import { shiftTaskDueInMarkdown } from "../../src/taskParsing";
 import { file } from "../testSupport";
 
 describe("Board task controls feature", () => {
   it("targets the earliest unfinished due task in a board row", () => {
-    const row = buildRowModel(
-      file(
-        "Mission/Platform/Billing Platform Modernization.md",
-        `---
+    const note = file(
+      "Mission/Platform/Billing Platform Modernization.md",
+      `---
 status: open
 up: -
 ---
@@ -16,8 +15,8 @@ up: -
 - [ ] Review the migration runbook 📅 2026-07-15
 - [ ] Approve the billing event contract 📅 2026-07-08
 `,
-      ),
     );
+    const row = rowSelection([note]).select("open", "*")[0]!;
 
     expect(row.actionLabel).toBe(
       "Approve the billing event contract 📅 2026-07-08",
@@ -37,7 +36,7 @@ up: -
 - [ ] Review the migration runbook 📅 2026-07-15
 `,
     );
-    const row = buildRowModel(note);
+    const row = rowSelection([note]).select("open", "*")[0]!;
 
     const updated = shiftTaskDueInMarkdown(
       note.tasks.map((task) => task.lineText).join("\n"),

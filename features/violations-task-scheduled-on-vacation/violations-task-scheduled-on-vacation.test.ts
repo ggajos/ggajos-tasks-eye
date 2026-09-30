@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rowErrors } from "../../src/model";
+import { selectRows } from "../../src/model";
 import type { AvailabilityConfig } from "../../src/vacation";
 import { file } from "../testSupport";
 
@@ -18,8 +18,8 @@ const availability: AvailabilityConfig = {
 
 describe("Task scheduled on vacation violation", () => {
   it("shows only the earliest vacation collision in row errors", () => {
-    expect(
-      rowErrors(
+    const [row] = selectRows(
+      [
         file(
           "Architecture/Architecture Offsite.md",
           `---
@@ -31,9 +31,13 @@ up: -
 - [ ] later 📅 2026-07-18
 `,
         ),
-        availability,
-      ),
-    ).toMatchObject([
+      ],
+      "inbox",
+      "*",
+      availability,
+    );
+
+    expect(row?.errors).toMatchObject([
       {
         code: "task-on-unavailable-day",
         message: "Task is due on an unavailable day: 2026-07-13 (Vacation).",

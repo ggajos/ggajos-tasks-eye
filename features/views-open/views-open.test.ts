@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BoardCollapseState } from "../../src/boardCollapse";
 import { DUE_BUCKETS } from "../../src/constants";
-import { buildRowModel, selectRows } from "../../src/model";
+import { rowSelection, selectRows } from "../../src/model";
 import { file, rowNames } from "../testSupport";
 
 describe("Open view feature", () => {
@@ -60,7 +60,7 @@ describe("Open view feature", () => {
   });
 
   it("uses the earliest unfinished due task as the row action", () => {
-    const row = buildRowModel(
+    const row = rowSelection([
       file(
         "Growth/Plan.md",
         `---
@@ -72,7 +72,7 @@ up: -
 - [ ] earlier 📅 2026-07-08
 `,
       ),
-    );
+    ]).select("open", "*")[0]!;
 
     expect(row.actionLabel).toBe("earlier 📅 2026-07-08");
     expect(row.earliestTask?.dueIso).toBe("2026-07-08");

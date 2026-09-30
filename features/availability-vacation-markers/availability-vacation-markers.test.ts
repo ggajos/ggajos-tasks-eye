@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { boardItemsForContext } from "../../src/board";
 import { isoToTs } from "../../src/date";
-import { boardItemsForContext, selectRows } from "../../src/model";
+import { selectRows } from "../../src/model";
 import type { AvailabilityConfig } from "../../src/vacation";
 import { availabilityReasonsForTs } from "../../src/vacation";
 import { files } from "../testSupport";

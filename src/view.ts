@@ -1,6 +1,12 @@
 import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { ItemView, MarkdownRenderer, setIcon } from "obsidian";
-import { boardContexts, buildBoard } from "./board";
+import {
+  type BoardBucket,
+  type BoardDayGroup,
+  boardContexts,
+  buildBoard,
+  type RenderItem,
+} from "./board";
 import { BoardCollapseState } from "./boardCollapse";
 import type {
   DoneContextGroup,
@@ -18,7 +24,6 @@ import {
 import { normalizeContextFilter } from "./context";
 import { formatHumanDate, nowDate, shiftIsoDate, todayIso } from "./date";
 import type TheEyePlugin from "./main";
-import type { BoardBucket, BoardDayGroup, RenderItem } from "./model";
 import {
   canLowerPriority,
   canRaisePriority,
