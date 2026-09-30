@@ -865,6 +865,11 @@
   opacity: 0.35;
 }
 
+.eye-note-tree .eye-tree-closed-filter[aria-pressed="true"] {
+  color: var(--text-accent);
+  background: var(--background-modifier-active-hover);
+}
+
 .eye-tree-row {
   position: relative;
   display: flex;
@@ -902,6 +907,11 @@
 
 .eye-tree-toggle-spacer {
   flex: 0 0 24px;
+}
+
+.eye-tree-bullet {
+  flex: 0 0 6px;
+  color: var(--text-muted);
 }
 
 .eye-tree-title {

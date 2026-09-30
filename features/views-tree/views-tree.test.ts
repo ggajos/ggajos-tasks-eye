@@ -4,16 +4,22 @@ import {
   buildNoteTree,
   collapsedTreePaths,
   expandTreeLevel,
+  filterClosedDescendants,
   noteTreeRows,
 } from "../../src/tree";
 import { file } from "../testSupport";
 
 // Builds an EyeFile with a specific `up` frontmatter.
-function noteFile(path: string, up: string | null) {
+function noteFile(
+  path: string,
+  up: string | null,
+  status: string | null = "open",
+) {
+  const statusLine = status === null ? "" : `status: ${status}\n`;
   const frontmatter =
     up === null
-      ? "---\nstatus: open\n---\n"
-      : `---\nstatus: open\nup: ${up}\n---\n`;
+      ? `---\n${statusLine}---\n`
+      : `---\n${statusLine}up: ${up}\n---\n`;
   return file(path, `${frontmatter}\n- [ ] task`);
 }
 
@@ -221,5 +227,182 @@ describe("tree expansion", () => {
         (row) => row.visible,
       ),
     ).toBe(true);
+  });
+});
+
+describe("closed descendant filtering", () => {
+  const closedRoot = noteFile("Root.md", '"-"', "closed");
+  const current = noteFile("Current.md", '"[[Root]]"', "closed");
+  const openLeaf = noteFile("A open leaf.md", '"[[Current]]"');
+  const closedLeaf = noteFile("B closed leaf.md", '"[[Current]]"', "closed");
+  const bridge = noteFile("C closed bridge.md", '"[[Current]]"', "closed");
+  const deepBridge = noteFile(
+    "D closed bridge.md",
+    '"[[C closed bridge]]"',
+    "closed",
+  );
+  const openGrandchild = noteFile(
+    "E open grandchild.md",
+    '"[[D closed bridge]]"',
+  );
+  const closedBranch = noteFile(
+    "F closed branch.md",
+    '"[[Current]]"',
+    "closed",
+  );
+  const closedChild = noteFile(
+    "G closed child.md",
+    '"[[F closed branch]]"',
+    "closed",
+  );
+  const closedSibling = noteFile(
+    "H closed sibling.md",
+    '"[[C closed bridge]]"',
+    "closed",
+  );
+  const tree = buildNoteTree(current.path, [
+    closedRoot,
+    current,
+    openLeaf,
+    closedLeaf,
+    bridge,
+    deepBridge,
+    openGrandchild,
+    closedBranch,
+    closedChild,
+    closedSibling,
+  ])!;
+  const filtered = filterClosedDescendants(tree);
+  const visible = (
+    value: typeof tree,
+    collapsed: ReadonlySet<string> = new Set(),
+  ) =>
+    noteTreeRows(value, collapsed)
+      .filter((row) => row.visible)
+      .map((row) => row.basename);
+
+  it("hides closed leaves and branches whose entire subtree is closed", () => {
+    expect(visible(filtered)).toEqual([
+      "Root",
+      "Current",
+      "A open leaf",
+      "C closed bridge",
+      "D closed bridge",
+      "E open grandchild",
+    ]);
+    // Closed notes are hidden even if their task checkbox remains unfinished.
+    expect(closedLeaf.tasks.some((task) => !task.completed)).toBe(true);
+    expect(visible(filtered)).not.toContain(closedLeaf.basename);
+  });
+
+  it("keeps the closed current note and closed parent path, including for a closed leaf", () => {
+    const leafTree = filterClosedDescendants(
+      buildNoteTree(closedChild.path, [
+        closedRoot,
+        current,
+        closedBranch,
+        closedChild,
+      ])!,
+    );
+    expect(visible(leafTree)).toEqual([
+      "Root",
+      "Current",
+      "F closed branch",
+      "G closed child",
+    ]);
+  });
+
+  it("keeps every closed bridge to an indirect non-closed descendant", () => {
+    expect(names(filtered.descendants)).toEqual([
+      { name: "A open leaf", children: [] },
+      {
+        name: "C closed bridge",
+        children: [
+          {
+            name: "D closed bridge",
+            children: [{ name: "E open grandchild", children: [] }],
+          },
+        ],
+      },
+    ]);
+    // Collapsing the branch does not change eligibility: the path is still present.
+    expect(visible(filtered, new Set([bridge.path]))).toContain(
+      bridge.basename,
+    );
+    expect(visible(filtered, new Set([bridge.path]))).not.toContain(
+      openGrandchild.basename,
+    );
+  });
+
+  it("does not mutate the full tree, so turning the filter off can restore it", () => {
+    expect(visible(tree)).toContain(closedLeaf.basename);
+    expect(visible(tree)).toContain(closedBranch.basename);
+    expect(
+      tree.descendants.find((node) => node.path === bridge.path)?.children,
+    ).toHaveLength(2);
+    expect(filtered.spine).toBe(tree.spine);
+    expect(filtered.current).toBe(tree.current);
+  });
+
+  it("keeps missing or unsupported statuses and open notes with completed tasks", () => {
+    const absent = noteFile("Absent.md", '"[[Current]]"', null);
+    const unsupported = noteFile("Unsupported.md", '"[[Current]]"', "done");
+    const capitalized = noteFile("Capitalized.md", '"[[Current]]"', "Closed");
+    const checked = file(
+      "Checked.md",
+      "---\nstatus: open\nup: '[[Current]]'\n---\n- [x] Finished task",
+    );
+    const result = filterClosedDescendants(
+      buildNoteTree(current.path, [
+        closedRoot,
+        current,
+        absent,
+        unsupported,
+        capitalized,
+        checked,
+      ])!,
+    );
+    expect(visible(result)).toEqual([
+      "Root",
+      "Current",
+      "Absent",
+      "Capitalized",
+      "Checked",
+      "Unsupported",
+    ]);
+  });
+
+  it("removes the branch toggle when all of an open note's children are filtered", () => {
+    const parent = noteFile("Open parent.md", '"[[Current]]"');
+    const child = noteFile("Closed child.md", '"[[Open parent]]"', "closed");
+    const result = filterClosedDescendants(
+      buildNoteTree(current.path, [closedRoot, current, parent, child])!,
+    );
+    expect(
+      noteTreeRows(result).find((row) => row.path === parent.path)?.children,
+    ).toEqual([]);
+    expect(collapsedTreePaths(result)).toEqual(new Set([current.path]));
+  });
+
+  it("expands only eligible branches one level at a time", () => {
+    let collapsed = collapsedTreePaths(tree);
+    collapsed = expandTreeLevel(filtered, collapsed);
+    expect(visible(filtered, collapsed)).toEqual([
+      "Root",
+      "Current",
+      "A open leaf",
+      "C closed bridge",
+    ]);
+    expect(collapsed.has(closedBranch.path)).toBe(true);
+    collapsed = expandTreeLevel(filtered, collapsed);
+    expect(visible(filtered, collapsed)).toEqual([
+      "Root",
+      "Current",
+      "A open leaf",
+      "C closed bridge",
+      "D closed bridge",
+    ]);
+    collapsed = expandTreeLevel(filtered, collapsed);
+    expect(visible(filtered, collapsed)).toContain(openGrandchild.basename);
   });
 });

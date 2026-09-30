@@ -44,6 +44,11 @@ async function openTree() {
   await tasksEyePage.openPreview(pathFor(CURRENT), CURRENT);
   const root = await tasksEyePage.openTree(CURRENT);
   await tasksEyePage.waitForTreeNotes(allNames);
+  await narrowTree();
+  return root;
+}
+
+async function narrowTree() {
   await browser.execute(() => {
     const tree = document.querySelector<HTMLElement>(".eye-note-tree")!;
     const pane = tree.closest<HTMLElement>(".view-content")!;
@@ -53,7 +58,6 @@ async function openTree() {
     tree.style.width = "260px";
     tree.style.boxSizing = "border-box";
   });
-  return root;
 }
 
 async function expectWrappedTitles() {
@@ -87,6 +91,11 @@ async function expectWrappedTitles() {
           }
         }
         const bounds = title.getBoundingClientRect();
+        const bullets = row.querySelectorAll(".eye-tree-bullet");
+        const bullet = bullets[0]!;
+        const bulletRange = document.createRange();
+        bulletRange.selectNodeContents(bullet);
+        const bulletBounds = bulletRange.getBoundingClientRect();
         const rowStyle = getComputedStyle(row);
         const textHeight =
           lines.size * parseFloat(getComputedStyle(title).lineHeight);
@@ -108,6 +117,11 @@ async function expectWrappedTitles() {
           panelFits: tree.scrollWidth <= tree.clientWidth + 1,
           dense: entryHeight <= textHeight + 6,
           toggleCount: row.querySelectorAll("button").length,
+          bulletCount: bullets.length,
+          bulletText: bullet.textContent,
+          bulletAligned:
+            Math.abs(bulletBounds.top - Math.min(...lines.keys())) < 2 &&
+            bulletBounds.right <= bounds.left,
         };
       });
     },
@@ -123,11 +137,14 @@ async function expectWrappedTitles() {
     expect(item.contained).toBe(true);
     expect(item.rowVisible).toBe(true);
     expect(item.panelFits).toBe(true);
+    expect(item.bulletCount).toBe(1);
+    expect(item.bulletText).toBe("•");
+    expect(item.bulletAligned).toBe(true);
   }
   expect(geometry.find((item) => item.name === UNBROKEN)?.toggleCount).toBe(1);
 }
 
-export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
+const standardScenarios = featureScenarios(
   fixture(
     [
       note(`${ROOT}.md`, { status: "open", up: "-", tasks: ["Plan the week"] }),
@@ -374,3 +391,259 @@ export const { acceptanceScenarios, screenshotScenarios } = featureScenarios(
     ],
   },
 );
+
+const FILTER_ROOT = "Projects";
+const FILTER_CURRENT = "Website launch";
+const ARCHIVED = "Archived launch checklist";
+const CLOSED_BRIEF = "Closed content brief";
+const CLOSED_DRAFT = "Closed messaging draft";
+const OPEN_STEP = "Finish the customer quote review";
+const CLOSED_RESEARCH = "Completed research";
+const CLOSED_INTERVIEWS = "Completed interviews";
+const CLOSED_SUMMARY = "Completed summary";
+const ANNOUNCEMENT = "Draft launch announcement";
+const MISSING_STATUS = "Needs a status decision";
+const CHECKED_OPEN = "Proofread the release note";
+const REFERENCES = "Reference links";
+const CLOSED_REFERENCES = "Saved references";
+const filterPath = (name: string) => `Launch/${name}.md`;
+const filterAncestors = [FILTER_ROOT, FILTER_CURRENT];
+const filteredNames = [
+  ...filterAncestors,
+  CLOSED_BRIEF,
+  CLOSED_DRAFT,
+  OPEN_STEP,
+  ANNOUNCEMENT,
+  MISSING_STATUS,
+  CHECKED_OPEN,
+  REFERENCES,
+];
+const unfilteredNames = [
+  ...filterAncestors,
+  ARCHIVED,
+  CLOSED_BRIEF,
+  CLOSED_DRAFT,
+  OPEN_STEP,
+  CLOSED_RESEARCH,
+  CLOSED_INTERVIEWS,
+  CLOSED_SUMMARY,
+  ANNOUNCEMENT,
+  MISSING_STATUS,
+  CHECKED_OPEN,
+  REFERENCES,
+  CLOSED_REFERENCES,
+];
+const filteredFirstLevel = [
+  ...filterAncestors,
+  CLOSED_BRIEF,
+  ANNOUNCEMENT,
+  MISSING_STATUS,
+  CHECKED_OPEN,
+  REFERENCES,
+];
+
+async function openFilteringTree() {
+  await tasksEyePage.openPreview(filterPath(FILTER_CURRENT), FILTER_CURRENT);
+  const root = await tasksEyePage.openTree(FILTER_CURRENT);
+  await tasksEyePage.waitForTreeNotes(filteredNames);
+  await narrowTree();
+  return root;
+}
+
+const filteringScenarios = featureScenarios(
+  fixture([
+    note(filterPath(FILTER_ROOT), { status: "closed", up: "-" }),
+    note(filterPath(FILTER_CURRENT), {
+      status: "closed",
+      up: `[[${FILTER_ROOT}]]`,
+    }),
+    ...(
+      [
+        [ARCHIVED, FILTER_CURRENT, "closed"],
+        [CLOSED_BRIEF, FILTER_CURRENT, "closed"],
+        [CLOSED_DRAFT, CLOSED_BRIEF, "closed"],
+        [OPEN_STEP, CLOSED_DRAFT, "open"],
+        [CLOSED_RESEARCH, FILTER_CURRENT, "closed"],
+        [CLOSED_INTERVIEWS, CLOSED_RESEARCH, "closed"],
+        [CLOSED_SUMMARY, CLOSED_INTERVIEWS, "closed"],
+        [ANNOUNCEMENT, FILTER_CURRENT, "open"],
+        [REFERENCES, FILTER_CURRENT, "open"],
+        [CLOSED_REFERENCES, REFERENCES, "closed"],
+      ] as const
+    ).map(([name, parent, status]) =>
+      note(filterPath(name), {
+        status,
+        up: `[[${parent}]]`,
+        tasks: ["Move this work forward"],
+      }),
+    ),
+    note(filterPath(MISSING_STATUS), {
+      up: `[[${FILTER_CURRENT}]]`,
+      tasks: ["Choose a status"],
+    }),
+    note(filterPath(CHECKED_OPEN), {
+      status: "open",
+      up: `[[${FILTER_CURRENT}]]`,
+      tasks: [{ text: "Already checked off", checked: true }],
+    }),
+  ]),
+  {
+    acceptance: [
+      {
+        title:
+          "hides closed descendants by default while retaining closed paths to open work",
+        async run() {
+          await openFilteringTree();
+          expect(await tasksEyePage.treeHidesClosed()).toBe("true");
+          expect(await tasksEyePage.treeExpanded(CLOSED_BRIEF)).toBe("true");
+          expect(await tasksEyePage.treeExpanded(REFERENCES)).toBeNull();
+          await tasksEyePage.toggleTreeNote(CLOSED_BRIEF);
+          await tasksEyePage.waitForTreeNotes(
+            filteredNames.filter(
+              (name) => ![CLOSED_DRAFT, OPEN_STEP].includes(name),
+            ),
+          );
+          await tasksEyePage.toggleTreeNote(CLOSED_BRIEF);
+          await tasksEyePage.waitForTreeNotes(filteredNames);
+        },
+      },
+      {
+        title:
+          "toggles closed notes with mouse, Enter and Space and updates branch controls",
+        async run() {
+          await openFilteringTree();
+          await tasksEyePage.treeAction("Hide closed notes");
+          await tasksEyePage.waitForTreeNotes(unfilteredNames);
+          expect(await tasksEyePage.treeHidesClosed()).toBe("false");
+          expect(await tasksEyePage.treeExpanded(REFERENCES)).toBe("true");
+          await tasksEyePage.treeAction("Hide closed notes", "Enter");
+          await tasksEyePage.waitForTreeNotes(filteredNames);
+          expect(await tasksEyePage.treeHidesClosed()).toBe("true");
+          expect(await tasksEyePage.treeExpanded(REFERENCES)).toBeNull();
+          await tasksEyePage.treeAction("Hide closed notes", "Space");
+          await tasksEyePage.waitForTreeNotes(unfilteredNames);
+          expect(await tasksEyePage.treeHidesClosed()).toBe("false");
+        },
+      },
+      {
+        title:
+          "keeps collapse choices while filtering and expands only displayed branches",
+        async run() {
+          await openFilteringTree();
+          await tasksEyePage.treeAction("Collapse all");
+          await tasksEyePage.waitForTreeNotes(filterAncestors);
+          await tasksEyePage.treeAction("Hide closed notes");
+          await tasksEyePage.waitForTreeNotes(filterAncestors);
+          await tasksEyePage.treeAction("Hide closed notes");
+          await tasksEyePage.treeAction("Expand one level");
+          await tasksEyePage.waitForTreeNotes(filteredFirstLevel);
+          await tasksEyePage.treeAction("Expand one level");
+          await tasksEyePage.waitForTreeNotes([
+            ...filterAncestors,
+            CLOSED_BRIEF,
+            CLOSED_DRAFT,
+            ANNOUNCEMENT,
+            MISSING_STATUS,
+            CHECKED_OPEN,
+            REFERENCES,
+          ]);
+          await tasksEyePage.treeAction("Expand one level");
+          await tasksEyePage.waitForTreeNotes(filteredNames);
+          await tasksEyePage.treeAction("Collapse all");
+          await tasksEyePage.treeAction("Expand all");
+          await tasksEyePage.waitForTreeNotes(filteredNames);
+          await tasksEyePage.treeAction("Hide closed notes");
+          await tasksEyePage.waitForTreeNotes(unfilteredNames);
+        },
+      },
+      {
+        title:
+          "retains the filter during refreshes and navigation and defaults on when reopened",
+        async run() {
+          await openFilteringTree();
+          await tasksEyePage.treeAction("Hide closed notes");
+          await tasksEyePage.waitForTreeNotes(unfilteredNames);
+          await tasksEyePage.refreshTree();
+          await tasksEyePage.waitForTreeNotes(unfilteredNames);
+          expect(await tasksEyePage.treeHidesClosed()).toBe("false");
+          await tasksEyePage.openPreview(filterPath(ARCHIVED), ARCHIVED);
+          await tasksEyePage.waitForTreeNotes([...filterAncestors, ARCHIVED]);
+          expect(await tasksEyePage.treeHidesClosed()).toBe("false");
+          await tasksEyePage.openPreview(
+            filterPath(FILTER_CURRENT),
+            FILTER_CURRENT,
+          );
+          await tasksEyePage.waitForTreeNotes(unfilteredNames);
+          await tasksEyePage.closeTree();
+          await tasksEyePage.openTree(FILTER_CURRENT);
+          await tasksEyePage.waitForTreeNotes(filteredNames);
+          expect(await tasksEyePage.treeHidesClosed()).toBe("true");
+          await tasksEyePage.openPreview(filterPath(ARCHIVED), ARCHIVED);
+          await tasksEyePage.waitForTreeNotes([...filterAncestors, ARCHIVED]);
+        },
+      },
+      {
+        title: "updates closed bridge visibility after real frontmatter edits",
+        async run() {
+          await openFilteringTree();
+          const setStatus = async (status: string) => {
+            await browser.executeObsidian(
+              async ({ app, obsidian }, path, value) => {
+                const file = app.vault.getAbstractFileByPath(path);
+                if (!(file instanceof obsidian.TFile))
+                  throw new Error("Missing filter fixture note");
+                await app.fileManager.processFrontMatter(
+                  file,
+                  (frontmatter) => {
+                    frontmatter.status = value;
+                  },
+                );
+              },
+              filterPath(OPEN_STEP),
+              status,
+            );
+          };
+          await setStatus("closed");
+          await tasksEyePage.waitForTreeNotes(
+            filteredNames.filter(
+              (name) => ![CLOSED_BRIEF, CLOSED_DRAFT, OPEN_STEP].includes(name),
+            ),
+          );
+          await setStatus("open");
+          await tasksEyePage.waitForTreeNotes(filteredNames);
+          expect(await tasksEyePage.treeHidesClosed()).toBe("true");
+        },
+      },
+    ],
+    screenshots: [
+      {
+        screenshotSlug: "tree-hide-closed",
+        async run({ save }) {
+          const root = await openFilteringTree();
+          expect(await tasksEyePage.treeHidesClosed()).toBe("true");
+          await save(root);
+        },
+      },
+      {
+        screenshotSlug: "tree-show-closed",
+        async run({ save }) {
+          const root = await openFilteringTree();
+          await tasksEyePage.treeAction("Hide closed notes");
+          await tasksEyePage.waitForTreeNotes(unfilteredNames);
+          expect(await tasksEyePage.treeHidesClosed()).toBe("false");
+          await narrowTree();
+          await save(root);
+        },
+      },
+    ],
+  },
+);
+
+export const acceptanceScenarios = [
+  ...standardScenarios.acceptanceScenarios,
+  ...filteringScenarios.acceptanceScenarios,
+];
+export const screenshotScenarios = [
+  ...standardScenarios.screenshotScenarios,
+  ...filteringScenarios.screenshotScenarios,
+];

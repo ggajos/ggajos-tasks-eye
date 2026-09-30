@@ -7,6 +7,7 @@ import {
   buildNoteTree,
   collapsedTreePaths,
   expandTreeLevel,
+  filterClosedDescendants,
   noteTreeRows,
 } from "./tree";
 import { button, element, unwrapSingleParagraph } from "./ui";
@@ -20,6 +21,7 @@ export class TreeView extends ItemView {
   private renderToken = 0;
   private activePath: string | null = null;
   private collapsed = new Set<string>();
+  private hideClosed = true;
 
   constructor(leaf: WorkspaceLeaf, plugin: TheEyePlugin) {
     super(leaf);
@@ -40,6 +42,7 @@ export class TreeView extends ItemView {
   }
 
   protected async onOpen(): Promise<void> {
+    this.hideClosed = true;
     this.activePath = null;
     this.collapsed.clear();
     await this.requestRender();
@@ -94,11 +97,14 @@ export class TreeView extends ItemView {
   ): Promise<void> {
     const toolbar = element("div", "eye-tree-toolbar");
     toolbar.setAttribute("role", "group");
-    toolbar.setAttribute("aria-label", "Tree expansion");
+    toolbar.setAttribute("aria-label", "Tree controls");
     root.appendChild(toolbar);
     const body = element("div", "eye-tree-body");
     root.appendChild(body);
-    const rows = noteTreeRows(tree);
+    const displayedTree = this.hideClosed
+      ? filterClosedDescendants(tree)
+      : tree;
+    const rows = noteTreeRows(displayedTree);
     const elements = new Map<
       string,
       {
@@ -108,7 +114,7 @@ export class TreeView extends ItemView {
     >();
     const actions: HTMLButtonElement[] = [];
     const update = (): void => {
-      const state = noteTreeRows(tree, this.collapsed);
+      const state = noteTreeRows(displayedTree, this.collapsed);
       for (const ref of state) {
         const entry = elements.get(ref.path);
         if (!entry) continue;
@@ -146,7 +152,7 @@ export class TreeView extends ItemView {
         "Expand one level",
         "list-plus",
         () => {
-          this.collapsed = expandTreeLevel(tree, this.collapsed);
+          this.collapsed = expandTreeLevel(displayedTree, this.collapsed);
         },
       ],
     ] as const) {
@@ -158,6 +164,21 @@ export class TreeView extends ItemView {
       toolbar.appendChild(control);
       actions.push(control);
     }
+    const closedFilter = button(
+      "eye-tree-control eye-tree-closed-filter clickable-icon",
+      "Hide closed notes",
+      () => {
+        this.hideClosed = !this.hideClosed;
+        void this.requestRender().then(() => {
+          this.contentEl
+            .querySelector<HTMLButtonElement>(".eye-tree-closed-filter")
+            ?.focus();
+        });
+      },
+    );
+    closedFilter.setAttribute("aria-pressed", String(this.hideClosed));
+    setIcon(closedFilter, "list-filter");
+    toolbar.appendChild(closedFilter);
     const renders: Promise<void>[] = [];
     for (const ref of rows) {
       const row = element(
@@ -183,6 +204,9 @@ export class TreeView extends ItemView {
         spacer.setAttribute("aria-hidden", "true");
         row.appendChild(spacer);
       }
+      const bullet = element("span", "eye-tree-bullet", "•");
+      bullet.setAttribute("aria-hidden", "true");
+      row.appendChild(bullet);
       const title = element("div", "eye-tree-title markdown-rendered");
       if (ref.current)
         title.appendChild(element("strong", undefined, ref.basename));

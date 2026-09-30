@@ -226,8 +226,21 @@ export const tasksEyePage = {
     throw new Error(`Tree link "${name}" was not found`);
   },
 
-  async treeAction(title: "Expand all" | "Collapse all" | "Expand one level"): Promise<void> {
-    await $(`.eye-tree-toolbar button[aria-label="${title}"]`).click();
+  async treeAction(
+    title: "Expand all" | "Collapse all" | "Expand one level" | "Hide closed notes",
+    key?: "Enter" | "Space",
+  ): Promise<void> {
+    const selector = `.eye-tree-toolbar button[aria-label="${title}"]`;
+    if (key) {
+      await browser.execute((query) => document.querySelector<HTMLElement>(query)?.focus(), selector);
+      await browser.keys(key);
+    } else {
+      await $(selector).click();
+    }
+  },
+
+  async treeHidesClosed(): Promise<string | null> {
+    return await $(".eye-tree-closed-filter").getAttribute("aria-pressed");
   },
 
   async toggleTreeNote(name: string, key?: "Enter" | "Space"): Promise<void> {

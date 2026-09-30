@@ -7,6 +7,7 @@ export interface TreeNoteRef {
 }
 
 export interface TreeNode extends TreeNoteRef {
+  closed: boolean;
   children: TreeNode[];
 }
 
@@ -14,6 +15,10 @@ export interface NoteTree {
   spine: TreeNoteRef[];
   current: TreeNoteRef;
   descendants: TreeNode[];
+}
+
+interface TreeFile extends ContextFile {
+  status?: unknown;
 }
 
 function toRef(file: ContextFile): TreeNoteRef {
@@ -55,21 +60,37 @@ export function buildSpine(
 }
 
 export function buildDescendants(
-  current: ContextFile,
-  files: readonly ContextFile[],
+  current: TreeFile,
+  files: readonly TreeFile[],
 ): TreeNode[] {
   const graph = noteGraph(files);
-  const build = (node: ContextFile, seen: ReadonlySet<string>): TreeNode[] => {
+  const build = (node: TreeFile, seen: ReadonlySet<string>): TreeNode[] => {
     const children = [...graph.children(node)]
       .filter((child) => !seen.has(child.path))
       .sort(compareRefs);
     return children.map((child) => {
       const nextSeen = new Set(seen).add(child.path);
-      return { ...toRef(child), children: build(child, nextSeen) };
+      return {
+        ...toRef(child),
+        closed: "status" in child && child.status === "closed",
+        children: build(child, nextSeen),
+      };
     });
   };
 
   return build(current, new Set([current.path]));
+}
+
+/** Keep the paths to non-closed descendants; never filter the current note or its spine. */
+export function filterClosedDescendants(tree: NoteTree): NoteTree {
+  const filter = (nodes: readonly TreeNode[]): TreeNode[] =>
+    nodes.flatMap((node) => {
+      const children = filter(node.children);
+      return node.closed && children.length === 0
+        ? []
+        : [{ ...node, children }];
+    });
+  return { ...tree, descendants: filter(tree.descendants) };
 }
 
 export interface TreeRow extends TreeNoteRef {
@@ -101,7 +122,12 @@ export function noteTreeRows(
       walk(child, depth + 1, visible && !collapsed.has(node.path));
     }
   };
-  walk({ ...tree.current, children: tree.descendants }, 0, true, true);
+  walk(
+    { ...tree.current, closed: false, children: tree.descendants },
+    0,
+    true,
+    true,
+  );
   return rows;
 }
 
@@ -132,7 +158,7 @@ export function expandTreeLevel(
 
 export function buildNoteTree(
   activePath: string | null,
-  files: readonly ContextFile[],
+  files: readonly TreeFile[],
 ): NoteTree | null {
   if (!activePath) return null;
   const current = files.find((file) => file.path === activePath);
