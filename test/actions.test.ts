@@ -1,11 +1,7 @@
 import type { App } from "obsidian";
 import { TFile } from "obsidian";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  completeTaskInFile,
-  setTaskPriorityInFile,
-  shiftTaskDueInFile,
-} from "../src/actions";
+import { editTaskInFile } from "../src/actions";
 import { parseTaskLine } from "../src/taskParsing";
 import type { EyeTask } from "../src/types";
 import { noticeLog } from "./stubs/obsidian";
@@ -44,7 +40,7 @@ beforeEach(() => {
   noticeLog.length = 0;
 });
 
-describe("shiftTaskDueInFile", () => {
+describe("editTaskInFile shift", () => {
   it("shifts the due date of the matched task line", async () => {
     const line = "- [ ] Write report 📅 2026-07-17";
     const files = {
@@ -52,7 +48,10 @@ describe("shiftTaskDueInFile", () => {
     };
     const app = fakeApp(files);
 
-    await shiftTaskDueInFile(app, "work/note.md", task(line), 1);
+    await editTaskInFile(app, "work/note.md", task(line), {
+      kind: "shift",
+      days: 1,
+    });
 
     expect(files["work/note.md"].markdown).toBe(
       "- [ ] Write report 📅 2026-07-18",
@@ -67,11 +66,11 @@ describe("shiftTaskDueInFile", () => {
     };
     const app = fakeApp(files);
 
-    await shiftTaskDueInFile(
+    await editTaskInFile(
       app,
       "work/missing.md",
       task("- [ ] task 📅 2026-07-17"),
-      1,
+      { kind: "shift", days: 1 },
     );
 
     expect(files["work/note.md"].processCalls).toBe(0);
@@ -95,13 +94,11 @@ describe("shiftTaskDueInFile", () => {
     } as unknown as App;
 
     await expect(
-      shiftTaskDueInFile(
-        app,
-        "work/note.md",
-        task("- [ ] task 📅 2026-07-17"),
-        1,
-      ),
-    ).resolves.toBeUndefined();
+      editTaskInFile(app, "work/note.md", task("- [ ] task 📅 2026-07-17"), {
+        kind: "shift",
+        days: 1,
+      }),
+    ).resolves.toBe(true);
 
     expect(noticeLog).toHaveLength(1);
     expect(noticeLog[0]).toContain("work/note.md");
@@ -110,7 +107,7 @@ describe("shiftTaskDueInFile", () => {
   });
 });
 
-describe("setTaskPriorityInFile", () => {
+describe("editTaskInFile priority", () => {
   it("raises the priority of the matched task line", async () => {
     const line = "- [ ] Write report 📅 2026-07-17";
     const files = {
@@ -118,7 +115,10 @@ describe("setTaskPriorityInFile", () => {
     };
     const app = fakeApp(files);
 
-    await setTaskPriorityInFile(app, "work/note.md", task(line), "raise");
+    await editTaskInFile(app, "work/note.md", task(line), {
+      kind: "priority",
+      direction: "raise",
+    });
 
     expect(files["work/note.md"].markdown).toBe(
       "- [ ] Write report 🔼 📅 2026-07-17",
@@ -134,7 +134,10 @@ describe("setTaskPriorityInFile", () => {
     };
     const app = fakeApp(files);
 
-    await setTaskPriorityInFile(app, "work/note.md", task(line), "lower");
+    await editTaskInFile(app, "work/note.md", task(line), {
+      kind: "priority",
+      direction: "lower",
+    });
 
     expect(files["work/note.md"].markdown).toBe(
       "- [ ] Write report 📅 2026-07-17",
@@ -148,11 +151,11 @@ describe("setTaskPriorityInFile", () => {
     };
     const app = fakeApp(files);
 
-    await setTaskPriorityInFile(
+    await editTaskInFile(
       app,
       "work/missing.md",
       task("- [ ] task 📅 2026-07-17"),
-      "raise",
+      { kind: "priority", direction: "raise" },
     );
 
     expect(files["work/note.md"].processCalls).toBe(0);
@@ -161,7 +164,7 @@ describe("setTaskPriorityInFile", () => {
   });
 });
 
-describe("completeTaskInFile", () => {
+describe("editTaskInFile done", () => {
   it("replaces the task line with the Tasks API result", async () => {
     const line = "- [ ] Ship it 📅 2026-07-17";
     const files = {
@@ -172,11 +175,12 @@ describe("completeTaskInFile", () => {
       executeToggleTaskDoneCommand: vi.fn(() => "- [x] Ship it ✅ 2026-07-17"),
     };
 
-    await completeTaskInFile(
+    await editTaskInFile(
       app,
-      tasksApi as never,
       "work/note.md",
       task(line),
+      { kind: "done" },
+      { tasksApi: () => tasksApi as never },
     );
 
     expect(tasksApi.executeToggleTaskDoneCommand).toHaveBeenCalledWith(
@@ -193,14 +197,33 @@ describe("completeTaskInFile", () => {
       executeToggleTaskDoneCommand: vi.fn(() => "- [x] done"),
     };
 
-    await completeTaskInFile(
+    await editTaskInFile(
       app,
-      tasksApi as never,
       "work/missing.md",
       task("- [ ] done 📅 2026-07-17"),
+      { kind: "done" },
+      { tasksApi: () => tasksApi as never },
     );
 
     expect(noticeLog).toHaveLength(1);
     expect(noticeLog[0]).toContain("work/missing.md");
+  });
+
+  it("does not touch the note without the Tasks API", async () => {
+    const files = {
+      "work/note.md": { markdown: "- [ ] done", processCalls: 0 },
+    };
+    const app = fakeApp(files);
+
+    const attempted = await editTaskInFile(
+      app,
+      "work/note.md",
+      task("- [ ] done"),
+      { kind: "done" },
+      { tasksApi: () => null },
+    );
+
+    expect(attempted).toBe(false);
+    expect(files["work/note.md"].processCalls).toBe(0);
   });
 });

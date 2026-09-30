@@ -37,39 +37,55 @@ async function updateMarkdownFile(
   }
 }
 
-export async function shiftTaskDueInFile(
-  app: App,
-  filePath: string,
-  task: EyeTask,
-  deltaDays: number,
-): Promise<void> {
-  await updateMarkdownFile(app, filePath, (markdown) =>
-    shiftTaskDueInMarkdown(markdown, task, deltaDays),
-  );
+/** One user-triggered change to a single task line. */
+export type TaskEdit =
+  | { kind: "done" }
+  | { kind: "shift"; days: number }
+  | { kind: "priority"; direction: PriorityDirection };
+
+export interface TaskEditDeps {
+  /** Resolves the Tasks API, needed only to complete a task. */
+  tasksApi?: () => TasksApiV1 | null;
 }
 
-export async function setTaskPriorityInFile(
-  app: App,
+function lineTransform(
   filePath: string,
   task: EyeTask,
-  direction: PriorityDirection,
-): Promise<void> {
-  await updateMarkdownFile(app, filePath, (markdown) =>
-    setTaskPriorityInMarkdown(markdown, task, direction),
-  );
+  edit: TaskEdit,
+  deps: TaskEditDeps,
+): ((markdown: string) => string) | null {
+  switch (edit.kind) {
+    case "shift":
+      return (markdown) => shiftTaskDueInMarkdown(markdown, task, edit.days);
+    case "priority":
+      return (markdown) =>
+        setTaskPriorityInMarkdown(markdown, task, edit.direction);
+    case "done": {
+      const api = deps.tasksApi?.() ?? null;
+      if (!api) return null;
+      const replacement = api.executeToggleTaskDoneCommand(
+        task.lineText,
+        filePath,
+      );
+      return (markdown) => replaceTaskLine(markdown, task, replacement);
+    }
+  }
 }
 
-export async function completeTaskInFile(
+/**
+ * Apply `edit` to `task` in the note at `filePath`. Missing files and write
+ * failures are reported to the user, never thrown. Returns false when the
+ * edit could not be attempted (e.g. completing without the Tasks API).
+ */
+export async function editTaskInFile(
   app: App,
-  tasksApi: TasksApiV1,
   filePath: string,
   task: EyeTask,
-): Promise<void> {
-  const replacement = tasksApi.executeToggleTaskDoneCommand(
-    task.lineText,
-    filePath,
-  );
-  await updateMarkdownFile(app, filePath, (markdown) =>
-    replaceTaskLine(markdown, task, replacement),
-  );
+  edit: TaskEdit,
+  deps: TaskEditDeps = {},
+): Promise<boolean> {
+  const transform = lineTransform(filePath, task, edit, deps);
+  if (!transform) return false;
+  await updateMarkdownFile(app, filePath, transform);
+  return true;
 }

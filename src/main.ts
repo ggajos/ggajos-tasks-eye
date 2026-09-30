@@ -6,11 +6,8 @@ import type {
   WorkspaceLeaf,
 } from "obsidian";
 import { addIcon, Notice, Plugin, TFile } from "obsidian";
-import {
-  completeTaskInFile,
-  setTaskPriorityInFile,
-  shiftTaskDueInFile,
-} from "./actions";
+import type { TaskEdit } from "./actions";
+import { editTaskInFile } from "./actions";
 import {
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
@@ -31,7 +28,6 @@ import { findManagedFolder } from "./managedFolder";
 import { isPathInSources, isPathRelatedToManagedFolder } from "./managedPath";
 import type { StatusStepDirection } from "./noteStatus";
 import { stepNoteStatus } from "./noteStatus";
-import type { PriorityDirection } from "./priority";
 import { TasksEyeSettingTab } from "./settings";
 import {
   defaultSettings,
@@ -328,42 +324,16 @@ export default class TheEyePlugin extends Plugin {
     await this.app.workspace.getLeaf(false).openFile(file);
   }
 
-  async shiftTaskDue(model: RowModel, deltaDays: number): Promise<void> {
+  async editTask(model: RowModel, edit: TaskEdit): Promise<void> {
     if (!model.earliestTask) return;
-    await shiftTaskDueInFile(
+    const attempted = await editTaskInFile(
       this.app,
       model.file.path,
       model.earliestTask,
-      deltaDays,
+      edit,
+      { tasksApi: () => this.getTasksApi() },
     );
-    this.queueRefresh();
-  }
-
-  async setTaskPriority(
-    model: RowModel,
-    direction: PriorityDirection,
-  ): Promise<void> {
-    if (!model.earliestTask) return;
-    await setTaskPriorityInFile(
-      this.app,
-      model.file.path,
-      model.earliestTask,
-      direction,
-    );
-    this.queueRefresh();
-  }
-
-  async completeTask(model: RowModel): Promise<void> {
-    if (!model.earliestTask) return;
-    const api = this.getTasksApi();
-    if (!api) return;
-    await completeTaskInFile(
-      this.app,
-      api,
-      model.file.path,
-      model.earliestTask,
-    );
-    this.queueRefresh();
+    if (attempted) this.queueRefresh();
   }
 
   private uncheckSelectedTasksInEditor(

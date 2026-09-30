@@ -722,7 +722,7 @@ export class EyeView extends ItemView {
     const done = button(
       "eye-icon-button",
       "Mark task done",
-      () => void this.plugin.completeTask(model),
+      () => void this.plugin.editTask(model, { kind: "done" }),
     );
     setIcon(done, "check");
     actions.appendChild(done);
@@ -733,7 +733,8 @@ export class EyeView extends ItemView {
           button(
             "eye-shift-button",
             dueShiftLabel(delta),
-            () => void this.plugin.shiftTaskDue(model, delta),
+            () =>
+              void this.plugin.editTask(model, { kind: "shift", days: delta }),
             delta > 0 ? `+${delta}` : `${delta}`,
           ),
         );
@@ -743,7 +744,11 @@ export class EyeView extends ItemView {
     const raise = button(
       "eye-shift-button",
       "Raise task priority",
-      () => void this.plugin.setTaskPriority(model, "raise"),
+      () =>
+        void this.plugin.editTask(model, {
+          kind: "priority",
+          direction: "raise",
+        }),
       "↑",
     );
     raise.disabled = !canRaisePriority(task.priority);
@@ -752,7 +757,11 @@ export class EyeView extends ItemView {
     const lower = button(
       "eye-shift-button",
       "Lower task priority",
-      () => void this.plugin.setTaskPriority(model, "lower"),
+      () =>
+        void this.plugin.editTask(model, {
+          kind: "priority",
+          direction: "lower",
+        }),
       "↓",
     );
     lower.disabled = !canLowerPriority(task.priority);
