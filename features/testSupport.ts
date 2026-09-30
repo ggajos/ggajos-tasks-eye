@@ -1,10 +1,10 @@
+import type { AvailabilityConfig } from "../src/availability";
+import { EMPTY_AVAILABILITY_CONFIG } from "../src/availability";
 import {
   buildEyeFileFromMarkdown,
   buildEyeFilesFromMarkdown,
 } from "../src/indexer";
 import type { EyeFile, RowModel } from "../src/types";
-import type { AvailabilityConfig } from "../src/vacation";
-import { EMPTY_AVAILABILITY_CONFIG } from "../src/vacation";
 import type { ViolationCode } from "../src/validation";
 import { validateFile } from "../src/validation";
 import type { FixtureFile } from "./fixtures";

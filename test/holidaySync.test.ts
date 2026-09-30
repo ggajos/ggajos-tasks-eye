@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { HolidayCache } from "../src/availability";
 import {
   fetchNagerCountries,
   fetchNagerHolidays,
@@ -7,7 +8,6 @@ import {
   syncNagerHolidayYears,
 } from "../src/holidaySync";
 import { buildEyeFileFromMarkdown } from "../src/indexer";
-import type { HolidayCache } from "../src/vacation";
 
 const emptyCache = (): HolidayCache => ({
   countryCode: "",

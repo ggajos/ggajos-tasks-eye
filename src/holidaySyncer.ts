@@ -1,3 +1,4 @@
+import type { AvailabilitySettings, HolidayCache } from "./availability";
 import type { JsonRequest } from "./holidaySync";
 import {
   requiredHolidayYears,
@@ -5,7 +6,6 @@ import {
   syncNagerHolidayYears,
 } from "./holidaySync";
 import type { EyeFile } from "./types";
-import type { AvailabilitySettings, HolidayCache } from "./vacation";
 
 export const HOLIDAY_RETRY_MS = 60 * 60 * 1000;
 

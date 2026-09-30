@@ -1,5 +1,5 @@
+import type { AvailabilitySettings, HolidayCache } from "./availability";
 import type { EyeMode } from "./constants";
-import type { AvailabilitySettings, HolidayCache } from "./vacation";
 import type { ValidationViolation } from "./validation";
 
 export interface EyeTask {

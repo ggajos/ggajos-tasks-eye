@@ -1,3 +1,8 @@
+import type { AvailabilityConfig, AvailabilityReason } from "./availability";
+import {
+  availabilityReasonsForTs,
+  EMPTY_AVAILABILITY_CONFIG,
+} from "./availability";
 import { STATUSES } from "./constants";
 import { formatYmd, isBeforeToday, nowDate } from "./date";
 import { isPathInManagedFolder } from "./managedPath";
@@ -5,11 +10,6 @@ import type { NoteGraph } from "./noteGraph";
 import { hasUp, isRootFile, noteGraph } from "./noteGraph";
 import { getEarliestDueDate } from "./taskSelection";
 import type { EyeFile, EyeTask } from "./types";
-import type { AvailabilityConfig, AvailabilityReason } from "./vacation";
-import {
-  availabilityReasonsForTs,
-  EMPTY_AVAILABILITY_CONFIG,
-} from "./vacation";
 
 export const VIOLATION_CODES = [
   "invalid-status",

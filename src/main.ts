@@ -8,6 +8,8 @@ import type {
 import { addIcon, Notice, Plugin, TFile } from "obsidian";
 import type { TaskEdit } from "./actions";
 import { editTaskInFile } from "./actions";
+import type { AvailabilityConfig } from "./availability";
+import { availabilityConfigFromSettings } from "./availability";
 import {
   MODE_COMMANDS,
   OPEN_COMPLETED_COMMAND,
@@ -40,8 +42,6 @@ import type { TasksApiV1 } from "./tasksApi";
 import { getTasksApi } from "./tasksApi";
 import { TREE_VIEW_TYPE, TreeView } from "./treeView";
 import type { EyeSettings, RowModel } from "./types";
-import type { AvailabilityConfig } from "./vacation";
-import { availabilityConfigFromSettings } from "./vacation";
 import { EyeView, VIEW_TYPE } from "./view";
 
 const ALL_CLEAR_ICON = "ggajos-tasks-eye-circle-check";

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { AvailabilityConfig } from "../../src/availability";
+import { availabilityReasonsForTs } from "../../src/availability";
 import { boardItemsForContext } from "../../src/board";
 import { isoToTs } from "../../src/date";
 import { selectRows } from "../../src/model";
-import type { AvailabilityConfig } from "../../src/vacation";
-import { availabilityReasonsForTs } from "../../src/vacation";
 import { files } from "../testSupport";
 
 const config: AvailabilityConfig = {

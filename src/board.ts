@@ -1,3 +1,5 @@
+import type { AvailabilityConfig, VacationMarker } from "./availability";
+import { EMPTY_AVAILABILITY_CONFIG, markersForDueRange } from "./availability";
 import type { DoneContextGroup } from "./completedTasks";
 import { prepareDone } from "./completedTasks";
 import type { DueBucket, EyeMode } from "./constants";
@@ -9,12 +11,10 @@ import {
   VACATION_CONTEXT,
   withVacationContext,
 } from "./context";
-import { formatHumanDate, formatYmd, isoToTs, nowDate } from "./date";
+import { formatHumanDate, formatYmd, nowDate } from "./date";
 import { rowSelection } from "./model";
 import type { VaultSnapshot } from "./snapshot";
 import type { EyeFile, RowModel } from "./types";
-import type { AvailabilityConfig, VacationMarker } from "./vacation";
-import { EMPTY_AVAILABILITY_CONFIG, vacationMarkers } from "./vacation";
 
 export type RenderItem =
   | { kind: "task"; model: RowModel }
@@ -94,11 +94,7 @@ function taskItems(rows: readonly RowModel[]): RenderItem[] {
   return rows.map((model) => ({ kind: "task", model }));
 }
 
-function vacationMarkersForRows(
-  rows: readonly RowModel[],
-  availability: AvailabilityConfig,
-  now: Date,
-): VacationMarker[] {
+function lastDueOf(rows: readonly RowModel[]): number | null {
   let lastDue: number | null = null;
   for (const model of rows) {
     if (
@@ -108,13 +104,15 @@ function vacationMarkersForRows(
       lastDue = model.earliestDue;
     }
   }
-  if (lastDue === null) return [];
-  return vacationMarkers(
-    isoToTs(formatYmd(now.getTime())),
-    lastDue,
-    availability,
-    now,
-  );
+  return lastDue;
+}
+
+function boardMarkers(
+  rows: readonly RowModel[],
+  availability: AvailabilityConfig,
+  now: Date,
+): VacationMarker[] {
+  return markersForDueRange(now, lastDueOf(rows), availability);
 }
 
 export function mergeItems(
@@ -163,7 +161,7 @@ export function boardItemsForContext(
   now: Date = nowDate(),
 ): RenderItem[] {
   if (contextFilter === VACATION_CONTEXT) {
-    return vacationMarkersForRows(vacationSourceRows, availability, now).map(
+    return boardMarkers(vacationSourceRows, availability, now).map(
       (marker) => ({
         kind: "marker",
         marker,
@@ -182,10 +180,7 @@ export function boardItemsForContext(
     }));
   }
 
-  return mergeItems(
-    rows,
-    vacationMarkersForRows(vacationSourceRows, availability, now),
-  );
+  return mergeItems(rows, boardMarkers(vacationSourceRows, availability, now));
 }
 
 function startOfDay(ts: number): Date {

@@ -1,11 +1,11 @@
+import type { AvailabilityConfig } from "./availability";
+import { EMPTY_AVAILABILITY_CONFIG } from "./availability";
 import type { EyeMode } from "./constants";
 import { getContextForFile, matchesContextFilter } from "./context";
 import { isAfterToday, nowDate } from "./date";
 import { NORMAL_PRIORITY } from "./priority";
 import { findEarliestDueTask, getEarliestDueDate } from "./taskSelection";
 import type { EyeFile, RowModel } from "./types";
-import type { AvailabilityConfig } from "./vacation";
-import { EMPTY_AVAILABILITY_CONFIG } from "./vacation";
 import type { ValidationViolation } from "./validation";
 import { statusValue, validateFile } from "./validation";
 

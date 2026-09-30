@@ -226,3 +226,21 @@ export function vacationMarkers(
   }
   return markers;
 }
+
+/**
+ * Markers for a board's due horizon: the range always starts today (never
+ * in the past) and ends at the furthest due date shown.
+ */
+export function markersForDueRange(
+  now: Date,
+  lastDueTs: number | null,
+  config: AvailabilityConfig,
+): VacationMarker[] {
+  if (lastDueTs === null) return [];
+  return vacationMarkers(
+    isoToTs(formatYmd(now.getTime())),
+    lastDueTs,
+    config,
+    now,
+  );
+}

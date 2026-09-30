@@ -1,5 +1,6 @@
 import type { ViewStateResult, WorkspaceLeaf } from "obsidian";
 import { ItemView, MarkdownRenderer, setIcon } from "obsidian";
+import type { VacationMarker } from "./availability";
 import {
   type BoardBucket,
   type BoardDayGroup,
@@ -38,7 +39,6 @@ import {
   element,
   unwrapSingleParagraph,
 } from "./ui";
-import type { VacationMarker } from "./vacation";
 import type { ViolationCode } from "./validation";
 import { violationDocsUrl } from "./violationDocs";
 

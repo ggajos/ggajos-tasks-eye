@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { discoverFeatures } from "../scripts/feature-discovery";
+import { availabilityConfigFromSettings } from "../src/availability";
 import { selectRows } from "../src/model";
-import { availabilityConfigFromSettings } from "../src/vacation";
 import { files, rowNames, violationCodes } from "./testSupport";
 
 const violationFeatures = (await discoverFeatures())

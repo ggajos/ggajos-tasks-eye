@@ -1,6 +1,4 @@
 import { requestUrl } from "obsidian";
-import { isIsoDate, nowDate, todayIso } from "./date";
-import type { EyeFile } from "./types";
 import type {
   AvailabilitySettings,
   CachedHolidayYear,
@@ -8,7 +6,9 @@ import type {
   HolidayCountry,
   PersonalTimeOff,
   PublicHoliday,
-} from "./vacation";
+} from "./availability";
+import { isIsoDate, nowDate, todayIso } from "./date";
+import type { EyeFile } from "./types";
 
 const NAGER_API_ROOT = "https://date.nager.at/api/v4";
 const COUNTRY_TTL_MS = 30 * 24 * 60 * 60 * 1000;

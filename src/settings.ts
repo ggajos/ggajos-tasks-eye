@@ -5,6 +5,12 @@ import type {
   TextComponent,
 } from "obsidian";
 import { PluginSettingTab } from "obsidian";
+import {
+  formatNonWorkingWeekdays,
+  NON_WORKING_WEEKDAY_ABBREVIATIONS,
+  type PersonalTimeOff,
+  parseNonWorkingWeekdays,
+} from "./availability";
 import { isIsoDate } from "./date";
 import type TheEyePlugin from "./main";
 import {
@@ -15,12 +21,6 @@ import {
   OUTSIDE_EXCLUSION_NOTE,
   vaultFolderPath,
 } from "./managedPath";
-import {
-  formatNonWorkingWeekdays,
-  NON_WORKING_WEEKDAY_ABBREVIATIONS,
-  type PersonalTimeOff,
-  parseNonWorkingWeekdays,
-} from "./vacation";
 
 type ExcludedFolderKey = `excludedFolder:${number}`;
 

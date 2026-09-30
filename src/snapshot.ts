@@ -1,8 +1,8 @@
+import type { AvailabilityConfig } from "./availability";
+import { EMPTY_AVAILABILITY_CONFIG } from "./availability";
 import type { NoteGraph } from "./noteGraph";
 import { noteGraph } from "./noteGraph";
 import type { EyeFile } from "./types";
-import type { AvailabilityConfig } from "./vacation";
-import { EMPTY_AVAILABILITY_CONFIG } from "./vacation";
 
 /** Everything the views derive from: the indexed notes plus availability. */
 export interface VaultSnapshot {

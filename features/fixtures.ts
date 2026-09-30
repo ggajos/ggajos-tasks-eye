@@ -185,4 +185,4 @@ export function isFeatureFixture(value: unknown): value is FeatureFixture {
   );
 }
 
-import type { AvailabilitySettings, HolidayCache } from "../src/vacation";
+import type { AvailabilitySettings, HolidayCache } from "../src/availability";

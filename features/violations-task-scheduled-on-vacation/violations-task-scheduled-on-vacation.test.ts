@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
+import type { AvailabilityConfig } from "../../src/availability";
 import { selectRows } from "../../src/model";
-import type { AvailabilityConfig } from "../../src/vacation";
 import { file } from "../testSupport";
 
 const availability: AvailabilityConfig = {

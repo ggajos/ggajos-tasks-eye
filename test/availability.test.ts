@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { isoToTs } from "../src/date";
-import type { AvailabilityConfig } from "../src/vacation";
+import type { AvailabilityConfig } from "../src/availability";
 import {
   availabilityReasonsForTs,
   formatNonWorkingWeekdays,
+  markersForDueRange,
   parseNonWorkingWeekdays,
   vacationMarkers,
-} from "../src/vacation";
+} from "../src/availability";
+import { isoToTs } from "../src/date";
 
 const config: AvailabilityConfig = {
   nonWorkingWeekdays: [0, 6],
@@ -94,5 +95,42 @@ describe("non-working weekday text", () => {
     expect(parseNonWorkingWeekdays("Saturday")).toBeNull();
     expect(parseNonWorkingWeekdays("Sat Sun")).toBeNull();
     expect(parseNonWorkingWeekdays("Sat,")).toBeNull();
+  });
+});
+
+describe("markersForDueRange", () => {
+  const rangeConfig: AvailabilityConfig = {
+    nonWorkingWeekdays: [0, 6],
+    publicHolidays: [],
+    personalTimeOff: [
+      {
+        id: "trip",
+        from: "2026-07-10",
+        to: "2026-07-25",
+        label: "Trip",
+      },
+    ],
+  };
+
+  it("returns no markers without a due horizon", () => {
+    expect(
+      markersForDueRange(new Date(2026, 6, 17), null, rangeConfig),
+    ).toEqual([]);
+  });
+
+  it("starts the range today, even when time off began earlier", () => {
+    const markers = markersForDueRange(
+      new Date(2026, 6, 17, 18),
+      isoToTs("2026-07-21"),
+      rangeConfig,
+    );
+
+    expect(markers.map((marker) => marker.dateLabel)).toEqual([
+      "07-17",
+      "07-18",
+      "07-19",
+      "07-20",
+      "07-21",
+    ]);
   });
 });

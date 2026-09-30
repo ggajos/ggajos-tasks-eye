@@ -1,3 +1,8 @@
+import type { PersonalTimeOff } from "./availability";
+import {
+  DEFAULT_AVAILABILITY_SETTINGS,
+  EMPTY_HOLIDAY_CACHE,
+} from "./availability";
 import type { EyeMode } from "./constants";
 import { DEFAULT_MODE, isEyeMode } from "./constants";
 import {
@@ -17,8 +22,6 @@ import {
   notesFolderExclusionError,
 } from "./managedPath";
 import type { EyeSettings } from "./types";
-import type { PersonalTimeOff } from "./vacation";
-import { DEFAULT_AVAILABILITY_SETTINGS, EMPTY_HOLIDAY_CACHE } from "./vacation";
 
 export function defaultSettings(): EyeSettings {
   return {

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import type { AvailabilityConfig } from "../src/availability";
 import type { BoardScreen } from "../src/board";
 import {
   boardContexts,
@@ -16,7 +17,6 @@ import {
 import { selectRows } from "../src/model";
 import { createSnapshot } from "../src/snapshot";
 import type { EyeFile, RowModel } from "../src/types";
-import type { AvailabilityConfig } from "../src/vacation";
 
 const NOW = new Date(2026, 6, 17);
 
