@@ -11,7 +11,7 @@ vault generator in `demo/`.
 
 | Category | Command | Use |
 | --- | --- | --- |
-| Essential | `npm run build` | Format, type-check, and bundle the plugin. |
+| Essential | `npm run build` | Format, type-check, lint (zero warnings allowed), and bundle the plugin. |
 | Essential | `npm test` | Run the Vitest unit suite; the regular development feedback loop. |
 | Essential | `npm run test:visual` | Run behavioral and screenshot WDIO tests in pinned Podman Linux/Xvfb, overwrite tracked screenshots, generate five community-submission cards, then run `dev:docs`. |
 | Local/optional | `npm run dev:coverage` | Run Vitest with coverage. |

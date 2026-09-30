@@ -25,7 +25,7 @@ export class TreeView extends ItemView {
   }
 
   getDisplayText(): string {
-    return "Tasks Eye Tree";
+    return "Tasks Eye tree";
   }
 
   getIcon(): string {

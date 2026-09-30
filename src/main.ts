@@ -145,7 +145,7 @@ export default class TheEyePlugin extends Plugin {
       void this.openEye(this.settings.mode);
     });
 
-    this.addRibbonIcon("list-tree", "Open Tasks Eye Tree", () => {
+    this.addRibbonIcon("list-tree", "Open Tasks Eye tree", () => {
       void this.openTree();
     });
 
