@@ -1,7 +1,7 @@
 {
   "name": "ggajos-tasks-eye",
   "version": "16.0.0-beta.1",
-  "description": "Turns your notes into an organized task board by reading your Tasks checkboxes and surfacing the next actionable, dated task for each of your active notes.",
+  "description": "Find your next action across your notes. Focus on today, plan ahead, and keep your task workflow in order.",
   "author": {
     "name": "Grzegorz Gajos",
     "email": "grzegorz.gajos@opentangerine.com",
@@ -52,6 +52,7 @@
     "mocha": "^10.8.2",
     "obsidian": "1.13.1",
     "obsidian-launcher": "^3.1.1",
+    "opentype.js": "1.3.4",
     "reladraw": "0.11.1",
     "release-it": "^20.2.1",
     "sharp": "0.35.3",
@@ -63,5 +64,5 @@
     "wdio-obsidian-service": "^3.1.1",
     "webdriverio": "^9.29.1"
   },
-  "longDescription": "Track what to do next across your notes. Instead of a raw list of tasks, this plugin treats your notes as projects and surfaces the next actionable task for each one based on scheduled or due dates. It provides three main views: Focus (for tasks due today or overdue), Open (for all upcoming active notes), and Inbox (to highlight notes with missing metadata). By reading your existing Markdown and Tasks checkboxes, it minimizes friction between asking 'what should I do next?' and reaching the relevant task with its full context, keeping your notes as the ultimate source of truth."
+  "longDescription": "Attention is precious. Tasks Eye is a free, open source Obsidian plugin built around a simple goal: help you tackle today’s commitments, decide what deserves attention next, and reach a clear stopping point for the day.\n\nYour notes are the units of work, with each next action kept close to the ideas, decisions, and context behind it. A task’s date says when it should return to your attention; its priority helps you choose what comes first. Work can move forward a little at a time, with a deliberate decision about when to return to what remains.\n\nFocus gives today’s commitments a clear place. Open makes room for thoughtful planning, while Inbox helps keep the underlying system trustworthy. The aim is a manageable day and a considered tomorrow. Today’s queue can be clear while future work remains open, leaving you free to stop or work ahead when it is useful.\n\nBuilt on your Markdown notes and the Obsidian Tasks community plugin, Tasks Eye keeps the work in your vault. It is shared freely with the community under the MIT license."
 }

@@ -2,6 +2,20 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import sharp from "sharp";
+import opentype from "opentype.js";
+
+// Outline the bundled fonts so SVG rendering cannot fall back to system fonts.
+const fontRoot = path.resolve("acceptance", "assets", "showcase-fonts");
+function readFont(filename) {
+  const bytes = fs.readFileSync(path.join(fontRoot, filename));
+  return opentype.parse(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+}
+
+const fonts = {
+  display: readFont("DMSerifDisplay-Regular.ttf"),
+  regular: readFont("Lato-Regular.ttf"),
+  bold: readFont("Lato-Bold.ttf"),
+};
 
 const root = process.cwd();
 const actualRoot = path.resolve(
@@ -32,67 +46,65 @@ const cards = [
     screenshot: "features/views-focus/board.png",
     windowTitle: "Tasks Eye — Focus",
     eyebrow: "FOCUS VIEW",
-    title: ["Know what needs", "attention today."],
+    title: ["A clear view", "of today."],
     description: [
       "Overdue work, today’s actions,",
       "and unavailable days—together.",
     ],
     pills: ["Today at a glance", "Built-in validation"],
-    accent: "#8b5cf6",
+    accent: "#b6a1de",
   },
   {
     filename: "02-plan-ahead.png",
     screenshot: "features/views-open/board.png",
     windowTitle: "Tasks Eye — Open",
     eyebrow: "OPEN VIEW",
-    title: ["Plan the work", "ahead."],
+    title: ["Make room for", "what’s next."],
     description: [
       "Group next actions by Today,",
       "Tomorrow, This Month, and beyond.",
     ],
     pills: ["Date buckets", "Progressive disclosure"],
-    accent: "#38bdf8",
+    accent: "#86c5d8",
   },
   {
     filename: "03-act-from-the-board.png",
     screenshot: "features/actions-board-task-controls/controls.png",
     windowTitle: "Tasks Eye — Quick actions",
     eyebrow: "QUICK ACTIONS",
-    title: ["Act without leaving", "the board."],
+    title: ["Small actions.", "Steady progress."],
     description: [
       "Complete tasks or move due dates",
       "and adjust priority inline.",
     ],
     pills: ["Fast updates", "Tasks integration"],
-    accent: "#22c55e",
+    accent: "#91c8a6",
   },
   {
     filename: "04-repair-inbox.png",
     screenshot: "features/views-inbox/repair-queue.png",
     windowTitle: "Tasks Eye — Inbox",
     eyebrow: "REPAIR QUEUE",
-    title: ["Turn inconsistencies", "into a clear queue."],
-    titleSize: 40,
-    titleLineHeight: 50,
+    title: ["A place to put", "things right."],
     description: [
       "See exactly what each note needs",
       "before it rejoins your workflow.",
     ],
     pills: ["Actionable errors", "Note-centered"],
-    accent: "#fb7185",
+    accent: "#e5a19a",
   },
   {
     filename: "05-plan-around-availability.png",
     screenshot: "features/availability-vacation-markers/settings.png",
     windowTitle: "Tasks Eye — Availability",
     eyebrow: "AVAILABILITY",
-    title: ["Plan around real", "availability."],
+    title: ["Plan around", "real life."],
     description: [
       "Combine weekends, public holidays,",
       "and personal time off.",
     ],
     pills: ["Personal time off", "Public holidays"],
-    accent: "#f59e0b",
+    accent: "#d9bd7b",
     wide: true,
   },
 ];
@@ -105,156 +117,130 @@ function escapeXml(value) {
     .replaceAll('"', "&quot;");
 }
 
-function dataUri(relativePath) {
-  const screenshotPath = path.join(actualRoot, relativePath);
-  if (!fs.existsSync(screenshotPath)) {
-    throw new Error(
-      `Showcase source is missing: ${path.relative(root, screenshotPath)}`,
-    );
-  }
-  return `data:image/png;base64,${
-    fs.readFileSync(screenshotPath).toString("base64")
-  }`;
+function outlineTypography(svg) {
+  const attributes = (source) => Object.fromEntries(
+    [...source.matchAll(/([\w-]+)="([^"]*)"/g)].map((match) => [match[1], match[2]]),
+  );
+  const decode = (value) => value.replaceAll("&quot;", '"')
+    .replaceAll("&gt;", ">").replaceAll("&lt;", "<").replaceAll("&amp;", "&");
+  return svg.replace(/<text\b([^>]*)>([\s\S]*?)<\/text>/g, (_, source, content) => {
+    const attrs = attributes(source);
+    const size = Number(attrs["font-size"]);
+    const font = attrs["font-family"] === "DM Serif Display" ? fonts.display :
+      Number(attrs["font-weight"]) >= 700 ? fonts.bold : fonts.regular;
+    let y = Number(attrs.y);
+    const draw = (value, x) => {
+      const outline = font.getPath(decode(value), x, y, size, {
+        letterSpacing: Number(attrs["letter-spacing"] ?? 0) / size,
+      });
+      return `<path d="${outline.toPathData(2)}" fill="${attrs.fill}"/>`;
+    };
+    if (!content.includes("<tspan")) return draw(content, Number(attrs.x));
+    return [...content.matchAll(/<tspan([^>]*)>(.*?)<\/tspan>/g)].map((match) => {
+      const span = attributes(match[1]);
+      y += Number(span.dy ?? 0);
+      return draw(match[2], Number(span.x ?? attrs.x));
+    }).join("");
+  });
 }
 
 function logo() {
   return `
-    <g transform="translate(64 52)">
-      <rect width="42" height="42" rx="10" fill="#111827"/>
-      <path fill="#38bdf8" d="M10 11h20v4H10zM10 19h14v4H10zM10 27h20v4H10z"/>
-      <path fill="#f8fafc" d="m29 19 3 3 6-8 3 2-9 11-6-6z"/>
+    <g transform="translate(56 48)">
+      <rect width="36" height="36" rx="9" fill="#294438"/>
+      <path fill="#b8d5c7" d="M8 9h18v3H8zM8 16h12v3H8zM8 23h18v3H8z"/>
+      <path fill="#fff" d="m24 16 3 3 6-7 2 2-8 9-5-5z"/>
     </g>
-    <text x="120" y="70" fill="#f8fafc" font-size="16" font-weight="700"
-      letter-spacing="1.4">TASKS EYE</text>
-    <text x="120" y="91" fill="#94a3b8" font-size="12" font-weight="500"
-      letter-spacing="1.1">FOR OBSIDIAN</text>
+    <text x="104" y="62" fill="#e6eee8" font-size="15" font-weight="700"
+      letter-spacing="1.5">TASKS EYE</text>
+    <text x="104" y="83" fill="#98aaa0" font-size="13">For your Obsidian workspace</text>
   `;
 }
 
-function textBlock(card, index) {
-  const titleStart = card.wide ? 172 : 202;
-  const titleSize = card.titleSize ?? (card.wide ? 41 : 46);
-  const titleLineHeight = card.titleLineHeight ?? 55;
-  const descriptionStart = titleStart + 140;
-  const pillStart = descriptionStart + 92;
-  const title = card.title
-    .map(
-      (line, lineIndex) =>
-        `<tspan x="64" dy="${lineIndex === 0 ? 0 : titleLineHeight}">${
-          escapeXml(line)
-        }</tspan>`,
-    )
-    .join("");
-  const description = card.description
-    .map(
-      (line, lineIndex) =>
-        `<tspan x="64" dy="${lineIndex === 0 ? 0 : 27}">${
-          escapeXml(line)
-        }</tspan>`,
-    )
-    .join("");
-
-  let pillX = 64;
-  const pills = card.pills
-    .map((pill) => {
-      const width = Math.round(pill.length * 6.5 + 42);
-      const markup = `
-        <rect x="${pillX}" y="${pillStart}" width="${width}" height="34" rx="17"
-          fill="#ffffff" fill-opacity="0.055" stroke="#ffffff" stroke-opacity="0.12"/>
-        <circle cx="${pillX + 16}" cy="${pillStart + 17}" r="3.5"
-          fill="${card.accent}"/>
-        <text x="${pillX + 28}" y="${pillStart + 17}" fill="#cbd5e1"
-          font-size="12" font-weight="600" dominant-baseline="central">${
-            escapeXml(pill)
-          }</text>`;
-      pillX += width + 10;
-      return markup;
-    })
-    .join("");
-
-  return `
-    <rect x="64" y="${titleStart - 57}" width="40" height="3" rx="1.5"
-      fill="${card.accent}"/>
-    <text x="116" y="${titleStart - 51}" fill="${card.accent}" font-size="12"
-      font-weight="700" letter-spacing="1.8">${escapeXml(card.eyebrow)}</text>
-    <text x="64" y="${titleStart}" fill="#f8fafc" font-size="${titleSize}"
-      font-weight="720" letter-spacing="-1.6">${title}</text>
-    <text x="64" y="${descriptionStart}" fill="#a9b4c7" font-size="18"
-      font-weight="400">${description}</text>
-    ${pills}
-    <text x="64" y="742" fill="#64748b" font-size="12" font-weight="700"
-      letter-spacing="1.2">${String(index + 1).padStart(2, "0")} / 05</text>
-  `;
-}
-
-function windowFrame(card, imageHref, index) {
+function textBlock(card) {
   const wide = card.wide === true;
-  const frameX = wide ? 402 : 500;
-  const frameY = wide ? 112 : 48;
-  const frameW = wide ? 750 : 650;
-  const frameH = wide ? 590 : 704;
-  const headerH = wide ? 42 : 43;
-  const imageX = frameX + 10;
-  const imageY = frameY + headerH;
-  const imageW = frameW - 20;
-  const imageH = wide ? 538 : 651;
-  const clipId = `screen-${index}`;
+  const titleY = wide ? 178 : 290;
+  const titleSize = wide ? 50 : 54;
+  const descriptionX = wide ? 640 : 56;
+  const descriptionY = wide ? 178 : 448;
+  const featureY = wide ? 268 : 536;
+  const title = card.title.map((line, index) =>
+    `<tspan x="56" dy="${index === 0 ? 0 : 58}">${escapeXml(line)}</tspan>`
+  ).join("");
+  const description = card.description.map((line, index) =>
+    `<tspan x="${descriptionX}" dy="${index === 0 ? 0 : 28}">${escapeXml(line)}</tspan>`
+  ).join("");
+  const features = card.pills.map((pill, index) => {
+    const x = wide ? 640 + index * 230 : 56;
+    const y = featureY + (wide ? 0 : index * 36);
+    return `
+      <circle cx="${x + 7}" cy="${y - 5}" r="7" fill="${card.accent}" fill-opacity="0.1"/>
+      <path d="m${x + 4} ${y - 5} 2 2 4-4" fill="none" stroke="${card.accent}"
+        stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="${x + 25}" y="${y}" fill="#b8c7bd" font-size="15">${escapeXml(pill)}</text>
+    `;
+  }).join("");
+  return `
+    <text x="56" y="${titleY - 53}" fill="${card.accent}" font-size="11"
+      font-weight="700" letter-spacing="2.3">${escapeXml(card.eyebrow)}</text>
+    <text x="56" y="${titleY}" fill="#e6eee8" font-family="DM Serif Display"
+      font-size="${titleSize}" letter-spacing="-0.7">${title}</text>
+    <text x="${descriptionX}" y="${descriptionY}" fill="#9eafa4"
+      font-size="18">${description}</text>
+    ${features}
+  `;
+}
 
+function screenshotLayout(card, { width, height }) {
+  const frameW = width + 16;
+  return {
+    frameX: card.wide ? Math.round((1200 - frameW) / 2) : 1144 - frameW,
+    frameY: card.wide ? 324 : 40,
+    frameW,
+    frameH: height + 48,
+  };
+}
+
+function windowFrame(card, layout) {
+  const { frameX, frameY, frameW, frameH } = layout;
   return `
     <g filter="url(#shadow)">
       <rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}"
-        rx="18" fill="#171b23" stroke="#ffffff" stroke-opacity="0.14"/>
-      <rect x="${frameX}" y="${frameY}" width="${frameW}" height="${headerH}"
-        rx="18" fill="#202631"/>
-      <rect x="${frameX}" y="${frameY + headerH - 18}" width="${frameW}"
-        height="18" fill="#202631"/>
-      <circle cx="${frameX + 20}" cy="${frameY + 21}" r="4" fill="#fb7185"/>
-      <circle cx="${frameX + 34}" cy="${frameY + 21}" r="4" fill="#fbbf24"/>
-      <circle cx="${frameX + 48}" cy="${frameY + 21}" r="4" fill="#4ade80"/>
-      <text x="${frameX + 66}" y="${frameY + 26}" fill="#94a3b8"
-        font-size="12" font-weight="600">${escapeXml(card.windowTitle)}</text>
-      <clipPath id="${clipId}">
-        <rect x="${imageX}" y="${imageY}" width="${imageW}" height="${imageH}"
-          rx="8"/>
-      </clipPath>
-      <image href="${imageHref}" x="${imageX}" y="${imageY}" width="${imageW}"
-        height="${imageH}" preserveAspectRatio="xMidYMid meet"
-        clip-path="url(#${clipId})"/>
+        rx="13" fill="#202321"/>
+      <rect x="${frameX + 0.5}" y="${frameY + 0.5}" width="${frameW - 1}" height="${frameH - 1}"
+        rx="13" fill="none" stroke="#fff" stroke-opacity="0.14"/>
+      <circle cx="${frameX + 19}" cy="${frameY + 20}" r="3" fill="${card.accent}"/>
+      <text x="${frameX + 32}" y="${frameY + 24}" fill="#c9ceca"
+        font-size="11" letter-spacing="0.2">${escapeXml(card.windowTitle)}</text>
+      <path d="M${frameX + frameW - 35} ${frameY + 16}h7v7h-7z
+        M${frameX + frameW - 22} ${frameY + 16}h7v7h-7z"
+        fill="none" stroke="#737b75" stroke-width="1"/>
     </g>
   `;
 }
 
-function makeSvg(card, index) {
+function makeSvg(card, index, layout) {
   return `
   <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"
-    viewBox="0 0 1200 800"
-    font-family="Inter, Arial, sans-serif">
+    viewBox="0 0 1200 800" font-family="Lato">
     <defs>
-      <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#080c16"/>
-        <stop offset="0.55" stop-color="#101625"/>
-        <stop offset="1" stop-color="#0b101b"/>
+      <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#111916"/>
+        <stop offset="1" stop-color="#19251f"/>
       </linearGradient>
-      <radialGradient id="glow">
-        <stop offset="0" stop-color="${card.accent}" stop-opacity="0.22"/>
-        <stop offset="1" stop-color="${card.accent}" stop-opacity="0"/>
-      </radialGradient>
-      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-        <path d="M40 0H0V40" fill="none" stroke="#ffffff"
-          stroke-opacity="0.025" stroke-width="1"/>
-      </pattern>
-      <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
-        <feDropShadow dx="0" dy="18" stdDeviation="24"
-          flood-color="#000000" flood-opacity="0.48"/>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+        <feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#000000" flood-opacity="0.35"/>
       </filter>
     </defs>
-    <rect width="1200" height="800" fill="url(#background)"/>
-    <ellipse cx="1080" cy="115" rx="470" ry="420" fill="url(#glow)"/>
-    <rect width="1200" height="800" fill="url(#grid)"/>
-    <path d="M0 799H1200" stroke="${card.accent}" stroke-opacity="0.5"/>
+    <rect width="1200" height="800" fill="url(#paper)"/>
+    <circle cx="1160" cy="70" r="280" fill="${card.accent}" fill-opacity="0.035"/>
     ${logo()}
-    ${textBlock(card, index)}
-    ${windowFrame(card, dataUri(card.screenshot), index)}
+    ${textBlock(card)}
+    ${windowFrame(card, layout)}
+    <path d="M56 ${card.wide ? 770 : 704}H${card.wide ? 1144 : 438}" stroke="#e6eee8" stroke-opacity="0.15"/>
+    <text x="56" y="${card.wide ? 791 : 735}" fill="#81998b" font-size="10" letter-spacing="1.5">YOUR NOTES. YOUR NEXT MOVE.</text>
+    <text x="${card.wide ? 1095 : 56}" y="${card.wide ? 791 : 764}" fill="${card.accent}" font-size="11" font-weight="700"
+      letter-spacing="1.5">${String(index + 1).padStart(2, "0")} / 05</text>
   </svg>`;
 }
 
@@ -277,8 +263,16 @@ fs.mkdirSync(outputDir, { recursive: true });
 
 for (const [index, card] of cards.entries()) {
   const outputPath = path.join(outputDir, card.filename);
-  await sharp(Buffer.from(makeSvg(card, index)))
-    .resize(1200, 800)
+  const screenshotPath = path.join(actualRoot, card.screenshot);
+  const layout = screenshotLayout(card, await sharp(screenshotPath).metadata());
+  // Composite source pixels directly, outside the SVG filters, at native size.
+  // Fractional SVG scaling and filtered image groups soften UI text.
+  await sharp(Buffer.from(outlineTypography(makeSvg(card, index, layout))))
+    .composite([{
+      input: screenshotPath,
+      left: layout.frameX + 8,
+      top: layout.frameY + 40,
+    }])
     .png({ compressionLevel: 9, adaptiveFiltering: true })
     .toFile(outputPath);
   const metadata = await sharp(outputPath).metadata();
