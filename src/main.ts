@@ -20,50 +20,32 @@ import {
 } from "./commands";
 import type { EyeMode } from "./constants";
 import {
-  DEFAULT_MODE,
   fileNotFoundMessage,
-  isEyeMode,
   TASKS_PLUGIN_REQUIRED_MESSAGE,
 } from "./constants";
 import { todayIso } from "./date";
 import { canUncheckSelectedTasks, uncheckSelectedTasks } from "./editorUncheck";
-import {
-  newPersonalTimeOff,
-  normalizeAvailabilitySettings,
-  normalizeHolidayCache,
-} from "./holidaySync";
 import { HolidaySyncer } from "./holidaySyncer";
 import { readEyeFiles } from "./indexer";
 import { findManagedFolder } from "./managedFolder";
-import {
-  DEFAULT_MANAGED_FOLDER_PATH,
-  excludedFolderError,
-  excludedNotesFolderMessage,
-  exclusionCoveringNotesFolder,
-  isPathInSources,
-  isPathRelatedToManagedFolder,
-  missingManagedFolderMessage,
-  normalizeExcludedFolderPath,
-  normalizeExcludedFolderPaths,
-  normalizeManagedFolderPath,
-  notesFolderExclusionError,
-} from "./managedPath";
+import { isPathInSources, isPathRelatedToManagedFolder } from "./managedPath";
 import type { StatusStepDirection } from "./noteStatus";
 import { stepNoteStatus } from "./noteStatus";
 import type { PriorityDirection } from "./priority";
 import { TasksEyeSettingTab } from "./settings";
+import {
+  defaultSettings,
+  normalizeSettings,
+  SettingsModel,
+} from "./settingsModel";
 import type { VaultSnapshot } from "./snapshot";
 import { createSnapshot, SnapshotCache } from "./snapshot";
 import type { TasksApiV1 } from "./tasksApi";
 import { getTasksApi } from "./tasksApi";
 import { TREE_VIEW_TYPE, TreeView } from "./treeView";
 import type { EyeSettings, RowModel } from "./types";
-import type { AvailabilityConfig, PersonalTimeOff } from "./vacation";
-import {
-  availabilityConfigFromSettings,
-  DEFAULT_AVAILABILITY_SETTINGS,
-  EMPTY_HOLIDAY_CACHE,
-} from "./vacation";
+import type { AvailabilityConfig } from "./vacation";
+import { availabilityConfigFromSettings } from "./vacation";
 import { EyeView, VIEW_TYPE } from "./view";
 
 const ALL_CLEAR_ICON = "ggajos-tasks-eye-circle-check";
@@ -71,51 +53,6 @@ const ALL_CLEAR_ICON_SVG = `
   <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
   <path d="m7.75 12 2.8 2.8 5.7-5.7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
 `;
-
-function defaultSettings(): EyeSettings {
-  return {
-    mode: DEFAULT_MODE,
-    contextFilter: "*",
-    notesFolderPath: DEFAULT_MANAGED_FOLDER_PATH,
-    excludedFolderPaths: [],
-    availability: {
-      countryCode: DEFAULT_AVAILABILITY_SETTINGS.countryCode,
-      nonWorkingWeekdays: [...DEFAULT_AVAILABILITY_SETTINGS.nonWorkingWeekdays],
-      personalTimeOff: [],
-    },
-    holidayCache: {
-      countryCode: EMPTY_HOLIDAY_CACHE.countryCode,
-      years: {},
-      countries: [],
-      countriesFetchedAt: null,
-    },
-  };
-}
-
-function normalizeSettings(value: unknown): EyeSettings {
-  const defaults = defaultSettings();
-  const saved =
-    typeof value === "object" && value !== null
-      ? (value as Record<string, unknown>)
-      : {};
-  return {
-    mode: isEyeMode(saved.mode) ? saved.mode : defaults.mode,
-    contextFilter:
-      typeof saved.contextFilter === "string" && saved.contextFilter
-        ? saved.contextFilter
-        : defaults.contextFilter,
-    notesFolderPath: normalizeManagedFolderPath(
-      typeof saved.notesFolderPath === "string"
-        ? saved.notesFolderPath
-        : defaults.notesFolderPath,
-    ),
-    excludedFolderPaths: normalizeExcludedFolderPaths(
-      saved.excludedFolderPaths,
-    ),
-    availability: normalizeAvailabilitySettings(saved.availability),
-    holidayCache: normalizeHolidayCache(saved.holidayCache),
-  };
-}
 
 export default class TheEyePlugin extends Plugin {
   settings: EyeSettings = defaultSettings();
@@ -126,7 +63,12 @@ export default class TheEyePlugin extends Plugin {
     dataChanged: () => this.refreshViews(),
     statusChanged: () => this.settingsTab?.update(),
   });
-  private personalSequence = 0;
+  readonly preferences = new SettingsModel({
+    settings: () => this.settings,
+    persist: () => this.saveData(this.settings),
+    changed: () => this.refreshViews(),
+    folderExists: (path) => findManagedFolder(this.app, path) !== null,
+  });
   private refreshTimer: number | null = null;
   private readonly snapshots = new SnapshotCache(() => this.loadSnapshot());
 
@@ -303,183 +245,33 @@ export default class TheEyePlugin extends Plugin {
     await this.holidays.setCountry(countryCode);
   }
 
-  async setNonWorkingWeekdays(days: readonly number[]): Promise<void> {
-    if (days.some((day) => !Number.isInteger(day) || day < 0 || day > 6)) {
-      throw new Error("Non-working weekdays must be integers from 0 to 6.");
-    }
-    const normalized = [...new Set(days)].sort((a, b) => a - b);
-    if (
-      normalized.length ===
-        this.settings.availability.nonWorkingWeekdays.length &&
-      normalized.every(
-        (day, index) =>
-          day === this.settings.availability.nonWorkingWeekdays[index],
-      )
-    ) {
-      return;
-    }
-    this.settings.availability.nonWorkingWeekdays = normalized;
-    await this.saveData(this.settings);
-    await this.refreshViews();
-  }
-
-  async addPersonalTimeOff(): Promise<void> {
-    const id = `time-off-${Date.now().toString(36)}-${++this.personalSequence}`;
-    this.settings.availability.personalTimeOff = [
-      ...this.settings.availability.personalTimeOff,
-      newPersonalTimeOff(id),
-    ];
-    await this.saveData(this.settings);
-    await this.refreshViews();
-  }
-
-  async updatePersonalTimeOff(
-    id: string,
-    patch: Partial<Pick<PersonalTimeOff, "from" | "to" | "label">>,
-  ): Promise<void> {
-    const entry = this.settings.availability.personalTimeOff.find(
-      (candidate) => candidate.id === id,
-    );
-    if (!entry) return;
-    Object.assign(entry, patch);
-    entry.label = entry.label.trim();
-    this.settings.availability.personalTimeOff.sort(
-      (a, b) => a.from.localeCompare(b.from) || a.id.localeCompare(b.id),
-    );
-    await this.saveData(this.settings);
-    await this.refreshViews();
-  }
-
-  async deletePersonalTimeOff(id: string): Promise<void> {
-    const next = this.settings.availability.personalTimeOff.filter(
-      (entry) => entry.id !== id,
-    );
-    if (next.length === this.settings.availability.personalTimeOff.length) {
-      return;
-    }
-    this.settings.availability.personalTimeOff = next;
-    await this.saveData(this.settings);
-    await this.refreshViews();
-  }
-
-  managedFolderError(): string | null {
-    const missing = this.managedFolderErrorFor(this.settings.notesFolderPath);
-    if (missing) return missing;
-    const covering = exclusionCoveringNotesFolder(
-      this.settings.notesFolderPath,
-      this.settings.excludedFolderPaths,
-    );
-    return covering
-      ? excludedNotesFolderMessage(this.settings.notesFolderPath, covering)
-      : null;
-  }
-
-  managedFolderErrorFor(notesFolderPath: string): string | null {
-    const normalized = normalizeManagedFolderPath(notesFolderPath);
-    return findManagedFolder(this.app, normalized) === null
-      ? missingManagedFolderMessage(normalized)
-      : null;
-  }
-
+  // Kept on the Plugin because WDIO scenarios drive them via browser.execute.
   notesFolderSettingError(notesFolderPath: string): string | null {
-    return (
-      notesFolderExclusionError(
-        notesFolderPath,
-        this.settings.excludedFolderPaths,
-      ) ?? this.managedFolderErrorFor(notesFolderPath)
-    );
+    return this.preferences.notesFolderSettingError(notesFolderPath);
   }
 
   excludedFolderSettingError(index: number, value: string): string | null {
-    return excludedFolderError(
-      value,
-      index,
-      this.settings.notesFolderPath,
-      this.settings.excludedFolderPaths,
-    );
+    return this.preferences.excludedFolderSettingError(index, value);
   }
 
-  excludedFolderExists(excludedFolderPath: string): boolean {
-    const normalized = normalizeExcludedFolderPath(excludedFolderPath);
-    return (
-      normalized !== "" && findManagedFolder(this.app, normalized) !== null
-    );
+  addExcludedFolder(): Promise<void> {
+    return this.preferences.addExcludedFolder();
   }
 
-  async addExcludedFolder(): Promise<void> {
-    this.settings.excludedFolderPaths = [
-      ...this.settings.excludedFolderPaths,
-      "",
-    ];
-    await this.saveData(this.settings);
+  setExcludedFolder(index: number, value: string): Promise<void> {
+    return this.preferences.setExcludedFolder(index, value);
   }
 
-  async setExcludedFolder(index: number, value: string): Promise<void> {
-    if (index < 0 || index >= this.settings.excludedFolderPaths.length) {
-      throw new Error(`No excluded folder exists at index ${index}.`);
-    }
-    const error = this.excludedFolderSettingError(index, value);
-    if (error) throw new Error(error);
-    const normalized = normalizeExcludedFolderPath(value);
-    if (this.settings.excludedFolderPaths[index] === normalized) return;
-    this.settings.excludedFolderPaths = this.settings.excludedFolderPaths.map(
-      (existing, existingIndex) =>
-        existingIndex === index ? normalized : existing,
-    );
-    await this.saveExcludedFolderChange();
+  deleteExcludedFolder(index: number): Promise<void> {
+    return this.preferences.deleteExcludedFolder(index);
   }
 
-  async deleteExcludedFolder(index: number): Promise<void> {
-    const removed = this.settings.excludedFolderPaths[index];
-    if (removed === undefined) {
-      throw new Error(`No excluded folder exists at index ${index}.`);
-    }
-    this.settings.excludedFolderPaths =
-      this.settings.excludedFolderPaths.filter(
-        (_, existingIndex) => existingIndex !== index,
-      );
-    if (removed === "") {
-      await this.saveData(this.settings);
-      return;
-    }
-    await this.saveExcludedFolderChange();
-  }
-
-  private async saveExcludedFolderChange(): Promise<void> {
-    this.settings.contextFilter = "*";
-    await this.saveData(this.settings);
-    await this.refreshViews();
-  }
-
-  async setNotesFolderPath(notesFolderPath: string): Promise<void> {
-    const normalized = normalizeManagedFolderPath(notesFolderPath);
-    if (this.settings.notesFolderPath === normalized) return;
-    const exclusionError = notesFolderExclusionError(
-      normalized,
-      this.settings.excludedFolderPaths,
-    );
-    if (exclusionError) throw new Error(exclusionError);
-    this.settings.notesFolderPath = normalized;
-    this.settings.contextFilter = "*";
-    await this.saveData(this.settings);
-    await this.refreshViews();
-  }
-
-  async setMode(mode: EyeMode): Promise<void> {
-    if (this.settings.mode === mode) return;
-    this.settings.mode = mode;
-    await this.saveData(this.settings);
-  }
-
-  async setContextFilter(contextFilter: string): Promise<void> {
-    const normalized = contextFilter || "*";
-    if (this.settings.contextFilter === normalized) return;
-    this.settings.contextFilter = normalized;
-    await this.saveData(this.settings);
+  setNotesFolderPath(notesFolderPath: string): Promise<void> {
+    return this.preferences.setNotesFolderPath(notesFolderPath);
   }
 
   async openEye(mode: EyeMode): Promise<void> {
-    await this.setMode(mode);
+    await this.preferences.setMode(mode);
     const existingLeaf = this.findLeaf();
     const leaf = existingLeaf ?? this.app.workspace.getLeaf(false);
     const state: Record<string, unknown> = { mode };
@@ -499,7 +291,7 @@ export default class TheEyePlugin extends Plugin {
   }
 
   async openCompletedTasks(date?: string): Promise<void> {
-    await this.setMode("done");
+    await this.preferences.setMode("done");
     const viewDate = date ?? todayIso();
     const existingLeaf = this.findLeaf();
     const leaf = existingLeaf ?? this.app.workspace.getLeaf(false);

@@ -77,7 +77,8 @@ export class TasksEyeSettingTab extends PluginSettingTab {
               includeRoot: true,
               placeholder: DEFAULT_MANAGED_FOLDER_PATH,
               validate: (value) =>
-                this.eyePlugin.notesFolderSettingError(value) ?? undefined,
+                this.eyePlugin.preferences.notesFolderSettingError(value) ??
+                undefined,
             },
           },
         ],
@@ -92,14 +93,14 @@ export class TasksEyeSettingTab extends PluginSettingTab {
           name: "Add excluded folder",
           action: () => {
             void (async () => {
-              await this.eyePlugin.addExcludedFolder();
+              await this.eyePlugin.preferences.addExcludedFolder();
               this.update();
             })();
           },
         },
         onDelete: (index) => {
           void (async () => {
-            await this.eyePlugin.deleteExcludedFolder(index);
+            await this.eyePlugin.preferences.deleteExcludedFolder(index);
             this.update();
           })();
         },
@@ -113,8 +114,10 @@ export class TasksEyeSettingTab extends PluginSettingTab {
             placeholder: "Choose a folder",
             filter: (folder) => this.suggestExcludedFolder(folder.path),
             validate: (value) =>
-              this.eyePlugin.excludedFolderSettingError(index, value) ??
-              undefined,
+              this.eyePlugin.preferences.excludedFolderSettingError(
+                index,
+                value,
+              ) ?? undefined,
           },
         })),
       },
@@ -180,7 +183,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
           name: "Add personal time off",
           action: () => {
             void (async () => {
-              await this.eyePlugin.addPersonalTimeOff();
+              await this.eyePlugin.preferences.addPersonalTimeOff();
               this.update();
             })();
           },
@@ -193,7 +196,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
                 `No personal time-off entry exists at index ${index}.`,
               );
             }
-            await this.eyePlugin.deletePersonalTimeOff(entry.id);
+            await this.eyePlugin.preferences.deletePersonalTimeOff(entry.id);
             this.update();
           })();
         },
@@ -233,14 +236,14 @@ export class TasksEyeSettingTab extends PluginSettingTab {
 
     const excludedIndex = excludedFolderIndex(key);
     if (excludedIndex !== null) {
-      await this.eyePlugin.setExcludedFolder(excludedIndex, value);
+      await this.eyePlugin.preferences.setExcludedFolder(excludedIndex, value);
       this.update();
       return;
     }
 
     switch (key) {
       case "notesFolderPath":
-        await this.eyePlugin.setNotesFolderPath(value);
+        await this.eyePlugin.preferences.setNotesFolderPath(value);
         this.update();
         return;
       case "holidayCountry":
@@ -249,7 +252,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
       case "nonWorkingWeekdays": {
         const weekdays = parseNonWorkingWeekdays(value);
         if (weekdays === null) throw new Error(WEEKDAY_INPUT_ERROR);
-        await this.eyePlugin.setNonWorkingWeekdays(weekdays);
+        await this.eyePlugin.preferences.setNonWorkingWeekdays(weekdays);
         return;
       }
       default:
@@ -259,7 +262,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
 
   private excludedFolderDescription(path: string): string {
     if (!path) return "Choose a folder inside the notes folder to ignore.";
-    if (!this.eyePlugin.excludedFolderExists(path)) {
+    if (!this.eyePlugin.preferences.excludedFolderExists(path)) {
       return MISSING_EXCLUSION_WARNING;
     }
     if (
@@ -302,7 +305,9 @@ export class TasksEyeSettingTab extends PluginSettingTab {
           start.setValue(entry.from);
           return;
         }
-        await this.eyePlugin.updatePersonalTimeOff(entry.id, { from: value });
+        await this.eyePlugin.preferences.updatePersonalTimeOff(entry.id, {
+          from: value,
+        });
       });
     });
     setting.addText((end) => {
@@ -312,7 +317,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
           end.setValue(entry.to ?? "");
           return;
         }
-        await this.eyePlugin.updatePersonalTimeOff(entry.id, {
+        await this.eyePlugin.preferences.updatePersonalTimeOff(entry.id, {
           to: value || null,
         });
       });
@@ -322,7 +327,7 @@ export class TasksEyeSettingTab extends PluginSettingTab {
       label.inputEl.ariaLabel = "Label (optional)";
       label.inputEl.addClass("eye-personal-label");
       label.inputEl.addEventListener("change", () => {
-        void this.eyePlugin.updatePersonalTimeOff(entry.id, {
+        void this.eyePlugin.preferences.updatePersonalTimeOff(entry.id, {
           label: label.getValue(),
         });
       });

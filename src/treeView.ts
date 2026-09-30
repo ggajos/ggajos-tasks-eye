@@ -45,7 +45,7 @@ export class TreeView extends ItemView {
     const root = element("div", "eye-note-tree");
     this.contentEl.replaceChildren(root);
 
-    const folderError = this.plugin.managedFolderError();
+    const folderError = this.plugin.preferences.managedFolderError();
     if (folderError) {
       root.appendChild(element("div", "eye-error", folderError));
       return;

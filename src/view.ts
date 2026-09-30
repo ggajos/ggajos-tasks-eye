@@ -193,7 +193,7 @@ export class EyeView extends ItemView {
     this.renderToolbar(root, []);
     root.appendChild(element("div", "eye-empty", "Loading…"));
 
-    const folderError = this.plugin.managedFolderError();
+    const folderError = this.plugin.preferences.managedFolderError();
     if (folderError) {
       root.replaceChildren();
       this.renderToolbar(root, []);
@@ -343,7 +343,7 @@ export class EyeView extends ItemView {
         contexts,
         activeFilter,
         (context) => {
-          void this.plugin
+          void this.plugin.preferences
             .setContextFilter(context)
             .then(() => this.requestRender());
         },
