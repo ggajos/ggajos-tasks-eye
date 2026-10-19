@@ -1,0 +1,254 @@
+:root {
+  --bg: #1b1b1f;
+  --surface: #25252b;
+  --surface-2: #2d2d35;
+  --border: #3a3a44;
+  --fg: #e6e6ea;
+  --muted: #8d8d99;
+  --accent: #a78bfa;
+  --warn: #f2b45a;
+  --ok: #6ee7a8;
+  --late: #f07178;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  line-height: 1.55;
+}
+
+body {
+  margin: 0;
+}
+
+#stage {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1.5rem, 5vw, 5rem);
+  padding: clamp(1.5rem, 5vw, 5rem);
+  max-width: 72rem;
+  margin: 0 auto;
+}
+
+.narration {
+  display: grid;
+}
+
+.scene {
+  grid-area: 1 / 1;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.scene:first-child {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scene h2 {
+  font-size: clamp(1.9rem, 4.2vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0 0 1rem;
+}
+
+.scene p {
+  color: var(--muted);
+  font-size: 1.1rem;
+  margin: 0 0 1rem;
+  max-width: 30rem;
+}
+
+.scene .kicker {
+  color: var(--accent);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.scene .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.button {
+  display: inline-block;
+  padding: 0.7rem 1.2rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #17141f;
+}
+
+.button:hover,
+.button:focus-visible {
+  filter: brightness(1.12);
+}
+
+.board {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.35);
+  position: relative;
+  min-height: 26rem;
+}
+
+.board-head {
+  padding: 0 0.25rem 0.75rem;
+  color: var(--fg);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.row,
+.extra {
+  overflow: hidden;
+}
+
+.note {
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.note.flagged {
+  border-color: var(--warn);
+}
+
+.note-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--border);
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+.chip.late {
+  background: rgb(240 113 120 / 0.2);
+  color: var(--late);
+}
+
+.chip.today {
+  background: rgb(167 139 250 / 0.22);
+  color: var(--accent);
+}
+
+.chip.warn {
+  background: rgb(242 180 90 / 0.2);
+  color: var(--warn);
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  padding-top: 0.2rem;
+}
+
+.task.next {
+  color: var(--fg);
+}
+
+.box {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1.5px solid var(--muted);
+  border-radius: 0.25rem;
+  flex: none;
+}
+
+.task.next .box {
+  border-color: var(--accent);
+}
+
+.task.ticked .box {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.task.ticked .label {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  color: var(--ok);
+  font-size: 1.1rem;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Static layout: reduced motion. */
+.static #stage {
+  display: block;
+  max-width: 40rem;
+}
+
+.static .board {
+  display: none;
+}
+
+.static .narration {
+  display: block;
+}
+
+.static .scene {
+  opacity: 1;
+  visibility: visible;
+  margin: 0 0 4rem;
+}
+
+@media (max-width: 52rem) {
+  #stage {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: 1.5rem;
+  }
+
+  .board {
+    min-height: 20rem;
+    padding: 0.75rem;
+  }
+}

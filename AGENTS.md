@@ -4,8 +4,8 @@
 
 Tasks Eye is a TypeScript Obsidian plugin for note-centered task views. Source
 code lives in `src/`, unit tests in `test/`, feature-owned executable docs in
-`features/<slug>/`, generated documentation in `docs/`, and the standalone demo
-vault generator in `scripts/demo/`.
+`features/<slug>/`, generated documentation in `docs/`, the standalone intro tour in `intro/`, and
+the standalone demo vault generator in `scripts/demo/`.
 
 ## Common Commands
 
@@ -15,7 +15,7 @@ vault generator in `scripts/demo/`.
 | Essential | `npm test` | Run the Vitest unit suite; the regular development feedback loop. |
 | Essential | `npm run test:visual` | Run behavioral and screenshot WDIO tests in pinned Podman Linux/Xvfb, overwrite tracked screenshots, generate five community-submission cards, then run `dev:docs`. |
 | Local/optional | `npm run dev:coverage` | Run Vitest with coverage. |
-| Local/optional | `npm run dev:docs` | Publish screenshots, render the Reladraw workflow SVG, and build generated docs |
+| Local/optional | `npm run dev:docs` | Publish screenshots, render the Reladraw workflow SVG, build generated docs, and build the intro tour into `docs/intro/` |
 | Local/optional | `npm run dev:docs:serve` | Rebuild docs, then preview them at `http://127.0.0.1:4173/`. |
 | Local/optional | `npm run dev:demo` | Regenerate the public demo vault into `../org-demo`, re-anchored on today. |
 | Operations | `npm run ops:verify:clean` | Verify `package-lock.json` resolves only from the public npm registry, then install and build from a clean checkout in a Podman container with the corporate registry host blackholed. Approximates Obsidian's community-plugin review sandbox. |
@@ -126,6 +126,27 @@ element capture, while the repository does no image comparison or report
 generation. The container mounts `acceptance/snapshots` read-write so captures
 persist on the host. `npm run ops:release:public` fails when that run leaves
 screenshots or generated docs dirty.
+
+## Intro Tour
+
+`intro/` is a self-contained, scroll-driven introduction page (GSAP +
+ScrollTrigger) published at `/ggajos-tasks-eye/intro/`. It is deliberately
+isolated: nothing in it imports from `src/` or `features/`, so it can be
+replaced by swapping the folder.
+
+- `index.html` holds the narration copy; `styles.css` the dark-minimal look and
+  the `prefers-reduced-motion` static layout; `main.ts` the mock notes and the
+  single scrubbed timeline; `build.mjs` bundles to `docs/intro/` (or to a
+  directory passed as its first argument).
+- `npm run dev:docs` runs `node intro/build.mjs` last, because Astro empties
+  `docs/` on every build. The output is committed with the rest of `docs/`.
+- The visuals are HTML/CSS mock rows, not screenshots, so no WDIO run is
+  needed. Rows tween between measured pixel heights; the timeline is rebuilt
+  when the viewport width changes.
+- Use relative links only (`../`, `../gtd-quickstart/`) and no external URLs;
+  `test/intro.test.ts` builds into a temp directory and enforces this.
+- The Starlight home links to the tour from `docs-src/templates/index.mdx`.
+  `intro/` is outside the tsc, Biome, and ESLint scopes.
 
 ## Developer Documentation
 

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Tasks Eye — see only what you can act on</title>
+    <meta
+      name="description"
+      content="A short story about managing attention with Tasks Eye for Obsidian."
+    />
+    <link rel="icon" href="../favicon.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="tour">
+      <section id="stage" aria-label="Tasks Eye introduction">
+        <div class="narration" id="narration">
+          <article class="scene" data-scene="0">
+            <p class="kicker">The problem</p>
+            <h2>Everything asks for you at once.</h2>
+            <p>
+              Notes, tasks, dates: all visible, all loud. Attention is the one
+              thing you cannot add more of.
+            </p>
+          </article>
+          <article class="scene" data-scene="1">
+            <p class="kicker">One note, one row</p>
+            <h2>One note. One next action.</h2>
+            <p>
+              Each note shows a single task, the one that is next. The rest wait
+              quietly inside the note.
+            </p>
+          </article>
+          <article class="scene" data-scene="2">
+            <p class="kicker">Focus</p>
+            <h2>Focus shows only what is due.</h2>
+            <p>Today and overdue. Nothing else is allowed on the screen.</p>
+          </article>
+          <article class="scene" data-scene="3">
+            <p class="kicker">Open</p>
+            <h2>Open is where future work waits.</h2>
+            <p>
+              Planned by date and kept out of the way, so you can look ahead
+              when you choose to.
+            </p>
+          </article>
+          <article class="scene" data-scene="4">
+            <p class="kicker">Inbox</p>
+            <h2>Inbox keeps the system honest.</h2>
+            <p>
+              No date, no next task, a broken link: it lands here, so nothing
+              silently rots.
+            </p>
+          </article>
+          <article class="scene" data-scene="5">
+            <p class="kicker">Done</p>
+            <h2>Finish, and the board goes quiet.</h2>
+            <p>Tick the task and it leaves. An empty Focus is a finished day.</p>
+          </article>
+          <article class="scene" data-scene="6">
+            <p class="kicker">Tasks Eye</p>
+            <h2>See only what you can act on.</h2>
+            <p>Your notes stay plain Markdown. Your attention stays yours.</p>
+            <p class="actions">
+              <a class="button primary" href="../gtd-quickstart/"
+                >Start in five minutes</a
+              >
+              <a class="button" href="../">Read the docs</a>
+            </p>
+          </article>
+        </div>
+
+        <div class="board" id="board" aria-hidden="true">
+          <div class="board-head">
+            <span class="board-title" id="board-title">All notes</span>
+          </div>
+          <div class="rows" id="rows"></div>
+          <p class="empty" id="empty">Nothing left for today.</p>
+        </div>
+      </section>
+    </main>
+    <script src="./main.js"></script>
+  </body>
+</html>
