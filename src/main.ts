@@ -181,9 +181,6 @@ export default class TheEyePlugin extends Plugin {
         void this.refreshTreeViews();
       }),
     );
-    if (!this.tasksApiAvailable()) {
-      new Notice(TASKS_PLUGIN_REQUIRED_MESSAGE);
-    }
     this.holidays.start();
   }
 
