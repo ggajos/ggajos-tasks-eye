@@ -135,14 +135,20 @@ isolated: nothing in it imports from `src/` or `features/`, so it can be
 replaced by swapping the folder.
 
 - `index.html` holds the narration copy; `styles.css` the dark-minimal look and
-  the `prefers-reduced-motion` static layout; `main.ts` the mock notes and the
+  the default readable static layout; `main.ts` the mock notes and the
   single scrubbed timeline; `build.mjs` bundles to `docs/intro/` (or to a
   directory passed as its first argument).
 - `npm run dev:docs` runs `node intro/build.mjs` last, because Astro empties
-  `docs/` on every build. The output is committed with the rest of `docs/`.
+  `docs/` on every build. The output, including `docs/intro/main.js`, is committed
+  with the rest of `docs/`. Keep the plugin-bundle ignore rule anchored to
+  `/main.js` so it does not exclude the tour's script.
 - The visuals are HTML/CSS mock rows, not screenshots, so no WDIO run is
   needed. Rows tween between measured pixel heights; the timeline is rebuilt
-  when the viewport width changes.
+  when the viewport width changes. Animation is enabled only at widths of
+  at least `52rem` and heights of at least `48rem`, with no reduced-motion
+  preference. Smaller screens, reduced motion, and JavaScript-disabled browsers
+  show all narration as a normal scrolling page; viewport/preference changes
+  tear down or enable the animation automatically.
 - Use relative links only (`../`, `../gtd-quickstart/`) and no external URLs;
   `test/intro.test.ts` builds into a temp directory and enforces this.
 - The Starlight home links to the tour from `docs-src/templates/index.mdx`.

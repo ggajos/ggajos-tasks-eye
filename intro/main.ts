@@ -101,7 +101,7 @@ function renderRows(container: HTMLElement): Record<Kind, HTMLElement[]> {
   return rows;
 }
 
-function startTour(): void {
+function startTour(): (() => void) | undefined {
   gsap.registerPlugin(ScrollTrigger);
 
   const scenes = gsap.utils.toArray<HTMLElement>(".scene");
@@ -238,7 +238,7 @@ function startTour(): void {
   // Row heights depend on text wrapping, so rebuild when the width changes.
   let width = window.innerWidth;
   let pending: number | undefined;
-  window.addEventListener("resize", () => {
+  const onResize = () => {
     if (window.innerWidth === width) return;
     width = window.innerWidth;
     window.clearTimeout(pending);
@@ -255,11 +255,30 @@ function startTour(): void {
               (timeline.scrollTrigger.start ?? 0)),
       );
     }, 200);
-  });
+  };
+  window.addEventListener("resize", onResize);
+
+  return () => {
+    window.clearTimeout(pending);
+    window.removeEventListener("resize", onResize);
+    timeline?.scrollTrigger?.kill(true);
+    timeline?.kill();
+    gsap.set([board, empty, ...scenes], { clearProps: "all" });
+    rowsEl.replaceChildren();
+    titleEl.textContent = BOARD_TITLES[0] ?? "";
+  };
 }
 
-if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  document.documentElement.classList.add("static");
-} else {
-  startTour();
-}
+// The pinned, two-column composition needs room for all six expanded notes.
+// Small screens and reduced motion use the ordinary readable page instead.
+gsap.matchMedia().add(
+  "(min-width: 52rem) and (min-height: 48rem) and (prefers-reduced-motion: no-preference)",
+  () => {
+    document.documentElement.classList.add("animated");
+    const stop = startTour();
+    return () => {
+      stop?.();
+      document.documentElement.classList.remove("animated");
+    };
+  },
+);

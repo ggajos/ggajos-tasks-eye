@@ -29,26 +29,36 @@ body {
 
 #stage {
   min-height: 100vh;
+  padding: clamp(1.5rem, 5vw, 5rem);
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.scene {
+  margin: 0 0 4rem;
+}
+
+/* Enhance only roomy viewports; the default also works without JavaScript. */
+.animated #stage {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
   gap: clamp(1.5rem, 5vw, 5rem);
-  padding: clamp(1.5rem, 5vw, 5rem);
   max-width: 72rem;
-  margin: 0 auto;
 }
 
-.narration {
+.animated .narration {
   display: grid;
 }
 
-.scene {
+.animated .scene {
   grid-area: 1 / 1;
   opacity: 0;
   visibility: hidden;
+  margin: 0;
 }
 
-.scene:first-child {
+.animated .scene:first-child {
   opacity: 1;
   visibility: visible;
 }
@@ -105,6 +115,7 @@ body {
 }
 
 .board {
+  display: none;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 1rem;
@@ -112,6 +123,10 @@ body {
   box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.35);
   position: relative;
   min-height: 26rem;
+}
+
+.animated .board {
+  display: block;
 }
 
 .board-head {
@@ -218,37 +233,4 @@ body {
   font-size: 1.1rem;
   opacity: 0;
   pointer-events: none;
-}
-
-/* Static layout: reduced motion. */
-.static #stage {
-  display: block;
-  max-width: 40rem;
-}
-
-.static .board {
-  display: none;
-}
-
-.static .narration {
-  display: block;
-}
-
-.static .scene {
-  opacity: 1;
-  visibility: visible;
-  margin: 0 0 4rem;
-}
-
-@media (max-width: 52rem) {
-  #stage {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    gap: 1.5rem;
-  }
-
-  .board {
-    min-height: 20rem;
-    padding: 0.75rem;
-  }
 }

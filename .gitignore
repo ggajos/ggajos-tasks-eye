@@ -1,7 +1,7 @@
 node_modules/
 data.json
 .obsidian-cache/
-main.js
+/main.js
 acceptance/.cache/
 acceptance/artifacts/
 .astro/
