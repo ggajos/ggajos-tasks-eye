@@ -7,6 +7,7 @@ export default defineFeature({
   acceptanceCriteria: [
     "Done is the fourth board tab, after Focus, Open, and Inbox.",
     "Completed tasks are selected by Tasks completion date.",
+    "Task text retains its configuration, with tags, emoji-format fields, and completion dates muted rather than removed.",
     "An 'Unfinished' toggle adds every unfinished task with a due date, but only inside notes that also have a task completed on the selected day.",
     "Subtask nesting is preserved; ancestors of a matching task appear as muted context rows without a completion check.",
     "Tasks are grouped by the first-level ancestor in the `up` tree and note name.",

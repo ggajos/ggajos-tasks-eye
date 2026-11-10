@@ -522,6 +522,15 @@
   margin: 0;
 }
 
+.eye-plugin .eye-task-metadata {
+  color: var(--text-faint);
+  filter: grayscale(1);
+}
+
+.eye-task-metadata-emoji {
+  opacity: 0.4;
+}
+
 .eye-note-line {
   align-items: baseline;
   display: flex;

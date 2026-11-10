@@ -161,6 +161,10 @@ const SIDEBAR_FEATURE_SECTIONS: readonly SidebarFeatureSection[] = [
         label: "Use Markdown in board tasks",
       },
       {
+        slug: "actions-task-metadata",
+        label: "Read tasks with muted configuration",
+      },
+      {
         slug: "actions-uncheck-selected-tasks",
         label: "Reopen completed tasks",
       },

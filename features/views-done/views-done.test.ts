@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { StatusNoteGroup, StatusTaskNode } from "../../src/completedTasks";
-import {
-  cleanCompletedTaskText,
-  collectStatusGroups,
-} from "../../src/completedTasks";
+import { collectStatusGroups } from "../../src/completedTasks";
 import { buildEyeFilesFromMarkdown } from "../../src/indexer";
 
 const DATE = "2026-07-08";
@@ -40,10 +37,13 @@ function flatten(nodes: StatusTaskNode[]): StatusTaskNode[] {
 }
 
 describe("Done/Status view", () => {
-  it("cleans completion dates, tags, and priority signifiers", () => {
-    expect(cleanCompletedTaskText("Ship feature #work ⏫ ✅ 2026-07-07")).toBe(
-      "Ship feature",
-    );
+  it("preserves Markdown, configuration and spacing for presentation", () => {
+    const text =
+      "Ship **feature**  #work ⏫ ✅ 2026-07-08 📅 2026-07-09 ^release";
+    const groups = groupsFor(`---\nstatus: closed\n---\n\n- [x] ${text}`);
+    const node = groups[0]!.nodes[0]!;
+    expect(node.text).toBe(text);
+    expect(node.text).toBe(node.task.text);
   });
 
   it("collects tasks completed on the selected date only", () => {
@@ -58,7 +58,9 @@ status: closed
     );
 
     const matched = flatten(groups[0]!.nodes).filter((n) => n.matched);
-    expect(matched.map((n) => n.text)).toEqual(["Approved ADR-042"]);
+    expect(matched.map((n) => n.text)).toEqual([
+      "Approved ADR-042 ✅ 2026-07-08",
+    ]);
     expect(groups[0]!.matchedCount).toBe(1);
   });
 
@@ -83,7 +85,7 @@ status: open
       const on = groupsFor(markdown, { showFuture: true });
       const matched = flatten(on[0]!.nodes).filter((n) => n.matched);
       expect(matched.map((n) => n.text)).toEqual([
-        "Shipped today",
+        "Shipped today ✅ 2026-07-08",
         `Catch up on yesterday's work 📅 ${PAST}`,
         `Handle today's follow-up 📅 ${DATE}`,
         `Plan next quarter 📅 ${FUTURE}`,
@@ -94,7 +96,7 @@ status: open
 
       const off = groupsFor(markdown, { showFuture: false });
       expect(flatten(off[0]!.nodes).map((n) => n.text)).toEqual([
-        "Shipped today",
+        "Shipped today ✅ 2026-07-08",
       ]);
       expect(off[0]!.matchedCount).toBe(1);
     } finally {
@@ -175,7 +177,10 @@ status: open
 
     const parent = groups[0]!.nodes[0]!;
     expect(parent.matched).toBe(false);
-    expect(parent.children.map((c) => c.text)).toEqual(["First", "Second"]);
+    expect(parent.children.map((c) => c.text)).toEqual([
+      "First ✅ 2026-07-08",
+      "Second ✅ 2026-07-08",
+    ]);
     expect(groups[0]!.matchedCount).toBe(2);
   });
 

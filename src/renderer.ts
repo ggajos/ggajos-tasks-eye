@@ -22,6 +22,7 @@ import {
   NORMAL_PRIORITY,
   priorityRowClasses,
 } from "./priority";
+import { dimTaskMetadata } from "./taskMetadata";
 import type { RowModel } from "./types";
 import {
   button,
@@ -321,8 +322,7 @@ async function renderStatusNode(
   row.appendChild(icon);
 
   const body = element("div", "eye-completed-task-text");
-  await host.renderMarkdown(body, node.text, filePath);
-  unwrapSingleParagraph(body);
+  await renderTaskMarkdown(body, node.text, filePath, host);
   row.appendChild(body);
 
   list.appendChild(row);
@@ -494,7 +494,7 @@ async function renderRow(
   const noteLine = element("div", "eye-note-line");
   const actionCell = element("div", "eye-action-cell");
   const action = element("div", "eye-task-title");
-  await renderActionMarkdown(action, model, host);
+  await renderTaskMarkdown(action, model.actionLabel, model.file.path, host);
 
   actionCell.appendChild(action);
   if (model.errors.length > 0) actionCell.appendChild(attentionPill());
@@ -522,13 +522,15 @@ async function renderRow(
   list.appendChild(row);
 }
 
-async function renderActionMarkdown(
-  action: HTMLElement,
-  model: RowModel,
+async function renderTaskMarkdown(
+  target: HTMLElement,
+  markdown: string,
+  sourcePath: string,
   host: ScreenHost,
 ): Promise<void> {
-  await host.renderMarkdown(action, model.actionLabel, model.file.path);
-  unwrapSingleParagraph(action);
+  await host.renderMarkdown(target, markdown, sourcePath);
+  unwrapSingleParagraph(target);
+  dimTaskMetadata(target, markdown);
 }
 
 function renderActions(model: RowModel, host: ScreenHost): HTMLElement {

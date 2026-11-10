@@ -166,6 +166,23 @@ async function narrowRowShape(): Promise<{
     const noteLineRect = noteLine?.getBoundingClientRect();
     const actionLineRect = actionLine?.getBoundingClientRect();
     const actionRects = [...(action?.getClientRects() ?? [])];
+    // Inline metadata can produce several fragments on one physical line.
+    // Compare each line's leftmost edge, not every fragment's left edge.
+    const actionLineHeight = Number.parseFloat(
+      getComputedStyle(action ?? row).lineHeight,
+    );
+    const actionLineLefts = new Map<number, number>();
+    for (const rect of actionRects) {
+      if (rect.width === 0 || rect.height === 0) continue;
+      const line = Math.round(
+        (rect.top - (actionLineRect?.top ?? 0)) / actionLineHeight,
+      );
+      actionLineLefts.set(
+        line,
+        Math.min(actionLineLefts.get(line) ?? Infinity, rect.left),
+      );
+    }
+    const lineLefts = [...actionLineLefts.values()];
     const contextLineRect = noteLine?.getBoundingClientRect();
     const contextRect = context?.getBoundingClientRect();
     const lineHeight = Number.parseFloat(
@@ -173,10 +190,8 @@ async function narrowRowShape(): Promise<{
     );
     const result = {
       actionHasHangingWrap:
-        actionRects.length > 1 &&
-        actionRects.every(
-          (rect) => Math.abs(rect.left - actionRects[0].left) < 1,
-        ),
+        lineLefts.length > 1 &&
+        lineLefts.every((left) => Math.abs(left - lineLefts[0]) < 1),
       actionStartsBelowNote:
         noteLineRect !== undefined &&
         actionLineRect !== undefined &&

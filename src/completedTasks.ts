@@ -1,5 +1,4 @@
 import { getContextForFile, isGlobalContextFilter } from "./context";
-import { stripPrioritySignifier } from "./priority";
 import type { EyeFile, EyeTask } from "./types";
 
 export interface StatusTaskNode {
@@ -17,16 +16,6 @@ export interface StatusNoteGroup {
   filePath: string;
   nodes: StatusTaskNode[];
   matchedCount: number;
-}
-
-export function cleanCompletedTaskText(text: string): string {
-  return stripPrioritySignifier(
-    text
-      .replace(/\s*✅\s*\d{4}-\d{2}-\d{2}.*$/, "")
-      .replace(/#[\w/-]+/g, "")
-      .replace(/\s+/g, " ")
-      .trim(),
-  );
 }
 
 function isCompletedOnDate(task: EyeTask, date: string): boolean {
@@ -83,7 +72,7 @@ function pruneNode(
     matched,
     completed,
     future,
-    text: cleanCompletedTaskText(node.task.text),
+    text: node.task.text,
     children,
   };
 }
