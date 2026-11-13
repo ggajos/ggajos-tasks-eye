@@ -282,6 +282,8 @@ const inboxScenarios = featureScenarios(
           await tasksEyePage.expectBucketExpanded("noDue", true);
           await tasksEyePage.expectBucketExpanded("today", true);
 
+          // This assertion checks base theme colors, not the link hover color.
+          await browser.action("pointer").move({ x: 0, y: 0 }).perform();
           expect(await inboxBoardShape()).toEqual({
             actionLineCount: 5,
             actionsFollowNotes: true,

@@ -54,6 +54,7 @@ export type BoardBody =
 
 export interface BoardScreen extends BoardContexts {
   counts: BoardCounts;
+  hiddenNoteCount: number;
   body: BoardBody;
   isEmpty: boolean;
 }
@@ -331,6 +332,7 @@ export function buildBoard(
     return {
       ...context,
       counts: { focus: 0, inbox: 0 },
+      hiddenNoteCount: prepared.hiddenNoteCount,
       body: {
         kind: "done",
         contexts: prepared.contexts,
@@ -344,6 +346,7 @@ export function buildBoard(
   const select = (selectMode: EyeMode, filter: string) =>
     selection.select(selectMode, filter);
   const rows = select(mode, contextFilter);
+  const hiddenNoteCount = select(mode, "*").length - rows.length;
   const counts: BoardCounts = {
     focus: select("focus", contextFilter).length,
     inbox: select("inbox", contextFilter).length,
@@ -365,6 +368,7 @@ export function buildBoard(
     return {
       ...context,
       counts,
+      hiddenNoteCount,
       body: { kind: "focus", items: focusItems },
       isEmpty: focusItems.length === 0,
     };
@@ -385,6 +389,7 @@ export function buildBoard(
   return {
     ...context,
     counts,
+    hiddenNoteCount,
     body: { kind: "buckets", buckets },
     isEmpty: buckets.length === 0,
   };

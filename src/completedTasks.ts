@@ -133,6 +133,7 @@ export interface DoneContextGroup {
 export interface DonePreparation {
   contexts: DoneContextGroup[];
   isEmpty: boolean;
+  hiddenNoteCount: number;
 }
 
 /**
@@ -156,6 +157,9 @@ export function prepareDone(
     .sort();
 
   return {
+    hiddenNoteCount: Object.entries(grouped)
+      .filter(([context]) => !contexts.includes(context))
+      .reduce((sum, [, groups]) => sum + groups.length, 0),
     contexts: contexts.map((context) => {
       const groups = [...(grouped[context] ?? [])].sort((a, b) =>
         a.fileName.localeCompare(b.fileName),

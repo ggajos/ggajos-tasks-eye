@@ -16,6 +16,7 @@ import type {
 } from "./completedTasks";
 import type { EyeMode } from "./constants";
 import { MODE_LABELS, MODES } from "./constants";
+import { formatContextLabel } from "./context";
 import {
   canLowerPriority,
   canRaisePriority,
@@ -193,7 +194,14 @@ function renderDateNav(ui: ScreenUiState, host: ScreenHost): HTMLElement {
   return nav;
 }
 
-function renderEmptyState(mode: EyeMode): HTMLElement {
+function renderEmptyState(mode: EyeMode, screen: BoardScreen): HTMLElement {
+  if (screen.hiddenNoteCount > 0) {
+    return element(
+      "div",
+      "eye-empty",
+      `No matching notes in ${formatContextLabel(screen.contextFilter)}.`,
+    );
+  }
   if (mode !== "focus" && mode !== "inbox") {
     return element("div", "eye-empty", emptyMessage(mode));
   }
@@ -217,13 +225,27 @@ export async function renderScreen(
   ui: ScreenUiState,
   host: ScreenHost,
 ): Promise<void> {
+  if (screen.hiddenNoteCount > 0) {
+    const notice = element("div", "eye-filter-notice");
+    notice.append(
+      element(
+        "strong",
+        "eye-filter-notice-count",
+        `${screen.hiddenNoteCount} ${screen.hiddenNoteCount === 1 ? "note" : "notes"}`,
+      ),
+      document.createTextNode(
+        ` hidden by the ${formatContextLabel(screen.contextFilter)} filter`,
+      ),
+    );
+    root.appendChild(notice);
+  }
   const list = element("div", "eye-list");
   root.appendChild(list);
 
   if (screen.body.kind === "focus") {
     list.classList.add("eye-focus-list");
     for (const item of screen.body.items) await renderItem(list, item, host);
-    if (screen.isEmpty) list.appendChild(renderEmptyState(ui.mode));
+    if (screen.isEmpty) list.appendChild(renderEmptyState(ui.mode, screen));
     return;
   }
 
@@ -232,7 +254,7 @@ export async function renderScreen(
     for (const bucket of screen.body.buckets) {
       await renderBucket(list, bucket, ui, host);
     }
-    if (screen.isEmpty) list.appendChild(renderEmptyState(ui.mode));
+    if (screen.isEmpty) list.appendChild(renderEmptyState(ui.mode, screen));
     return;
   }
 
@@ -242,11 +264,13 @@ export async function renderScreen(
   }
   if (screen.isEmpty) {
     list.appendChild(
-      element(
-        "div",
-        "eye-empty",
-        `No completed tasks for ${screen.body.dateLabel}.`,
-      ),
+      screen.hiddenNoteCount > 0
+        ? renderEmptyState(ui.mode, screen)
+        : element(
+            "div",
+            "eye-empty",
+            `No completed tasks for ${screen.body.dateLabel}.`,
+          ),
     );
   }
 }
